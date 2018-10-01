@@ -93,11 +93,13 @@ FPC Options: -g -Xs
 
 
 Focus:
+
 		Unices and MacOS(graphics libraries for DOS have been written by Borland, INC.)
 		I use SDL v2 C and Pascal headers (JEDI) and sections included from version 1.2 in pascal.    
 
 There are some ports to Sin (windows) already. 
 Borland took up and turned to Delphi in this regards.
+
 
 
 To use this you will need(depends on):
@@ -124,16 +126,16 @@ You may have to install the developer packages.
 
 Full 16, 256, RGB, and RGBA support up to 1080p.
 
--(Free)Pascal is missing a "graphics engine". C has one.
--TCanvas for Laz doesnt quite do the job.
--Linux has never had a graphics engine or BGI. EVER. Only TCanvas has come close(incomplete).
--GVision for Linux (Pascal version of Win311) never took off- if it was ever written. Thats C, Qt or GTK youre looking at.
--JEDI doesnt stand for what you think it does- its incomplete, missing, and now depreciated.
--Castle engine is good, potentially missing in places things we should have and requires OpenGL knowhow.
--X11 "core primitives" are non-portable. Mac uses Quartz and Sin uses DirectX and WinAPI.
--If you have a better way-show me the PASCAL code, but it must get the job done (and compile).
--Open Source is a "vague comment".
--This isnt a "class project", its my passion.
+		-(Free)Pascal is missing a "graphics engine". C has one.
+		-TCanvas for Laz doesnt quite do the job.
+		-Linux has never had a graphics engine or BGI. EVER. Only TCanvas has come close(incomplete).
+		-GVision for Linux (Pascal version of Win311) never took off- if it was ever written. Thats C, Qt or GTK youre looking at.
+		-JEDI doesnt stand for what you think it does- its incomplete, missing, and now depreciated.
+		-Castle engine is good, potentially missing in places things we should have and requires OpenGL knowhow.
+		-X11 "core primitives" are non-portable. Mac uses Quartz and Sin uses DirectX and WinAPI.
+		-If you have a better way-show me the PASCAL code, but it must get the job done (and compile).
+		-Open Source is a "vague comment". It doesnt guarantee the code works, nor for you.
+		-This isnt a "class project", its my passion.
 
 
 Come Set Sail!
@@ -143,18 +145,28 @@ Come Set Sail!
 
 
 The makefile should work now.
+
 Note that Windows SDL is much slower than someone elses WinAPI implementation.
 (referred to below)
 
-By default compiles for Win32/64 and linux 32/64 targets all at once.
-OSX/XCode may or may not build this way.
+
+By default compiles for :
+
+		Win32/64
+		linux 32/64 
+		
+
+OSX/XCode may or may not build. UNTESTED as of right now.
+
 
 Dont forget to rename the ppu unit library to something more useful.
+
 
 Demos at first will focus on BGI graphics "quality" and "basic logic".
 (The othello code Ive written in the past has an excessive recursion problem)
 
 FLAT-
+
 Board Games:
 
 	Othello, 2d chess, sorry, pente...
@@ -163,10 +175,13 @@ Card Games:
 
 	Basic Solitare, Poker, etc.
 	
-SIDESCROLLER(collision based)-	
-2d/3d games:
+	
+	
+SIDESCROLLER(collision based) 2d/3d games:
     
     OpenSonic/Mayro remake etc. etc. etc.
+
+
         
 3D-        
    
@@ -185,26 +200,33 @@ SIDESCROLLER(collision based)-
 		
 The meat of the crux is this:
 
-  Render "frames" and use "collsion sweeping"- logic enhancements. (Batch writes.)
-  Do Not RenderPresent every object(do you want a screensaver??).
+		Render "frames" and use "collsion sweeping"- logic enhancements. (Batch writes.)
+		Do Not RenderPresent() every object(do you want a screensaver??).
   
   
+  
+This code is a "black boxed" FPC derivative work.
 
-		Borland, INC. has been bought out and seems to "be no more".
-		Unlike Microsoft, I respect thier codebase and right to copyright.
 
-		Original code for DOS (c) Borland, INC. and reported (from C) via FreePascal (FPK) dev team, myself and a few others.
+Borland, INC. has been bought out and seems to "be no more".
+Unlike Microsoft, I respect thier codebase and right to copyright.
 
-		I have left reference where its due in the code. I only accept credit where its due me.
-		The C libGraph port(s) were very lacking.
+Original code for DOS (c) Borland, INC. and reported (from C) via FreePascal (FPK) dev team, myself and a few others.
 
-        I suppose if you want to- you can update TCanvas from this. TCanvas is an ugly inherited mess.
-        The alternative is to hook into X11 primitives code in C. (which makes inverse proprietary unices only code) 
-        I do not know X11 accelleration(2D) hooks- dont ask.
+I have left reference where its due in the code. I only accept credit where its due me.
+The C libGraph port(s) were very lacking.
+
+I suppose if you want to- you can update TCanvas from this. 
+
+TCanvas is an ugly inherited mess.
+The alternative is to hook into X11 primitives code in C. (which makes inverse proprietary unices only code) 
+I do not know X11 accelleration(2D) hooks- dont ask.
         
-        X11 is not cross-platform. OpenGL(3D) IS.
-        This will be ported- if need be- to windows. I can do that.
-        I will aim to force "console compatibility" with winDos and keyboard units support- 
+X11 is not cross-platform. OpenGL(3D) IS.
+
+
+This will be ported- if need be- to windows. I can do that.
+I will aim to force "console compatibility" with winDos and keyboard units support- 
         
         DO NOT LEAN ON THEM for INPUT.
 
@@ -221,6 +243,7 @@ Mac:
 		Mac should import the necessary units via IFDEFS. Let me know if Im off.
 		(Build for Linux x64 on Ubuntu at the moment.)
 
+
 MODELIST:
 
         This is a royal pain in the ass to maintain.
@@ -234,11 +257,12 @@ MOBILE:
 
 		SDL says it supports mobile devices. 
 		Droids and iFruits will have to be tested seperately. 
-		It is a BITCH to dev a iFruit app because of all the things needed to get the app on the phone.
-		Droids are easier- but to distribute its a pain(marketplace)
 		
 		Once you get this down and have all your secret keys-- you should have a fine day. Eventually.
 
+		iFruit (iPhone/iPad)  may never be supported due to CocoaTouch SDK limitations "forbiding linked source code". 
+		SORRY.
+		
 
 SIN(windows):
 
@@ -329,7 +353,8 @@ It DOES AIM, however to extend the existing (old-as-FUDGE) existing code to UNIC
 make attempts and reworking and updating the code to something more recent.
 
 I hope it is useful..yada yada yada....YMMV. 
-Read the Licence agreement.
+**Read the Licence agreement.**
+
 
 **This is a UNIT, not a program. See the demos provided.**
 
@@ -361,7 +386,9 @@ Incomplete or untested:
 		Fills(incomplete as of yet)
 		More Advanced functions
 		3D OGL routines(OGL surface is enabled-code isnt there yet)
-		
+
+
+---		
 	
 ## Basic Q and A:
 
@@ -488,7 +515,7 @@ Q: Whut? 3D? Physics? huh? The files says 'physics'...
 A: Unlike the BGI, SDL uses both 2d AND 3D/OpenGL functions. 
 So YES, we can and we WILL extend our code.
 
-POSTAL2 uses SDL. I like "going postal"....
+POSTAL2 uses SDL. I like POSTAL2.
 
 There are two types of physics:
 
@@ -513,10 +540,13 @@ You are doing something in a loop that continuously allocates (surface) ram but 
 
 
 Could be also that you need to recompile Lazarus(point variance I call it-version mismatch) or build some
-or all of the LCL subcomponents.
+or all of the LCL subcomponents. THAT- I CANT help you with.
+
 
 LibVLC expansion is planned but I will have to check the sources for viability.
 LibFFmpeg is also available.
+
+
 
 Q: No comprende? 
 A: Libtool. (Problema.)	
@@ -526,9 +556,11 @@ FPC has the "feature" but I dont know how to use it.
 
 It has to do with aclocal and locales.
 
+(They NEED A DEVELOPER.)
+
+
 Code is universal language of itself. 
 If I can understand German or russian programmers, you can understand my english.
-I will look into this.
 
 
 
@@ -544,5 +576,5 @@ I will look into this.
 
 
 Seriously...the SDL syntax isnt that hard to master. 
-(I can piss better C in my sleep-- and I refuse to write C.)
+(I can piss better C and PYTHON in my sleep-- and I refuse to write C.)
 
