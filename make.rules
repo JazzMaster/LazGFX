@@ -1,0 +1,29 @@
+NASM=nasm
+FPC=fpc
+
+# Used by all build mode:
+# ELF executable target, Intel style assembler reader, allow assertions,
+# labels and gotos, inline routines, and C-like operators.
+# verbose on warnings, notes,hints, and infos
+OPT=-Aelf -Rintel -Sagic -Tlinux  -vwn
+
+# Debug mode:
+# NASMOPT=-g
+# Emit debugging symbols, turn on all checks, smartlinkable units, use smartlinking
+# If the last two aren't turned on, linker errors will occur don't know why
+# FPCOPT=$(OPT) -g -Crtoi -CX -XX
+
+# Optimized mode:
+NASMOPT=
+
+# Smartlinkable units, SSE3 instruction set, use smartlinking,
+# Turn on all possible optimizations
+FPCOPT=$(OPT) -CX -CfSSE3 -XX -O3
+
+# Not needed I guess, -O3 already enables some (if not all) of these
+# -OpPENTIUM4 -OoREGVAR -OoSTACKFRAME -OoPEEPHOLE -OoASMCSE -OoLOOPUNROLL -OoTAILREC -OoCSE -OoDFA
+
+# Will be used when releasing (when would it happen? :-( )
+# -Xs
+
+LD=ld
