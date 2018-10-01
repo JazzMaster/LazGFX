@@ -1,4 +1,5 @@
-## GrFX for Laz- An Extended SDL replacement of the "Borland Graphics Interface" (BGI)
+## GrFX for Laz- 
+An Extended SDL replacement of the "Borland Graphics Interface" (BGI)
 
 
 ### What is it, what does it do?
