@@ -1,6 +1,8 @@
 ## Laz GrFX- 
 An Extended SDL replacement of the "Borland Graphics Interface" (BGI)
+
 (For Lazarus/FPC) Written in SEMI-PURE Pascal
+
 
 
 ### What is it, what does it do?
@@ -19,8 +21,10 @@ BGI (Borland Graphics Interface) According to Wikipedia-
 
 
 -What is not written, however, is that the codebase was abandoned because of UI environments.
+
 When X11 and Sin came about...there was no way to use graphics mode because it was in use.
 As a result you could not write an old-school graphics mode application.
+
 
 Along came SDL, DirectX, and OGL....but nobody bothered to backport the BGI.
 You can learn OGL from SDL but usually the reverse is difficult.
@@ -52,22 +56,32 @@ SDL (Simple Directmedia Layer) according to Wikipedia-
 
 I have noticed numberous fail points to which SDL is NOT "simple" nor "easy" and the BGI wins
 in these regards. I do not write OOP level garbage, I find object code and repeated instantiation is a mess.
+
 I have my own "methods" if I need object-related routines. They work.
+
 
 **Expect "pure pascal functions" where possible.**
 
+
 You will need this Library if you write strictly for graphics modes or wish to.
+
 I intend to utilize an "everything bagel" here. 
+
 You may not need or want everything on your bagel- but Im making them that way anyways.
 
 
 This code and demos are in a very early state. 
+
 I will try to provide further demos where possible.
+
+
 
 ### Pardon the mess
 
 The .ppu and .o are output files from the compiler. 
+
 The .inc are mostly for SDL2.
+
 **Do not remove them.**
 
 I have a few myself that I need.
@@ -75,12 +89,14 @@ I have a few myself that I need.
 You should be able to compile this once you GIT or DL it to your computer, so long as FPC and/or
 Lazarus is installed.
 
+
 This code doesnt call the LCL- but yours might. LCL errors are up to you to fix.
 
 
 ### 3D programming?
 
 DX9 programming experience is not necessary- I will hold your hand until we get to OpenGL.
+
 Lazarus supports it. SDL supports it.
 
 For OpenGL follow along here (not overly difficult once you understand SDL):
@@ -88,15 +104,21 @@ For OpenGL follow along here (not overly difficult once you understand SDL):
 		http://wiki.lazarus.freepascal.org/OpenGL_Tutorial
 
 These are LCL demos but you need to build the LCL(as a whole or it cant be used).
+
 The fastest way to do this was to build FPC from full sources, including unit folders.
 
 Im also noticing as of late that you need to re-build Lazarus in place(YMMV w options here).
+
 I do it within Lazarus itself and it takes minutes.
+
 Do note the call to Vampyre libs (above OGL demos) for imagery, SDL doesnt use this method.
+
 You will have to build these yourself and/or put them in place when units can find them.
 
 Most prefer the FP application(console FPC UI) or Lazarus to do this for you. 
+
 I agree. I hate "digging for units".
+
 
 
 The OpenGL demo is busted. Maybe an FPC issue.
@@ -108,6 +130,7 @@ Allegro is now on a similar path to SDL but not-so-much better maintained.
 
 		
 Remember to remove debugging code and strip binaries when writing for real gaming hardware. 
+
 (FPC Options: -g -Xs)
 
 
@@ -121,6 +144,7 @@ Focus:
 I use SDL v2 C and Pascal headers (JEDI) and sections included from version 1.2 in pascal.    
 
 There are some ports to Sin (windows) already. 
+
 Borland took up and turned to Delphi in this regards.
 
 
@@ -130,6 +154,7 @@ Borland took up and turned to Delphi in this regards.
 To use this you will need(depends on):
 
 UNIX/Lin-ux:
+
 (preferably SDL2-)
 
 			SDL-x.x.x.rpm 		   	-- the main SDL library
@@ -140,11 +165,15 @@ UNIX/Lin-ux:
 etc. There are lots of these units.
 
 Debians and ubunt-nuts need to find the .deb(s). They use similar names.
+
 SuSe and Fedora wearers(its a hat) can find similar.
 
 These libaries are a standard part of most current distributions. 
+
 The libaries will *probably already*(cross fingers) be installed. 
+
 You may have to install the developer packages. 
+
 
 
 
@@ -154,7 +183,7 @@ You may have to install the developer packages.
 		-(Free)Pascal is missing a "graphics engine". C has one.
 		-TCanvas for Laz doesnt quite do the job.
 		-Linux has never had a graphics engine or BGI. EVER. Only TCanvas has come close(incomplete).
-		-GVision for Linux (Pascal version of Win311) never took off- if it was ever written. Thats C, Qt or GTK youre looking at.
+		-GVision for Linux (Pascal version of Win311) never took off. Thats Obj-C, Qt or GTK youre looking at.
 		-JEDI doesnt stand for what you think it does- its incomplete, missing, and now depreciated.
 		-Castle engine is good, potentially missing in places things we should have and requires OpenGL knowhow.
 		-X11 "core primitives" are non-portable. Mac uses Quartz and Sin uses DirectX and WinAPI.
@@ -165,6 +194,7 @@ You may have to install the developer packages.
 
 
 Come Set Sail!
+
 (-And yes, I will add Alpha masked layers to my next iteration of this.)
 
 
@@ -176,6 +206,7 @@ The makefile should work now.
 
 
 Note that Windows SDL is much slower than someone elses WinAPI implementation.
+
 (referred to below)
 
 
@@ -187,13 +218,16 @@ By default compiles for :
 		
 
 OSX/XCode may or may not build. UNTESTED as of right now.
+
 Android I need help with anyways.
+
 
 
 ### DEMOS!!! LOADS OF DEMOS!!!
 
 
 Demos at first will focus on BGI graphics "quality" and "basic logic".
+
 (The othello code Ive written in the past has an excessive recursion problem)
 
 
@@ -235,8 +269,8 @@ SIDESCROLLER(collision based) 2d/3d games:
 		
 The meat of the crux is this:
 
-		Render "frames" and use "collsion sweeping"- logic enhancements. (Batch writes.)
-		Do Not RenderPresent() every object(do you want a screensaver??).
+	Render "frames" and use "collsion sweeping"- logic enhancements. (Batch writes.)
+	Do Not RenderPresent() every object(do you want a screensaver??).
   
   
   
@@ -244,6 +278,7 @@ This code is a "black boxed" FPC derivative work.
 
 
 Borland, INC. has been bought out and seems to "be no more".
+
 Unlike Microsoft, I respect thier codebase and right to copyright.
 
 Original code for DOS (c) Borland, INC. and reported (from C) via FreePascal (FPK) dev team, myself and a few others.
@@ -260,6 +295,7 @@ I suppose if you want to- you can update TCanvas from this.
 
 
 The alternative is to hook into X11 primitives code in C. (which makes inverse proprietary unices only code) 
+
 I do not know X11 accelleration(2D) hooks- dont ask.
         
 
@@ -267,6 +303,7 @@ I do not know X11 accelleration(2D) hooks- dont ask.
 
 
 This will be ported- if need be- to windows. I can do that.
+
 I will aim to force "console compatibility" with winDos and keyboard units support- 
         
         DO NOT LEAN ON THEM for INPUT.
@@ -275,6 +312,7 @@ I will aim to force "console compatibility" with winDos and keyboard units suppo
         
 
 Write/WriteLn is ok(logging), IFF theres a Terminal to write to, and IF NOT used in a GUI application.
+
 Thats an FPC limitation with Windows and "Lazarus mode".
 	
 
@@ -299,103 +337,103 @@ MODELIST:
 MOBILE:
 
         ModeList support is experimental (or non-existant) right now.
-		(without this nothing works)
+	(without this nothing works)
 
-		SDL says it supports mobile devices. 
-		Droids and iFruits will have to be tested seperately. 
+	SDL says it supports mobile devices. 
+	Droids and iFruits will have to be tested seperately. 
 		
-		Once you get this down and have all your secret keys-- you should have a fine day. Eventually.
+	Once you get this down and have all your secret keys-- you should have a fine day. Eventually.
 
-		iFruit (iPhone/iPad)  may never be supported due to CocoaTouch SDK limitations "forbiding linked source code". 
-		SORRY.
+	iFruit (iPhone/iPad)  may never be supported due to  SDK limitations "forbiding linked source code". 
+	SORRY.
 		
 
 SIN(windows):
 
 For now-
 
-		For SIN there is a WinAPI port: http://math.ubbcluj.ro/~sberinde/wingraph/main.html
-		(yes, I have the files)
+	For SIN there is a WinAPI port: http://math.ubbcluj.ro/~sberinde/wingraph/main.html
+	(yes, I have the files)
 
-		The guy seems to have a better WinAPI direct access than the FPC team, therefore his unit 
-		(as per 2010) AFAIK is far superior. I doubt much has changed in FPC, all of the docs still point to JEDI
-		residing on sourceforge (via PGD website). It isnt there. Its on Github (and dodgy at best.)
+	The guy seems to have a better WinAPI direct access than the FPC team, therefore his unit 
+	(as per 2010) AFAIK is far superior. I doubt much has changed in FPC, all of the docs still point to JEDI
+	residing on sourceforge (via PGD website). It isnt there. Its on Github (and dodgy at best.)
 
-		^^ The above uses WinAPI, not SDL for BGI support. So dont come beggin me for help.
-		It is the windows equivalent of using X11 core libs I believe. They are fast, indeed.
+	^^ The above uses WinAPI, not SDL for BGI support. So dont come beggin me for help.
+	It is the windows equivalent of using X11 core libs I believe. They are fast, indeed.
 		
 		
-		I use SDL for the BGI interface port here. HUGE difference.
-		(But- the C may be slow in places, where WinAPI AKA assembler isnt.)
+	I use SDL for the BGI interface port here. HUGE difference.
+	(But- the C may be slow in places, where WinAPI AKA assembler isnt.)
 
-		WinDos, WinMouse, and WinCrt units I believe were rewritten in Delphi by Borland.
-		Im not writing on this platform curently so I cant test against them. They should work.
+	WinDos, WinMouse, and WinCrt units I believe were rewritten in Delphi by Borland.
+	Im not writing on this platform curently so I cant test against them. They should work.
 
 
 ALL ELSE FAILS: 
 		
-		Revert to SDL and its manuals.
-		The SDL 2.0 wiki is a wiked mess if you try to DL it and there is no PDF -- the devs dont care.
+	Revert to SDL and its manuals.
+	The SDL 2.0 wiki is a wiked mess if you try to DL it and there is no PDF -- the devs dont care.
 		
 		
 
 Macintosh:
 
-		OS9 was removed support years ago...not sure if it has a FPC use these days
-		FPK and others had some ability to program but dont ask me where to find abandoned alpha level code.
+	OS9 was removed support years ago...not sure if it has a FPC use these days
+	FPK and others had some ability to program but dont ask me where to find abandoned alpha level code.
 
 
-		Otherwise you need XCode installed
+	Otherwise you need XCode installed
 		
-		Setup SDL First, then FPC. 
+	Setup SDL First, then FPC. 
 
-		For SDL in C, Try the directions here: 
+	For SDL in C, Try the directions here: 
 			
-				http://lazyfoo.net/tutorials/SDL/01_hello_SDL/mac/index.php
-				(You will need XCode 6.1, "Yo-sem-i-te" is assumed.)
+			http://lazyfoo.net/tutorials/SDL/01_hello_SDL/mac/index.php
+			(You will need XCode 6.1, "Yo-sem-i-te" is assumed.)
 
-		The IFDEFS in the Pascal code 'should' pull in everything SDL.
-		There is no "Lazarus" in MacOSX, you use XCode and link in the LCL routines instead.
+	The IFDEFS in the Pascal code 'should' pull in everything SDL.
+	There is no "Lazarus" in MacOSX, you use XCode and link in the LCL routines instead.
 
-		I have a Mac available but Im working from a Linux box.
+	I have a Mac available but Im working from a Linux box.
 
 
 #### Project Attempts to use or uses
 
-		Simple DirectMedia Layer (www.libsdl.org).
-		X11 "Core Drawing primitives" (www.x.org) [as otherwise provided by Borland, INC. for DOS]
-		WinAPI (where available and documented)
+	Simple DirectMedia Layer (www.libsdl.org).
+	X11 "Core Drawing primitives" (www.x.org) [as otherwise provided by Borland, INC. for DOS]
+	WinAPI (where available and documented)
 
-		"BGI" references within "Turbo Pascal Quick Reference Book" by Que Publishing
-		SDL Online reference (in C) and JEDI-SDL offline Pascal CHM reference(missing stuff) 
+	"BGI" references within "Turbo Pascal Quick Reference Book" by Que Publishing
+	SDL Online reference (in C) and JEDI-SDL offline Pascal CHM reference(missing stuff) 
 		
-		Modified Unit hacks provided by me
+	Modified Unit hacks provided by me
 
 #### This project cannot use:
 
-		VESA(its already in use)
-		SVGALib(its already in use)
-		Framebuffer access(in use by video driver)
-		Direct Video Driver access
+	VESA(its already in use)
+	SVGALib(its already in use)
+	Framebuffer access(in use by video driver)
+	Direct Video Driver access
 
-		DOS or DPMI code(Already in 32 and 64 bit modes by kernel)
+	DOS or DPMI code(Already in 32 and 64 bit modes by kernel)
 
-		Assembler hacks(prior Pascal code using VESA or SVGALib or direct FB access)
-		INT10 or 21 code (MS DOS specific)
+	Assembler hacks(prior Pascal code using VESA or SVGALib or direct FB access)
+	INT10 or 21 code (MS DOS specific)
 
-		Other libraries like allegro.
+	Other libraries like allegro.
 
 
 ### The objective of this package
 
-		 1) to enable people to run programs written using BGI or "libGraph" (C) functions 
+	 1) to enable people to run programs written using BGI or "libGraph" (C) functions 
          directly in "Linux"(Linus Torvaldis Unix). 
          
-		 2) To take old code, help you execute it, learn form it, and move forward.
+	 2) To take old code, help you execute it, learn form it, and move forward.
 
-		 3) To teach you use of SDL- so that you can code with or in competition to it.
-		 Some parts are impossible to work around(input/threads) and you need the SDL code. 
-		 -So you need to know how it works.
+	 3) To teach you use of SDL- so that you can code with or in competition to it.
+	 Some parts are impossible to work around(input/threads) and you need the SDL code. 
+	 -So you need to know how it works.
 		 
 
 "It does not aim to be a complete graphics solution."
@@ -404,6 +442,7 @@ It DOES AIM, however to extend the existing (old-as-FUDGE) existing code to UNIC
 make attempts and reworking and updating the code to something more recent.
 
 I hope it is useful..yada yada yada....YMMV. 
+
 **Read the Licence agreement.**
 
 
@@ -414,6 +453,7 @@ I hope it is useful..yada yada yada....YMMV.
 Be mindful of the initgraph (and other) header change.
 
 Even "nil pointing" "PathToDriver" still leaves us in a window.
+
 (If you want fullscreen--I have to ask.)
 
 Provides(these parts should be working):
