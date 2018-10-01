@@ -62,7 +62,20 @@ You may not need or want everything on your bagel- but Im making them that way a
 This code and demos are in a very early state. 
 I will try to provide further demos where possible.
 
+### Pardon the mess
 
+The .ppu and .o are output files from the compiler. T
+he .inc are mostly for SDL2. **Do not remove them.**
+
+I have a few myself that I need.
+
+You should be able to compile this once you GIT or DL it to your computer, so long as FPC and/or
+Lazarus is installed.
+
+This code doesnt call the LCL- but yours might. LCL errors are up to you to fix.
+
+
+### 3D programming?
 
 DX9 programming experience is not necessary- I will hold your hand until we get to OpenGL.
 Lazarus supports it. SDL supports it.
