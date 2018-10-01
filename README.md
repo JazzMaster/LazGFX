@@ -1,5 +1,6 @@
-## GrFX for Laz- 
+## Laz GrFX- 
 An Extended SDL replacement of the "Borland Graphics Interface" (BGI)
+(For Lazarus/FPC) Written in SEMI-PURE Pascal
 
 
 ### What is it, what does it do?
