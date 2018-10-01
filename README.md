@@ -318,7 +318,7 @@ For now-
 
 ALL ELSE FAILS: 
 		
-        Revert to SDL and its manuals.
+		Revert to SDL and its manuals.
 		The SDL 2.0 wiki is a wiked mess if you try to DL it and there is no PDF -- the devs dont care.
 		
 		
@@ -428,6 +428,8 @@ Incomplete or untested:
 ## Basic Q and A:
 
 Q: I just dont get it....
+
+
 A: Scan thru the headers or a PASCAL REFERENCE manual to further inderstand invocation.
 These are slim for FPC/LAZARUS but plenty available for PASCAL.
 
@@ -436,6 +438,8 @@ The rest is minor details unless you want to sweat those.
 Same for SDL in C. (C is backwards with variables, mind you)
 
 Q: It seems incomplete...
+
+
 A: Not quite. 
 Most basic functions should work- for example: initgraph.
 Keep in mind the original code was very primitive.
@@ -461,6 +465,8 @@ Why do it directly(PITA) when you can use easier to use routines?
 
 
 Q: I think I found a buggie!
+
+
 A: Report it to me.
 
 DO NOT SPAM. 
@@ -481,6 +487,8 @@ and
 is better.
 
 Q: can you port for OS (xyz, game platform abc...)
+
+
 A: Not unless its supported by BOTH FPC and SDL.
 
 Thats up to you. Grab a FPC RTL and get hoppin.
@@ -493,6 +501,8 @@ You should have an "engine already made" to use if you want to go this route...
 HAVOK, etc. etc. 
 
 Q: Will you port to DirectX? 
+
+
 A: Hell no. And WinAPI is provided thanks to someone else. USE IT. Maybe fork from there?
 
 WHY?
@@ -510,6 +520,8 @@ They are around somewhere.
 
 
 Q: But this isnt useful...
+
+
 A: No warrantees of...... yada yada yada...you didnt read the Licence.
 Ive your not going to read, then you probably shouldnt be writing code.
 
@@ -522,6 +534,8 @@ Sometimes people find vast improvements and they should be shared.
 
 
 Q: Is this all this can accomplish?
+
+
 A: Hell No.
 
 These are baseline examples of what the BGI does and SDL certainly is far more advanced.
@@ -547,6 +561,8 @@ We will start with 2d games and logic before moving onto 3d.
 
 
 Q: Whut? 3D? Physics? huh? The files says 'physics'...
+
+
 A: Unlike the BGI, SDL uses both 2d AND 3D/OpenGL functions. 
 So YES, we can and we WILL extend our code.
 
@@ -566,12 +582,25 @@ And THAT is the point.
 You like Jazz? Call it the "SAX [physics] Engine"...he he he...
 
 
-Q: Runtime errors..
-A: Check SDL depends for multimedia. 
+Q: Runtime errors..I get these STUPID ERRORS!
+
+
+A: 
+
+This is WIP- expect the occasional build bug. I might be break-fixing something.
+(Thats life.)
+
+
+Check SDL depends for multimedia. 
 (I cant control those..SDL links into them as seperate projects.)
 
+
 Error 216 is usually an "out of bounds" caused by "Alloc and not Free" errors
-You are doing something in a loop that continuously allocates (surface) ram but doesnt free it.
+
+AKA:
+
+		You are doing something in a loop that continuously allocates (surface) ram but doesnt free it.
+		-or some pointer was dereferenced (emptied) twice.
 
 
 Could be also that you need to recompile Lazarus(point variance I call it-version mismatch) or build some
@@ -584,6 +613,8 @@ LibFFmpeg is also available.
 
 
 Q: No comprende? 
+
+
 A: Libtool. (Problema.)	
 
 There exist a way with Qt apps to do MOC (.po) or something. 
