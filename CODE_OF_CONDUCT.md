@@ -38,9 +38,21 @@ Instances of abusive, harassing, or otherwise unacceptable behavior may be repor
 
 Project maintainers who do not follow or enforce the Code of Conduct in good faith may face temporary or permanent repercussions as determined by other members of the project's leadership.
 
+### Summary:
+
+The main goal is NOT TO SCREW UP by targeting, HAZING, or HARASSING people.
+Really I dont care about the other BS- its fruitcake language for:
+
+    "WE DONT DISCRIMINATE INTENTIONALLY."
+
+I will however, point out your mistakes as a programmer- as Ive probly been doing this longer than you.
+THIS ISNT COLLEGE HOMEWORK.
+THIS IS MY PASSION.
+
+
 ## Attribution
 
-This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 1.4, available at [http://contributor-covenant.org/version/1/4][version]
+This Code of Conduct is adapted (and modified from) the [Contributor Covenant][homepage], version 1.4, available at [http://contributor-covenant.org/version/1/4][version]
 
 [homepage]: http://contributor-covenant.org
 [version]: http://contributor-covenant.org/version/1/4/
