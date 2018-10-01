@@ -1,11 +1,14 @@
 I insist on version 2, if you dont like it, dont take my code.
 
 REDHAT did this for the same reason Im doing it now:
-Share the code alike and BACKPORT changes.
+
+		Share the code alike and BACKPORT changes.
 
 If you dont backport, then DONT TAKE the CODE. 
-You may FORK.
-You may NOT include in PROPRIETARY programs or units/libraries. (Licensed GPLv2, not LGPL)
+You may FORK. You may rewrite it BACK INTO C/CPP/C sharp...PYTHON..(I dont care...)
+
+LGPL is enclosed. THIS IS A LIBRARY.
+Plan accordingly.
 
 --
 	
