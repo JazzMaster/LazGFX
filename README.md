@@ -1,8 +1,10 @@
-GrFX for Laz- An Extended SDL replacement of the "Borland Graphics Interface" (in FreePascal)
-(This project has had many name iterations but I think this one fits the best.)
+## GrFX for Laz- An Extended SDL replacement of the "Borland Graphics Interface" (BGI)
 
 
-## What is it, what does it do?
+### What is it, what does it do?
+
+First lets define BGI, then SDL, then the need for this code.
+
 
 
 BGI (Borland Graphics Interface) According to Wikipedia-
@@ -54,12 +56,13 @@ I have my own "methods" if I need object-related routines. They work.
 
 You will need this Library if you write strictly for graphics modes or wish to.
 I intend to utilize an "everything bagel" here. 
-
 You may not need or want everything on your bagel- but Im making them that way anyways.
 
 
 This code and demos are in a very early state. 
 I will try to provide further demos where possible.
+
+
 
 DX9 programming experience is not necessary- I will hold your hand until we get to OpenGL.
 Lazarus supports it. SDL supports it.
@@ -73,8 +76,6 @@ The fastest way to do this was to build FPC from full sources, including unit fo
 
 Im also noticing as of late that you need to re-build Lazarus in place(YMMV w options here).
 I do it within Lazarus itself and it takes minutes.
-
-
 Do note the call to Vampyre libs (above OGL demos) for imagery, SDL doesnt use this method.
 You will have to build these yourself and/or put them in place when units can find them.
 
@@ -82,23 +83,31 @@ Most prefer the FP application(console FPC UI) or Lazarus to do this for you.
 I agree. I hate "digging for units".
 
 
-And the demo hasnt been tested fully- I dunno where its going wrong, yet.
+The OpenGL demo is busted. Maybe an FPC issue.
+
+
 
 
 Allegro is now on a similar path to SDL but not-so-much better maintained.
 
 		
 Remember to remove debugging code and strip binaries when writing for real gaming hardware. 
-FPC Options: -g -Xs
+(FPC Options: -g -Xs)
+
+
 
 
 Focus:
 
 		Unices and MacOS(graphics libraries for DOS have been written by Borland, INC.)
-		I use SDL v2 C and Pascal headers (JEDI) and sections included from version 1.2 in pascal.    
+
+
+I use SDL v2 C and Pascal headers (JEDI) and sections included from version 1.2 in pascal.    
 
 There are some ports to Sin (windows) already. 
 Borland took up and turned to Delphi in this regards.
+
+
 
 
 
@@ -122,10 +131,10 @@ The libaries will *probably already*(cross fingers) be installed.
 You may have to install the developer packages. 
 
 
+
 ## Why Pascal and why now and why THIS WAY?
 
-Full 16, 256, RGB, and RGBA support up to 1080p.
-
+		-Full 16, 256, RGB, and RGBA support (24BIT) up to 1080p.
 		-(Free)Pascal is missing a "graphics engine". C has one.
 		-TCanvas for Laz doesnt quite do the job.
 		-Linux has never had a graphics engine or BGI. EVER. Only TCanvas has come close(incomplete).
@@ -138,16 +147,21 @@ Full 16, 256, RGB, and RGBA support up to 1080p.
 		-This isnt a "class project", its my passion.
 
 
+
 Come Set Sail!
-(Lazarus TCanvas demo- but you get the point)
+(-And yes, I will add Alpha masked layers to my next iteration of this.)
+
 
 ![Lazarus Boat](./boatdemo/boat.png)
 
 
 The makefile should work now.
 
+
+
 Note that Windows SDL is much slower than someone elses WinAPI implementation.
 (referred to below)
+
 
 
 By default compiles for :
@@ -157,13 +171,18 @@ By default compiles for :
 		
 
 OSX/XCode may or may not build. UNTESTED as of right now.
+Android I need help with anyways.
 
 
-Dont forget to rename the ppu unit library to something more useful.
+### DEMOS!!! LOADS OF DEMOS!!!
 
 
 Demos at first will focus on BGI graphics "quality" and "basic logic".
 (The othello code Ive written in the past has an excessive recursion problem)
+
+
+Planned demos:
+
 
 FLAT-
 
@@ -214,15 +233,21 @@ Unlike Microsoft, I respect thier codebase and right to copyright.
 Original code for DOS (c) Borland, INC. and reported (from C) via FreePascal (FPK) dev team, myself and a few others.
 
 I have left reference where its due in the code. I only accept credit where its due me.
-The C libGraph port(s) were very lacking.
+
+
+
 
 I suppose if you want to- you can update TCanvas from this. 
 
-TCanvas is an ugly inherited mess.
+
+		TCanvas is an ugly inherited mess.
+
+
 The alternative is to hook into X11 primitives code in C. (which makes inverse proprietary unices only code) 
 I do not know X11 accelleration(2D) hooks- dont ask.
         
-X11 is not cross-platform. OpenGL(3D) IS.
+
+		X11 is not cross-platform. OpenGL(3D) IS.
 
 
 This will be ported- if need be- to windows. I can do that.
@@ -231,12 +256,17 @@ I will aim to force "console compatibility" with winDos and keyboard units suppo
         DO NOT LEAN ON THEM for INPUT.
 
         You cannot use ReadLn/ReadKey, it creates issues with EVENT-DRIVEN SDL input.
-        Write/WriteLn is ok(logging), IFF theres a Terminal to write to, and IF NOT used in a GUI application.
+        
+
+Write/WriteLn is ok(logging), IFF theres a Terminal to write to, and IF NOT used in a GUI application.
+Thats an FPC limitation with Windows and "Lazarus mode".
 	
+
 
 Cross building to Sin:
 
 		There are ways to crossbuild on one system for others. TO SIN is easier than FROM it.
+		MinGW is probly a best bet. Im not working on this right now.
 
 Mac:
 		
@@ -266,6 +296,8 @@ MOBILE:
 
 SIN(windows):
 
+For now-
+
 		For SIN there is a WinAPI port: http://math.ubbcluj.ro/~sberinde/wingraph/main.html
 		(yes, I have the files)
 
@@ -287,7 +319,9 @@ SIN(windows):
 ALL ELSE FAILS: 
 		
         Revert to SDL and its manuals.
-		Yes, the manual for 2.0 can be downloaded- but its a wiki bundle.
+		The SDL 2.0 wiki is a wiked mess if you try to DL it and there is no PDF -- the devs dont care.
+		
+		
 
 Macintosh:
 
@@ -310,7 +344,7 @@ Macintosh:
 		I have a Mac available but Im working from a Linux box.
 
 
-## Project Attempts to use or uses
+#### Project Attempts to use or uses
 
 		Simple DirectMedia Layer (www.libsdl.org).
 		X11 "Core Drawing primitives" (www.x.org) [as otherwise provided by Borland, INC. for DOS]
@@ -321,7 +355,7 @@ Macintosh:
 		
 		Modified Unit hacks provided by me
 
-This project cannot use:
+#### This project cannot use:
 
 		VESA(its already in use)
 		SVGALib(its already in use)
@@ -335,7 +369,8 @@ This project cannot use:
 
 		Other libraries like allegro.
 
-## The objective of this package
+
+### The objective of this package
 
 		 1) to enable people to run programs written using BGI or "libGraph" (C) functions 
          directly in "Linux"(Linus Torvaldis Unix). 
