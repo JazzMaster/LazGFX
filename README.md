@@ -65,8 +65,9 @@ I will try to provide further demos where possible.
 
 ### Pardon the mess
 
-The .ppu and .o are output files from the compiler. T
-he .inc are mostly for SDL2. **Do not remove them.**
+The .ppu and .o are output files from the compiler. 
+The .inc are mostly for SDL2. 
+**Do not remove them.**
 
 I have a few myself that I need.
 
