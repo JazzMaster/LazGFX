@@ -12,10 +12,12 @@ interface
 {FIXME: 
 
 mustfix to compile:
-SYNTAX SYNTAX SYNTAX  (MainSurface MUST BE DEFINED)
+SYNTAX SYNTAX SYNTAX
 Pointer checks with SDL_Color...
 
 needs "if LIBGRAPHICS_ACTIVE then begin" checks
+
+format-> MainSurface.format in places
 
 
 TODO: split this unit out- everything is "here" and should be seperate units.
@@ -884,7 +886,7 @@ end;
 
 Got weird fucked up c boolean evals? (JEEZ theyre a BITCH to understand....)
   wonky "what ? (eh vs uh) : something" ===>if (evaluation) then (= to this) else (equal to that)
-(usually a boolean eval with a byte input)
+(usually a boolean eval with a byte input- an overflow disaster waiting to happen)
 
 }
 
@@ -1368,7 +1370,7 @@ end;
 procedure setBGColor(color:byte);
 var
 	colorToSet:^SDL_Color;
-
+//if we dont store the value- we cant fetch it later on when we need it.
 begin
 
     if MaxColors=256 then begin
@@ -1539,9 +1541,6 @@ begin
 end;	
 
 
-//FIXME: WIP
-//needs formats per bpp that we use
-
 //gives you the DWord of the RGB Tuple last used
 //does not return RGB SDL_Color Tuple
 
@@ -1549,11 +1548,13 @@ function GetFgDWordRGB:DWord;
 begin
 	SDL_GetRenderDrawColor(renderer,r,g,b);
     case bpp of
-		8:format:=
-		16:
-		24:
-		32:
-	end;
+		4:format:=SDL_PIXELFORMAT_INDEX4LSB;
+        8:format:=SDL_PIXELFORMAT_INDEX8;
+        15:format:=SDL_PIXELFORMAT_RGB555;
+        16:format:=SDL_PIXELFORMAT_RGBA4444;
+        24:format:=SDL_PIXELFORMAT_RGB888;
+   //     32:format:=SDL_PIXELFORMAT_RGBA8888;
+    end;
 
     GetFGDWord:=MapRGBA(format,r,g,b,a); //gimmie the DWord instead
 end;
@@ -1561,12 +1562,15 @@ end;
 function GetFgDWordRGBA:DWord;
 begin
 	SDL_GetRenderDrawColor(renderer,r,g,b,a);
+    if (bpp < 8) then exit; //rgba not supported
     case bpp of
-		8:format:=
-		16:
-		24:
-		32:
-	end;
+		4:format:=SDL_PIXELFORMAT_INDEX4LSB;
+        8:format:=SDL_PIXELFORMAT_INDEX8;
+        15:format:=SDL_PIXELFORMAT_RGB555;
+        16:format:=SDL_PIXELFORMAT_RGBA4444;
+        24:format:=SDL_PIXELFORMAT_RGB888;
+   //     32:format:=SDL_PIXELFORMAT_RGBA8888;
+    end;
 
     GetFGDWord:=MapRGBA(format,r,g,b,a); //gimmie the DWord instead
 end;
@@ -1578,11 +1582,13 @@ end;
 function GetBgDWordRGB(r,g,b:byte):DWord;
 begin
     case bpp of
-		8:format:=
-		16:
-		24:
-		32:
-	end;
+		4:format:=SDL_PIXELFORMAT_INDEX4LSB;
+        8:format:=SDL_PIXELFORMAT_INDEX8;
+        15:format:=SDL_PIXELFORMAT_RGB555;
+        16:format:=SDL_PIXELFORMAT_RGBA4444;
+        24:format:=SDL_PIXELFORMAT_RGB888;
+   //     32:format:=SDL_PIXELFORMAT_RGBA8888;
+    end;
     
     GetBgDWordRGB:=MapRGB(format,r,g,b); //returns SDL RGB Tuple 
     
@@ -1591,11 +1597,13 @@ end;
 function GetBgDWordRGBA(r,g,b,a:byte):DWord;
 begin
     case bpp of
-		8:format:=
-		16:
-		24:
-		32:
-	end;
+		4:format:=SDL_PIXELFORMAT_INDEX4LSB;
+        8:format:=SDL_PIXELFORMAT_INDEX8;
+        15:format:=SDL_PIXELFORMAT_RGB555;
+        16:format:=SDL_PIXELFORMAT_RGBA4444;
+        24:format:=SDL_PIXELFORMAT_RGB888;
+   //     32:format:=SDL_PIXELFORMAT_RGBA8888;
+    end;
 
     GetFGDWord:=MapRGBA(format,r,g,b,a); //gimmie the DWord instead
 end;
@@ -1608,6 +1616,7 @@ procedure Blink(Sometext:string);
 
 // or RenderClear sounds good( background refresh)...
 
+//apple uses a font that blinks??? eh?
 var
   HowWide:integer;
 
@@ -1635,6 +1644,9 @@ begin
 	SDL_RenderClear;
 end;
 
+
+//this is off- wouldnt it make sense to STORE the BG color??
+//UH HUH...silly me. see above for HOWTO.
 procedure clearscreen(color:Dword); overload;
 
 var
@@ -1734,6 +1746,7 @@ begin
       delay(1000); //~1sec
       halt(0);
   end;
+ //usually we can get at least -here-
 
   if wantsFullIMGSupport then begin
 
@@ -1743,52 +1756,26 @@ begin
 
     //not critical, as we have bmp support but lacking very very bad...
     if((imagesON and _imgflags) != _imgflags) then begin
-       writeln("IMG_Init: Failed to init required JPG, PNG, and TIFF support!");
-       writeln("IMG_Init: %s ", IMG_GetError());
+       writeln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
+       writeln('IMG_Init: %s ', IMG_GetError);
     end;
   end;
 
-{
-  RamSize:=SDL_GetSystemRAM;
-  
+// im going to skip the RAM requirements code and instead haarp on proper rendering requirements.
+// note that a 12 yr old notebook-try as it may- might not have enough vRAM to pull things off.
+// can you squeeze the code to fit into a 486??---you are pushing it.
 
-   two things here:
-  
-1- we need bare min 8mb vram. 32-64 recommended. (x*y*bpp/8*(1mb in power of 2 format))
-2- surfaces and textures will consume much much more.
-3- we also need RAM   (this program and units, etc.)
-
-so lets check to see what we got..
-we dotn want to run into problems is why this check is here.
-
-
-//better if its in VRAM, not RAM
-
-  if (RamSize<16777216) then begin
-      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL starts but 16mb of RAM isnt a lot of room.','BYE..',NIL);
-      closegraph;
-  end;
-
-//non-critical error
-  if (RamSize<33554432) then begin
-      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL starts but 32MB ram is my bare minimum','OK',NIL);
-  end;
-
-}
   if (graphdriver = DETECT) then begin
 	DetectGraph; //probe for it, dumbass...NEVER ASSUME.
     graphmode := MaxModes.num; //pick the highest supported by default(1080p x millions)
   end;
 
-//before setting the mode--- this one.
   if BitDepth=4 then initPalette16 else if BitDepth=8 then initpalette256; //ignor high color bpp, its not paletted.
   //setup the palette(s) (but only in modes 256 colors or less).
-
 
   LIBGRAPHICS_INIT:=true; 
   LIBGRAPHICS_ACTVE:=false; 
 
-//set the mode
   SetGraphMode(graphdriver,Graphmode,wantFullScreen);
 
 //no atexit handler needed, just call CloseGraph
@@ -2043,22 +2030,13 @@ begin
 	    exit;
 end
 else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setup- initgraph called us
-
+//FIXME: match this to the include file
 
   case(graphmode) of //we can do fullscreen, but dont force it...
-	CGA:
-			MaxX:=320;
-			MaxY:=200;
-			BitDepth:=4; 
-			MaxColors:=16;
-           NonPalette:=false;
-		   TrueColor:false;	
-		end;
-       //TV mode
-		CGAMed:
+	     mCGA:
 			MaxX:=320;
 			MaxY:=240;
-			BitDepth:=4;
+			BitDepth:=4; 
 			MaxColors:=16;
            NonPalette:=false;
 		   TrueColor:false;	
@@ -2413,6 +2391,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
 	if ( RendedWindow = NULL ) then begin
         //try software first...
 
+         //posX,PosY,sizeX,sizeY,physScreenNum
          window = SDL_CreateWindow('SDLBGI Application', SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
     	 if (window = NULL) then begin
  			if IsConsoleInvoked then begin
@@ -2424,11 +2403,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
 			_graphResult:=-1;
 	    	closegraph;
         end;
-        SDL_WM_SetIcon (SDL_LoadBMP(iconpath), NULL);
-   		free (iconpath);
-   		SDL_WM_SetCaption('SDLBGI Application', 0);  // Set the default libgraph window caption
- 
-{
+
+        //we have a window but are forced into SW rendering(why?)
     	renderer := SDL_CreateSoftwareRenderer(Mainsurface);
 		if (renderer = NULL ) then begin
  			if IsConsoleInvoked then begin
@@ -2439,8 +2415,14 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
 	    	_graphResult:=-1;
 	    	closegraph;
 		end;
-} 
-   end;
+   end; 
+   //we have arenderer and HW window, but no surface yet
+    SDL_WM_SetIcon (SDL_LoadBMP(iconpath), NULL);
+    free (iconpath);
+    SDL_WM_SetCaption('SDLBGI Application', 0);  // Set the default libgraph window caption
+ 
+
+
     //either way we should have a window and renderer by now...   
    if wantFullscreen then begin
        //I dont know about double buffers yet but this looks yuumy..
@@ -2473,11 +2455,20 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
 
     end; 
 
-//shouldnt be an issue- set "videoMode" inside the rended window, right?
-//AKA: gimmie a surface!
+    //we can create a surface down to 1bpp, but we CANNOT SetVideoMode <8 bpp
+    //I think this is a HW limitation in X11,etc.
+
+    //syntax: flags, w,h,bpp,rmask,gmask,bmask,amask
+
+    Mainsurface = SDL_CreateRGBSurface(0, MaxX, MaxY, bpp, 0, 0, 0, 0);
+    if (Mainsurface = NiL) then begin //cant create a surface
+        SDL_Log('SDL_CreateRGBSurface failed: %s', SDL_GetError());
+        libGraph:=-1; //probly out of vram
+        //we can exit w failure codes, if we check for them
+        halt(0);
+    end;
 
   if (bpp<=8) then begin
-	  screen := SDL_SetVideoMode(MaxX, MaxY, bpp, SDL_HWPALETTE );
       if MaxColors=16 then
 			SDL_SetPalette( screen, SDL_LOGPAL or SDL_PHYSPAL, TPalette16.colors, 0, 16 );
 	  else if MaxColors=256 then
@@ -2487,19 +2478,11 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
    LIBGRAPHICS_ACTIVE:=true;
    exit; //back to initgraph we go.
 
-end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go, cut the crap
+end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
 
   case(graphmode) of //we can do fullscreen, but dont force it...
-	CGA:
-			MaxX:=320;
-			MaxY:=200;
-			BitDepth:=4; 
-			MaxColors:=16;
-           NonPalette:=false;
-		   TrueColor:false;	
-		end;
-       //TV mode
-		CGAMed:
+	
+		mCGA:
 			MaxX:=320;
 			MaxY:=240;
 			BitDepth:=4;
@@ -2855,16 +2838,14 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go, cut the crap
 
                    
     if wantFullscreen then begin
-// case statement derived based on bpp -but must be specified.
+
         case BitDepth of
-		  4:
+		  4: mode.format:=
 		  8:
+          15:
 		  16:
-		  24,32:
-//        mode.format:=
-
+		  24:      
         end;
-
 
         mode.x:=MaxX;
 		mode.y:=MaxY;
@@ -2874,10 +2855,52 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go, cut the crap
 		success:=SDL_SetWindowDisplayMode(window,mode);
         if success (<> 0) then begin 
 			//cant do it, sorry.
-        end; 
+
+ 
+    //either way we should have a window and renderer by now...   
+   if wantFullscreen then begin
+       //I dont know about double buffers yet but this looks yuumy..
+       //SDL_SetVideoMode(MaxX, MaxY, BitDepth, SDL_DOUBLEBUF|SDL_FULLSCREEN);
+
+       flags:=(SDL_GetWindowFlags(window));
+       flags:=flags or SDL_WINDOW_FULLSCREEN_DESKTOP; //fake it till u make it..
+       //we dont want to change HW videomodes because 4bpp isnt supported.
+       
+       
+       if ((flags and SDL_WINDOW_FULLSCREEN_DESKTOP) <> 0) then begin
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 'linear');
+            SDL_RenderSetLogicalSize(renderer, MaxX, MaxY);
+       end;
+
+	   IsThere:=SDL_SetWindowFullscreen(window, flags);
+
+  	   if ( IsThere < 0 ) then begin
+    	      if IsConsoleInvoked then begin
+    	         writeln('Unable to set FS: ', getmodename(graphmode));
+    	         writeln('SDL reports: ',' ', SDL_GetError);      
+     	      end;
+//throwning an error here might fuck with a game or something. Note the error and carry on.
+//    	      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
+              FSNotPossible:=true;      
+       
+       //if we failed then just gimmie a yuge window..      
+       SDL_SetWindowSize(window, MaxX, MaxY);
+       end;
+
     end;
-    SDL_SetWindowSize(window,MaxX,MaxY);
-    //restore palette
+
+  //reset palette data
+  if bpp=4 then
+    Init16Palette;
+  if bpp=8 then 
+    Init256Palette; 
+  //then set it back up
+  if (bpp<=8) then begin
+      if MaxColors=16 then
+			SDL_SetPalette( screen, SDL_LOGPAL or SDL_PHYSPAL, TPalette16.colors, 0, 16 );
+	  else if MaxColors=256 then
+			SDL_SetPalette( screen, SDL_LOGPAL or SDL_PHYSPAL, TPalette256.colors, 0, 256 );
+  end;
 
      clearviewscreen;
 end;
@@ -2972,9 +2995,10 @@ and various ways of combining the source and destination data.
 procedure HowPutPixel(X,Y: integer; var Writemode:currentWriteMode);
 
 begin
-    //how do we invert or whatever on RGB or RGBA pairs? Hmmmmm....
-	if MaxColors >256 then exit;
 
+    //_fgcolor is a  DWord
+
+    //needs more putPixel(x,y,_fgcolor) for 15bpp plus modes
     case WriteMode of
       XORPut:
         begin
@@ -3053,7 +3077,7 @@ all work similarly.
 function GetPixel(x,y:integer):DWord;
 
 //this function is "inconsistently fucked" from C...so lets standardize it...
-//this works, its hackish but it works..SDL_GetPixel is for Surfaces/screens, nor renderers.
+//this works, its hackish -but it works..SDL_GetPixel is for Surfaces/screens, nor renderers.
 var
   format:longword;
   TempSurface:^SDL_Surface;
@@ -3138,44 +3162,42 @@ begin
     
 end;
 
-//force use of the renderer (unless theres a godforsaken reason not to).
-//we can always add a compatibility unit for the surface routines.
 
 Procedure PutPixel(Renderer:^SDL_Renderer; x,y:Word);
 
 var
   someDWord:DWord;
-  Color:^SDL_Color;
+
 
 begin
+//set renderDrawPoint (putPixel) uses fgcolor set with SDL_SEtPenColor or similar
+
 
   case bpp of
 
-		4,8: SDL_RenderDrawPoint( Renderer, X, Y );
+		4: begin
+            format:=SDL_PIXELFORMAT_INDEX4LSB;
+            SDL_RenderDrawPoint( Renderer, X, Y );
+        end;
+        8: begin
+            format:=SDL_PIXELFORMAT_INDEX8;
+            SDL_RenderDrawPoint( Renderer, X, Y );
+        end;
         15: begin
 
 		     format:=SDL_PIXELFORMAT_RGB555;
-		     someDWord:=MapRGB(MainSurface.format,color.r,Color.g,Color.b,$FF);
 			 SDL_RenderDrawPoint( Renderer, X, Y );
 
 		end;
-        16,24,32: begin
-
-    		case bpp of
-					16: format:=SDL_PIXELFORMAT_RGBA4444;
-					24: format:=SDL_PIXELFORMAT_RGB888;
-					32: format:=SDL_PIXELFORMAT_RGBA8888;
-    		end;
-
-     		someDWord:=MapRGBA(MainSurface.format,color.r,Color.g,Color.b,Color.a);
-			SDL_RenderDrawPoint( Renderer, X, Y );
-     		
-		end;
+        16: format:=SDL_PIXELFORMAT_RGBA4444;
+        24: format:=SDL_PIXELFORMAT_RGB888;
+        32: format:=SDL_PIXELFORMAT_RGBA8888;
+ 
   end else begin
     		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Put Pixel values...','OK',NIL);
 			exit;
   end;
-  
+  SDL_RenderDrawPoint( Renderer, X, Y );
 end;
 
 
@@ -3251,7 +3273,6 @@ begin
 end;
 
 
-//combine these three 
 
 procedure Rectangle(x,y,w,h,:integer);
 //fill rectagle starting at x,y to w,h
@@ -3281,8 +3302,6 @@ begin
 	SDL_RenderFillRect(renderer, rect);
     SDL_RenderPresent(renderer);
 end;
-
-
 
 
 function getdrivername:string;
@@ -3378,19 +3397,19 @@ begin
   		end else
 
   		if (graphdriver= VESA) then begin
-    		 lomode := CGA;
-    		 himode := m1920x1080xMil2;
+    		 lomode := mCGA;
+    		 himode := m1920x1080xMil;
   		end else
 
-		if (graphdriver = CGA) then begin
-    	  lomode := CGA;
-    	  himode := CGAMed;
+		if (graphdriver = mCGA) then begin
+    	  lomode := mCGA;
+    	  himode := mCGA;
   		end;
 
 	end else begin
         if (graphdriver=DETECT) then begin
 	    	himode:=MaxModeSupported.num;
-	    	lomode:= CGA; //no less than this.
+	    	lomode:= mCGA; //no less than this.
 		end else begin
 			if IsConsoleEnabled then
 				writeln('I cant get a valid GraphicsMode to report a range.');
@@ -3574,6 +3593,7 @@ end;
 function RemoveViewPort(windowcount:byte):SDL_Rect;
 //the opposite of above...
 //return with the last window coords..(we might be trying to write to them)
+//and redraw the prior window as if the new one was not there(not an easy task).
 var
   ThisRect,LastRect:^SDL_Rect;
 
@@ -3646,7 +3666,7 @@ end;
 
 
 {
-//return values can be ignored. these are proceedures.
+//return values can be ignored(unless there are problems) these are proceedures.
 
 SDL_GradientFillRect( Surface,Rect, RGBStartColor, RGBEndColor, GradientStyle);
 
@@ -3706,10 +3726,9 @@ trigonRGBA(renderer, x1, y1, x2, y2, x3, y3,r, g, b, a);
 filledTrigonColor(renderer, x1, y1, x2, y2, x3, y3, colour); 
 filledTrigonRGBA(renderer, x1, y1, x2, y2, x3, y3,r, g, b, a); 
 
-//(polys) SDL_RenderDrawPoints
+//these are confusing...you need to pass in multiple point(s)...
+SDL_RenderDrawPoints(points,num)
 
-??
-??
 
 // Filled Polys 
 
