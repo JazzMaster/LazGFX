@@ -15,6 +15,8 @@ mustfix to compile:
 SYNTAX SYNTAX SYNTAX
 Pointer checks with SDL_Color...
 
+index4_MSB - L is for little endians (significant bit??)
+
 needs "if LIBGRAPHICS_ACTIVE then begin" checks
 
 format-> MainSurface.format in places
