@@ -21,6 +21,17 @@ YOU need to write it.
 ScreenShots and "pausing the game" are covered in the main BGI unit.
 ..or were...
 
+This will throw a lot of hints and unused variable warnings.
+YOu will probably NOT use everything here.
+
+
+The Basics:
+
+Cards, board games, monsters, etc.
+
+MTG has been done (cockatrice) and Pokemon,etc have "weird rules" to implement on a per card basis.
+That is beyond the scope of this code.
+
 }
 
 interface
@@ -29,7 +40,7 @@ type
 //theres some weird math with this that most games share -- CURSES, DND! (It wont DIE!)
 //usually random dice involved and percentages of percentages and more random dice.....
 
-effects=(ice,fire,drainHealth,drainMagic,drainStamina,Sleep,zombie,fury,hate,love);
+effects=(none,ice,fire,drainHealth,drainMagic,drainStamina,Sleep,zombie,fury,hate,Attractlover);
 
 chest=record
 	name:string;
@@ -38,13 +49,50 @@ chest=record
 	price:integer;
 end;
 
+Crime=record
+    ZombiesKilled,
+    ChestsLooted,
+    Assaults,
+    DoorsBustedIn,
+    Murders,
+    Bribes:integer;
+end;
+
+CharInventory=record
+    ItemName:string;
+    //ItemIcon:^SDL_Texture; //bmp image
+end;
+
+roomType=(shipCompartment,HouseRoom,kitchen,gallery,dungeonRoom,GreatHall,arena,CitySection,forge,medicalBay); 
+//derived from AGT- yes AGT.(Adventure Game Toolkit)
+
+cardsType=(Spades,Hearts,Flowers,Diamonds); //clover
+cardsValueSpecial=(Ace,King,Queen,Jack);
+cardsValue=(Ace,King,Queen,Jack,Ten,Nine,Eight,Seven,Sox,Five,FOur,Three,Two); //ace(1)-King: this is backwards
+
+currentChessBoardColor=(Black,White);
+//defaults for othello/reversi and go also
+
+var
+
+//Carry Weight is a weird one..its affected by items at current char level (limits inventory max items)
+Rummied,GinRummied,MadeASet:boolean;
+IsSorry:boolean; //parcheesy,sorry,etc.
+KingME:boolean; //checkers
+CharLevel:integer; //affects everything
+currentCarryLimit:integer; //dynamic var, but set in game begining.
+CanCarryIT.IsDrunk,IsNaked:boolean;
+CurrentInventory:array [1..currentCarryLimit] of CharInventory;
 CharacterEffects=(stamina,health,magic,hate,love);
 Hungry,IsVampire,IsWereWolf,IsTired:boolean;
 MonsterCount,HasntSleptIn:integer;
-
+CurrentCash,ValidMovesLeft,MovesLeft:integer; //may be a hole but is move valid
+DiceValue:integer; //random(6,20,etc)
 
 implementation
 //these two might assume a black background(which is correct- (but an ASS out of EWE and ME)
+//never assume, SET it.
+
 
 //a 8x8 w green background( I hope)
 procedure DrawChessBoard(renderer:^SDL_Renderer);
@@ -114,5 +162,8 @@ begin
 end;
 
 
-begin
+begin 
+
+//  CharLevel:=1; 
+//  CarryWeight:=110;
 end.

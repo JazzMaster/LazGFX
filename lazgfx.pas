@@ -1,25 +1,96 @@
-Unit SDLBGI; 
+Unit LazGFX; 
+//SDL BGI reimplementation for FPC
 
 interface
 
-//Library -DONT RUN A LIBRARY..link to it.
-//-Anonymous C dev
+//-DONT RUN A LIBRARY..link to it.
+//-Anonymous C kernel dev (that runs a library)
 
 //This is not -and never will be- your program. Sorry, Jim.
+//SO- DONT EXPECT A RELEASE, EVER.
+
+
+{
+
+Some notes before we begin:
+
+There are two ways to invoke this-
+1- with GUI and Lazarus
+
+Project-> Application (kiss writeln() and readln() goodbye)
+You can only log output.
+
+2- without GUI/Lazarus as a Console Application
+Project-> Console App or
+Project-> Program
+
+Set Run Parameters:
+"Use Launcher" -to enable runwait.sh and console output (otherwise you might not see it)
+
+-This was the old school "compiler output window" in DOS Days.
+-Yes, Im that old.
 
 
 
-{FIXME: 
+-One uses Classes and CThreads, the other doesnt.(This unit will suck in CThreads.)
+This method offers a Console output and Readln() writeln().
+What you wont get is the LCL and components and nice UI- but we are using SDL for that.
+:-P
 
-mustfix to compile:
-SYNTAX SYNTAX SYNTAX
-Pointer checks with SDL_Color...
 
-index4_MSB - L is for little endians (significant bit??)
+While Id reccommend the 2nd- Lord knows what you are using this for.
+Most Game finished products (and Game consoles dont have a debugging output window)
 
-needs "if LIBGRAPHICS_ACTIVE then begin" checks
+-THIS CODE WILL CHECK WHICH IS USED and log accordingly.
 
-format-> MainSurface.format in places
+
+mem optim:
+
+destroySurface(mainsurface); needs to be used.
+dont need a surface in initgraph-use the renderer ops instead
+-make one as we need one
+
+
+(createSurface must use surface.format of chosen bpp or it could be off-from renderer would be better)
+destroy surface after textureFromSurface op , then destroy texture as its in the renderer
+(The bpp limitation is intentional with this unit due to backward compatibility)
+
+Should leave just: 
+
+window
+renderer
+
+layers active- freeing a lot of ram if surface ops arent needed, and limiting to one - if needed
+
+
+This code was a mess because of SDL1.2 implementation all over the place.
+Many dont understand its use- then get thrown and force fed SDL2.x and GPU_ opcodes.
+I am working on cleaning this up.
+
+
+There is a lot of plugins for SDL/SDLv2 and that initially confused the heck out of me.
+Most of those were ported to FPC by JEDI team. I have cleaned that mess up, except for depends.
+
+If you are using non-unices you will need to install these packages or build the sources to get the compiled units.
+Im looking for the latter but sometimes I get the sources instead. Sorry.
+
+
+However, THE MAIN THING is that we can use them as soon as the BGI code is written(HERE).
+
+SDL_gfx and SDL_Image are some of those extensions.
+
+Image is JPEG, TIF, PNG.support (BMP is in 1.2)
+GFX is supposed to utilize mmx and better the GPU
+
+Theres another unit: SDL_GPU to extend that further.
+
+I havent "scraped the surface" on OGL yet, its a daunting mess right now.
+
+Anyway, Nexiuz and Postal2 use it- so its capable.(even with SDL)
+Hedgewars uses SDL v1.2, iirc...
+
+The difference between an ellipse and a circle is that an ellipse is corrected for the aspect ratio.
+
 
 
 TODO: split this unit out- everything is "here" and should be seperate units.
@@ -28,6 +99,8 @@ sub units should pull us- (and sdl1 and 2) in.
 get tris and circles and elippses working
 
 aspect stretching???
+
+FIX these damn comments and optimize variable sections into single chunks
 
 }
 
@@ -38,10 +111,7 @@ aspect stretching???
 //SDL_gfx has a 8x8 font embedded into the code headers.
 
 {
-Description:
 
-In simplest terms, a FreePascal "graph" unit. 
-A BGI ->SDL (event-driven) API.
 
 Useful when you need VESA modes but cant have them because X11, etc. is running.
 This code **should** port or crossplatform build, but no guarantees.
@@ -82,6 +152,8 @@ SDL support adds "wave, mp3, etc" sounds instead of PC speaker beeping(see the '
 and adds mouse and joystick, even haptic feedback support also.
 
 However, licensing issues (as with qb64 which also uses SDL) wreak havoc on us. 
+Yes- Have a merge tree of qb64 that builds, just ask...
+
 The workaround is to use VLC/FFMpeg or other libraries. I may in fact choose this over SDL Audio functions.
 
 
@@ -90,21 +162,22 @@ A lot of code back in the day(20 years ago) was written to use "banks" due to co
 The dos mouse was broken due to bank switching.
 
 -We dont have said limitations now-
+
 CGA as implemented here is actually MCGA(pre VGA 16 color mode).
-True CGA is 4plane-4color mode (and its butt ugly). It was designed for early GREEN and ORANGE monitors
-and 4 color monitors that had some limits.
+True CGA is 4plane-4color mode (and its butt ugly). 
+It was designed for early GREEN and ORANGE monitors and 4 color monitors that had some limits.
 
 As such also due to ROM bugs, some "yellows" were actually "oranges".
 
 
 Code is written for 32 AND 64 bit systems.
-Some JEDI bugs were squashed in the process.
  
 16 Bit systems will have to use code hacks and function relocation definitions as like the original hackish Borland unit used. 
 Memory addressing MMU/PMU, etc. allows such things that Borland Pascal does not anymore. (who uses a system that old anyway?)
 
 Note some 64-bit SDL code upgrades due to FPC compiler hacks on 64 bit systems(when is a LongWord not a LongWord?).
 Apparently the SDL/JEDI never got the bugfix(GitHub, people...).
+
 
 Has this been done before? YES. Twice. 
 (Once for C- with SDL Video thread issues [version 1.2 instead of 2.0??],and once for SIN.
@@ -115,17 +188,20 @@ Most code I find is abandoned work or half-assed.
 Mine is WIP. I at least attempt the impossible.
 
 *Most* 1.2 routines can be upgraded or used with 2.0.
-Error 216 indicated BOUNDS errors(alloc and not FREE)
+Error 216 usually indicates BOUNDS errors(alloc and not FREE)
+
+I need "pascal Pointer schooling". I dont deny this.
 
 
-I need "pascal Pointer schooling".
-
-RGB:
+SDL_Color RGB syntax:
 
 r,g,b,a:byte;
 
 2 byte take up a WORD(unused)
 4 byte take up a longword/DWord(full rgb tuple plus a)
+
+Tuples dont exist in Pascal(or C).Its a Python Thing.
+The closest we have is a record and a pointer to one, or an array of one.
 
 
 "THIS CODE (WAS) is an ANCIENT mess.."
@@ -133,7 +209,10 @@ r,g,b,a:byte;
 16 color **WAS** assumed.  
 256 is the defacto VGA standard. some newer cards refuse anything less.
 32-bit is supported by SDL and I am still tweaking this code for compliance.
+(24-bit should work for now)
+
 48-bit color is theoretical -most HDTV still arent there yet.
+
 
 Note the POSTAL implementation of SDL(steam):
 
@@ -145,25 +224,31 @@ Note the POSTAL implementation of SDL(steam):
 this is the proper workflow. especially for "these old modes"..
 Otherwise you are hardware flipping and using a slow screen surface..not wise.
 
+-or-
+
+you could be over-rendering....
 
 
 Most Games use transparency for "invisible background" effects.
 Doing this with PNG may not work as intended-
-   and quite frankly using compressed textures (JPEG) results in artifacting at hi resolutions 
+
+   quite frankly using compressed textures (JPEG) results in artifacting at hi resolutions 
    or when thigns are streetched too much.
+
 PNG-Lite may come to the rescue- but I need the Pascal headers, not the C ones for that.
 
 Not all games use a full 256-color (8x8 bit) palette
 This is even noted in SkyLander games lately with Activision.
 
 
-Older school games would have to overwrite "layers" onscreen.
-Most in fact do so and clear either VRAM or RAM while running (cheat) to accomplish most effects.
+Most older games clear either VRAM or RAM while running (cheat) to accomplish most effects.
 Most FADE TO BLACK arent just visuals, they clear VRAM in the process.
 
 Read "Racing the beam"...and see Super Mario TP7 source code for more details.
 
+
 The code- (as a DWord) should support 32bpp- not sure that SDL does in practice.
+
 
 Color Modes:
 
@@ -212,7 +297,8 @@ Not Supported(SDL Limit):
 8k (?? x ??)                8/16/24/30/36/48
 
 
-I havent added in Native iOS, Android or MacOS modes yet.
+I havent added in Android or MacOS modes yet.
+You cant support portable Apple devices. Apple forbids it w FPC.
 
 
 **CORE EFFICIENCY FAILURE**:
@@ -231,7 +317,7 @@ USE RenderPresent() to PageFlip.
 
 
 There may be bugs in my math. I havent checked yet.
-I cant be as bad as multiplying "safely" your tokens on ETH/EXP by zero, though.
+(I cant be as bad as multiplying "safely" your tokens on ETH/EXP by zero, though.)
 
 
 
@@ -277,8 +363,7 @@ manuals:
 	TurboVision(TVision) references (where I can find them and understand them.)
 
 
-units should be mostly complete.
-
+THIS unit should be mostly complete.
 
 
 NOTE: All visual rendering routines are 'far calls' if you insist building for DOS.
@@ -287,11 +372,11 @@ NOTE: All visual rendering routines are 'far calls' if you insist building for D
 (ifdefine things...)
 
 
-floodFill needs 9-way not 4-way fills to nearest neighbor...Use SDL routines, not FPC.
+floodFill ...Use SDL routines, not FPC.
 
 
 plotting pixels and lines is notoriously slow. dont make it worse. 
-lock and unlock only where necessary, IFFFFF you need surface rendering at all.
+lock and unlock only where necessary, 
 
 
 to animate- screen savers, etc...you need to (page)flip/rendercopy and slow down rendering timers.
@@ -299,8 +384,9 @@ to animate- screen savers, etc...you need to (page)flip/rendercopy and slow down
 
 bounds:
    cap pixels at viewport
-   ok if off screen..we ignore it. Games use a second hidden surface (and zoom in a blit)
+   ok if off screen..we ignore it. 
 
+Games use a second hidden surface (and zoom in a blit)
 (therefore when you change views (L+R) its just tris updating.)
 
 
@@ -310,9 +396,8 @@ what.. 64K for a level? cmon....
 
   Move (texture,memory,sizeof(texture));
 
+
 Palettes:
-   This code will be in a seperate include file. It is taking up half of this unit.
-   I can (and should get to) reading/writing this with a file.
 
    I will leave to you the palette hacking
 
@@ -331,10 +416,12 @@ Palettes:
   
   256x3=728 bytes. 
   Nothing fancy. 
+
   See the included file from Super Mario in TP7.
   It very similar method.
 
   Note "the holes" can be used for overlay areas onscreen when stacking layers.
+  The holes are standardized to xterm specs. I think theres like 5.
 
 
 I wonder if DirectX .DDS files are SDL Surfaces??? HMMMM....
@@ -352,14 +439,16 @@ SDL is screwed up somewhere-
 some 1.2 routines are missing 2.0 documentation as if support was dropped.
 -and yet multithreaded apps and rendering is required...hmmmm..
 
+
 Tris (triangles, trigons), polys are not ported from SDL yet. This requires much more than 
 just dropping a routine in here- you have to know how the original routine wants the data-
-  get it in the right format, call the routine, and if needed-catch errors.
+get it in the right format, call the routine, and if needed-catch errors.
 
-Progmatic approach I like to call it.
+(Progmatic approach I like to call it.)
+
 
 SDL is not SIMPLE. The BGI was SIMPLE.
-
+SemiDirect MultiMedia OverLayer - should be the unit name.
 
  --Jazz (comments by me unless otherwise noted)
 
@@ -367,10 +456,6 @@ SDL is not SIMPLE. The BGI was SIMPLE.
 
 
 uses
-
-
-//FPC team:
-//linux apps "have a console" whether "built as a console" app or not...
 
 {$ifdef unix} cthreads,ctypes,cmem,sysUtils,crt,{$endif}
 
@@ -390,7 +475,7 @@ uses
    ,windos 
 {$ENDIF}
 
-//dont ask....need dpmi at minimal
+//dont ask....need (HX)dpmi at minimal
 {$IFDEF go32v2}
   ,dos,crt,crtstuff
 {$ENDIF}
@@ -674,8 +759,8 @@ Then these can be used properly.
   
   MaxModeSupported:^TMaximumModeData; //string, not an array entry??
 	
-  //window:PSDL_Window; //A window... heh..."windows" he he...these cant be "closed"...
-  Font_surface:PSDL_Surface;	//font screen 
+  window:PSDL_Window; //A window... heh..."windows" he he...these cant be "closed"...
+
   ttfFont : PTTF_Font;
   TextFore,TextBack : PSDL_Color; //font fg and bg...
   Renderer : PSDL_Renderer;
@@ -780,9 +865,9 @@ procedure RegisterBGIDriver(driver: pointer);
 function GetMaxColor: word;
 procedure LoadBMPImage;
 
-function  GetPixel( SrcSurface : PSDL_Surface; x : integer; y : integer ) : Dword;
+function  GetPixel( x; y : integer ) : Dword; //mainSurface
 procedure PutPixelRenderer(Renderer:SDL_Renderer; x,y:integer);
-procedure PutPixel( DstSurface : PSDL_Surface; x,y : integer; _fgcolor : Dword );
+
 
 procedure PlotPixelWNeighbors(x,y:integer);
 procedure SaveBMPImage(filename:string);
@@ -909,15 +994,26 @@ begin
   end;
 end;
 
+//call when done drawing pixels
 procedure unlock(MainSurface:^SDL_Surface);
+
+var
+  Tex:^SDL_Texture;
 
 begin
   if SDL_MUSTLOCK(MainSurface) then 
     SDL_UnlockSurface(MainSurface);
+
+//surface does update the renderer onscreen by itself
   Tex:=CreateTextureFromSurface(MainSurface);
   RenderCopy(Renderer,Tex);
   SDL_FreeSurface(Tex); //alloc and not free bug if this isnt not here.
-  RenderPresent;
+
+//we are going to render at the screens refresh rate anyhoo in most cases
+// if not TimerActive then
+//  SDL_RenderPresent(renderer);
+
+//DO NOT OVER RENDER or page flip!
 end;
 
 procedure timer_flip; //triggered by SDL timer according to screen refresh rate
@@ -2462,7 +2558,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
 
     //syntax: flags, w,h,bpp,rmask,gmask,bmask,amask
 
-    Mainsurface = SDL_CreateRGBSurface(0, MaxX, MaxY, bpp, 0, 0, 0, 0);
+    Mainsurface := SDL_CreateRGBSurface(0, MaxX, MaxY, bpp, 0, 0, 0, 0);
     if (Mainsurface = NiL) then begin //cant create a surface
         SDL_Log('SDL_CreateRGBSurface failed: %s', SDL_GetError());
         libGraph:=-1; //probly out of vram
@@ -3782,9 +3878,8 @@ begin
 
     SDL_FreeSurface(surface);
 
-    SDL_RenderCopy(renderer, texture, Nil, rect);
-    SDL_RenderPresent(renderer);
-//SDL_FreeTexture(Tex);
+    SDL_RenderCopy(renderer, tex, Nil, rect);
+    SDL_FreeTexture(tex);
 end;
 
 procedure LoadBMPImage(filename:string Rect:^SDL_Rect);
@@ -3802,8 +3897,7 @@ begin
     SDL_FreeSurface(surface);
 
     SDL_RenderCopy(renderer, texture, Nil, rect);
-    SDL_RenderPresent(renderer);
-//SDL_FreeTexture(Tex);
+    SDL_FreeTexture(NewTex);
 end;
 
 //saving PNG is weird, requires extra headers for 8bit images.
@@ -3821,7 +3915,7 @@ begin
    Rect.w:=3;
    Rect.h:=3;
    SDL_RenderFillRect(renderer, rect);
-   SDL_RenderPresent(renderer);
+//   SDL_RenderPresent(renderer);
    Free(Rect);
    //now restore x and y
    x:=x+2;
