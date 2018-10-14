@@ -43,16 +43,17 @@ Most Game finished products (and Game consoles dont have a debugging output wind
 
 -THIS CODE WILL CHECK WHICH IS USED and log accordingly.
 
-
+---
 mem optim:
 
 destroySurface(mainsurface); needs to be used.
 dont need a surface in initgraph-use the renderer ops instead
--make one as we need one
+-make one as we need one, then destroy it. same with textures.
 
+to work around a SDL flaw w textures not matching surface bpp(required here) we must "create textures"
+this is optimized by the fact that we can render to them (and treat them) like a surface(with renderer functions).
 
-(createSurface must use surface.format of chosen bpp or it could be off-from renderer would be better)
-destroy surface after textureFromSurface op , then destroy texture as its in the renderer
+(createTextureFromSurface must use surface.format of chosen bpp or it could be off-)
 (The bpp limitation is intentional with this unit due to backward compatibility)
 
 Should leave just: 
@@ -62,11 +63,14 @@ renderer
 
 layers active- freeing a lot of ram if surface ops arent needed, and limiting to one - if needed
 
+Furthermore we need to switch to Texture ops, not Surface ones and take full use of the GPU.
+I have not done this yet as there are a shitton of surface ops (or WERE) here.
+
 
 This code was a mess because of SDL1.2 implementation all over the place.
 Many dont understand its use- then get thrown and force fed SDL2.x and GPU_ opcodes.
 I am working on cleaning this up.
-
+---
 
 There is a lot of plugins for SDL/SDLv2 and that initially confused the heck out of me.
 Most of those were ported to FPC by JEDI team. I have cleaned that mess up, except for depends.
@@ -460,8 +464,13 @@ uses
 {$ifdef unix} cthreads,ctypes,cmem,sysUtils,crt,{$endif}
 
 //FPC generic units(OS independent)
-	SDL2,SDL2_gfx,SDL_Image,SDL2_TTF,strings,math
-//gfx is untested as of yet. HELLO!
+	SDL2,SDL_Image,SDL2_TTF,strings,math,typinfo
+
+//typinfo will come in handy with color Names.
+//(it saves a lot of space)
+
+//SDL2_gfx is untested as of yet. functions start with GPU_ not SDL_
+//dont be confused w graphics modes etc- thats what this unit is for- we just need SDL (base)
 
 {$ifdef debug} ,heaptrc {$endif} //logger
 
@@ -479,6 +488,9 @@ uses
 {$IFDEF go32v2}
   ,dos,crt,crtstuff
 {$ENDIF}
+
+//sdl_net
+//YAASSS!! networking!!!
 
 
 //Carbon is OS 8 and 9 to OSX API

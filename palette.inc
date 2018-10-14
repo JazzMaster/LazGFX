@@ -1,13 +1,13 @@
 
 {
 
-256 and paletted modes-
+256 and below "color" paletted modes-
 this gets harder as we go along but this is the "last indexed mode". 
 
 colors (indexes) above 255 should throw an error(undefined --and out of bounds). 
 
 (technically they are rgb(a) colors and have no index anymore)
-(so we are in true colors and straight rgb after this.....)
+(so we are in true colors and straight rgb/rgba after this.....)
 
 You need (full) DWords or RGB data for TRUE color modes.
  
@@ -24,290 +24,37 @@ This is for drawing "primitives" on the "surface".....
 -One step at a time.
 
 each 256 SDL_color= r,g,b,a whereas in range of 0-255(FF FF) per color.
+for 16 color modes we use 0-16(FF)
+ 
+16 color mode is technically a wonky spec:
+officially this is composed of:  RGB plus I(light/dark) modes.
+in relaity thi is: RGB+CMY whereas W+K are seperate colors- its not quite CMYK nor RGB with two intensities(7 or F)
+
+CMYK isnt really a video color standard normally because pixels are RGB. 
+CMYK is for printing. The reason has to do with color gamut and other huffy-puff.
+(Learn photography if you want the color headache)
+ 
+
+--and THEN- 4 color , 4 palette hi bit resolution modes that are half ass documented. 
+Theres no need for those modes anymore.(think t shirt half-tones for screen printing)
+
+this is the best I can implement this given that specs are all over the place- and I want this standardized as much as pssible
+given that we have very high color
+VGA/SVGA (Video gate array and super video gate array) and VESA (video electronic standards association) modes available now.
 
 }
 
 
-const 
-
 //we can use SetColor(SkyBlue3); in 256 modes with this- since we know which color index it is.
 //this is only for the default palette of course- if you muck with it.....
 // and only up to 256 colors....sorry.
+// you have no idea how hard to find and hard to put into code this shit is.
 
-BLACK=0;
-BLUE=1;
-GREEN=2;
-CYAN=3;
-RED=4;
-MAGENTA=5;
-BROWN=6;
-LTGRAY=7;
-GRAY=8;
-LTBLUE=9;
-LTGREEN=10;
-LTCYAN=11;
-LTRED=12;
-LTMAGENTA=13;
-YELLOW=14;
-WHITE=15;
-
-//note there are multiple shades and a few "holes".
-Grey1=16;
-NavyBlue=17;
-DarkBlue=18;
-Blue2=19;
-Blue3=20;
-Blue1=21;
-DarkGreen=22;
-DeepSkyBlue5=23;
-DeepSkyBlue6=24;
-DeepSkyBlue7=25;
-DodgerBlue2=26;
-DodgerBlue1=27;
-Green4=28;
-SpringGreen5=29;
-Turquoise1=30;
-DeepSkyBlue2=31;
-DeepSkyBlue3=32;
-DodgerBlue=33;
-Green2=34;
-SpringGreen3=35;
-DarkCyan=36;
-LightSeaGreen=37;
-DeepSkyBlue1=38;
-DeepSkyBlue=39;
-Green3=40;
-SpringGreen4=41;
-SpringGreen1=42;
-Cyan3=43;
-DarkTurquoise=44;
-Turquoise=45;
-Green1=46;
-SpringGreen2=47;
-SpringGreen=48;
-MediumSpringGreen=49;
-Cyan2=50;
-
-Cyan1=51;
-DarkRed=52;
-DeepPink5=53;
-Purple4=54;
-Purple5=55;
-Purple3=56;
-BlueViolet=57;
-Orange2=58;
-Grey2=59;
-MediumPurple6=60;
-SlateBlue1=61;
-SlateBlue2=62;
-RoyalBlue1=63;
-UnUsedHole5=64;
-DarkSeaGreen7=65;
-PaleTurquoise1=66;
-SteelBlue=67;
-SteelBlue3=68;
-CornflowerBlue=69;
-UnUsedHole3=70;
-DarkSeaGreen8=71;
-CadetBlue=72;
-CadetBlue1=73;
-SkyBlue2=74;
-SteelBlue1=75;
-UnUsedHole4=76;
-PaleGreen2=77;
-SeaGreen3=78;
-Aquamarine2=79;
-MediumTurquoise=80;
-SteelBlue2=81;
-UnUsedHole1=82;
-SeaGreen2=83;
-SeaGreen=84;
-SeaGreen1=85;
-Aquamarine=86;
-DarkSlateGray1=87;
-DarkRed1=88;
-DeepPink6=89;
-DarkMagenta=90;
-DarkMagenta1=91;
-DarkViolet=92;
-Purple1=93;
-Orange3=94;
-LightPink2=95;
-Plum3=96;
-MediumPurple4=97;
-MediumPurple5=98;
-SlateBlue=99;
-Yellow5=100;
-
-Wheat1=101;
-Grey3=102;
-LightSlateGrey=103;
-MediumPurple=104;
-LightSlateBlue=105;
-Yellow6=106;
-DarkOliveGreen3=107;
-DarkSeaGreen=108;
-LightSkyBlue1=109;
-LightSkyBlue2=110;
-SkyBlue1=111;
-UnUsedHole2=112;
-DarkOliveGreen4=113;
-PaleGreen3=114;
-DarkSeaGreen5=115;
-DarkSlateGray2=116;
-SkyBlue=117;
-UnUsedHole=118;
-LightGreen=119;
-LightGreen1=120;
-PaleGreen=121;
-Aquamarine1=122;
-DarkSlateGray=123;
-Red2=124;
-DeepPink7=125;
-MediumVioletRed=126;
-Magenta4=127;
-DarkViolet1=128; 
-Purple2=129;
-DarkOrange1=130;
-IndianRed=131;
-HotPink3=132;
-MediumOrchid3=133;
-MediumOrchid=134;
-MediumPurple2=135;
-DarkGoldenrod=136;
-LightSalmon1=137;
-RosyBrown=138;
-Grey4=139;
-MediumPurple3=140;
-MediumPurple1=141;
-Gold1=142;
-DarkKhaki=143;
-NavajoWhite1=144;
-Grey5=145;
-LightSteelBlue2=146;
-LightSteelBlue=147;
-Yellow3=148;
-DarkOliveGreen5=149;
-DarkSeaGreen6=150;
-
-DarkSeaGreen3=151;
-LightCyan2=152;
-LightSkyBlue=153;
-GreenYellow=154;
-DarkOliveGreen2=155;
-PaleGreen1=156;
-DarkSeaGreen4=157;
-DarkSeaGreen1=158;
-PaleTurquoise=159;
-Red3=160;
-DeepPink3=161;
-DeepPink4=162;
-Magenta5=163;
-Magenta6=164;
-Magenta2=165;
-DarkOrange2=166;
-IndianRed1=167;
-HotPink4=168;
-HotPink2=169;
-Orchid=170;
-MediumOrchid1=171;
-Orange1=172;
-LightSalmon2=173;
-LightPink1=174;
-Pink1=175;
-
-Plum2=176;
-Violet=177;
-Gold2=178;
-LightGoldenrod4=179;
-Tan=180;
-MistyRose1=181;
-Thistle1=182;
-Plum1=183;
-Yellow4=184;
-Khaki1=185;
-LightGoldenrod1=186;
-LightYellow=187;
-Grey6=188;
-LightSteelBlue1=189;
-Yellow2=190;
-DarkOliveGreen=191;
-DarkOliveGreen1=192;
-DarkSeaGreen2=193;
-Honeydew=194;
-LightCyan1=195;
-Red1=196;
-DeepPink2=197;
-DeepPink=198;
-DeepPink1=199;
-Magenta3=200;
-
-Magenta1=201;
-OrangeRed=202;
-IndianRed2=203;
-IndianRed3=204;
-HotPink=205;
-HotPink1=206;
-MediumOrchid2=207;
-DarkOrange=208;
-Salmon=209;
-LightCoral=210;
-PaleVioletRed=211;
-Orchid2=212;
-Orchid1=213;
-Orange=214;
-SandyBrown=215;
-LightSalmon=216;
-LightPink=217;
-Pink=218;
-Plum=219;
-Gold=220;
-LightGoldenrod2=221;
-LightGoldenrod3=222;
-NavajoWhite=223;
-MistyRose=224;
-Thistle=225;
-Yellow1=226;
-LightGoldenrod=227;
-Khaki=228;
-Wheat=229;
-Cornsilk=230;
-
-//yes "the GREYS"..important for shading flat images...
-
-Grey7=231;
-Grey8=232;
-Grey9=233;
-Grey10=234;
-Grey11=235;
-Grey12=236;
-Grey13=237;
-Grey14=238;
-Grey15=239;
-Grey16=240;
-
-Grey17=241;
-Grey18=242;
-Grey19=243;
-Grey20=244;
-Grey21=245;
-Grey22=246;
-Grey23=247;
-Grey24=248;
-Grey25=249;
-Grey26=250;
-
-Grey27=251;
-Grey28=252;
-Grey29=253;
-Grey30=254;
-Grey31=255;
 
 //blink is a "text attribute" ..a feature...
 //write..wait.erase..wait..rewrite..just like the blinking cursor..
-//128 is hex 0F- bit hackery with the color palette.
-//(which may have worked at the time)
 
+// blink used to be set at value 128;
 // Color:=color+Blink; -is the old way.
 // Blink('string'); -is the new way.
 
@@ -320,6 +67,571 @@ colors:
 
 }
 type
+//There IS a way to ge the Names listed here- the magic type info library
+
+//iirc - its ...RED,BLUE,GREEN... on the ol 8088s...
+// K-R-B-G-C-M-Br Gy-Gyd R-B-G-C-M-Y-W (CGA)
+// vs K-B-G-C-R-M-Br Gy-Gyd- B-G-C-R-M-Y-W (wikipedia)
+
+
+//the only issue I see here is the overlapping names
+TPalette16Names=(BLACK,RED,BLUE,GREEN,CYAN,MAGENTA,BROWN,LTGRAY,GRAY,LTRED,LTBLUE,LTGREEN,LTCYAN,LTMAGENTA,YELLOW,WHITE);
+TPalette16NamesGrey=(BLACK,GREY,GREY2,GREY3,GREY4,GREY5,GREY6,GREY7,GRAY8,grey9,grey10,grey11,grey12,grey13,grey14,WHITE);
+TPalette256Names=(
+
+BLACK,
+BLUE,
+GREEN,
+CYAN,
+RED,
+MAGENTA,
+BROWN,
+LTGRAY,
+GRAY,
+LTBLUE,
+LTGREEN,
+LTCYAN,
+LTRED,
+LTMAGENTA,
+YELLOW,
+WHITE,
+
+Grey1,
+NavyBlue,
+DarkBlue,
+Blue2,
+Blue3,
+Blue1,
+DarkGreen,
+DeepSkyBlue5,
+DeepSkyBlue6,
+DeepSkyBlue7,
+DodgerBlue2,
+DodgerBlue1,
+Green4,
+SpringGreen5,
+Turquoise1,
+DeepSkyBlue2,
+DeepSkyBlue3,
+DodgerBlue,
+Green2,
+SpringGreen,
+DarkCyan,
+LightSeaGreen,
+DeepSkyBlue1,
+DeepSkyBlue,
+Green3,
+SpringGreen4,
+SpringGreen1,
+Cyan3,
+DarkTurquoise,
+Turquoise,
+Green1,
+SpringGreen2,
+SpringGreen,
+MediumSpringGreen,
+Cyan2,
+
+Cyan1,
+DarkRed,
+DeepPink5,
+Purple4,
+Purple5,
+Purple3,
+BlueViolet,
+Orange2,
+Grey2,
+MediumPurple6,
+SlateBlue1,
+SlateBlue2,
+RoyalBlue1,
+UnUsedHole5,
+DarkSeaGreen7,
+PaleTurquoise1,
+SteelBlue,
+SteelBlue3,
+CornflowerBlue,
+UnUsedHole3,
+DarkSeaGreen8,
+CadetBlue,
+CadetBlue1,
+SkyBlue2,
+SteelBlue1,
+UnUsedHole4,
+PaleGreen2,
+SeaGreen3,
+Aquamarine2,
+MediumTurquoise,
+SteelBlue2,
+UnUsedHole1,
+SeaGreen2,
+SeaGreen,
+SeaGreen1,
+Aquamarine,
+DarkSlateGray1,
+DarkRed1,
+DeepPink6,
+DarkMagenta,
+DarkMagenta1,
+DarkViolet,
+Purple1,
+Orange3,
+LightPink2,
+Plum3,
+MediumPurple4,
+MediumPurple5,
+SlateBlue,
+Yellow5,
+
+Wheat1,
+Grey3,
+LightSlateGrey,
+MediumPurple,
+LightSlateBlue,
+Yellow6,
+DarkOliveGreen3,
+DarkSeaGreen,
+LightSkyBlue1,
+LightSkyBlue2,
+SkyBlue1,
+UnUsedHole2,
+DarkOliveGreen4,
+PaleGreen3,
+DarkSeaGreen5,
+DarkSlateGray2,
+SkyBlue,
+UnUsedHole,
+LightGreen,
+LightGreen1,
+PaleGreen,
+Aquamarine1,
+DarkSlateGray,
+Red2,
+DeepPink7,
+MediumVioletRed,
+Magenta4,
+DarkViolet1, 
+Purple2,
+DarkOrange1,
+IndianRed,
+HotPink3,
+MediumOrchid3,
+MediumOrchid,
+MediumPurple2,
+DarkGoldenrod,
+LightSalmon1,
+RosyBrown,
+Grey4,
+MediumPurple3,
+MediumPurple1,
+Gold1,
+DarkKhaki,
+NavajoWhite1,
+Grey5,
+LightSteelBlue2,
+LightSteelBlue,
+Yellow3,
+DarkOliveGreen5,
+DarkSeaGreen6,
+
+DarkSeaGreen3,
+LightCyan2,
+LightSkyBlue,
+GreenYellow,
+DarkOliveGreen2,
+PaleGreen1,
+DarkSeaGreen4,
+DarkSeaGreen1,
+PaleTurquoise,
+Red3,
+DeepPink3,
+DeepPink4,
+Magenta5,
+Magenta6,
+Magenta2,
+DarkOrange2,
+IndianRed1,
+HotPink4,
+HotPink2,
+Orchid,
+MediumOrchid1,
+Orange1,
+LightSalmon2,
+LightPink1,
+Pink1,
+
+Plum2,
+Violet,
+Gold2,
+LightGoldenrod4,
+Tan,
+MistyRose1,
+Thistle1,
+Plum1,
+Yellow4,
+Khaki1,
+LightGoldenrod1,
+LightYellow,
+Grey6,
+LightSteelBlue1,
+Yellow2,
+DarkOliveGreen,
+DarkOliveGreen1,
+DarkSeaGreen2,
+Honeydew,
+LightCyan1,
+Red1,
+DeepPink2,
+DeepPink,
+DeepPink1,
+Magenta3,
+
+Magenta1,
+OrangeRed,
+IndianRed2,
+IndianRed3,
+HotPink,
+HotPink1,
+MediumOrchid2,
+DarkOrange,
+Salmon,
+LightCoral,
+PaleVioletRed,
+Orchid2,
+Orchid1,
+Orange,
+SandyBrown,
+LightSalmon,
+LightPink,
+Pink,
+Plum,
+Gold,
+LightGoldenrod2,
+LightGoldenrod3,
+NavajoWhite,
+MistyRose,
+Thistle,
+Yellow1,
+LightGoldenrod,
+Khaki,
+Wheat,
+Cornsilk,
+
+Grey7,
+Grey8,
+Grey9,
+Grey10,
+Grey11,
+Grey12,
+Grey13,
+Grey14,
+Grey15,
+Grey16,
+
+Grey17,
+Grey18,
+Grey19,
+Grey20,
+Grey21,
+Grey22,
+Grey23,
+Grey24,
+Grey25,
+Grey26,
+
+Grey27,
+Grey28,
+Grey29,
+Grey30,
+Grey31);
+
+//this one is HELL!
+TPalette256NamesGrey=(
+
+BLACK,
+grey1,
+grey2,
+grey3,
+grey4,
+grey5,
+grey6,
+grey7,
+grey8,
+grey9,
+grey10,
+
+grey11,
+grey12,
+grey13,
+grey14,
+grey15,
+grey16,
+grey17,
+grey18,
+grey19,
+grey20,
+
+grey21,
+grey22,
+grey23,
+grey24,
+grey25,
+grey26,
+grey27,
+grey28,
+grey29,
+grey30,
+
+grey31,
+grey32,
+grey33,
+grey34,
+grey35,
+grey36,
+grey37,
+grey38,
+grey39,
+grey40,
+
+grey41,
+grey42,
+grey43,
+grey44,
+grey45,
+grey46,
+grey47,
+grey48,
+grey49,
+grey50,
+
+grey51,
+grey52,
+grey53,
+grey54,
+grey55,
+
+grey56,
+grey57,
+grey58,
+grey59,
+grey60,
+grey61,
+grey62,
+grey63,
+grey64,
+grey65,
+
+grey66,
+grey67,
+grey68,
+grey69,
+grey70,
+grey71,
+grey72,
+grey73,
+grey74,
+grey75, 
+
+grey76,
+grey77,
+grey78, 
+
+grey79,
+grey80,
+grey81,
+grey82,
+grey83,
+grey84,
+grey85,
+grey86,
+grey87,
+grey88, 
+
+grey89,
+grey90,
+grey91,
+grey92,
+grey93,
+grey94,
+grey95,
+grey96,
+grey97,
+grey98, /
+
+grey99,
+grey100,
+grey101,
+grey102,
+grey103,
+grey104,
+grey105,
+grey106,
+grey107,
+grey108, 
+
+grey109,
+grey110,
+grey111,
+grey112,
+grey113,
+grey114,
+grey115,
+grey116,
+grey117,
+grey118, 
+
+grey119,
+grey120,
+grey121,
+grey122,
+grey123,
+grey124,
+grey125,
+grey126,
+grey127,
+grey128, 
+
+grey129,
+grey130,
+grey131,
+grey132,
+grey133,
+grey134,
+grey135,
+grey136,
+grey137,
+grey138, 
+
+grey139,
+grey140,
+grey141,
+grey142,
+grey143,
+grey144,
+grey145,
+grey146,
+grey147,
+grey148, 
+
+grey149,
+grey150,
+grey151,
+grey152,
+grey153,
+grey154,
+grey155, 
+grey156,
+grey157,
+grey158, 
+
+grey159,
+grey160,
+grey161,
+grey162,
+grey163,
+grey164,
+grey165,
+grey166,
+grey167,
+grey168, 
+
+grey169,
+grey170,
+grey171,
+grey172,
+grey173,
+grey174,
+grey175,
+grey176,
+grey177,
+grey178, 
+
+grey179,
+grey180,
+grey181,
+grey182,
+grey183,
+grey184,
+grey185,
+grey186,
+grey187,
+grey188, 
+
+grey189,
+grey190,
+grey191,
+grey192,
+grey193,
+grey194,
+grey195,
+grey196,
+grey197,
+grey198, 
+
+grey199,
+grey200,
+grey201,
+grey201,
+grey203,
+grey204,
+grey205,
+grey206,
+grey207,
+grey208,
+
+grey209,
+grey210,
+grey211,
+grey212,
+grey213,
+grey214,
+grey215,
+grey216,
+grey217,
+grey218,
+
+grey219,
+grey220,
+grey221,
+grey222,
+grey223,
+grey224,
+grey225,
+grey226,
+grey227,
+grey228,
+grey229,
+
+grey230,
+grey231,
+grey232,
+grey233,
+grey234,
+grey235,
+grey236,
+grey237,
+grey238,
+grey239,
+grey240,
+
+grey241,
+grey242,
+grey243,
+grey244,
+grey245,
+grey246,
+grey247,
+grey248,
+grey249,
+grey250,
+
+grey251,
+grey252,
+grey253,
+grey254,
+white, 
+
+);
 
 TRec16=record
   
@@ -335,7 +647,6 @@ end;
 }
 
 	DWords=array [0..15] of DWord;
-	Name=array [0..15] of string;
 
 end;
 
@@ -355,22 +666,107 @@ TRec256=record
 
   colors=array [0..255] of PSDL_COLOR; //this is setup later on. 
   DWords=array [0..255] of DWord;
-  Name=array [0..255] of string;
 
 end;
 
 
 var
-
+//this one is unorthodox due to the totally destructive downsizing and image degredation needed
+  GreyList16:array [0..48] of word;
   valuelist16: array [0..48] of Word;
+  
+//in case you want B/W greyscale images or modes or other cruft  
+  GreyList256:array [0..765] of word;
   valuelist256: array [0..765] of Word;
+
   TPalette16:TRec16;
+  TPalette16Grey:TRec256;
+
   TPalette256:TRec256;
+  TPalette256Grey:TRec256;
 
-//Do we want GreyScale 256??
-//if so, we can speed assign it by using steps
 
-//  GreyList256:array [0..765] of word;
+procedure init16PaletteGrey;
+
+var
+   i:integer;
+
+
+ begin  
+
+valuelist16:=
+
+(
+$00, $00, $00,
+$11, $11, $11,
+$22, $22, $22,
+$33, $33, $33,
+$44, $44, $44,
+$55, $55, $55, 
+$66, $66, $66,
+$77, $77, $77,
+$88, $88, $88,
+$99, $99, $99,
+$AA, $AA, $AA,
+$bb, $bb, $bb,
+$cc, $cc, $cc,
+$dd, $dd, $dd,
+$ee, $ee, $ee, 
+$ff, $ff, $ff);
+
+
+   i:=0;
+   num:=0; 
+   for num:=0 to 15 do begin 
+      Tpalette16.colors[num].r:=valuelist16[i];
+      Tpalette16.colors[num].g:=valuelist16[i+1];
+      Tpalette16.colors[num].b:=valuelist16[i+2];
+      Tpalette16.colors[num].a:=#ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
+      inc(i,3);
+      inc(num); 
+  end;
+
+
+//16 color (M)CGA palette
+
+TPalette16Grey.Name[0]:='black';
+TPalette16Grey.Name[1]:='grey1';
+TPalette16Grey.Name[2]:='grey2';
+TPalette16Grey.Name[3]:='grey3';
+TPalette16Grey.Name[4]:='grey4';
+TPalette16Grey.Name[5]:='grey5';
+TPalette16Grey.Name[6]:='grey6';
+TPalette16Grey.Name[7]:='grey7';
+TPalette16Grey.Name[8]:='grey8';
+TPalette16Grey.Name[9]:='grey9';
+TPalette16Grey.Name[10]:='grey10';
+TPalette16Grey.Name[11]:='grey11';
+TPalette16Grey.Name[12]:='grey12';
+TPalette16Grey.Name[13]:='grey13';
+TPalette16Grey.Name[14]:='grey14';
+TPalette16Grey.Name[15]:='white';
+
+
+TPalette16GRey.DWords[0]:=$000000ff;
+TPalette16GRey.DWords[1]:=$111111ff;
+TPalette16GRey.DWords[2]:=$222222ff;
+TPalette16GRey.DWords[3]:=$333333ff;
+TPalette16GRey.DWords[4]:=$444444ff;
+TPalette16GRey.DWords[5]:=$555555ff;
+TPalette16GRey.DWords[6]:=$666666ff;
+TPalette16GRey.DWords[7]:=$777777ff;
+TPalette16GRey.DWords[8]:=$888888ff;
+TPalette16GRey.DWords[9]:=$999999ff;
+TPalette16GRey.DWords[10]:=$aaaaaaff;
+TPalette16GRey.DWords[11]:=$bbbbbbff;
+TPalette16GRey.DWords[12]:=$ccccccff;
+TPalette16GRey.DWords[13]:=$ddddddff;
+TPalette16GRey.DWords[14]:=$eeeeeeff;
+TPalette16GRey.DWords[15]:=$ffffffff; 
+
+
+end;
+
 
 
 procedure init16Palette;
@@ -815,286 +1211,6 @@ $ee, $ee, $ee
 
 	
 //256 color VGA palette based on XTerm colors(Unix)
-
-
-TPalette256.Name[0]:='black';
-TPalette256.Name[1]:='blue';
-TPalette256.Name[2]:='green';
-TPalette256.Name[3]:='cyan';
-TPalette256.Name[4]:='red';
-TPalette256.Name[5]:='magenta';
-TPalette256.Name[6]:='brown';
-TPalette256.Name[7]:='light grey';
-TPalette256.Name[8]:='grey';
-TPalette256.Name[9]:='light blue';
-TPalette256.Name[10]:='light green';
-TPalette256.Name[11]:='light cyan';
-TPalette256.Name[12]:='lightred';
-TPalette256.Name[13]:='light magenta';
-TPalette256.Name[14]:='yellow';
-TPalette256.Name[15]:='white';
-
-
-TPalette256.Name[16]:='Hole';
-TPalette256.Name[17]:='NavyBlue';
-TPalette256.Name[18]:='DarkBlue';
-TPalette256.Name[19]:='Blue2';
-TPalette256.Name[20]:='Blue3';
-TPalette256.Name[21]:='Blue1';
-TPalette256.Name[22]:='DarkGreen';
-TPalette256.Name[23]:='DeepSkyBlue5';
-TPalette256.Name[24]:='DeepSkyBlue6';
-TPalette256.Name[25]:='DeepSkyBlue7';
-TPalette256.Name[26]:='DodgerBlue2';
-TPalette256.Name[27]:='DodgerBlue1';
-TPalette256.Name[28]:='Green4';
-TPalette256.Name[29]:='SpringGreen5';
-TPalette256.Name[30]:='Turquoise1';
-
-TPalette256.Name[31]:='DeepSkyBlue2';
-TPalette256.Name[32]:='DeepSkyBlue3';
-TPalette256.Name[33]:='DodgerBlue';
-TPalette256.Name[34]:='Green2';
-TPalette256.Name[35]:='SpringGreen3';
-TPalette256.Name[36]:='DarkCyan';
-TPalette256.Name[37]:='LightSeaGreen';
-TPalette256.Name[38]:='DeepSkyBlue1';
-TPalette256.Name[39]:='DeepSkyBlue';
-TPalette256.Name[40]:='Green3';
-TPalette256.Name[41]:='SpringGreen4';
-TPalette256.Name[42]:='SpringGreen1';
-TPalette256.Name[43]:='Cyan3';
-TPalette256.Name[44]:='DarkTurquoise';
-TPalette256.Name[45]:='Turquoise';
-
-TPalette256.Name[46]:='Green1';
-TPalette256.Name[47]:='SpringGreen2';
-TPalette256.Name[48]:='SpringGreen';
-TPalette256.Name[49]:='MediumSpringGreen';
-TPalette256.Name[50]:='Cyan2';
-TPalette256.Name[51]:='Cyan1';
-TPalette256.Name[52]:='DarkRed';
-TPalette256.Name[53]:='DeepPink5';
-TPalette256.Name[54]:='Purple4';
-TPalette256.Name[55]:='Purple5';
-TPalette256.Name[56]:='Purple3';
-TPalette256.Name[57]:='BlueViolet';
-TPalette256.Name[58]:='Orange2';
-TPalette256.Name[59]:='Grey2';
-TPalette256.Name[60]:='MediumPurple6';
-
-TPalette256.Name[61]:='SlateBlue1';
-TPalette256.Name[62]:='SlateBlue2';
-TPalette256.Name[63]:='RoyalBlue1';
-TPalette256.Name[64]:= 'UnUsedHole5';   // DWord #000000ff
-TPalette256.Name[65]:='DarkSeaGreen7';
-TPalette256.Name[66]:='PaleTurquoise1';
-TPalette256.Name[67]:='SteelBlue';
-TPalette256.Name[68]:='SteelBlue3';
-TPalette256.Name[69]:='CornflowerBlue';
-TPalette256.Name[70]:='UnUsedHole3'; // DWord #000000ff
-TPalette256.Name[71]:='DarkSeaGreen8';
-TPalette256.Name[72]:='CadetBlue';
-TPalette256.Name[73]:='CadetBlue1';
-TPalette256.Name[74]:='SkyBlue2';
-TPalette256.Name[75]:='SteelBlue1';
-
-TPalette256.Name[76]:='UnUsedHole4';  // DWord #000000ff
-TPalette256.Name[77]:='PaleGreen2';
-TPalette256.Name[78]:='SeaGreen3';
-TPalette256.Name[79]:='Aquamarine2';
-TPalette256.Name[80]:='MediumTurquoise';
-TPalette256.Name[81]:='SteelBlue2';
-TPalette256.Name[82]:='UnUsedHole1'; // DWord #000000ff
-TPalette256.Name[83]:='SeaGreen2';
-TPalette256.Name[84]:='SeaGreen';
-TPalette256.Name[85]:='SeaGreen1';
-TPalette256.Name[86]:='Aquamarine';
-TPalette256.Name[87]:='DarkSlateGray1';
-TPalette256.Name[88]:='DarkRed1';
-TPalette256.Name[89]:='DeepPink6';
-TPalette256.Name[90]:='DarkMagenta';
-
-TPalette256.Name[91]:='DarkMagenta1';
-TPalette256.Name[92]:='DarkViolet';
-TPalette256.Name[93]:='Purple1';
-TPalette256.Name[94]:='Orange3';
-TPalette256.Name[95]:='LightPink2';
-TPalette256.Name[96]:='Plum3';
-TPalette256.Name[97]:='MediumPurple4';
-TPalette256.Name[98]:='MediumPurple5';
-TPalette256.Name[99]:='SlateBlue';
-TPalette256.Name[100]:='Yellow5';
-TPalette256.Name[101]:='Wheat1';
-TPalette256.Name[102]:='Grey3';
-TPalette256.Name[103]:='LightSlateGrey';
-TPalette256.Name[104]:='MediumPurple';
-TPalette256.Name[105]:='LightSlateBlue';
-
-TPalette256.Name[106]:='Yellow6';
-TPalette256.Name[107]:='DarkOliveGreen3';
-TPalette256.Name[108]:='DarkSeaGreen';
-TPalette256.Name[109]:='LightSkyBlue1';
-TPalette256.Name[110]:='LightSkyBlue2';
-TPalette256.Name[111]:='SkyBlue1';
-TPalette256.Name[112]:='UnUsedHole2'; // DWord #000000ff
-TPalette256.Name[113]:='DarkOliveGreen4';
-TPalette256.Name[114]:='PaleGreen3';
-TPalette256.Name[115]:='DarkSeaGreen5';
-TPalette256.Name[116]:='DarkSlateGray2';
-TPalette256.Name[117]:='SkyBlue';
-TPalette256.Name[118]:='UnUsedHole';  // DWord #000000ff
-TPalette256.Name[119]:='LightGreen';
-TPalette256.Name[120]:='LightGreen1';
-
-TPalette256.Name[121]:='PaleGreen';
-TPalette256.Name[122]:='Aquamarine1';
-TPalette256.Name[123]:='DarkSlateGray';
-TPalette256.Name[124]:='Red2';
-TPalette256.Name[125]:='DeepPink7';
-TPalette256.Name[126]:='MediumVioletRed';
-TPalette256.Name[127]:='Magenta4';
-TPalette256.Name[128]:='DarkViolet1';
-TPalette256.Name[129]:='Purple2';
-TPalette256.Name[130]:='DarkOrange1';
-TPalette256.Name[131]:='IndianRed';
-TPalette256.Name[132]:='HotPink3';
-TPalette256.Name[133]:='MediumOrchid3';
-TPalette256.Name[134]:='MediumOrchid';
-TPalette256.Name[135]:='MediumPurple2';
-
-TPalette256.Name[136]:='DarkGoldenrod';
-TPalette256.Name[137]:='LightSalmon1';
-TPalette256.Name[138]:='RosyBrown';
-TPalette256.Name[139]:='Grey4';
-TPalette256.Name[140]:='MediumPurple3';
-TPalette256.Name[141]:='MediumPurple1';
-TPalette256.Name[142]:='Gold1';
-TPalette256.Name[143]:='DarkKhaki';
-TPalette256.Name[144]:='NavajoWhite1';
-TPalette256.Name[145]:='Grey5';
-TPalette256.Name[146]:='LightSteelBlue2';
-TPalette256.Name[147]:='LightSteelBlue';
-TPalette256.Name[148]:='Yellow3';
-TPalette256.Name[149]:='DarkOliveGreen5';
-TPalette256.Name[150]:='DarkSeaGreen6';
-
-TPalette256.Name[151]:='DarkSeaGreen3';
-TPalette256.Name[152]:='LightCyan2';
-TPalette256.Name[153]:='LightSkyBlue';
-TPalette256.Name[154]:='GreenYellow';
-TPalette256.Name[155]:='DarkOliveGreen2';
-
-TPalette256.Name[156]:='PaleGreen1';
-TPalette256.Name[157]:='DarkSeaGreen4';
-TPalette256.Name[158]:='DarkSeaGreen1';
-TPalette256.Name[159]:='PaleTurquoise';
-TPalette256.Name[160]:='Red3';
-TPalette256.Name[161]:='DeepPink3';
-TPalette256.Name[162]:='DeepPink4';
-TPalette256.Name[163]:='Magenta5';
-TPalette256.Name[164]:='Magenta6';
-TPalette256.Name[165]:='Magenta2';
-
-TPalette256.Name[166]:='DarkOrange2';
-TPalette256.Name[167]:='IndianRed1';
-TPalette256.Name[168]:='HotPink4';
-TPalette256.Name[169]:='HotPink2';
-TPalette256.Name[170]:='Orchid';
-TPalette256.Name[171]:='MediumOrchid1';
-TPalette256.Name[172]:='Orange1';
-TPalette256.Name[173]:='LightSalmon2';
-TPalette256.Name[174]:='LightPink1';
-TPalette256.Name[175]:='Pink1';
-TPalette256.Name[176]:='Plum2';
-TPalette256.Name[177]:='Violet';
-TPalette256.Name[178]:='Gold2';
-TPalette256.Name[179]:='LightGoldenrod4';
-TPalette256.Name[180]:='Tan';
-
-TPalette256.Name[181]:='MistyRose1';
-TPalette256.Name[182]:='Thistle1';
-TPalette256.Name[183]:='Plum1';
-TPalette256.Name[184]:='Yellow4';
-TPalette256.Name[185]:='Khaki1';
-TPalette256.Name[186]:='LightGoldenrod1';
-TPalette256.Name[187]:='LightYellow';
-TPalette256.Name[188]:='Grey6';
-TPalette256.Name[189]:='LightSteelBlue1';
-TPalette256.Name[190]:='Yellow2';
-TPalette256.Name[191]:='DarkOliveGreen';
-TPalette256.Name[192]:='DarkOliveGreen1';
-TPalette256.Name[193]:='DarkSeaGreen2';
-TPalette256.Name[194]:='Honeydew';
-TPalette256.Name[195]:='LightCyan1';
-
-TPalette256.Name[196]:='Red1';
-TPalette256.Name[197]:='DeepPink2';
-TPalette256.Name[198]:='DeepPink';
-TPalette256.Name[199]:='DeepPink1';
-TPalette256.Name[200]:='Magenta3';
-
-
-TPalette256.Name[201]:='Magenta1';
-TPalette256.Name[202]:='OrangeRed';
-TPalette256.Name[203]:='IndianRed2';
-TPalette256.Name[204]:='IndianRed3';
-TPalette256.Name[205]:='HotPink';
-TPalette256.Name[206]:='HotPink1';
-TPalette256.Name[207]:='MediumOrchid2';
-TPalette256.Name[208]:='DarkOrange';
-TPalette256.Name[209]:='Salmon';
-TPalette256.Name[210]:='LightCoral';
-
-TPalette256.Name[211]:='PaleVioletRed';
-TPalette256.Name[212]:='Orchid2';
-TPalette256.Name[213]:='Orchid1';
-TPalette256.Name[214]:='Orange';
-TPalette256.Name[215]:='SandyBrown';
-TPalette256.Name[216]:='LightSalmon';
-TPalette256.Name[217]:='LightPink';
-TPalette256.Name[218]:='Pink';
-TPalette256.Name[219]:='Plum';
-TPalette256.Name[220]:='Gold';
-TPalette256.Name[221]:='LightGoldenrod2';
-TPalette256.Name[222]:='LightGoldenrod3';
-TPalette256.Name[223]:='NavajoWhite';
-TPalette256.Name[224]:='MistyRose';
-TPalette256.Name[225]:='Thistle';
-
-TPalette256.Name[226]:='Yellow1';
-TPalette256.Name[227]:='LightGoldenrod';
-TPalette256.Name[228]:='Khaki';
-TPalette256.Name[229]:='Wheat';
-TPalette256.Name[230]:='Cornsilk';
-
-TPalette256.Name[231]:='Grey7';
-TPalette256.Name[232]:='Grey8';
-TPalette256.Name[233]:='Grey9';
-TPalette256.Name[234]:='Grey10';
-TPalette256.Name[235]:='Grey11';
-TPalette256.Name[236]:='Grey12';
-TPalette256.Name[237]:='Grey13';
-TPalette256.Name[238]:='Grey14';
-TPalette256.Name[239]:='Grey15';
-TPalette256.Name[240]:='Grey16';
-
-TPalette256.Name[241]:='Grey17';
-TPalette256.Name[242]:='Grey18';
-TPalette256.Name[243]:='Grey19';
-TPalette256.Name[244]:='Grey20';
-TPalette256.Name[245]:='Grey21';
-TPalette256.Name[246]:='Grey22';
-TPalette256.Name[247]:='Grey23';
-TPalette256.Name[248]:='Grey24';
-TPalette256.Name[249]:='Grey25';
-TPalette256.Name[250]:='Grey26';
-TPalette256.Name[251]:='Grey27';
-TPalette256.Name[252]:='Grey28';
-TPalette256.Name[253]:='Grey29';
-TPalette256.Name[254]:='Grey30';
-TPalette256.Name[255]:='Grey31';
-
 
 
 TPalette256.DWords[0]:=$000000ff;
