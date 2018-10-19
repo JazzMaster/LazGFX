@@ -735,12 +735,12 @@ end;
 
 var
 //this one is unorthodox due to the totally destructive downsizing and image degredation needed
-  GreyList16:array [0..48] of word;
-  valuelist16: array [0..48] of Word;
+  GreyList16:array [0..48] of byte;
+  valuelist16: array [0..48] of byte;
   
 //in case you want B/W greyscale images or modes or other cruft  
-  GreyList256:array [0..765] of word;
-  valuelist256: array [0..765] of Word;
+  GreyList256:array [0..765] of byte;
+  valuelist256: array [0..765] of byte;
 
   TPalette16:TRec16;
   TPalette16Grey:TRec256;

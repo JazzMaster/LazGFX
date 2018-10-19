@@ -7,6 +7,14 @@
 //the hardspec is here as a default setting, much like most 8x8 font sometimes are included
 //by default in graphics modes source code.
 
+//these are zero based colors. for 16 color modes- 88 or even 80 is not correct, 70 or 77 is.
+// the 256 hex color data was pulled from xterm specs.
+
+
+//the only guaranteed perfect palette code is (m)CGA -tweaked by me, and Greyscale 256.
+//(greyscale mCGA is a hackish guess based on rough math, given 14 colors, and also black and white)
+
+
 procedure init16PaletteGrey;
 
 var
@@ -15,26 +23,54 @@ var
 
  begin  
 
-valuelist16:=
-
-(
-$00, $00, $00,
-$11, $11, $11,
-$22, $22, $22,
-$33, $33, $33,
-$44, $44, $44,
-$55, $55, $55, 
-$66, $66, $66,
-$77, $77, $77,
-$88, $88, $88,
-$99, $99, $99,
-$AA, $AA, $AA,
-$bb, $bb, $bb,
-$cc, $cc, $cc,
-$dd, $dd, $dd,
-$ee, $ee, $ee, 
-$ff, $ff, $ff);
-
+valuelist16[0]:=$00;
+valuelist16[1]:=$00;
+valuelist16[2]:=$00;
+valuelist16[3]:=$11;
+valuelist16[4]:=$11;
+valuelist16[5]:=$11;
+valuelist16[6]:=$22;
+valuelist16[7]:=$22;
+valuelist16[8]:=$22;
+valuelist16[9]:=$33;
+valuelist16[10]:=$33;
+valuelist16[11]:=$33;
+valuelist16[12]:=$44;
+valuelist16[13]:=$44;
+valuelist16[14]:=$44;
+valuelist16[15]:=$55;
+valuelist16[16]:=$55;
+valuelist16[17]:=$55;
+valuelist16[18]:=$66;
+valuelist16[19]:=$66;
+valuelist16[20]:=$66;
+valuelist16[21]:=$77;
+valuelist16[22]:=$77;
+valuelist16[23]:=$77;
+valuelist16[24]:=$88;
+valuelist16[25]:=$88;
+valuelist16[26]:=$88;
+valuelist16[27]:=$99;
+valuelist16[28]:=$99;
+valuelist16[29]:=$99;
+valuelist16[30]:=$aa;
+valuelist16[31]:=$aa;
+valuelist16[32]:=$aa;
+valuelist16[33]:=$bb;
+valuelist16[34]:=$bb;
+valuelist16[35]:=$bb;
+valuelist16[36]:=$cc;
+valuelist16[37]:=$cc;
+valuelist16[38]:=$cc;
+valuelist16[39]:=$dd;
+valuelist16[40]:=$dd;
+valuelist16[41]:=$dd;
+valuelist16[42]:=$ee;
+valuelist16[43]:=$ee;
+valuelist16[44]:=$ee;
+valuelist16[45]:=$ff;
+valuelist16[46]:=$ff;
+valuelist16[47]:=$ff;
 
    i:=0;
    num:=0; 
@@ -96,7 +132,7 @@ begin
 
 	
 //00-FF as shown above with all value the same in the DWord except the Alpha/transparency Bit, which stays at FF
-
+//these need to be corrected before use
 TPalette256.DWords[0]:=$000000ff;
 TPalette256.DWords[1]:=$010101ff;
 TPalette256.DWords[2]:=$020202ff;
@@ -384,34 +420,98 @@ procedure init16Palette;
 
 var
    i:integer;
+//80 in hex is beyond the halfway point at 128. 127 (7f) is more correct.
 
+begin  
 
- begin  
+valuelist16[0]:=$00;
+valuelist16[1]:=$00;
+valuelist16[2]:=$00;
 
-valuelist16:=
+valuelist16[3]:=$7f;
+valuelist16[4]:=$00;
+valuelist16[5]:=$00;
 
-(
-$00, $00, $00,
-$80, $00, $00,
-$00, $80, $00,
-$80, $80, $00,
-$00, $00, $80,
-$80, $00, $80, 
-$00, $80, $80,
-$c0, $c0, $c0,
-$80, $80, $80,
-$ff, $00, $00,
-$00, $ff, $00,
-$ff, $ff, $00,
-$00, $00, $ff,
-$ff, $00, $ff,
-$ff, $ff, $00, 
-$ff, $ff, $ff);
+valuelist16[6]:=$00;
+valuelist16[7]:=$7f;
+valuelist16[8]:=$00;
+
+valuelist16[9]:=$80;
+valuelist16[10]:=$7f;
+valuelist16[11]:=$00;
+
+valuelist16[12]:=$00;
+valuelist16[13]:=$00;
+valuelist16[14]:=$7f;
+
+valuelist16[15]:=$7f;
+valuelist16[16]:=$00;
+valuelist16[17]:=$7f;
+
+valuelist16[18]:=$00;
+valuelist16[19]:=$7f;
+valuelist16[20]:=$7f;
+
+valuelist16[21]:=$c0;
+valuelist16[22]:=$c0;
+valuelist16[23]:=$c0;
+
+valuelist16[24]:=$7f;
+valuelist16[25]:=$7f;
+valuelist16[26]:=$7f;
+
+valuelist16[27]:=$ff;
+valuelist16[28]:=$00;
+valuelist16[29]:=$00;
+
+valuelist16[30]:=$00;
+valuelist16[31]:=$ff;
+valuelist16[32]:=$00;
+
+valuelist16[33]:=$ff;
+valuelist16[34]:=$ff;
+valuelist16[35]:=$00;
+
+valuelist16[36]:=$00;
+valuelist16[37]:=$00;
+valuelist16[38]:=$ff;
+
+valuelist16[39]:=$ff;
+valuelist16[40]:=$00;
+valuelist16[41]:=$ff;
+
+valuelist16[42]:=$ff;
+valuelist16[43]:=$ff;
+valuelist16[44]:=$00;
+
+valuelist16[45]:=$ff;
+valuelist16[46]:=$ff;
+valuelist16[47]:=$ff;
 
 
    i:=0;
    num:=0; 
-   for num:=0 to 15 do begin 
+   for num:=0 to 14 do begin 
+      Tpalette16.colors[num].r:=valuelist16[i];
+      Tpalette16.colors[num].g:=valuelist16[i+1];
+      Tpalette16.colors[num].b:=valuelist16[i+2];
+      Tpalette16.colors[num].a:=#ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
+      //see the remmed out notes below
+      inc(i,3);
+      inc(num); 
+  end;
+
+//This is the proper way to do it but we have transparencys, not just intensities now.
+//mucking w the alpha bit changes opacity levels- we dont want that.
+//so we assume we are not going to "muck with it". 
+//YOU can if you want.
+
+{
+//yes this is hackish- as were the days of (m)CGA...
+
+   i:=0;
+   num:=0; 
+   for num:=0 to 7 do begin 
       Tpalette16.colors[num].r:=valuelist16[i];
       Tpalette16.colors[num].g:=valuelist16[i+1];
       Tpalette16.colors[num].b:=valuelist16[i+2];
@@ -421,7 +521,27 @@ $ff, $ff, $ff);
   end;
 
 
+  num:=8;//force it
+  i:=24;
+   for num:=8 to 14 do begin 
+      Tpalette16.colors[num].r:=valuelist16[i];
+      Tpalette16.colors[num].g:=valuelist16[i+1];
+      Tpalette16.colors[num].b:=valuelist16[i+2];
+      Tpalette16.colors[num].a:=#7f; 
+      inc(i,3);
+      inc(num); 
+  end;
+
+  Tpalette16.colors[15].r:=valuelist16[45];
+  Tpalette16.colors[15].g:=valuelist16[46];
+  Tpalette16.colors[15].b:=valuelist16[47];
+  Tpalette16.colors[15].a:=#ff; 
+}
+
+//oops! THIS ISNT RIGHT!
+
 TPalette16.DWords[0]:=$000000ff;
+
 TPalette16.DWords[1]:=$0000aaff;
 TPalette16.DWords[2]:=$00aa00ff;
 TPalette16.DWords[3]:=$00aaaaff;
@@ -436,6 +556,7 @@ TPalette16.DWords[11]:=$55ffffff;
 TPalette16.DWords[12]:=$ff5555ff;
 TPalette16.DWords[13]:=$ff55ffff;
 TPalette16.DWords[14]:=$ffff55ff;
+
 TPalette16.DWords[15]:=$ffffffff;
 
 end;

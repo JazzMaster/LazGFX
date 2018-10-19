@@ -65,7 +65,8 @@ type
    *  A structure representing rendering state
    *}
 
-  PPSDL_Renderer = ^PSDL_Renderer;
+  PPSDL_Renderer = ^SDL_Renderer;
+  SDL_Renderer= ^TSDL_Renderer;
   PSDL_Renderer = ^TSDL_Renderer;
   TSDL_Renderer = record
     end;
@@ -73,6 +74,7 @@ type
   {**
    *  An efficient driver-specific representation of pixel data
    *}
+  SDL_Texture = ^TSDL_Texture;
   PSDL_Texture = ^TSDL_Texture;
   TSDL_Texture = record
     end;

@@ -37,6 +37,9 @@ type
   {**
    * Definition of the timer ID type.
    *}
+  SDL_TimerID=^SInt32;
+  PSDL_TimerID=^SInt32;
+
   TSDL_TimerID = SInt32;
 
   {**

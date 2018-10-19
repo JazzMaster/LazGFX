@@ -12,6 +12,7 @@ type
 
   {* The joystick structure used to identify an SDL joystick *}
   PSDL_Joystick = Pointer; // todo!!
+  SDL_Joystick = Pointer;
 
 {* A structure that encodes the stable unique id for a joystick device *}
 

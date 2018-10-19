@@ -357,6 +357,7 @@ const
                            (Integer('U') shl 24);
 
 type
+  SDL_Color = ^TSDL_Color;
   PSDL_Color = ^TSDL_Color;
   TSDL_Color = record
     r: UInt8;

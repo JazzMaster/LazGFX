@@ -1,7 +1,8 @@
 //from "sdl_thread.h"
 
 {* The SDL thread structure, defined in SDL_thread.c *}
-//todo!
+
+
 type
   {* The SDL thread priority
    *
@@ -19,10 +20,8 @@ type
   TSDL_ThreadFunction = function(data: Pointer): Integer; cdecl;
 
   {* The SDL thread ID *}
+//  SDL_ThreadID = Longword;
   TSDL_ThreadID = LongWord;
-   {
-  PSDL_Thread = Pointer;
-     }
 
   PSDL_Thread = ^TSDL_Thread;
   TSDL_Thread = record
@@ -34,6 +33,7 @@ type
     data: Pointer;
   end;
 
+  SDL_Thread = TSDL_Thread;
   TSDL_TLSID = Cardinal;
 
 {$IFDEF WINDOWS}

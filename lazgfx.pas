@@ -458,6 +458,7 @@ SemiDirect MultiMedia OverLayer - should be the unit name.
 }
 
 
+
 uses
 
 {$ifdef unix} cthreads,ctypes,cmem,sysUtils,crt,{$endif}
@@ -718,14 +719,14 @@ var
     TextFore,TextBack : PSDL_Color; //font fg and bg...
 
     filename:String;
-    fontpath:PChar; 
+    fontpath:PChar; // "C:\windows\fonts\*.ttf" (one at a time) or "/usr/share/fonts/*.ttf"
     font_size:integer; 
     style:byte; 
     outline:longint;
     r,g,b,a:byte; //positives only!!
 
-//main() init
-  grError: array [low(grerrorType)..high(grErrorType)-1] of string;
+
+    grError: array [low(grerrorType)..high(grErrorType)] of string;
 
 
   AspectRatio:real; //pairs of x,y defined in a record but a "real" value
@@ -762,15 +763,9 @@ Then these can be used properly.
   NonPalette, TrueColor,WantsAudioToo,WantsCDROM:boolean;	
   Blink:boolean=false;
   CenterText:boolean=false; //see crtstuff unit for the trick
-  fontpath:string; // "C:\windows\fonts\*.ttf" (one at a time) or "/usr/share/fonts/*.ttf"
   
   MaxModeSupported:^TMaximumModeData; //string, not an array entry??
 	
-  window:PSDL_Window; //A window... heh..."windows" he he...these cant be "closed"...
-
-  ttfFont : PTTF_Font;
-  TextFore,TextBack : PSDL_Color; //font fg and bg...
-  Renderer : PSDL_Renderer;
 
   _fgcolor, _bgcolor:DWord;	//this is modified due to hi and true color support.
   //do not use old school index numbers. FETCH the index DWord instead.  
@@ -779,7 +774,7 @@ Then these can be used properly.
 
   flip_timer_id:^SDL_TimerID; //needed later to remvoe it
   thread:^SDL_Thread;
-  threadID:^SDL_threadID;
+  threadID:^TSDL_threadID;
   threadReturnValue:integer;
 	
   Rect : PSDL_Rect;
@@ -791,93 +786,11 @@ Then these can be used properly.
    
   himode,lomode:integer;
 
-  _initflag:PSDL_Flags; //^SDL_flags
-
 
 //ideally we could fork for rendering and then wait for renderer to (fail) exit...
 //not sure if this is required....or not...
 
 
-//routines...
-procedure RoughSteinbergDither(filename,filename2:string);
-procedure init16Palette;
-procedure init256Palette;
-procedure lock;
-procedure unlock;
-procedure timer_flip;
-function GetRGBfromHex(Hex: DWord):SDL_Color; 
-function GetRGBAfromHex(Hex: DWord):SDL_Color; 
-function ColorNumToHex(Color : integer) : string;
-function ColorNumFromHex:integer;
-function GetColorNameFromHex(color:dword):string;
-function GetRGBFromHex(color:DWord):SDL_Color;
-procedure setFontFore(color:integer);
-procedure setFontFore(somecolor:dword); overload;
-procedure setFontBack(color:integer);
-procedure setFontBack(somecolor:DWord); overload;
-function ColorNameToNum(ColorName : string) : integer;
-function GetFGColorIndex:integer;
-function GetBGColorIndex:integer;
-function GetFGName:string;
-function GetBGName:string;
-procedure setRGBPenColor(r,g,b:byte);
-procedure setColorRGB(r,g,b:byte);
-procedure setRGBAPenColor(r,g,b,a:byte);
-procedure setColorRGBA(r,g,b,a:byte);
-procedure setColorFGByString(colorname:string);
-procedure setColorBGByString(colorname:string);
-procedure SetColor(color:byte);
-procedure clearviewport(windownumber:smallint);
-procedure initgraph(graphdriver,graphmode:integer; pathToDriver:string; wantFullScreen:boolean);
-procedure RendedRectangle(x,y,w,h,:integer);
-procedure closegraph;
-function GetX:word;
-function GetY:word;
-function GetXY:where;
-procedure setgraphmode(graphmode:integer,wantfullscreen:boolean); 
-function getgraphmode:string; 
-procedure restorecrtmode;
-function getmaxX:word;
-function getmaxY:word;
-procedure HowPutPixel(X,Y: integer; var Writemode:currentWriteMode);
-
-function GetPixelFromRenderer(x,y:integer):DWord;
-
-Procedure PutPixelRGB(x,y:Word; color:SDL_Color);
-Procedure PutPixelRGBA(x,y:Word; color:SDL_Color);
-
-procedure RenderedLinePaletted(renderer1:^SDL_Renderer; X1, Y1, X2, Y2: word; LineStyle:Linestyles);
-procedure RenderedLineRGB(renderer1:^SDL_Renderer; X1, Y1, X2, Y2: word; somecolor:^SDL_Color; LineStyle:LineStyles);
-procedure RenderedLineRGBA(renderer1:^SDL_Renderer; X1, Y1, X2, Y2: word; somecolor:^SDL_Color; LineStyle:LineStyles);
-procedure RenderedDrawRectanglePalette(x,y,w,h,:integer);
-procedure RenderedDrawRectangleRGB(x,y,w,h,:integer; color:SDL_Color);
-procedure RenderedDrawRectangleRGBA(x,y,w,h,:integer; color:SDL_Color);
-procedure RenderedDrawFilledRectanglePalette(x,y,w,h,:integer);
-procedure RenderedDrawFilledRectangleRGB(x,y,w,h,:integer;  color:SDL_Color);
-procedure RenderedDrawFilledRectangleRGBA(x,y,w,h,:integer;  color:SDL_Color);
-function getdrivername:string;
-Function detectGraph:boolean;
-function getmaxmode:string;
-procedure getmoderange(graphdriver:integer);
-procedure installUserFont(fontpath:string; font_size:integer; style:fontflags; outline:boolean);
-function Long2String(l: longint): string;
-Procedure FileLogString(s: String);
-Procedure FileLogLn(s: string);
-function cloneSurface(surface1:SDL_Surface):SDL_Surface;
-procedure SetViewPort(X1, Y1, X2, Y2: Word);
-function RemoveViewPort(windowcount:byte):SDL_Rect;
-procedure Line(x1,y1,x2,y2:integer);
-procedure InstallUserDriver(Name: string; AutoDetectPtr: Pointer);
-procedure RegisterBGIDriver(driver: pointer);
-function GetMaxColor: word;
-procedure LoadBMPImage;
-
-function  GetPixel( x; y : integer ) : Dword; //mainSurface
-procedure PutPixelRenderer(Renderer:SDL_Renderer; x,y:integer);
-
-
-procedure PlotPixelWNeighbors(x,y:integer);
-procedure SaveBMPImage(filename:string);
 
 
 { this is an example- programmer needs to provide these.
