@@ -4,6 +4,7 @@ An Extended SDL replacement of the "Borland Graphics Interface" (BGI)
 (For Lazarus/FPC) Written in SEMI-PURE Pascal
 
 
+state: <font color='green'> COMPILING </font> (somewhat)
 
 ### What is it, what does it do?
 

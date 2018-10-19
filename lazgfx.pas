@@ -566,7 +566,7 @@ only so many can do it at once, first come- first served
 - but theres more than one toilet
 }
 
-
+const
 //drawing width of lines in pixels
 //otherwise, which half do we draw? top or bottom? how about both with a middle...
   NormWidth  = 1;
@@ -662,8 +662,8 @@ type
      bpp:byte;
   end;
 
-{$INCLUDE palettes.inc}
-{$INCLUDE modelist.inc}
+{$INCLUDE palettesh.inc}
+{$INCLUDE modelisth.inc}
 
 //This is for updating sections or "viewports".
 
@@ -930,6 +930,9 @@ where.X and where.Y
 }
 
 implementation
+
+{$INCLUDE palettes.inc}
+{$INCLUDE modelist.inc}
 
 {
 
@@ -4012,7 +4015,14 @@ begin
 end;
 
 //if you want to blink circles etc...I wil leave this to the reader.
-//it can be done- but its very unused code. Ususally reserved for text like warnings, etc.
+//it can be done- but its very unused code. Ususally reserved for text warnings,notices, etc.
+
+
+// blink used to be set at value 128;
+// Color:=color+Blink; -is the old way.
+// Blink('string'); -is the new way.
+//update your code. I CANTFIX: and WONTFIX: this. (This was a hardwired spec in the past and is not anymore.)
+
 
 procedure blinkText(Text:string);
 
@@ -4025,18 +4035,21 @@ begin
 	blink:=true; //this wont kill itself, naturally. only external forces can kill me now.
     repeat		
 		GotoXY(x,y);
-		DrawText(text);
+
+//remmed out due to syn tax not yet paid.
+//		DrawText(text);
 		invertcolors;
 		delay(500);
 		GotoXY(x,y);
-		DrawText(text);
+//		DrawText(text);
 		invertcolors;
 		delay(500); //.5 sec delay
 	until blink:=false;
 end;
 
 procedure STOPBlinkText;
-
+//often the simplest solution is the easiest and most sane.
+//we walk up to the blinking text, nudge it- and say STOP.
    
 begin
             blink:=false; //kill the loop
