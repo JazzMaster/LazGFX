@@ -1,8 +1,10 @@
 ## Laz GrFX- 
 An Extended SDL replacement of the "Borland Graphics Interface" (BGI)
-For Lazarus/FPC Written in SEMI-PURE Pascal
+For Lazarus/FPC 
 
-A VB(visual Basic or VB.NET) could fork from this, if needed.
+(SEMI-PURE Pascal is used here)
+
+A VB(visual Basic or VB.NET) - or even python- could fork from this, if needed.
 -Who nose, I might even just fork it myself!
 
 
@@ -18,7 +20,9 @@ It makes more sense to use similar syntax, if possible.
 ### What is it, what does it do?
 
 Its a GRAPHICS MODE "Canvas", not unlike TCanvas. You draw with it.
-There is a reason Im redoing this. We could extend TCanvas- 
+There is a reason Im redoing this. 
+
+We could extend TCanvas- 
 but I dont think it will happen the way it needs to.
 
 Lazarus OGL demos are busted- where the SDL ones work.
