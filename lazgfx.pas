@@ -463,7 +463,9 @@ uses
 {$ifdef unix} cthreads,ctypes,cmem,sysUtils,crt,{$endif}
 
 //FPC generic units(OS independent)
-	SDL2,SDL_Image,SDL2_TTF,strings,typinfo
+	SDL,SDL2,SDL_Image,SDL2_TTF,strings,typinfo
+
+//GL, GLU
 //math
 
 //typinfo will come in handy with color Names.
@@ -667,8 +669,10 @@ type
 
 //This is for updating sections or "viewports".
 
-  texBounds: array [0..64] of SDL_Rect;
-  textures: array [0..64] of SDL_Texture;
+var
+
+  texBounds: array [0..64] of ^SDL_Rect;
+  textures: array [0..64] of ^SDL_Texture;
 //you only scroll,etc within a viewport- you cant escape from it without help.
 
 
@@ -721,17 +725,8 @@ var
     r,g,b,a:byte; //positives only!!
 
 //main() init
-  grError= array [low(grerrorType)..high(grErrorType)-1] of string;
+  grError: array [low(grerrorType)..high(grErrorType)-1] of string;
 
-=(
-  'No Error',
-  'Not enough memory for graphics',
-  'Not enough memory to load font',
-  'Font file not found',
-  'Invalid graphics mode',
-  'Graphics error',
-  'Graphics I/O error',
-  'Invalid font');
 
   AspectRatio:real; //pairs of x,y defined in a record but a "real" value
 
@@ -4058,6 +4053,19 @@ begin
 			delay(1000); //wait for routine to safely exit.
 			BlinkPID:=Nil;
 end;
+
+begin
+
+//with initgraph as a function it returns one of these codes
+
+   grError[0]:='No Error';
+   grError[1]:='Not enough memory for graphics';
+   grError[2]:='Not enough memory to load font';
+   grError[3]:='Font file not found';
+   grError[4]:='Invalid graphics mode';
+   grError[5]:='General unspecified Graphics error';
+   grError[6]:='Graphics I/O error';
+   grError[7]:='Invalid font';
 
 
 end.
