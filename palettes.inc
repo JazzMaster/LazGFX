@@ -415,7 +415,7 @@ TPalette256.DWords[255]:=$eeeeeeff;
 
 end;
 
-
+//FIXED- for good this time. (Oct-19-18)
 procedure init16Palette;
 
 var
@@ -423,34 +423,37 @@ var
 //80 in hex is beyond the halfway point at 128. 127 (7f) is more correct.
 
 begin  
+//Color Sequence:
+//K HiR HiG HiB HiC HiM HiY HiGR LoGr LoR LoG LoB LoC LoM LoY W
 
 valuelist16[0]:=$00;
 valuelist16[1]:=$00;
 valuelist16[2]:=$00;
 
-valuelist16[3]:=$7f;
+valuelist16[3]:=$ff;
 valuelist16[4]:=$00;
 valuelist16[5]:=$00;
 
 valuelist16[6]:=$00;
-valuelist16[7]:=$7f;
+valuelist16[7]:=$ff;
 valuelist16[8]:=$00;
 
-valuelist16[9]:=$80;
-valuelist16[10]:=$7f;
+valuelist16[9]:=$ff;
+valuelist16[10]:=$ff;
 valuelist16[11]:=$00;
 
 valuelist16[12]:=$00;
 valuelist16[13]:=$00;
-valuelist16[14]:=$7f;
+valuelist16[14]:=$ff;
 
-valuelist16[15]:=$7f;
+valuelist16[15]:=$ff;
 valuelist16[16]:=$00;
-valuelist16[17]:=$7f;
+valuelist16[17]:=$ff;
 
-valuelist16[18]:=$00;
-valuelist16[19]:=$7f;
-valuelist16[20]:=$7f;
+valuelist16[18]:=$ff;
+valuelist16[19]:=$ff;
+valuelist16[20]:=$00;
+
 
 valuelist16[21]:=$c0;
 valuelist16[22]:=$c0;
@@ -460,29 +463,30 @@ valuelist16[24]:=$7f;
 valuelist16[25]:=$7f;
 valuelist16[26]:=$7f;
 
-valuelist16[27]:=$ff;
+
+valuelist16[27]:=$7f;
 valuelist16[28]:=$00;
 valuelist16[29]:=$00;
 
 valuelist16[30]:=$00;
-valuelist16[31]:=$ff;
+valuelist16[31]:=$7f;
 valuelist16[32]:=$00;
 
-valuelist16[33]:=$ff;
-valuelist16[34]:=$ff;
+valuelist16[33]:=$7f;
+valuelist16[34]:=$7f;
 valuelist16[35]:=$00;
 
 valuelist16[36]:=$00;
 valuelist16[37]:=$00;
-valuelist16[38]:=$ff;
+valuelist16[38]:=$7f;
 
-valuelist16[39]:=$ff;
+valuelist16[39]:=$7f;
 valuelist16[40]:=$00;
-valuelist16[41]:=$ff;
+valuelist16[41]:=$7f;
 
-valuelist16[42]:=$ff;
-valuelist16[43]:=$ff;
-valuelist16[44]:=$00;
+valuelist16[42]:=$00;
+valuelist16[43]:=$7f;
+valuelist16[44]:=$7f;
 
 valuelist16[45]:=$ff;
 valuelist16[46]:=$ff;
@@ -536,26 +540,34 @@ valuelist16[47]:=$ff;
   Tpalette16.colors[15].g:=valuelist16[46];
   Tpalette16.colors[15].b:=valuelist16[47];
   Tpalette16.colors[15].a:=#ff; 
+
+Color Sequence:
+
+K HiR HiG HiB HiC HiM HiY HiGR LoGr LoR LoG LoB LoC LoM LoY W
 }
 
-//oops! THIS ISNT RIGHT!
 
 TPalette16.DWords[0]:=$000000ff;
 
-TPalette16.DWords[1]:=$0000aaff;
-TPalette16.DWords[2]:=$00aa00ff;
-TPalette16.DWords[3]:=$00aaaaff;
-TPalette16.DWords[4]:=$aa0000ff;
-TPalette16.DWords[5]:=$aa00aaff;
-TPalette16.DWords[6]:=$aa5500ff;
-TPalette16.DWords[7]:=$aaaaaaff;
-TPalette16.DWords[8]:=$555555ff;
-TPalette16.DWords[9]:=$5555ffff;
-TPalette16.DWords[10]:=$55ff55ff;
-TPalette16.DWords[11]:=$55ffffff;
-TPalette16.DWords[12]:=$ff5555ff;
-TPalette16.DWords[13]:=$ff55ffff;
-TPalette16.DWords[14]:=$ffff55ff;
+TPalette16.DWords[1]:=$ff0000ff;
+TPalette16.DWords[2]:=$00ff00ff;
+TPalette16.DWords[3]:=$ffff00ff;
+
+TPalette16.DWords[4]:=$0000ffff;
+TPalette16.DWords[5]:=$ff00ffff;
+TPalette16.DWords[6]:=$ffff55ff;
+
+
+TPalette16.DWords[7]:=$c0c0c0ff;
+TPalette16.DWords[8]:=$7f7f7fff;
+
+TPalette16.DWords[9]:=$7f0000ff;
+TPalette16.DWords[10]:=$007f00ff;
+TPalette16.DWords[11]:=$7f7f00ff;
+
+TPalette16.DWords[12]:=$00007fff;
+TPalette16.DWords[13]:=$7f007fff;
+TPalette16.DWords[14]:=$007f7fff;
 
 TPalette16.DWords[15]:=$ffffffff;
 
@@ -633,46 +645,139 @@ var
     i:integer;
 
 
- begin  
+begin  
 
-valuelist256:=
-(
+//this is GOING TO HURT!
 
-$00, $00, $00,
-$08, $00, $00,
-$00, $80, $00,
-$80, $80, $00,
-$00, $00, $80,
-$80, $00, $80,
-$00, $80, $80,
-$c0, $c0, $c0,
-$80, $80, $80,
-$ff, $00, $00,
-$00, $ff, $00,
-$ff, $ff, $00,
-$00, $00, $ff,
-$ff, $00, $ff,
-$00, $ff, $ff,
-$ff, $ff, $ff,
-$00, $00, $00,
-$00, $00, $5f,
-$00, $00, $87,
-$00, $00, $af,
-$00, $00, $d7,
-$00, $00, $ff,
-$00, $5f, $00,
-$00, $5f, $5f,
-$00, $5f, $87,
-$00, $5f, $af,
-$00, $5f, $d7,
-$00, $5f, $ff,
-$00, $87, $00,
-$00, $87, $5f,
-$00, $87, $87,
-$00, $87, $af,
-$00, $87, $d7,
-$00, $87, $ff,
-$00, $af, $00,
+valuelist256[0]:=$00;
+valuelist256[1]:=$00;
+valuelist256[2]:=$00;
+valuelist256[3]:=$ff;
+valuelist256[4]:=$00;
+valuelist256[5]:=$00;
+valuelist256[6]:=$00;
+valuelist256[7]:=$ff;
+valuelist256[8]:=$00;
+valuelist256[9]:=$ff;
+valuelist256[10]:=$ff;
+valuelist256[11]:=$00;
+valuelist256[12]:=$00;
+valuelist256[13]:=$00;
+valuelist256[14]:=$ff;
+valuelist256[15]:=$ff;
+valuelist256[16]:=$00;
+valuelist256[17]:=$ff;
+valuelist256[18]:=$ff;
+valuelist256[19]:=$ff;
+valuelist256[20]:=$00;
+valuelist256[21]:=$c0;
+valuelist256[22]:=$c0;
+valuelist256[23]:=$c0;
+valuelist256[24]:=$7f;
+valuelist256[25]:=$7f;
+valuelist256[26]:=$7f;
+valuelist256[27]:=$7f;
+valuelist256[28]:=$00;
+valuelist256[29]:=$00;
+valuelist256[30]:=$00;
+valuelist256[31]:=$7f;
+valuelist256[32]:=$00;
+valuelist256[33]:=$7f;
+valuelist256[34]:=$7f;
+valuelist256[35]:=$00;
+valuelist256[36]:=$00;
+valuelist256[37]:=$00;
+valuelist256[38]:=$7f;
+valuelist256[39]:=$7f;
+valuelist256[40]:=$00;
+valuelist256[41]:=$7f;
+valuelist256[42]:=$00;
+valuelist256[43]:=$7f;
+valuelist256[44]:=$7f;
+valuelist256[45]:=$ff;
+valuelist256[46]:=$ff;
+valuelist256[47]:=$ff;
+
+valuelist256[48]:=$00;
+valuelist256[49]:=$00;
+valuelist256[50]:=$00;
+
+valuelist256[51]:=$00;
+valuelist256[52]:=$00;
+valuelist256[53]:=$5f;
+
+valuelist256[54]:=$00;
+valuelist256[55]:=$00;
+valuelist256[56]:=$87;
+
+valuelist256[57]:=$00;
+valuelist256[58]:=$00;
+valuelist256[59]:=$af;
+
+valuelist256[60]:=$00;
+valuelist256[61]:=$00;
+valuelist256[62]:=$d7;
+
+valuelist256[63]:=$00
+valuelist256[64]:=$00
+valuelist256[65]:=$ff
+
+valuelist256[66]:=$00
+valuelist256[67]:=$5f
+valuelist256[68]:=$00
+
+valuelist256[69]:=$00
+valuelist256[70]:=$5f
+valuelist256[71]:=$5f
+
+valuelist256[72]:=$00
+valuelist256[73]:=$5f
+valuelist256[74]:=$87
+
+valuelist256[75]:=$00
+valuelist256[76]:=$5f
+valuelist256[77]:=$af
+
+valuelist256[78]:=$00
+valuelist256[79]:=$5f
+valuelist256[80]:=$d7
+
+valuelist256[81]:=$00
+valuelist256[82]:=$5f
+valuelist256[83]:=$ff
+
+valuelist256[84]:=$00
+valuelist256[85]:=$87
+valuelist256[86]:=$00
+
+valuelist256[87]:=$00
+valuelist256[88]:=$87
+valuelist256[89]:=$5f
+
+valuelist256[90]:=$00
+valuelist256[91]:=$87
+valuelist256[92]:=$87
+
+valuelist256[93]:=$00
+valuelist256[94]:=$87
+valuelist256[95]:=$af
+
+valuelist256[96]:=$00
+valuelist256[97]:=$87
+valuelist256[98]:=$d7
+
+valuelist256[99]:=$00
+valuelist256[100]:=$87
+valuelist256[101]:=$ff
+
+valuelist256[102]:=$00
+valuelist256[103]:=$af
+valuelist256[104]:=$00
+
+
+//more to come!
+{
+
 $00, $af, $5f,
 $00, $af, $87,
 $00, $af, $af,
@@ -683,6 +788,7 @@ $00, $d7, $5f,
 $00, $d7, $87,
 $00, $d7, $af,
 $00, $d7, $d7,
+
 $00, $d7, $ff,
 $00, $ff, $00,
 $00, $ff, $5f,
@@ -693,6 +799,7 @@ $00, $ff, $ff,
 $5f, $00, $00,
 $5f, $00, $5f,
 $5f, $00, $87,
+
 $5f, $00, $af,
 $5f, $00, $d7,
 $5f, $00, $ff,
@@ -703,6 +810,7 @@ $5f, $5f, $af,
 $5f, $5f, $d7,
 $5f, $5f, $ff,
 $5f, $87, $00,
+
 $5f, $87, $5f,
 $5f, $87, $87,
 $5f, $87, $af,
@@ -713,6 +821,7 @@ $5f, $af, $5f,
 $5f, $af, $87,
 $5f, $af, $af,
 $5f, $af, $d7,
+
 $5f, $af, $ff,
 $5f, $d7, $00,
 $5f, $d7, $5f,
@@ -723,6 +832,7 @@ $5f, $d7, $ff,
 $5f, $ff, $00,
 $5f, $ff, $5f,
 $5f, $ff, $87,
+
 $5f, $ff, $af,
 $5f, $ff, $d7,
 $5f, $ff, $ff,
@@ -733,6 +843,7 @@ $87, $00, $af,
 $87, $00, $d7,
 $87, $00, $ff,
 $87, $5f, $00,
+
 $87, $5f, $5f,
 $87, $5f, $87,
 $87, $5f, $af,
@@ -743,6 +854,7 @@ $87, $87, $5f,
 $87, $87, $87,
 $87, $87, $af,
 $87, $87, $d7,
+
 $87, $87, $ff,
 $87, $af, $00,
 $87, $af, $5f,
@@ -753,6 +865,7 @@ $87, $af, $ff,
 $87, $d7, $00,
 $87, $d7, $5f,
 $87, $d7, $87,
+
 $87, $d7, $af,
 $87, $d7, $d7,
 $87, $d7, $ff,
@@ -763,6 +876,7 @@ $87, $ff, $af,
 $87, $ff, $d7,
 $87, $ff, $ff,
 $af, $00, $00,
+
 $af, $00, $5f,
 $af, $00, $87,
 $af, $00, $af,
@@ -773,12 +887,14 @@ $af, $5f, $5f,
 $af, $5f, $87,
 $af, $5f, $af,
 $af, $5f, $d7,
+
 $af, $5f, $ff,
 $af, $87, $00,
 $af, $87, $5f,
 $af, $87, $87,
 $af, $87, $af,
 $af, $87, $d7,
+
 $af, $87, $ff,
 $af, $af, $00,
 $af, $af, $5f,
@@ -790,6 +906,7 @@ $af, $d7, $00,
 $af, $d7, $5f,
 $af, $d7, $87,
 $af, $d7, $af,
+
 $af, $d7, $d7,
 $af, $d7, $ff,
 $af, $ff, $00,
@@ -801,6 +918,7 @@ $af, $ff, $ff,
 $d7, $00, $00,
 $d7, $00, $5f,
 $d7, $00, $87,
+
 $d7, $00, $af,
 $d7, $00, $d7,
 $d7, $00, $ff,
@@ -812,6 +930,7 @@ $d7, $5f, $d7,
 $d7, $5f, $ff,
 $d7, $87, $00,
 $d7, $87, $5f,
+
 $d7, $87, $87,
 $d7, $87, $af,
 $d7, $87, $d7,
@@ -823,6 +942,7 @@ $d7, $af, $af,
 $d7, $af, $d7,
 $d7, $af, $ff,
 $d7, $d7, $00,
+
 $d7, $d7, $5f,
 $d7, $d7, $87,
 $d7, $d7, $af,
@@ -834,6 +954,7 @@ $d7, $ff, $87,
 $d7, $ff, $af,
 $d7, $ff, $d7,
 $d7, $ff, $ff,
+
 $ff, $00, $00,
 $ff, $00, $5f,
 $ff, $00, $87,
@@ -845,6 +966,7 @@ $ff, $5f, $5f,
 $ff, $5f, $87,
 $ff, $5f, $af,
 $ff, $5f, $d7,
+
 $ff, $5f, $ff,
 $ff, $87, $00,
 $ff, $87, $5f,
@@ -857,6 +979,7 @@ $ff, $af, $5f,
 $ff, $af, $87,
 $ff, $af, $af,
 $ff, $af, $d7,
+
 $ff, $af, $ff,
 $ff, $d7, $00,
 $ff, $d7, $5f,
@@ -868,6 +991,7 @@ $ff, $ff, $00,
 $ff, $ff, $5f,
 $ff, $ff, $87,
 $ff, $ff, $af,
+
 $ff, $ff, $d7,
 $ff, $ff, $ff,
 $08, $08, $08,
@@ -879,6 +1003,7 @@ $3a, $3a, $3a,
 $44, $44, $44,
 $4e, $4e, $4e,
 $58, $58, $58,
+
 $62, $62, $62,
 $6c, $6c, $6c,
 $76, $76, $76,
@@ -889,13 +1014,14 @@ $9e, $9e, $9e,
 $a8, $a8, $a8,
 $b2, $b2, $b2,
 $bc, $bc, $bc,
+
 $c6, $c6, $c6,
 $d0, $d0, $d0,
 $da, $da, $da,
 $e4, $e4, $e4,
 $ee, $ee, $ee
+}
 
-);
 
    i:=0;
    num:=0; 
@@ -910,23 +1036,23 @@ $ee, $ee, $ee
 
 	
 //256 color VGA palette based on XTerm colors(Unix)
-
+//first 16 colors now should be more accurate!
 
 TPalette256.DWords[0]:=$000000ff;
-TPalette256.DWords[1]:=$080000ff;
-TPalette256.DWords[2]:=$008000ff;
-TPalette256.DWords[3]:=$808000ff;
-TPalette256.DWords[4]:=$000080ff;
-TPalette256.DWords[5]:=$800080ff;
-TPalette256.DWords[6]:=$008080ff;
+TPalette256.DWords[1]:=$ff0000ff;
+TPalette256.DWords[2]:=$00ff00ff;
+TPalette256.DWords[3]:=$ffff00ff;
+TPalette256.DWords[4]:=$0000ffff;
+TPalette256.DWords[5]:=$ff00ffff;
+TPalette256.DWords[6]:=$ffff55ff;
 TPalette256.DWords[7]:=$c0c0c0ff;
-TPalette256.DWords[8]:=$808080ff;
-TPalette256.DWords[9]:=$ff0000ff;
-TPalette256.DWords[10]:=$00ff00ff;
-TPalette256.DWords[11]:=$ffff00ff;
-TPalette256.DWords[12]:=$0000ffff;
-TPalette256.DWords[13]:=$ff00ffff;
-TPalette256.DWords[14]:=$00ffffff;
+TPalette256.DWords[8]:=$7f7f7fff;
+TPalette256.DWords[9]:=$7f0000ff;
+TPalette256.DWords[10]:=$007f00ff;
+TPalette256.DWords[11]:=$7f7f00ff;
+TPalette256.DWords[12]:=$00007fff;
+TPalette256.DWords[13]:=$7f007fff;
+TPalette256.DWords[14]:=$007f7fff;
 TPalette256.DWords[15]:=$ffffffff;
 
 TPalette256.DWords[16]:=$000000ff;
