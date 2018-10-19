@@ -1,15 +1,33 @@
 ## Laz GrFX- 
 An Extended SDL replacement of the "Borland Graphics Interface" (BGI)
+For Lazarus/FPC Written in SEMI-PURE Pascal
 
-(For Lazarus/FPC) Written in SEMI-PURE Pascal
+A VB(visual Basic or VB.NET) could fork from this, if needed.
+-Who nose, I might even just fork it myself!
 
 
-state: <font color='green'> COMPILING </font> (somewhat)
+state:  COMPILING (somewhat)
+
+
+This unit uses **modified** JEDI headers.
+While the C Syntax is correct when utilizing SDL, the PASCAL needed some adjustment.
+It makes more sense to use similar syntax, if possible.
+
+
 
 ### What is it, what does it do?
 
-First lets define BGI, then SDL, then the need for this code.
+Its a GRAPHICS MODE "Canvas", not unlike TCanvas. You draw with it.
+There is a reason Im redoing this. We could extend TCanvas- 
+but I dont think it will happen the way it needs to.
 
+Lazarus OGL demos are busted- where the SDL ones work.
+
+
+#### Why does it exist?
+
+Some outdated BGI code needed to be brought up to speed.
+So what is the BGI? and why use SDL or even OpenGL?
 
 
 BGI (Borland Graphics Interface) According to Wikipedia-
