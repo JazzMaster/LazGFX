@@ -7,8 +7,7 @@ interface
 //-Anonymous C kernel dev (that runs a library)
 
 //This is not -and never will be- your program. Sorry, Jim.
-//SO- DONT EXPECT A RELEASE, EVER.
-
+//RELEASES are stable builds and nothing else is guaranteed.
 
 {
 
@@ -464,7 +463,8 @@ uses
 {$ifdef unix} cthreads,ctypes,cmem,sysUtils,crt,{$endif}
 
 //FPC generic units(OS independent)
-	SDL2,SDL_Image,SDL2_TTF,strings,math,typinfo
+	SDL2,SDL_Image,SDL2_TTF,strings,typinfo
+//math
 
 //typinfo will come in handy with color Names.
 //(it saves a lot of space)
@@ -481,7 +481,7 @@ uses
    {$IFDEF CONSOLE}
 	  ,wincrt, crtstuff
    {$ENDIF}   
-   ,windos 
+//   ,windos 
 {$ENDIF}
 
 //dont ask....need (HX)dpmi at minimal
@@ -3994,5 +3994,57 @@ IsConsole:=true;
 //see T and L demos for an example- Im not there yet, but others have gotten there.
 
 //you invert a bitmap inside a bitmap or a section of the screen- is how the trick is pulled off.
+
+
+
+
+procedure invertColors;
+
+//so you see how to do manual shifting etc.. 
+var
+   r, g, b, a:byte;
+
+begin
+
+	SDL_GetRenderDrawColor(renderer, r, g, b, a);
+	SDL_SetRenderDrawColor(renderer, 255 - r, 255 - g, 255 - b, a); 
+
+end;
+
+//if you want to blink circles etc...I wil leave this to the reader.
+//it can be done- but its very unused code. Ususally reserved for text like warnings, etc.
+
+procedure blinkText(Text:string);
+
+//SDL can only SLOWLY redraw over something to "erase"
+//write..erase(redraw)..write..erase..
+//yes this is how my kernel console code works -just implemented differently.
+begin
+    
+    BlinkPID:=fork() //this has to occur wo stopping while other ops are going on usually
+	blink:=true; //this wont kill itself, naturally. only external forces can kill me now.
+    repeat		
+		GotoXY(x,y);
+		DrawText(text);
+		invertcolors;
+		delay(500);
+		GotoXY(x,y);
+		DrawText(text);
+		invertcolors;
+		delay(500); //.5 sec delay
+	until blink:=false;
+end;
+
+procedure STOPBlinkText;
+
+   
+begin
+            blink:=false; //kill the loop
+// if needed:
+//			killPID(BlinkPID);
+			delay(1000); //wait for routine to safely exit.
+			BlinkPID:=Nil;
+end;
+
 
 end.
