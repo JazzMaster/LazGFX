@@ -637,8 +637,11 @@ end;
 
 procedure init256Palette;
 
+//256 color VGA palette based on XTerm colors(Unix)
+// however the first 16 are off according to mCGA specs and have been corrected.
+//xterms dont use "bold text by deault" an maybe this is where the confusion is.
+
 //furthermore there are other 256rgb palettes.
-//semi-accurate as per xterm specs.
 
 
 var
@@ -698,6 +701,7 @@ valuelist256[47]:=$ff;
 valuelist256[48]:=$00;
 valuelist256[49]:=$00;
 valuelist256[50]:=$00;
+
 valuelist256[51]:=$00;
 valuelist256[52]:=$00;
 valuelist256[53]:=$5f;
@@ -748,6 +752,7 @@ valuelist256[97]:=$87;
 valuelist256[98]:=$d7;
 valuelist256[99]:=$00;
 valuelist256[100]:=$87;
+
 valuelist256[101]:=$ff;
 valuelist256[102]:=$00;
 valuelist256[103]:=$af;
@@ -798,6 +803,7 @@ valuelist256[147]:=$00;
 valuelist256[148]:=$ff;
 valuelist256[149]:=$af;
 valuelist256[150]:=$00;
+
 valuelist256[151]:=$ff;
 valuelist256[152]:=$d7;
 valuelist256[153]:=$00;
@@ -812,243 +818,650 @@ valuelist256[161]:=$5f;
 valuelist256[162]:=$5f;
 valuelist256[163]:=$00;
 valuelist256[164]:=$87;
+valuelist256[165]:=$5f;
+valuelist256[166]:=$00;
+valuelist256[167]:=$af;
+valuelist256[168]:=$5f;
+valuelist256[169]:=$00;
+valuelist256[170]:=$d7;
+valuelist256[171]:=$5f;
+valuelist256[172]:=$00;
+valuelist256[173]:=$ff;
+valuelist256[174]:=$5f;
+valuelist256[175]:=$5f;
+valuelist256[176]:=$00;
+valuelist256[177]:=$5f;
+valuelist256[178]:=$5f;
+valuelist256[179]:=$5f;
+valuelist256[180]:=$5f;
+valuelist256[181]:=$5f;
+valuelist256[182]:=$87;
+valuelist256[183]:=$5f;
+valuelist256[184]:=$5f;
+valuelist256[185]:=$af;
+valuelist256[186]:=$5f;
+valuelist256[187]:=$5f;
+valuelist256[188]:=$d7;
+valuelist256[189]:=$5f;
+valuelist256[190]:=$5f;
+valuelist256[191]:=$ff;
+valuelist256[192]:=$5f;
+valuelist256[193]:=$87;
+valuelist256[194]:=$00;
+valuelist256[195]:=$5f;
+valuelist256[196]:=$87;
+valuelist256[197]:=$5f;
+valuelist256[198]:=$5f;
+valuelist256[199]:=$87;
+valuelist256[200]:=$87;
 
-valuelist256[]:=$5f
-valuelist256[]:=$00
-valuelist256[]:=$af
+valuelist256[201]:=$5f;
+valuelist256[202]:=$87;
+valuelist256[203]:=$af;
+valuelist256[204]:=$5f;
+valuelist256[205]:=$87;
+valuelist256[206]:=$d7;
+valuelist256[207]:=$5f;
+valuelist256[208]:=$87;
+valuelist256[209]:=$ff;
+valuelist256[210]:=$5f;
+valuelist256[211]:=$af;
+valuelist256[212]:=$00;
+valuelist256[213]:=$5f;
+valuelist256[214]:=$af;
+valuelist256[215]:=$5f;
+valuelist256[216]:=$5f;
+valuelist256[217]:=$af;
+valuelist256[218]:=$87;
+valuelist256[219]:=$5f;
+valuelist256[220]:=$af;
+valuelist256[221]:=$af;
+valuelist256[222]:=$5f;
+valuelist256[223]:=$af;
+valuelist256[224]:=$d7;
+valuelist256[225]:=$5f;
+valuelist256[226]:=$af;
+valuelist256[227]:=$ff;
+valuelist256[228]:=$5f;
+valuelist256[229]:=$d7;
+valuelist256[230]:=$00;
+valuelist256[231]:=$5f;
+valuelist256[232]:=$d7;
+valuelist256[233]:=$5f;
+valuelist256[234]:=$5f;
+valuelist256[235]:=$d7;
+valuelist256[236]:=$87;
+valuelist256[237]:=$5f;
+valuelist256[238]:=$d7;
+valuelist256[239]:=$af;
+valuelist256[240]:=$5f;
+valuelist256[241]:=$d7;
+valuelist256[242]:=$d7;
+valuelist256[243]:=$5f;
+valuelist256[244]:=$d7;
+valuelist256[245]:=$ff;
+valuelist256[246]:=$5f;
+valuelist256[247]:=$ff;
+valuelist256[248]:=$00;
+valuelist256[249]:=$5f;
+valuelist256[250]:=$ff;
+valuelist256[251]:=$5f;
+valuelist256[252]:=$5f;
+valuelist256[253]:=$ff;
+valuelist256[254]:=$87;
+valuelist256[255]:=$5f;
+valuelist256[256]:=$ff;
+valuelist256[257]:=$af;
+valuelist256[258]:=$5f;
+valuelist256[259]:=$ff;
+valuelist256[260]:=$d7;
 
-valuelist256[]:=$5f
-valuelist256[]:=$00
-valuelist256[]:=$d7
+valuelist256[261]:=$5f;
+valuelist256[262]:=$ff;
+valuelist256[263]:=$ff;
+valuelist256[264]:=$87;
+valuelist256[265]:=$00;
+valuelist256[266]:=$00;
+valuelist256[267]:=$87;
+valuelist256[268]:=$00;
+valuelist256[269]:=$5f;
+valuelist256[270]:=$87;
+valuelist256[271]:=$00;
+valuelist256[272]:=$87;
+valuelist256[273]:=$87;
+valuelist256[274]:=$00;
+valuelist256[275]:=$af;
+valuelist256[276]:=$87;
+valuelist256[277]:=$00;
+valuelist256[278]:=$d7;
+valuelist256[279]:=$87;
+valuelist256[280]:=$00;
+valuelist256[281]:=$ff;
+valuelist256[282]:=$87;
+valuelist256[283]:=$5f;
+valuelist256[284]:=$00;
+valuelist256[285]:=$87;
+valuelist256[286]:=$5f;
+valuelist256[287]:=$5f;
+valuelist256[288]:=$87;
+valuelist256[289]:=$5f;
+valuelist256[290]:=$87;
+valuelist256[291]:=$87;
+valuelist256[292]:=$5f;
+valuelist256[293]:=$af;
+valuelist256[294]:=$87;
+valuelist256[295]:=$5f;
+valuelist256[296]:=$d7;
+valuelist256[297]:=$87;
+valuelist256[298]:=$5f;
+valuelist256[299]:=$ff;
+valuelist256[300]:=$87;
+
+valuelist256[301]:=$87;
+valuelist256[302]:=$00;
+valuelist256[303]:=$87;
+valuelist256[304]:=$87;
+valuelist256[305]:=$5f;
+valuelist256[306]:=$87;
+valuelist256[307]:=$87;
+valuelist256[308]:=$87;
+valuelist256[309]:=$87;
+valuelist256[310]:=$87;
+valuelist256[311]:=$af;
+valuelist256[312]:=$87;
+valuelist256[313]:=$87;
+valuelist256[314]:=$d7;
+valuelist256[315]:=$87;
+valuelist256[316]:=$87;
+valuelist256[317]:=$ff;
+valuelist256[318]:=$87;
+valuelist256[319]:=$af;
+valuelist256[320]:=$00;
+valuelist256[321]:=$87;
+valuelist256[322]:=$af;
+valuelist256[323]:=$5f;
+valuelist256[324]:=$87;
+valuelist256[325]:=$af;
+valuelist256[326]:=$87;
+valuelist256[327]:=$87;
+valuelist256[328]:=$af;
+valuelist256[329]:=$af;
+valuelist256[330]:=$87;
+valuelist256[331]:=$af;
+valuelist256[332]:=$d7;
+valuelist256[333]:=$87;
+valuelist256[334]:=$af;
+valuelist256[335]:=$ff;
+valuelist256[336]:=$87;
+valuelist256[337]:=$d7;
+valuelist256[338]:=$00;
+valuelist256[339]:=$87;
+valuelist256[340]:=$d7;
+valuelist256[341]:=$5f;
+valuelist256[342]:=$87;
+valuelist256[343]:=$d7;
+valuelist256[344]:=$87;
+valuelist256[345]:=$87;
+valuelist256[346]:=$d7;
+valuelist256[347]:=$af;
+valuelist256[348]:=$87;
+valuelist256[349]:=$d7;
+valuelist256[350]:=$d7;
+valuelist256[351]:=$87;
+valuelist256[352]:=$d7;
+valuelist256[353]:=$ff;
+valuelist256[354]:=$87;
+valuelist256[355]:=$ff;
+valuelist256[356]:=$00;
+valuelist256[357]:=$87;
+valuelist256[358]:=$ff;
+valuelist256[359]:=$5f;
+valuelist256[360]:=$87;
+valuelist256[361]:=$ff;
+valuelist256[362]:=$87;
+valuelist256[363]:=$87;
+valuelist256[364]:=$ff;
+valuelist256[365]:=$af;
+valuelist256[366]:=$87;
+valuelist256[367]:=$ff;
+valuelist256[368]:=$d7;
+valuelist256[369]:=$87;
+valuelist256[370]:=$ff;
+valuelist256[371]:=$ff;
+valuelist256[372]:=$af;
+valuelist256[373]:=$00;
+valuelist256[374]:=$00;
+valuelist256[375]:=$af;
+valuelist256[376]:=$00;
+valuelist256[377]:=$5f;
+valuelist256[378]:=$af;
+valuelist256[379]:=$00;
+valuelist256[380]:=$87;
+valuelist256[381]:=$af;
+valuelist256[382]:=$00;
+valuelist256[383]:=$af;
+valuelist256[384]:=$af;
+valuelist256[385]:=$00;
+valuelist256[386]:=$d7;
+valuelist256[387]:=$af;
+valuelist256[388]:=$00;
+valuelist256[389]:=$af;
+valuelist256[390]:=$af;
+valuelist256[391]:=$5f;
+valuelist256[392]:=$00;
+valuelist256[393]:=$af;
+valuelist256[394]:=$5f;
+valuelist256[395]:=$5f;
+valuelist256[396]:=$af;
+valuelist256[397]:=$5f;
+valuelist256[398]:=$87;
+valuelist256[399]:=$af;
+valuelist256[400]:=$5f;
+
+valuelist256[401]:=$af;
+valuelist256[402]:=$af;
+valuelist256[403]:=$5f;
+valuelist256[404]:=$d7;
+valuelist256[405]:=$af;
+valuelist256[406]:=$5f;
+valuelist256[407]:=$ff;
+valuelist256[408]:=$af;
+valuelist256[409]:=$87;
+valuelist256[410]:=$00;
+valuelist256[411]:=$af;
+valuelist256[412]:=$87;
+valuelist256[413]:=$5f;
+valuelist256[414]:=$af;
+valuelist256[415]:=$87;
+valuelist256[416]:=$87;
+valuelist256[417]:=$af;
+valuelist256[418]:=$87;
+valuelist256[419]:=$af;
+valuelist256[420]:=$af;
+valuelist256[421]:=$87;
+valuelist256[422]:=$d7;
+valuelist256[423]:=$af;
+valuelist256[424]:=$87;
+valuelist256[425]:=$ff;
+valuelist256[426]:=$af;
+valuelist256[427]:=$af;
+valuelist256[428]:=$00;
+valuelist256[429]:=$af;
+valuelist256[430]:=$af;
+valuelist256[431]:=$5f;
+valuelist256[432]:=$af;
+valuelist256[433]:=$af;
+valuelist256[434]:=$87;
+valuelist256[435]:=$af;
+valuelist256[436]:=$af;
+valuelist256[437]:=$af;
+valuelist256[438]:=$af;
+valuelist256[439]:=$af;
+valuelist256[440]:=$d7;
 
 
-//more to come!
-{
+valuelist256[441]:=$af;
+valuelist256[442]:=$af;
+valuelist256[443]:=$ff;
+valuelist256[444]:=$af;
+valuelist256[445]:=$d7;
+valuelist256[446]:=$00;
+valuelist256[447]:=$af;
+valuelist256[448]:=$d7;
+valuelist256[449]:=$5f;
 
-$5f, $00, $ff,
-$5f, $5f, $00,
-$5f, $5f, $5f,
-$5f, $5f, $87,
-$5f, $5f, $af,
-$5f, $5f, $d7,
-$5f, $5f, $ff,
-$5f, $87, $00,
+valuelist256[450]:=$af;
+valuelist256[451]:=$d7;
+valuelist256[452]:=$87;
+valuelist256[453]:=$af;
+valuelist256[454]:=$d7;
+valuelist256[455]:=$af;
+valuelist256[456]:=$af;
+valuelist256[457]:=$d7;
+valuelist256[458]:=$d7;
+valuelist256[459]:=$af;
 
-$5f, $87, $5f,
-$5f, $87, $87,
-$5f, $87, $af,
-$5f, $87, $d7,
-$5f, $87, $ff,
-$5f, $af, $00,
-$5f, $af, $5f,
-$5f, $af, $87,
-$5f, $af, $af,
-$5f, $af, $d7,
+valuelist256[460]:=$d7;
+valuelist256[461]:=$ff;
+valuelist256[462]:=$af;
+valuelist256[463]:=$ff;
+valuelist256[464]:=$00;
+valuelist256[465]:=$af;
+valuelist256[466]:=$ff;
+valuelist256[467]:=$5f;
+valuelist256[468]:=$af;
+valuelist256[469]:=$ff;
 
-$5f, $af, $ff,
-$5f, $d7, $00,
-$5f, $d7, $5f,
-$5f, $d7, $87,
-$5f, $d7, $af,
-$5f, $d7, $d7,
-$5f, $d7, $ff,
-$5f, $ff, $00,
-$5f, $ff, $5f,
-$5f, $ff, $87,
+valuelist256[470]:=$87;
+valuelist256[471]:=$af;
+valuelist256[472]:=$ff;
+valuelist256[473]:=$af;
+valuelist256[474]:=$af;
+valuelist256[475]:=$ff;
+valuelist256[476]:=$d7;
+valuelist256[477]:=$af;
+valuelist256[478]:=$ff;
+valuelist256[479]:=$ff;
 
-$5f, $ff, $af,
-$5f, $ff, $d7,
-$5f, $ff, $ff,
-$87, $00, $00,
-$87, $00, $5f,
-$87, $00, $87,
-$87, $00, $af,
-$87, $00, $d7,
-$87, $00, $ff,
-$87, $5f, $00,
+valuelist256[480]:=$d7;
+valuelist256[481]:=$00;
+valuelist256[482]:=$00;
+valuelist256[483]:=$d7;
+valuelist256[484]:=$00;
+valuelist256[485]:=$5f;
+valuelist256[486]:=$d7;
+valuelist256[487]:=$00;
+valuelist256[488]:=$87;
+valuelist256[489]:=$d7;
+valuelist256[490]:=$00;
 
-$87, $5f, $5f,
-$87, $5f, $87,
-$87, $5f, $af,
-$87, $5f, $d7,
-$87, $5f, $ff,
-$87, $87, $00,
-$87, $87, $5f,
-$87, $87, $87,
-$87, $87, $af,
-$87, $87, $d7,
+valuelist256[491]:=$af;
+valuelist256[492]:=$d7;
+valuelist256[493]:=$00;
+valuelist256[494]:=$d7;
+valuelist256[495]:=$d7;
+valuelist256[496]:=$00;
+valuelist256[497]:=$ff;
+valuelist256[498]:=$d7;
+valuelist256[499]:=$5f;
 
-$87, $87, $ff,
-$87, $af, $00,
-$87, $af, $5f,
-$87, $af, $87,
-$87, $af, $af,
-$87, $af, $d7,
-$87, $af, $ff,
-$87, $d7, $00,
-$87, $d7, $5f,
-$87, $d7, $87,
+valuelist256[500]:=$00;
+valuelist256[501]:=$d7;
+valuelist256[502]:=$5f;
+valuelist256[503]:=$5f;
+valuelist256[504]:=$d7;
+valuelist256[505]:=$5f;
+valuelist256[506]:=$87;
+valuelist256[507]:=$d7;
+valuelist256[508]:=$5f;
+valuelist256[509]:=$af;
+valuelist256[510]:=$d7;
+valuelist256[511]:=$5f;
+valuelist256[512]:=$d7;
+valuelist256[513]:=$d7;
+valuelist256[514]:=$5f;
+valuelist256[515]:=$ff;
+valuelist256[516]:=$d7;
+valuelist256[517]:=$87;
+valuelist256[518]:=$00;
+valuelist256[519]:=$d7;
+valuelist256[520]:=$87;
+valuelist256[521]:=$5f;
+valuelist256[522]:=$d7;
+valuelist256[523]:=$87;
+valuelist256[524]:=$87;
+valuelist256[525]:=$d7;
+valuelist256[526]:=$87;
+valuelist256[527]:=$af;
+valuelist256[528]:=$d7;
+valuelist256[529]:=$87;
 
-$87, $d7, $af,
-$87, $d7, $d7,
-$87, $d7, $ff,
-$87, $ff, $00,
-$87, $ff, $5f,
-$87, $ff, $87,
-$87, $ff, $af,
-$87, $ff, $d7,
-$87, $ff, $ff,
-$af, $00, $00,
+valuelist256[530]:=$d7;
+valuelist256[531]:=$d7;
+valuelist256[532]:=$87;
+valuelist256[533]:=$ff;
+valuelist256[534]:=$d7;
+valuelist256[535]:=$af;
+valuelist256[536]:=$00;
+valuelist256[537]:=$d7;
+valuelist256[538]:=$af;
+valuelist256[539]:=$5f;
 
-$af, $00, $5f,
-$af, $00, $87,
-$af, $00, $af,
-$af, $00, $d7,
-$af, $00, $ff,
-$af, $5f, $00,
-$af, $5f, $5f,
-$af, $5f, $87,
-$af, $5f, $af,
-$af, $5f, $d7,
+valuelist256[540]:=$d7;
+valuelist256[541]:=$af;
+valuelist256[542]:=$87;
+valuelist256[543]:=$d7;
+valuelist256[544]:=$af;
+valuelist256[545]:=$af;
+valuelist256[546]:=$d7;
+valuelist256[547]:=$af;
+valuelist256[548]:=$d7;
+valuelist256[549]:=$d7;
+valuelist256[550]:=$af;
+valuelist256[551]:=$ff;
+valuelist256[552]:=$d7;
+valuelist256[553]:=$d7;
+valuelist256[554]:=$00;
+valuelist256[555]:=$d7;
+valuelist256[556]:=$d7;
+valuelist256[557]:=$5f;
+valuelist256[558]:=$d7;
+valuelist256[559]:=$d7;
+valuelist256[560]:=$87;
 
-$af, $5f, $ff,
-$af, $87, $00,
-$af, $87, $5f,
-$af, $87, $87,
-$af, $87, $af,
-$af, $87, $d7,
+valuelist256[561]:=$d7;
+valuelist256[562]:=$d7;
+valuelist256[563]:=$af;
+valuelist256[564]:=$d7;
+valuelist256[565]:=$d7;
+valuelist256[566]:=$d7;
+valuelist256[567]:=$d7;
+valuelist256[568]:=$d7;
+valuelist256[569]:=$ff;
 
-$af, $87, $ff,
-$af, $af, $00,
-$af, $af, $5f,
-$af, $af, $87,
-$af, $af, $af,
-$af, $af, $d7,
-$af, $af, $ff,
-$af, $d7, $00,
-$af, $d7, $5f,
-$af, $d7, $87,
-$af, $d7, $af,
+valuelist256[570]:=$d7;
+valuelist256[571]:=$ff;
+valuelist256[572]:=$00;
+valuelist256[573]:=$d7;
+valuelist256[574]:=$ff;
+valuelist256[575]:=$5f;
+valuelist256[576]:=$d7;
+valuelist256[577]:=$ff;
+valuelist256[578]:=$87;
+valuelist256[579]:=$d7;
 
-$af, $d7, $d7,
-$af, $d7, $ff,
-$af, $ff, $00,
-$af, $ff, $5f,
-$af, $ff, $87,
-$af, $ff, $af,
-$af, $ff, $d7,
-$af, $ff, $ff,
-$d7, $00, $00,
-$d7, $00, $5f,
-$d7, $00, $87,
+valuelist256[580]:=$ff;
+valuelist256[581]:=$af;
+valuelist256[582]:=$d7;
+valuelist256[583]:=$ff;
+valuelist256[584]:=$d7;
+valuelist256[585]:=$d7;
+valuelist256[586]:=$ff;
+valuelist256[587]:=$ff;
+valuelist256[588]:=$ff;
+valuelist256[589]:=$00;
 
-$d7, $00, $af,
-$d7, $00, $d7,
-$d7, $00, $ff,
-$d7, $5f, $00,
-$d7, $5f, $5f,
-$d7, $5f, $87,
-$d7, $5f, $af,
-$d7, $5f, $d7,
-$d7, $5f, $ff,
-$d7, $87, $00,
-$d7, $87, $5f,
+valuelist256[590]:=$00;
+valuelist256[591]:=$ff;
+valuelist256[592]:=$00;
+valuelist256[593]:=$5f;
+valuelist256[594]:=$ff;
+valuelist256[595]:=$00;
+valuelist256[596]:=$87;
+valuelist256[597]:=$ff;
+valuelist256[598]:=$00;
+valuelist256[599]:=$af;
 
-$d7, $87, $87,
-$d7, $87, $af,
-$d7, $87, $d7,
-$d7, $87, $ff,
-$d7, $af, $00,
-$d7, $af, $5f,
-$d7, $af, $87,
-$d7, $af, $af,
-$d7, $af, $d7,
-$d7, $af, $ff,
-$d7, $d7, $00,
+valuelist256[600]:=$ff;
+valuelist256[601]:=$00;
+valuelist256[602]:=$d7;
+valuelist256[603]:=$ff;
+valuelist256[604]:=$00;
+valuelist256[605]:=$ff;
+valuelist256[606]:=$ff;
+valuelist256[607]:=$5f;
+valuelist256[608]:=$00;
+valuelist256[609]:=$ff;
 
-$d7, $d7, $5f,
-$d7, $d7, $87,
-$d7, $d7, $af,
-$d7, $d7, $d7,
-$d7, $d7, $ff,
-$d7, $ff, $00,
-$d7, $ff, $5f,
-$d7, $ff, $87,
-$d7, $ff, $af,
-$d7, $ff, $d7,
-$d7, $ff, $ff,
+valuelist256[610]:=$5f;
+valuelist256[611]:=$5f;
+valuelist256[612]:=$ff;
+valuelist256[613]:=$5f;
+valuelist256[614]:=$87;
+valuelist256[615]:=$ff;
+valuelist256[616]:=$5f;
+valuelist256[617]:=$af;
+valuelist256[618]:=$ff;
+valuelist256[619]:=$5f;
 
-$ff, $00, $00,
-$ff, $00, $5f,
-$ff, $00, $87,
-$ff, $00, $af,
-$ff, $00, $d7,
-$ff, $00, $ff,
-$ff, $5f, $00,
-$ff, $5f, $5f,
-$ff, $5f, $87,
-$ff, $5f, $af,
-$ff, $5f, $d7,
+valuelist256[620]:=$d7;
+valuelist256[621]:=$ff;
+valuelist256[622]:=$5f;
+valuelist256[623]:=$ff;
+valuelist256[624]:=$ff;
+valuelist256[625]:=$87;
+valuelist256[626]:=$00;
+valuelist256[627]:=$ff;
+valuelist256[628]:=$87;
+valuelist256[629]:=$5f;
 
-$ff, $5f, $ff,
-$ff, $87, $00,
-$ff, $87, $5f,
-$ff, $87, $87,
-$ff, $87, $af,
-$ff, $87, $d7,
-$ff, $87, $ff,
-$ff, $af, $00,
-$ff, $af, $5f,
-$ff, $af, $87,
-$ff, $af, $af,
-$ff, $af, $d7,
+valuelist256[630]:=$ff;
+valuelist256[631]:=$87;
+valuelist256[632]:=$87;
+valuelist256[633]:=$ff;
+valuelist256[634]:=$87;
+valuelist256[635]:=$af;
+valuelist256[636]:=$ff;
+valuelist256[637]:=$87;
+valuelist256[638]:=$d7;
+valuelist256[639]:=$ff;
 
-$ff, $af, $ff,
-$ff, $d7, $00,
-$ff, $d7, $5f,
-$ff, $d7, $87,
-$ff, $d7, $af,
-$ff, $d7, $d7,
-$ff, $d7, $ff,
-$ff, $ff, $00,
-$ff, $ff, $5f,
-$ff, $ff, $87,
-$ff, $ff, $af,
+valuelist256[640]:=$87;
+valuelist256[641]:=$ff;
+valuelist256[642]:=$ff;
+valuelist256[643]:=$af;
+valuelist256[644]:=$00;
+valuelist256[645]:=$ff;
+valuelist256[646]:=$af;
+valuelist256[647]:=$5f;
+valuelist256[648]:=$ff;
+valuelist256[649]:=$af;
 
-$ff, $ff, $d7,
-$ff, $ff, $ff,
-$08, $08, $08,
-$12, $12, $12,
-$1c, $1c, $1c,
-$26, $26, $26,
-$30, $30, $30,
-$3a, $3a, $3a,
-$44, $44, $44,
-$4e, $4e, $4e,
-$58, $58, $58,
+valuelist256[650]:=$87;
+valuelist256[651]:=$ff;
+valuelist256[652]:=$af;
+valuelist256[653]:=$af;
+valuelist256[654]:=$ff;
+valuelist256[655]:=$af;
+valuelist256[656]:=$d7;
+valuelist256[657]:=$ff;
+valuelist256[658]:=$af;
+valuelist256[659]:=$ff;
 
-$62, $62, $62,
-$6c, $6c, $6c,
-$76, $76, $76,
-$80, $80, $80,
-$8a, $8a, $8a,
-$94, $94, $94,
-$9e, $9e, $9e,
-$a8, $a8, $a8,
-$b2, $b2, $b2,
-$bc, $bc, $bc,
+valuelist256[660]:=$ff;
+valuelist256[661]:=$d7;
+valuelist256[662]:=$00;
+valuelist256[663]:=$ff;
+valuelist256[664]:=$d7;
+valuelist256[665]:=$5f;
+valuelist256[666]:=$ff;
+valuelist256[667]:=$d7;
+valuelist256[668]:=$87;
+valuelist256[669]:=$ff;
 
-$c6, $c6, $c6,
-$d0, $d0, $d0,
-$da, $da, $da,
-$e4, $e4, $e4,
-$ee, $ee, $ee
-}
+valuelist256[670]:=$d7;
+valuelist256[671]:=$af;
+valuelist256[672]:=$ff;
+valuelist256[673]:=$d7;
+valuelist256[674]:=$d7;
+valuelist256[675]:=$ff;
+valuelist256[676]:=$d7;
+valuelist256[677]:=$ff;
+valuelist256[678]:=$ff;
+valuelist256[679]:=$ff;
 
+valuelist256[680]:=$00;
+valuelist256[681]:=$ff;
+valuelist256[682]:=$ff;
+valuelist256[683]:=$5f;
+valuelist256[684]:=$ff;
+valuelist256[685]:=$ff;
+valuelist256[686]:=$87;
+valuelist256[687]:=$ff;
+valuelist256[688]:=$ff;
+valuelist256[689]:=$af;
+
+valuelist256[690]:=$ff;
+valuelist256[691]:=$ff;
+valuelist256[692]:=$d7;
+valuelist256[693]:=$ff;
+valuelist256[694]:=$ff;
+valuelist256[695]:=$ff;
+valuelist256[696]:=$08;
+valuelist256[697]:=$08;
+valuelist256[698]:=$08;
+valuelist256[699]:=$12;
+
+valuelist256[700]:=$12;
+valuelist256[701]:=$12;
+valuelist256[702]:=$1c;
+valuelist256[703]:=$1c;
+valuelist256[704]:=$1c;
+valuelist256[705]:=$26;
+valuelist256[706]:=$26;
+valuelist256[707]:=$26;
+valuelist256[708]:=$30;
+valuelist256[709]:=$30;
+
+valuelist256[710]:=$30;
+valuelist256[711]:=$3a;
+valuelist256[712]:=$3a;
+valuelist256[713]:=$3a;
+valuelist256[714]:=$44;
+valuelist256[715]:=$44;
+valuelist256[716]:=$44;
+valuelist256[717]:=$4e;
+valuelist256[718]:=$4e;
+valuelist256[719]:=$4e;
+
+valuelist256[720]:=$58;
+valuelist256[721]:=$58;
+valuelist256[722]:=$58;
+valuelist256[723]:=$62;
+valuelist256[724]:=$62;
+valuelist256[725]:=$62;
+valuelist256[726]:=$6c;
+valuelist256[727]:=$6c;
+valuelist256[728]:=$6c;
+valuelist256[729]:=$76;
+
+valuelist256[730]:=$76;
+valuelist256[731]:=$76;
+valuelist256[732]:=$80;
+valuelist256[733]:=$80;
+valuelist256[734]:=$80;
+valuelist256[735]:=$8a;
+valuelist256[736]:=$8a;
+valuelist256[737]:=$8a;
+valuelist256[738]:=$94;
+valuelist256[739]:=$94;
+
+valuelist256[740]:=$94;
+valuelist256[741]:=$9e;
+valuelist256[742]:=$9e;
+valuelist256[743]:=$9e;
+valuelist256[744]:=$a8;
+valuelist256[745]:=$a8;
+valuelist256[746]:=$a8;
+valuelist256[747]:=$b2;
+valuelist256[748]:=$b2;
+valuelist256[749]:=$b2;
+
+valuelist256[750]:=$bc;
+valuelist256[751]:=$bc;
+valuelist256[752]:=$bc;
+valuelist256[753]:=$c6;
+valuelist256[754]:=$c6;
+valuelist256[755]:=$c6;
+valuelist256[756]:=$d0;
+valuelist256[757]:=$d0;
+valuelist256[758]:=$d0;
+valuelist256[759]:=$da;
+
+valuelist256[760]:=$da;
+valuelist256[761]:=$da;
+valuelist256[762]:=$e4;
+valuelist256[763]:=$e4;
+valuelist256[764]:=$e4;
+valuelist256[765]:=$ee;
+valuelist256[766]:=$ee;
+valuelist256[767]:=$ee;
+
+//zero increments are always one short
 
    i:=0;
    num:=0; 
-   for num:=0 to 768 do begin 
+   for num:=0 to 767 do begin 
       palette256.colors[num].r:=valuelist256[i];
       palette256.colors[num].g:=valuelist256[i+1];
       palette256.colors[num].b:=valuelist256[i+2];
