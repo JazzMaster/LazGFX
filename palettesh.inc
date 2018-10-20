@@ -739,8 +739,8 @@ var
   valuelist16: array [0..48] of byte;
   
 //in case you want B/W greyscale images or modes or other cruft  
-  GreyList256:array [0..765] of byte;
-  valuelist256: array [0..765] of byte;
+  GreyList256:array [0..767] of byte;
+  valuelist256: array [0..767] of byte;
 
   TPalette16:TRec16;
   TPalette16Grey:TRec256;

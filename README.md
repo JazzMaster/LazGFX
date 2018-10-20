@@ -8,7 +8,7 @@ A VB(visual Basic or VB.NET) - or even python- could fork from this, if needed.
 -Who nose, I might even just fork it myself!
 
 
-state:  COMPILING (somewhat)
+state:  **COMPILING**  -up until line 1399 in main unit.
 
 
 This unit uses **modified** JEDI headers.

@@ -215,6 +215,7 @@ I need "pascal Pointer schooling". I dont deny this.
 
 
 SDL_Color RGB syntax:
+(points to)
 
 r,g,b,a:byte;
 
@@ -432,7 +433,7 @@ Palettes:
 
   Its pretty basic and standardized.
 
-  Max colors are always 256. 
+  Max colors are always 256, unless in modified CGA modes- then 16. 
   Specify each value or leave it as a zero
   
   256x3=728 bytes. 
@@ -478,6 +479,7 @@ SemiDirect MultiMedia OverLayer - should be the unit name.
 
 
 uses
+//need to reconsult the JEDI code again --mostly there.
 
 {$ifdef unix} cthreads,ctypes,cmem,sysUtils,crt,{$endif}
 
@@ -537,7 +539,7 @@ uses
 
 {$endif}
 
-;
+
 
 //Altogether we are talking PCs running OSX, OS9, OS8 (heaven forbid), Windows(sin), and most unices.
 //Some android (as a unice subderivative)
@@ -552,7 +554,7 @@ uses
 //include the default data for the basic core routines.
 //we need both of these.
 
-
+;
 
 {
 NOTES on units used:
@@ -872,41 +874,42 @@ making a 16 or 256 palette and/or modelist file
 }
 
 
-//this routine is very rough but may help
+
 // from wikipedia
 procedure RoughSteinbergDither(filename,filename2:string);
-type
-   imageArray =array[1..1280,1..1024] of DWord; //maximum 1080p or file x and y (image resolution) size?
-//assumed here for now
 
 var
-	pixel:ImageArray;
+	pixel:array[0..1280,0..1024] of DWord;
 	oldpixel,newpixel,quant_error:DWord;
-	location:file;
+	file1,file2:file;
+    Buf : Array[1..4096] of byte;
+    
 
 begin
-    assign(filename,location); 
+    assign(file1,filename); 
+    assign(file2,filename2); 
   
-    blockread(filename,sizeof(file));
+    blockread(file1,buf,sizeof(file));
 
   while Y<MaxY do begin
 	 while x<MaxX do begin
 
-      oldpixel  := pixel(x,y);
-      newpixel  := round(oldpixel / 256);
-      pixel(x,y)  := newpixel;
+      oldpixel  := pixel[x,y];
+      newpixel  := round(oldpixel mod 256);
+      pixel[x,y]  := newpixel;
       quant_error  := oldpixel - newpixel;
 
-      pixel(x + 1,y):= (pixel(x + 1,y) + quant_error * 7 / 16);
-      pixel(x - 1,y + 1) := (pixel(x - 1,y + 1) + quant_error * 3 / 16);
-      pixel(x,y + 1) := (pixel(x,y + 1) + quant_error * 5 / 16);
-      pixel(x + 1,y + 1) := (pixel(x + 1,y + 1) + quant_error * 1 / 16);
+      pixel[x + 1,y]:= longword(pixel[x + 1,y] + quant_error * 7 mod 16);
+      pixel[x - 1,y + 1] := longword(pixel[x - 1,y + 1] + quant_error * 3 mod 16);
+      pixel[x,y + 1] := longword(pixel[x,y + 1] + quant_error * 5 mod 16);
+      pixel[x + 1,y + 1] := longword(pixel[x + 1,y + 1] + quant_error * 1 mod 16);
 
     end;
    end;
-     blockwrite(filename2,sizeof(file));
-     close(filename);
-	 close(filename2);
+     blockwrite(file2,buf,sizeof(file));
+
+     close(file1);
+	 close(file2);
 end;
 
 
@@ -919,12 +922,18 @@ Got weird fucked up c boolean evals? (JEEZ theyre a BITCH to understand....)
 }
 
 
+{here it is: the PASCAL SYN TAX POLICE
+or the reason your C styled syntax-although correct--just wont work:
 
+^ANything needs to be ^TAnything
+so ^SDL_Surface => ^TSDL_Surface which is actually PSDL_Surface
+
+}
 
 //which surface do we lock/unlock??
 //solve for X -by providing it.
 
-procedure lock(MainSurface:^SDL_Surface);
+procedure lock(MainSurface:PSDL_Surface);
 begin
   if SDL_MUSTLOCK(MainSurface) then begin
     if SDL_LockSurface(MainSurface) < 0 then
@@ -936,25 +945,23 @@ begin
 end;
 
 //call when done drawing pixels
-procedure unlock(MainSurface:^SDL_Surface);
+procedure unlock(MainSurface:PSDL_Surface);
 
 var
-  Tex:^SDL_Texture;
+  Tex:PSDL_Texture;
 
 begin
   if SDL_MUSTLOCK(MainSurface) then 
     SDL_UnlockSurface(MainSurface);
 
 //surface does update the renderer onscreen by itself
-  Tex:=CreateTextureFromSurface(MainSurface);
-  RenderCopy(Renderer,Tex);
-  SDL_FreeSurface(Tex); //alloc and not free bug if this isnt not here.
+  Tex:=SDL_CreateTextureFromSurface(Renderer,MainSurface);
 
-//we are going to render at the screens refresh rate anyhoo in most cases
-// if not TimerActive then
-//  SDL_RenderPresent(renderer);
+  SDL_RenderCopy(Renderer,Tex,Nil,Nil); //copy onto the full renderer the texture 
+  //warning: this can stretch output if texture is not the same size
 
-//DO NOT OVER RENDER or page flip!
+//  SDL_FreeSurface(MainSurface);
+
 end;
 
 procedure timer_flip; //triggered by SDL timer according to screen refresh rate
@@ -969,55 +976,85 @@ end;
 //semi-generic color functions
 
 function GetRGBfromIndex(index:byte):SDL_Color; 
+//if its indexed- we have the rgb definition already!!
 
 var
    somecolor:SDL_Color;
-   getThis:DWord;
+   
 
 begin
   if MaxColors =16 then
-	  getThis:=palette16.DWords[index]; //literally get the dword from the index
+	  somecolor:=Tpalette16.colors[index] //literally get the SDL_color from the index
   else if MaxColors=256 then
-	  getThis:=palette256.DWords[index]; //literally get the dword from the index
+	  somecolor:=Tpalette256.colors[index]; 
 
-  somecolor.R := getThis and $FF;
-  somecolor.G := (getThis shr 8) and $FF;
-  somecolor.B := (getThis shr 16) and $FF;
-  somecolor.A:= $FF;
-  GetRGBFromHex:=somecolor;
+  GetRGBFromIndex:=somecolor;
 end;
 
 //you already have the DWord- if you need to get it, call:
 //DWord:=SDL_MapRGB(format,r, g,b);
 //first
 
-function GetRGBfromHex(Hex: DWord):SDL_Color; 
 
+function GetRGBFromHex(input:DWord):SDL_Color;
 var
-   somecolor:SDL_Color;
+	i:integer;
+    somedata:PSDL_Color; 
+    r,g,b:PUInt8;
 
 begin
-  somecolor.R := Hex and $FF;
-  somecolor.G := (Hex shr 8) and $FF;
-  somecolor.B := (Hex shr 16) and $FF;
-  somecolor.A:= $FF;
-  GetRGBFromHex:=somecolor;
+
+   if (MaxColors=256) then begin
+	   i:=0;
+	   while (i<256) do begin
+		    if (Tpalette256.dwords[i] = input) then begin //did we find a match?
+	    	   SDL_GetRGB(Tpalette256.DWords[i],MainSurface^.format,r,g,b);
+               somedata^.r:=byte(^r);
+               somedata^.g:=byte(^g);
+               somedata^.b:=byte(^b);
+               somedata^.a:= $ff;
+ 			   GetRGBFromHex:=somedata;
+           
+           end else
+				inc(i);  //no
+       end;
+	  //no match found
+      //exit
+
+   end else if (MaxColors=16) then begin
+	    i:=0;
+	    while (i<16) do begin
+
+		    if (Tpalette16.dwords[i] = input) then begin//did we find a match?
+	    	   SDL_GetRGB(Tpalette16.DWords[i],MainSurface^.format,r,g,b);
+			   somedata^.r:=byte(^r);
+               somedata^.g:=byte(^g);
+               somedata^.b:=byte(^b);
+               somedata^.a:= $ff;
+               GetRGBFromHex:=somedata;
+            end else
+				inc(i);  //no
+       end;
+
+
+   end else begin //True color modes
+	   SDL_GetRGB(input,MainSurface^.format,somedata^.r,somedata^.g,somedata^.b);
+   	   GetRGBFromHex:=somedata;
+   end;
 end;
 
-//DWord:=SDL_MapRGBA(format,r, g,b,a);
-
-function GetRGBAfromHex(Hex: DWord):SDL_Color; overload;
-
+function GetRGBAFromHex(input:DWord):SDL_Color;
 var
-   somecolor:SDL_Color;
+	i:integer;
+    somedata:PSDL_Color; 
+    r,g,b:PUInt8;
 
 begin
-  somecolor.R := Hex and $FF;
-  somecolor.G := (Hex shr 8) and $FF;
-  somecolor.B := (Hex shr 16) and $FF;
-  somecolor.A:= (Hex shr 24) and $FF; 
-  GetRGBAFromHex:=somecolor;
+//RGBA doesnt support paletted modes(True color modes)
+	   SDL_GetRGBA(input,MainSurface^.format,somedata^.r,somedata^.g,somedata^.b,somedata^.a);
+   	   GetRGBFromHex:=somedata;
 end;
+
 
 //index to DWord
 
@@ -1027,9 +1064,9 @@ begin
    if (MaxColors >256) then exit;
 
    if MaxColors=256 then
-	   ColorNumToHex:=palette256.dwords[color]; //its already hexed....go fetch the right one.
+	   ColorNumToHex:=Tpalette256.dwords[color] //its already hexed....go fetch the right one.
    else if MaxColors=16 then
-	   ColorNumToHex:=palette16.dwords[color]; //its already hexed....go fetch the right one.		
+	   ColorNumToHex:=Tpalette16.dwords[color]; //its already hexed....go fetch the right one.		
 
 end;
 
@@ -1037,23 +1074,23 @@ end;
 function ColorNumFromHex(input:DWord):integer;
 
 var
-	r,g,b:word;
-    color:^SDL_Color;
+	r,g,b:PUInt8;
+    color:PSDL_Color;
      
     i:integer;
 
 begin
   if (MaxColors >256) then exit; //index not available
 
-  //FIXME: which format?? (16 colors is 4LSB iirc.)
+  //FIXME: which format?? (16 colors is 4MSB iirc.)
 
 
   i:=0;
-  color:=SDL_GetRGB(input,format,r,g,b); //Get the RGB color from the DWord given
+  SDL_GetRGB(input,MainSurface^.format,r,g,b); //Get the RGB color from the DWord given
 
 	if MaxColors=256 then begin
 		repeat
-			if (color.r=palette256.colors[i].r) and (color.g=palette256.colors[i].g) and (color.b=palette256.colors[i].b) then begin
+			if ((color^.r=Tpalette256.colors[i]^.r) and (color^.g=Tpalette256.colors[i]^.g) and (color^.b=Tpalette256.colors[i]^.b)) then begin
 				ColorNumFromHex:=i;
 				exit;
 			end;
@@ -1064,7 +1101,7 @@ begin
 
 	end else if MaxColors=16 then begin
 		repeat
-  			if (color.r=palette16.colors[i].r) and (color.g=palette16.colors[i].g) and (color.b=palette16.colors[i].b) then begin
+  			if ((color^.r=Tpalette16.colors[i]^.r) and (color^.g=Tpalette16.colors[i]^.g) and (color^.b=Tpalette16.colors[i]^.b)) then begin
 				ColorNumFromHex:=i;
 				exit;
   			end;
@@ -1079,8 +1116,8 @@ end;
 function GetColorNameFromHex(input:dword):string;
 
 var
-	r,g,b:word;
-    color:^SDL_Color;
+	r,g,b:PUInt8;
+    color:PSDL_Color;
      
     i:integer;
 
@@ -1088,12 +1125,12 @@ begin
   if (MaxColors >256) then exit; //I dunno what the name is...
   i:=0;
 
-  color:=SDL_GetRGB(input,format,r,g,b); //Get the RGB color from the DWord given
+  SDL_GetRGB(input,Mainsurface^.format,r,g,b); //Get the RGB color from the DWord given
 
   if MaxColors=256 then begin
 	repeat
-  		if (color.r=palette256.colors[i].r) and (color.g=palette256.colors[i].g) and (color.b=palette256.colors[i].b) then begin
-			GetColorNameFromHex:=palette256.names[i];
+  		if ((color^.r=Tpalette256.colors[i]^.r) and (color^.g=Tpalette256.colors[i]^.g) and (color^.b=Tpalette256.colors[i]^.b)) then begin
+			GetColorNameFromHex:=GEtEnumName(typeinfo(TPalette256Names),ord(i));
 			exit;
   		end;
   		inc(i);
@@ -1104,8 +1141,8 @@ begin
 
   end else if MaxColors=16 then begin
 	repeat
-  		if (color.r=palette256.colors[i].r) and (color.g=palette256.colors[i].g) and (color.b=palette256.colors[i].b) then begin
-			ColorNameFromHex:=palette16.names[i];
+  		if ((color^.r=Tpalette256.colors[i]^.r) and (color^.g=Tpalette256.colors[i]^.g) and (color^.b=Tpalette256.colors[i]^.b)) then begin
+			GetColorNameFromHex:=GEtEnumName(typeinfo(TPalette16Names),ord(i));
 			exit;
   		end;
   		inc(i);
@@ -1118,75 +1155,42 @@ end;
 
 
 
-//DWord in - SDL_Color(RGB) out
-
-//only two of these are needed
-//RGB is supported due to SDL quirks- technically.... (its funky)
-//these arent just index colors- they do have RGB and RGBA data values
-
-function GetRGBFromHex(input:DWord):SDL_Color;
-var
-	i:integer;
-    somedata:^SDL_Color; 
-
-begin
-
-   if (MaxColors=256) then begin
-	   i:=0;
-	   while (i<256) do begin
-		    if (palette256.dwords[i] = input) then //did we find a match?
-	    	   GetRGBFromHex:=SDL_GetRGB(palette256.DWords[i]);
-            else
-				inc(i);  //no
-       end;
-	  //no match found
-      //exit
-
-   end else if (MaxColors=16) then begin
-	    i:=0;
-	    while (i<16) do begin
-
-		    if (palette256.dwords[i] = input) then //did we find a match?
-	    	   GetRGBFromHex:=SDL_GetRGB(palette16.DWords[i]);
-            else
-				inc(i);  //no
-       end;
-
-
-   end else begin //True color modes
-	   SDL_GetRGB(input,MainSurface.format,somedata.r,somedata.g,somedata.b);
-   	   GetRGBFromHex:=somedata;
-   end;
-end;
-
-function GetRGBAFromHex(input:DWord):SDL_Color;
-var
-	i:integer;
-    somedata:^SDL_Color; 
-
-begin
-//RGBA doesnt support paletted modes
-
-//True color modes
-	   SDL_GetRGBA(input,MainSurface.format,somedata.r,somedata.g,somedata.b,somedata.a);
-   	   GetRGBFromHex:=somedata;
-end;
-
-
 
 //get the last color set
 
-function GetFgRGB:^SDL_Color;
+function GetFgRGB:PSDL_Color;
+var
+  color:PSDL_Color;
+  r,g,b,a:PUInt8;
+
+
 begin
 	SDL_GetRenderDrawColor(renderer,r,g,b,255);
+    color^.r:=byte(^r);
+    color^.g:=byte(^g);
+    color^.b:=byte(^b);
+    color^.a:= $ff;
+    GetFgRGB:=color; 
 end;
 
-function GetFgRGBA:^SDL_Color;
+function GetFgRGBA:PSDL_Color;
+
+var
+  color:PSDL_Color;
+  r,g,b,a:PUInt8;
+
+
 begin
 	SDL_GetRenderDrawColor(renderer,r,g,b,a);
+    color^.r:=byte(^r);
+    color^.g:=byte(^g);
+    color^.b:=byte(^b);
+    color^.a:= $ff;
+    GetFgRGBA:=color; 
+
 end;
 
-//give me the name(string) of the current fg or bg color (paletted modes only)
+//give me the name(string) of the current fg or bg color (paletted modes only) from the screen
 
 function GetFGName:string;
 
@@ -1198,7 +1202,7 @@ var
 begin
    i:=0;
    i:=GetFGColorIndex;
-   if ((i> 256) or (i=0)) then begin
+   if ((i> 256) or (i<0)) then begin
 
       If IsConsoleInvoked then
 			Writeln('Cant Get color name from an RGB mode colors.');
@@ -1206,10 +1210,10 @@ begin
 	  exit;
    end;
    if MaxColors=256 then begin
-	      GetFGName:=palette256.name[i];
+	      GetFGName:=GEtEnumName(typeinfo(TPalette256Names),ord(i));
 		  exit;
    end else if MaxColors=16 then begin
-	      GetFGName:=palette16.name[i];
+	      GetFGName:=GEtEnumName(typeinfo(TPalette16Names),ord(i));
 		  exit;
    end;	
 
@@ -1226,7 +1230,7 @@ var
 begin
    i:=0;
    i:=GetBGColorIndex;
-   if ((i> 256) or (i=0)) then begin
+   if ((i> 256) or (i<0)) then begin
 
       If IsConsoleInvoked then
 			Writeln('Cant Get color name from an RGB mode colors.');
@@ -1234,10 +1238,10 @@ begin
 	  exit;
    end;
    if MaxColors=256 then begin
-	      GetFGName:=palette256.name[i];
+	      GetBGName:=GEtEnumName(typeinfo(TPalette256Names),ord(i));
 		  exit;
    end else if MaxColors=16 then begin
-	      GetFGName:=palette16.name[i];
+	      GetBGName:=GEtEnumName(typeinfo(TPalette16Names),ord(i));
 		  exit;
    end;	
 
@@ -1253,8 +1257,9 @@ var
    i:integer;
 
 begin
-     i:=0;
+     
      if MaxColors=16 then begin
+     i:=0;
         repeat
 	        if Palette16.dwords[i]= _bgcolor then begin
 		        GetFGColorIndex:=i;
@@ -1262,10 +1267,11 @@ begin
             end;
             inc(i);
        until i=15;
-
-     i:=0;
+    end;
+     
      if MaxColors=256 then begin
-        repeat
+       i:=0; 
+       repeat
 	        if Palette256.dwords[i]= _bgcolor then begin
 		        GetFGColorIndex:=i;
 			    exit;
@@ -1273,7 +1279,7 @@ begin
             inc(i);
        until i=255;
 
-	 else begin
+	 end else begin
 		If IsConsoleInvoked then
 			Writeln('Cant Get index from an RGB mode colors.');
 		//else
@@ -1287,32 +1293,34 @@ function GetFGColorIndex:byte;
 
 var
    i:integer;
-   someColor:^SDL_Color; //UInt8 in C
+   someColor:PSDL_Color;
 
 begin
-     SDL_GetRenderDrawColor(renderer,somecolor.r,somecolor.g,somecolor.b,255); //returns SDL color but we want a DWord of it
+     SDL_GetRenderDrawColor(renderer,somecolor^.r,somecolor^.g,somecolor^.b,255); //returns SDL color but we want a DWord of it
 
-     i:=0;
+     
      if MaxColors=16 then begin
-        repeat
-	        if ((Palette16.colors[i].r=somecolor.r) and (Palette16.colors[i].g=somecolor.g) and (Palette16.colors[i].b=somecolor.b))  then begin
+       i:=0;  
+       repeat
+	        if ((TPalette16.colors[i]^.r=somecolor^.r) and (TPalette16.colors[i]^.g=somecolor^.g) and (TPalette16.colors[i]^.b=somecolor^.b))  then begin
 		        GetFGColorIndex:=i;
 			    exit;
             end;
             inc(i);
        until i=15;
-
-     i:=0;
+     end;
+     
      if MaxColors=256 then begin
-        repeat
-	        if ((Palette256.colors[i].r=somecolor.r) and (Palette256.colors[i].g=somecolor.g) and (Palette256.colors[i].b=somecolor.b))  then begin
+       i:=0; 
+       repeat
+	        if ((TPalette256.colors[i]^.r=somecolor^.r) and (TPalette256.colors[i]^.g=somecolor^.g) and (TPalette256.colors[i]^.b=somecolor^.b))  then begin
 		        GetFGColorIndex:=i;
 			    exit;
             end;
             inc(i);
        until i=255;
 
-	 else begin
+	 end else begin
 		If IsConsoleInvoked then
 			Writeln('Cant Get index from an RGB mode colors.');
 		//else
@@ -1363,16 +1371,16 @@ PenUp is UpMouseButton[x]
 //sets pen color given an indexed input
 procedure setFGColor(color:byte);
 var
-	colorToSet:^SDL_Color;
-    r,g,b:byte;
+	colorToSet:PSDL_Color;
+    r,g,b:PUInt8;
 begin
 
    if MaxColors=256 then begin
-        colorToSet:=GetRGBFromHex(palette256.dwords[color]);
-        SDL_SetRenderDrawColor( Renderer, ord(r), ord(g), ord(b), 255 ); 
+        colorToSet:=Tpalette256.colors[color];
+        SDL_SetRenderDrawColor( Renderer, ord(colorToSet^.r), ord(colorToSet^.g), ord(colorToSet^.b), 255 ); 
    end else if MaxColors=16 then begin
-		colorToSet:=GetRGBFromHex(palette16.dwords[color]);
-        SDL_SetRenderDrawColor( Renderer, ord(r), ord(g), ord(b), 255 ); 
+		colorToSet:=Tpalette16.colors[color];
+        SDL_SetRenderDrawColor( Renderer, ord(colorToSet^.r), ord(colorToSet^.g), ord(colorToSet^.b), 255 ); 
    end;
    //else
    exit;
@@ -1380,17 +1388,21 @@ end;
 
 
 //sets pen color to given dword.
-procedure setFGColor(somecolor:dword); overload;
+procedure setFGColor(someDword:dword); overload;
 var
-    r,g,b:byte;
-
+    r,g,b:PUInt8;
+    somecolor:PSDL_Color;
 begin
 
-   setFontFore:=SDL_GetRGB(somecolor,MainSurface.format,r,g,b); //now gimmie the RGB pair of that color
-   SDL_SetRenderDrawColor( Renderer, ord(r), ord(g), ord(b), 255 ); 
+   SDL_GetRGB(somecolor,MainSurface.format,r,g,b); //now gimmie the RGB pair of that color
+   
+
+
+   SDL_SetRenderDrawColor( Renderer, ord(somecolor^.r), ord(somecolor^.g), ord(somecolor^.b), 255 ); 
    
 end;
 
+//"words" are not Pointers to "Unsigned 8-bit ints".. some type conversion is needed here
 procedure setFGColor(r,g,b:word); overload;
 
 begin
