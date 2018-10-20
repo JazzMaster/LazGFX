@@ -1,6 +1,24 @@
 Unit LazGFX; 
 //SDL BGI reimplementation for FPC
 
+{
+A fully creative rewrite (c) 2017 Richard Jasmin
+with the assistance of others.
+
+License LGPL v2 ONLY. 
+GPL/LGPL v3 complies with MIT rules- this is not Licensed MIT.
+Commercial software is allowed- provided I get the backported changes and modifications.
+(YOU WILL use IFDEFS where appropriate when backporting the code!!)
+
+You must cite original authors and sub authors, as appropriate(standard attribution rules).
+DO NOT CLAIM THIS CODE AS YOUR OWN and you MAY NOT remove this notice.
+
+ANYONE caught DOING SO will be reported.
+
+However- feel free to comment and rewrite the code as you see fit.
+GetText .po can handle translations- if you know how to use it. I dont.
+}
+
 interface
 
 //-DONT RUN A LIBRARY..link to it.

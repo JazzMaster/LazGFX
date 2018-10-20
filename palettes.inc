@@ -647,8 +647,6 @@ var
 
 begin  
 
-//this is GOING TO HURT!
-
 valuelist256[0]:=$00;
 valuelist256[1]:=$00;
 valuelist256[2]:=$00;
@@ -697,111 +695,136 @@ valuelist256[44]:=$7f;
 valuelist256[45]:=$ff;
 valuelist256[46]:=$ff;
 valuelist256[47]:=$ff;
-
 valuelist256[48]:=$00;
 valuelist256[49]:=$00;
 valuelist256[50]:=$00;
-
 valuelist256[51]:=$00;
 valuelist256[52]:=$00;
 valuelist256[53]:=$5f;
-
 valuelist256[54]:=$00;
 valuelist256[55]:=$00;
 valuelist256[56]:=$87;
-
 valuelist256[57]:=$00;
 valuelist256[58]:=$00;
 valuelist256[59]:=$af;
-
 valuelist256[60]:=$00;
 valuelist256[61]:=$00;
 valuelist256[62]:=$d7;
+valuelist256[63]:=$00;
+valuelist256[64]:=$00;
+valuelist256[65]:=$ff;
+valuelist256[66]:=$00;
+valuelist256[67]:=$5f;
+valuelist256[68]:=$00;
+valuelist256[69]:=$00;
+valuelist256[70]:=$5f;
+valuelist256[71]:=$5f;
+valuelist256[72]:=$00;
+valuelist256[73]:=$5f;
+valuelist256[74]:=$87;
+valuelist256[75]:=$00;
+valuelist256[76]:=$5f;
+valuelist256[77]:=$af;
+valuelist256[78]:=$00;
+valuelist256[79]:=$5f;
+valuelist256[80]:=$d7;
+valuelist256[81]:=$00;
+valuelist256[82]:=$5f;
+valuelist256[83]:=$ff;
+valuelist256[84]:=$00;
+valuelist256[85]:=$87;
+valuelist256[86]:=$00;
+valuelist256[87]:=$00;
+valuelist256[88]:=$87;
+valuelist256[89]:=$5f;
+valuelist256[90]:=$00;
+valuelist256[91]:=$87;
+valuelist256[92]:=$87;
+valuelist256[93]:=$00;
+valuelist256[94]:=$87;
+valuelist256[95]:=$af;
+valuelist256[96]:=$00;
+valuelist256[97]:=$87;
+valuelist256[98]:=$d7;
+valuelist256[99]:=$00;
+valuelist256[100]:=$87;
+valuelist256[101]:=$ff;
+valuelist256[102]:=$00;
+valuelist256[103]:=$af;
+valuelist256[104]:=$00;
+valuelist256[105]:=$00;
+valuelist256[106]:=$af;
+valuelist256[107]:=$5f;
+valuelist256[108]:=$00;
+valuelist256[109]:=$af;
+valuelist256[110]:=$87;
+valuelist256[111]:=$00;
+valuelist256[112]:=$af;
+valuelist256[113]:=$af;
+valuelist256[114]:=$00;
+valuelist256[115]:=$af;
+valuelist256[116]:=$d7;
+valuelist256[117]:=$00;
+valuelist256[118]:=$af;
+valuelist256[119]:=$ff;
+valuelist256[120]:=$00;
+valuelist256[121]:=$d7;
+valuelist256[122]:=$00;
+valuelist256[123]:=$00;
+valuelist256[124]:=$d7;
+valuelist256[125]:=$5f;
+valuelist256[126]:=$00;
+valuelist256[127]:=$d7;
+valuelist256[128]:=$87;
+valuelist256[129]:=$00;
+valuelist256[130]:=$d7;
+valuelist256[131]:=$af;
+valuelist256[132]:=$00;
+valuelist256[133]:=$d7;
+valuelist256[134]:=$d7;
+valuelist256[135]:=$00;
+valuelist256[136]:=$d7;
+valuelist256[137]:=$ff;
+valuelist256[138]:=$00;
+valuelist256[139]:=$ff;
+valuelist256[140]:=$00;
+valuelist256[141]:=$00;
+valuelist256[142]:=$ff;
+valuelist256[143]:=$5f;
+valuelist256[144]:=$00;
+valuelist256[145]:=$ff;
+valuelist256[146]:=$87;
+valuelist256[147]:=$00;
+valuelist256[148]:=$ff;
+valuelist256[149]:=$af;
+valuelist256[150]:=$00;
+valuelist256[151]:=$ff;
+valuelist256[152]:=$d7;
+valuelist256[153]:=$00;
+valuelist256[154]:=$ff;
+valuelist256[155]:=$ff;
+valuelist256[156]:=$5f;
+valuelist256[157]:=$00;
+valuelist256[158]:=$00;
+valuelist256[159]:=$5f;
+valuelist256[160]:=$00;
+valuelist256[161]:=$5f;
+valuelist256[162]:=$5f;
+valuelist256[163]:=$00;
+valuelist256[164]:=$87;
 
-valuelist256[63]:=$00
-valuelist256[64]:=$00
-valuelist256[65]:=$ff
+valuelist256[]:=$5f
+valuelist256[]:=$00
+valuelist256[]:=$af
 
-valuelist256[66]:=$00
-valuelist256[67]:=$5f
-valuelist256[68]:=$00
-
-valuelist256[69]:=$00
-valuelist256[70]:=$5f
-valuelist256[71]:=$5f
-
-valuelist256[72]:=$00
-valuelist256[73]:=$5f
-valuelist256[74]:=$87
-
-valuelist256[75]:=$00
-valuelist256[76]:=$5f
-valuelist256[77]:=$af
-
-valuelist256[78]:=$00
-valuelist256[79]:=$5f
-valuelist256[80]:=$d7
-
-valuelist256[81]:=$00
-valuelist256[82]:=$5f
-valuelist256[83]:=$ff
-
-valuelist256[84]:=$00
-valuelist256[85]:=$87
-valuelist256[86]:=$00
-
-valuelist256[87]:=$00
-valuelist256[88]:=$87
-valuelist256[89]:=$5f
-
-valuelist256[90]:=$00
-valuelist256[91]:=$87
-valuelist256[92]:=$87
-
-valuelist256[93]:=$00
-valuelist256[94]:=$87
-valuelist256[95]:=$af
-
-valuelist256[96]:=$00
-valuelist256[97]:=$87
-valuelist256[98]:=$d7
-
-valuelist256[99]:=$00
-valuelist256[100]:=$87
-valuelist256[101]:=$ff
-
-valuelist256[102]:=$00
-valuelist256[103]:=$af
-valuelist256[104]:=$00
+valuelist256[]:=$5f
+valuelist256[]:=$00
+valuelist256[]:=$d7
 
 
 //more to come!
 {
 
-$00, $af, $5f,
-$00, $af, $87,
-$00, $af, $af,
-$00, $af, $d7,
-$00, $af, $ff,
-$00, $d7, $00,
-$00, $d7, $5f,
-$00, $d7, $87,
-$00, $d7, $af,
-$00, $d7, $d7,
-
-$00, $d7, $ff,
-$00, $ff, $00,
-$00, $ff, $5f,
-$00, $ff, $87,
-$00, $ff, $af,
-$00, $ff, $d7,
-$00, $ff, $ff,
-$5f, $00, $00,
-$5f, $00, $5f,
-$5f, $00, $87,
-
-$5f, $00, $af,
-$5f, $00, $d7,
 $5f, $00, $ff,
 $5f, $5f, $00,
 $5f, $5f, $5f,

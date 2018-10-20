@@ -1,16 +1,21 @@
-I insist on version 2, if you dont like it, dont take my code.
+I insist on LGPL version 2, if you dont like it, dont take my code.
 
 REDHAT did this for the same reason Im doing it now:
 
 		Share the code alike and BACKPORT changes.
 
 If you dont backport, then DONT TAKE the CODE. 
-You may FORK. You may rewrite it BACK INTO C/CPP/C sharp...PYTHON..(I dont care...)
+You may FORK. 
+You may rewrite it BACK INTO C/CPP/C sharp...PYTHON..(I dont care...)
 
-LGPL is enclosed. THIS IS A LIBRARY.
+LGPL is enclosed. 
+
+THIS IS A LIBRARY.
 Plan accordingly.
-See LICENSE for more details.
 
-NO WARRANTY (IMPLIED OR OTHERWISE).
+NO WARRANTY (IMPLIED, ASSUMED OR OTHERWISE).
 YOUR MILEAGE WILL VARY.
+
+You must cite original authors and sub authors, as appropriate(stand attribution rules).
+DO NOT CLAIM THIS CODE AS YOUR OWN and you may not remove this notice.
 
