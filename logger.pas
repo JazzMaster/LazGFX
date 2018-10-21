@@ -1,164 +1,81 @@
 unit logger;
 
-{                                                                              }
-{ The initial developer of this Pascal code was :                              }
-{ Dominique Louis <Dominique@SavageSoftware.com.au>                            }
-{                                                                              }
-{ Portions created by Dominique Louis are                                      }
-{ Copyright (C) 2000 - 2001 Dominique Louis.                                   }
-{                                                                              }
-{                                                                              }
-{                                                                              }
-{ Contributor(s)                                                               }
-{ --------------                                                               }
-{ Richard Jasmin <Jazz>                                                                             }
-{                                                                              }
-{ Obtained through:                                                            }
-{ Joint Endeavour of Delphi Innovators ( Project JEDI )                        }
-                                                                }
-{ The contents of this file are used with permission, subject to               }
-{ the Mozilla Public License Version 1.1 (the "License"); you may              }
-{ not use this file except in compliance with the License. You may             }
-{ obtain a copy of the License at                                              }
-{ http://www.mozilla.org/MPL/MPL-1.1.html                                      }
-{                                                                              }
-{ Software distributed under the License is distributed on an                  }
-{ "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or               }
-{ implied. See the License for the specific language governing                 }
-{ rights and limitations under the License.                                    }
-{                                                                              }
-{ Description                                                                  }
-{ -----------                                                                  }
-{  Objectified  Logging functions...                                                       }
-{                                                                              }
-{                                                                              }
-{ Programming Notes                                                            }
-{ -----------------                                                            }
-{  updated by Jazz - jedi include removed                                      
-Location isnt needed and spurious- otherwise useful.
+var
 
-  Revision 1.2  2006/11/26 16:58:04  
-  Modifed to create separate log files. 
-  Therefore each instance running from the same directory will have their own individual log file, prepended with a number.
-
-  Revision 1.1  2004/02/05 00:08:20
-  Module 1.0 release
-
-  
-}
-
-// {$I jedi.inc}
-
-{$WEAKPACKAGEUNIT OFF}
+  critical,normal,warning:string;
 
 interface
 
-uses
-  Classes,
-  SysUtils;
+Procedure FileLogString(s: String);
+Procedure FileLogLn(s: string);
 
-type
-  TLogger = class
-  private
-    FFileHandle : TextFile;
-    FApplicationName : string;
-    FApplicationPath : string;
-  protected
-
-  public
-    constructor Create;
-    destructor Destroy; override;
-    function GetApplicationName: string;
-    function GetApplicationPath: string;
-    procedure LogError( ErrorMessage : string );
-    procedure LogWarning( WarningMessage : string );
-    procedure LogStatus( StatusMessage : string);
-  published
-    property ApplicationName : string read GetApplicationName;
-    property ApplicationPath : string read GetApplicationPath;
-  end;
-
-var
-  Log : TLogger;
 
 implementation
+{
+followng code is from FPC graphics unit(mostly sane code)
 
-{ TLogger }
-constructor TLogger.Create;
+AUTHORS:                                              
+   Gernot Tenchio      - original version              
+   Florian Klaempfl    - major updates                 
+   Pierre Mueller      - major bugfixes                
+   Carl Eric Codere    - complete rewrite              
+   Thomas Schatzl      - optimizations,routines and    
+                           suggestions.                
+   Jonas Maebe         - bugfixes and optimizations    
+
+}
+
+
+function Long2String(l: longint): string;
+begin
+  str(l, strf)
+end;
+
+//end FPC code - the rest has been modified "for an EXPLICIT PURPOSE"
+
+
+//logChar is pointless..
+Procedure FileLogString(s: String);
 var
-  FileName : string;
-  FileNo : integer;
-begin
-  FApplicationName := ExtractFileName( ParamStr(0) );
-  FApplicationPath := ExtractFilePath( ParamStr(0) );
-  FileName := FApplicationPath + ChangeFileExt( FApplicationName, '.log' );
-  FileNo := 0;
-  while FileExists( FileName ) do
-  begin
-    inc( FileNo );
-    FileName := FApplicationPath + IntToStr( FileNo ) + ChangeFileExt( FApplicationName, '.log' )
-  end;
-  AssignFile( FFileHandle, FileName );
-  ReWrite( FFileHandle );
-  (*inherited Create( FApplicationPath + ChangeFileExt( FApplicationName, '.log' ),
-                    fmCreate {$IFNDEF FPC}or fmShareExclusive{$ENDIF} );*)
-end;
+   output: file; //untyped text
 
-destructor TLogger.Destroy;
-begin
-  CloseFile( FFileHandle );
-  inherited;
-end;
+Begin
+//dont open a file if its already opened and why open/close repeatedly?
+  if NotLogging then begin 
+    Assign(output,'lazgfx.log'); 
+    Append(debuglog);
+ end;
+  if IsConsoleInvoked then
+     write(s);
+  Write(otuput, s);
+  if donelogging then Close(debuglog);
+End;
 
-function TLogger.GetApplicationName: string;
-begin
-  result := FApplicationName;
-end;
-
-function TLogger.GetApplicationPath: string;
-begin
-  result := FApplicationPath;
-end;
-
-procedure TLogger.LogError(ErrorMessage:string);
+Procedure FileLogLn(s: string);
 var
-  S : string;
-begin
-  S := '*** ERROR *** : @ ' + TimeToStr(Time) + ' MSG : ' + ErrorMessage + ' IN : ' + #13#10;
-  WriteLn( FFileHandle,  S );
-  Flush( FFileHandle );
-end;
+   output: file; //untyped text
 
-procedure TLogger.LogStatus(StatusMessage: string);
-var
-  S : string;
-begin
-  S := 'STATUS INFO : @ ' + TimeToStr(Time) + ' MSG : ' + StatusMessage + ' IN : ' + #13#10;
-  WriteLn( FFileHandle,  S );
-  Flush( FFileHandle );
-end;
+Begin
 
-procedure TLogger.LogWarning(WarningMessage: string);
-var
-  S : string;
-begin
-  S := '=== WARNING === : @ ' + TimeToStr(Time) + ' MSG : ' + WarningMessage + ' IN : ' + #13#10;
-  WriteLn( FFileHandle,  S );
-  Flush( FFileHandle );
-end;
+//dont open a file if its already opened and why open/close repeatedly?
+  if NotLogging then begin 
+    Assign(output,'lazgfx.log'); 
+    Append(debuglog);
+ end;
+  if IsConsoleInvoked then
+     writeln(s);
+  Writeln(otuput,s);
+  if donelogging then Close(debuglog);
+End;
 
-initialization
-begin
-  Log := TLogger.Create;
-  Log.LogStatus( 'Starting Application', 'Initialization' );
-end;
 
-finalization
 begin
-  Log.LogStatus( 'Terminating Application', 'Finalization' );
-  Log.Free;
-  Log := nil;
-end;
+//so we can compile custom error messages
+   critical:='*** CRITICAL ERROR!! ';
+   normal:='*** STATUS: ';
+   warning:='*** WARNING!! ';
+
 
 end.
  
+

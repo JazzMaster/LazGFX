@@ -747,3 +747,16 @@ var
 
   TPalette256:TRec256;
   TPalette256Grey:TRec256;
+
+//exported functions/proceedures
+
+procedure initPaletteGrey16;
+procedure initPalette256Grey;
+procedure initPalette16;
+procedure initPalette256;
+
+procedure Save16Palette(filename:string);
+procedure Read16Palette(filename:string);
+procedure Save256Palette(filename:string);
+procedure Read256Palette(filename:string);
+

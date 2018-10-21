@@ -15,7 +15,7 @@
 //(greyscale mCGA is a hackish guess based on rough math, given 14 colors, and also black and white)
 
 
-procedure init16PaletteGrey;
+procedure initPaletteGrey16;
 
 var
    i,num:integer;
@@ -105,7 +105,7 @@ TPalette16GRey.DWords[15]:=$ffffffff;
 end;
 
 
-procedure init256PaletteGrey;
+procedure initPaletteGrey256;
 
 //easy peasy to setup.
 
@@ -415,7 +415,7 @@ TPalette256.DWords[255]:=$eeeeeeff;
 end;
 
 //FIXED- for good this time. (Oct-19-18)
-procedure init16Palette;
+procedure initPalette16;
 
 var
    num,i:integer;
@@ -580,7 +580,7 @@ var
 	i,num            : integer;
 
 Begin
-	init16Palette;
+	initPalette16;
 	Assign(palette16File, filename);
 	ReWrite(palette16File);
 
@@ -612,7 +612,7 @@ Begin
 
 end;
 
-procedure init256Palette;
+procedure initPalette256;
 
 //256 color VGA palette based on XTerm colors(Unix)
 // however the first 16 are off according to mCGA specs and have been corrected.
@@ -1746,7 +1746,7 @@ Var
 Begin
 
     //save us a lot of code and work
-    init256Palette;
+    initPalette256;
 	Assign(palette256File, filename);
 	ReWrite(palette256File);
 

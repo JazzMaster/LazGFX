@@ -484,7 +484,7 @@ uses
 {$ifdef unix} cthreads,ctypes,cmem,sysUtils,crt,{$endif}
 
 //FPC generic units(OS independent)
-	SDL,SDL2,SDL_Image,SDL2_TTF,strings,typinfo
+  SDL2,SDL2_Image,SDL2_TTF,strings,typinfo
 
 //GL, GLU
 //math
@@ -607,7 +607,7 @@ type
 
 //becuse otherwise we confuse the compiler etc.
 //adjust the variables accordingly. This is mostly for records and objects.
-//OK- Im lazy....or tired...
+
 
 //should we need to abort...
 
@@ -675,15 +675,6 @@ solution:
 
 }
 
-type
-
-
-  TMaximumModeData=record
-     strings:string;
-     num:smallint;
-     MAxX,MAxY:word;
-     bpp:byte;
-  end;
 
 {$INCLUDE palettesh.inc}
 {$INCLUDE modelisth.inc}
@@ -692,8 +683,8 @@ type
 
 var
 
-  texBounds: array [0..64] of ^SDL_Rect;
-  textures: array [0..64] of ^SDL_Texture;
+  texBounds: array [0..64] of PSDL_Rect;
+  textures: array [0..64] of PSDL_Texture;
 //you only scroll,etc within a viewport- you cant escape from it without help.
 
 
@@ -724,15 +715,15 @@ const
    JOYSTICK_DEAD_ZONE = 8000;
 
 var
-	quit,minimized:boolean;
-    X,y:integer;
-	e:PSDL_Event;
-    gGameController:^SDL_Joystick;
+    where:Twhere;
+	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop:boolean;
+    X,Y,_grResult:integer;
+    gGameController:PSDL_Joystick;
     Renderer:PSDL_Renderer;
     MainSurface,FontSurface : PSDL_Surface; //main drawing screen
     window:PSDL_Window; //A window... heh..."windows" he he...
     Texture:PSDL_Texture;
-    Rect1,srcR,destR:PSDL_Rect;
+    Rect1,srcR,destR,TextRect:PSDL_Rect;
     rmask,gmask,bmask,amask:longword;
 
     ttfFont : PTTF_Font;
@@ -743,13 +734,12 @@ var
     font_size:integer; 
     style:byte; 
     outline:longint;
-    r,g,b,a:byte; //positives only!!
 
+//maxMode:=GraphicsModes[i]
 
     grError: array [low(grerrorType)..high(grErrorType)] of string;
 
-
-  AspectRatio:real; //pairs of x,y defined in a record but a "real" value
+    AspectRatio:real; //pairs of x,y defined in a record but a "real" value
 
 {
 older modes are not used, so y keep them in the list??
@@ -770,39 +760,41 @@ Then these can be used properly.
 }
 
   debuglog: text;
-
-  CurrX, CurrY : Word;   { viewport relative }
-
+  MaxColors:LongWord; //positive only!!
   ClipPixels: Boolean=true; //always clip
 
-  _GraphResult : smallint; //compatibility
   WantsJoyPad:boolean;
   screenshots:longint=000000;
-
 
   NonPalette, TrueColor,WantsAudioToo,WantsCDROM:boolean;	
   Blink:boolean=false;
   CenterText:boolean=false; //see crtstuff unit for the trick
   
-  MaxModeSupported:^TMaximumModeData; //string, not an array entry??
-	
+  MaxX,MaxY:word;
+  bpp:byte;
+
+//maxModeSupported:=GraphicsModes[i]
+
 
   _fgcolor, _bgcolor:DWord;	//this is modified due to hi and true color support.
-  //do not use old school index numbers. FETCH the index DWord instead.  
+  //do not use old school index numbers. FETCH the index based DWord instead.  
   
-  //GetPixel should convert it back to an index value if possible....not leave us with hex...
+  flip_timer_ms:integer; //Time in MS between Render calls.
+  //ideally ignore this and use GetTicks estimates with "Deltas"
+  //this is bare minimum support.
 
-  flip_timer_id:^SDL_TimerID; //needed later to remvoe it
-  thread:^SDL_Thread;
+  thread:PSDL_Thread;
   threadID:^TSDL_threadID;
   threadReturnValue:integer;
 	
   Rect : PSDL_Rect;
 
-  LIBGRAPHICS_ACTIVE,LIBGRAPHICS_INIT,RenderingDone:boolean; //did you call me correctly?
-  IsInvokedConsole,CantDoAudio:boolean; //will audio init? and the other is tripped if in X11.
+  LIBGRAPHICS_ACTIVE:boolean;
+  LIBGRAPHICS_INIT:boolean;
+  RenderingDone:boolean; //did you call me correctly?
+  IsConsoleInvoked,CantDoAudio:boolean; //will audio init? and the other is tripped if in X11.
   //can we check if LCL is compiled in?
-
+  Event:PSDL_Event;
    
   himode,lomode:integer;
 
@@ -968,7 +960,8 @@ procedure timer_flip; //triggered by SDL timer according to screen refresh rate
 
 begin
    if (not Paused) then begin //if paused then ignore screen updates
-         SDL_RenderPresent(Renderer);  //SDL_Flip; ensures screen is updated if ever rendering between updates.
+      if TimerTicks mod flip_timer_ms then 
+         SDL_RenderPresent(Renderer);  
    end else exit;
    //else: do other stuff instead of updating the screen.
 end;
@@ -996,7 +989,7 @@ end;
 //first
 
 
-function GetRGBFromHex(input:DWord):SDL_Color;
+function GetRGBFromHex(input:DWord):PSDL_Color;
 var
 	i:integer;
     somedata:PSDL_Color; 
@@ -1038,21 +1031,29 @@ begin
 
 
    end else begin //True color modes
-	   SDL_GetRGB(input,MainSurface^.format,somedata^.r,somedata^.g,somedata^.b);
+	   SDL_GetRGB(input,MainSurface^.format,r,g,b);
+       somedata^.r:=byte(^r);
+       somedata^.g:=byte(^g);
+       somedata^.b:=byte(^b);
+       somedata^.a:= $ff;
    	   GetRGBFromHex:=somedata;
    end;
 end;
 
-function GetRGBAFromHex(input:DWord):SDL_Color;
+function GetRGBAFromHex(input:DWord):PSDL_Color;
 var
 	i:integer;
-    somedata:PSDL_Color; 
-    r,g,b:PUInt8;
+    somecolor:PSDL_Color; 
+    r,g,b,a:PUInt8;
 
 begin
 //RGBA doesnt support paletted modes(True color modes)
-	   SDL_GetRGBA(input,MainSurface^.format,somedata^.r,somedata^.g,somedata^.b,somedata^.a);
-   	   GetRGBFromHex:=somedata;
+	   SDL_GetRGBA(input,MainSurface^.format,r,g,b,a);
+       somecolor^.r:=byte(^r);
+       somecolor^.g:=byte(^g);
+       somecolor^.b:=byte(^b);
+       somecolor^.a:=byte(^a);
+   	   GetRGBAFromHex:=somecolor;
 end;
 
 
@@ -1165,7 +1166,7 @@ var
 
 
 begin
-	SDL_GetRenderDrawColor(renderer,r,g,b,255);
+	SDL_GetRenderDrawColor(renderer,r,g,b,a);
     color^.r:=byte(^r);
     color^.g:=byte(^g);
     color^.b:=byte(^b);
@@ -1261,7 +1262,7 @@ begin
      if MaxColors=16 then begin
      i:=0;
         repeat
-	        if Palette16.dwords[i]= _bgcolor then begin
+	        if TPalette16.dwords[i]= _bgcolor then begin
 		        GetFGColorIndex:=i;
 			    exit;
             end;
@@ -1272,7 +1273,7 @@ begin
      if MaxColors=256 then begin
        i:=0; 
        repeat
-	        if Palette256.dwords[i]= _bgcolor then begin
+	        if TPalette256.dwords[i]= _bgcolor then begin
 		        GetFGColorIndex:=i;
 			    exit;
             end;
@@ -1294,10 +1295,14 @@ function GetFGColorIndex:byte;
 var
    i:integer;
    someColor:PSDL_Color;
+   r,g,b,a:PUInt8;
 
 begin
-     SDL_GetRenderDrawColor(renderer,somecolor^.r,somecolor^.g,somecolor^.b,255); //returns SDL color but we want a DWord of it
-
+     SDL_GetRenderDrawColor(renderer,r,g,b,a); //returns SDL color but we want a DWord of it
+    somecolor^.r:=byte(^r);
+    somecolor^.g:=byte(^g);
+    somecolor^.b:=byte(^b);
+    somecolor^.a:= $ff;
      
      if MaxColors=16 then begin
        i:=0;  
@@ -1386,6 +1391,9 @@ begin
    exit;
 end;
 
+//im not just fucking lazy- this is the proper calling convention(fucked from C)
+//LMAO
+
 
 //sets pen color to given dword.
 procedure setFGColor(someDword:dword); overload;
@@ -1394,9 +1402,11 @@ var
     somecolor:PSDL_Color;
 begin
 
-   SDL_GetRGB(somecolor,MainSurface.format,r,g,b); //now gimmie the RGB pair of that color
-   
-
+   SDL_GetRGB(someDword,MainSurface^.format,r,g,b); //now gimmie the RGB pair of that color
+    somecolor^.r:=byte(^r);
+    somecolor^.g:=byte(^g);
+    somecolor^.b:=byte(^b);
+//    somecolor^.a:= $ff;
 
    SDL_SetRenderDrawColor( Renderer, ord(somecolor^.r), ord(somecolor^.g), ord(somecolor^.b), 255 ); 
    
@@ -1418,212 +1428,119 @@ end;
 
 
 //sets background color based on index
-procedure setBGColor(color:byte);
+procedure setBGColor(index:byte);
 var
-	colorToSet:^SDL_Color;
+	colorToSet:PSDL_Color;
 //if we dont store the value- we cant fetch it later on when we need it.
 begin
 
     if MaxColors=256 then begin
-        colorToSet:=GetRGBFromHex(palette256.dwords[color]);
-        _bgcolor:=palette256.dwords[color]; //set here- fetch later
-	    SDL_SetRenderDrawColor( Renderer, ord(r), ord(g), ord(b), 255 ); 
-	    SDL_RenderClear;
+        colorToSet:=Tpalette256.colors[index];
+        _bgcolor:=Tpalette256.dwords[index]; //set here- fetch later
+	    SDL_SetRenderDrawColor( Renderer, ord(colorToSet^.r), ord(colorToSet^.g), ord(colorToSet^.b), 255 ); 
+	    SDL_RenderClear(Renderer);
    end else if MaxColors=16 then begin 
-		colorToSet:=GetRGBFromHex(palette16.dwords[color]);
-        _bgcolor:=palette16.dwords[color]; //set here- fetch later
-   	    SDL_SetRenderDrawColor( Renderer, ord(r), ord(g), ord(b), 255 ); 
-   	    SDL_RenderClear;
+		colorToSet:=Tpalette16.colors[index];
+        _bgcolor:=Tpalette256.dwords[index]; //set here- fetch later
+   	    SDL_SetRenderDrawColor( Renderer, ord(colorToSet^.r), ord(colorToSet^.g), ord(colorToSet^.b), 255 ); 
+   	    SDL_RenderClear(Renderer);
    end;
    //else
+//yell at user
    exit;
    
 end;
 
-procedure setBGColor(somecolor:DWord); overload;
+procedure setBGColor(someDword:DWord); overload;
 var
-    r,g,b:byte;
-	color:DWord;
+    r,g,b:PUInt8;
+	somecolor:PSDL_Color;
 
 begin
-   color:=SDL_GetRGB(somecolor,MainSurface.format,r,g,b); //now gimmie the RGB pair of that color
-   _bgcolor:=somecolor;
-   SDL_SetRenderDrawColor( Renderer, ord(r), ord(g), ord(b), 255 ); 
-   SDL_RenderClear;
+
+
+    SDL_GetRGB(someDword,MainSurface^.format,r,g,b); //now gimmie the RGB pair of that color
+    somecolor^.r:=byte(^r);
+    somecolor^.g:=byte(^g);
+    somecolor^.b:=byte(^b);
+//    somecolor^.a:= $ff;
+
+   _bgcolor:=someDword; //store the value
+   SDL_SetRenderDrawColor( Renderer, ord(somecolor^.r), ord(somecolor^.g), ord(somecolor^.b), 255 ); 
+   SDL_RenderClear(renderer);
 end;
 
 procedure setBGColor(r,g,b:word); overload;
 
 //bgcolor here and rgba *MAY* not match our palette..be advised.
 
+var
+ color:PSDL_Color;
+
 begin
-   _bgcolor:=SDL_MapRGB(format,r,g,b);
-   SDL_SetRenderDrawColor( Renderer, ord(r), ord(g), ord(b), 255 ); 
-   SDL_RenderClear;
+   _bgcolor:=SDL_MapRGB(MainSurface^.format,color^.r,color^.g,color^.b);
+   SDL_SetRenderDrawColor( Renderer, ord(color^.r), ord(color^.g), ord(color^.b), 255 ); 
+   SDL_RenderClear(renderer);
 end;
 
 procedure setBGColor(r,g,b,a:word); overload;
 
-begin
-   _bgcolor:=SDL_MapRGB(format,r,g,b,a);
-   SDL_SetRenderDrawColor( Renderer, ord(r), ord(g), ord(b), ord(a)); 
-   SDL_RenderClear;
-end;
-
-
-function ColorNameToNum(ColorName : string) : integer;
-//from string to color number
-
 var
-	i:integer;
+  color:PSDL_Color;
 
 begin
-  i:=0;
-
-//gonna have to look and see if anything matches...
-
-  if MaxColors=16 then begin
-     while (i<16) do begin
-        if (palette16.name[i]=ColorName) then begin
-           ColorNameToNum:=i;
-           exit;
-        end;
-        inc(i);
-     end;
-
-  end else if MaxColors=256 then begin
-  while (i<256) do begin
-     if (palette256.name[i]=ColorName) then begin
-        ColorNameToNum:=i;
-        exit;
-     end;
-     inc(i);
-  end;
-
+   _bgcolor:=SDL_MapRGB(MainSurface^.format,color^.r,color^.g,color^.b);
+   SDL_SetRenderDrawColor( Renderer, ord(color^.r), ord(color^.g), ord(color^.b), ord(color^.a)); 
+   SDL_RenderClear(renderer);
 end;
 
+
+// ColorNameToNum(ColorName : string) : integer;
+//isnt needed anymore because enums carry a number for the definition defined "NAME".
+
+//yellow=15 now...without even trying.
 
 
 //these two only:
 //we locate the string and then find the value of it in the array.
 
-procedure setColorFGByString(colorname:string); 
-var
-   somecolor:byte;
-   somestring:string;
-	i:byte;
+//therefore setting by string value is also obsoleted because you already have the index.
 
-begin
-
-    if (MaxColors >256) then begin
-		If IsConsoleInvoked then
-			Writeln('Cant Set colors from an RGB mode colors.');
-		//else
-			//messagebox('Cant Get index from an RGB mode colors.');
-       exit;
-    end;
-    
-	if MaxColors=16 then begin
-        i:=0;
-		repeat
-           if (palette16.names[i]=colorname) then
-				   		SetFGColor(i); //set pencolor with index
-		   inc(i);
-				
-		until i=15;
-	    //else
-        exit;
-	end;
-
-	else if MaxColors =256 then begin
-        i:=0;
-		repeat
-           if (palette256.names[i]=colorname) then
-				   		SetFGColor(i); //set pencolor with index
-		   inc(i);
-				
-		until i=255;
-	    //else
-        exit;
-	end;
-   
-end;	
- 
-procedure setColorBGByString(colorname:string); 
-
-var
-   somecolor:byte;
-	i:integer;
-
-begin
-
-    if MaxColors >256 then begin
-		If IsConsoleInvoked then
-			Writeln('Cant Set colors from an RGB mode colors.');
-		//else
-			//messagebox('Cant Get index from an RGB mode colors.');
-       exit;
-    end;
-    
-
-	if MaxColors =16 then begin
-        i:=0;
-		repeat
-           if (palette16.names[i]=colorname) then
-				   		SetBGColor(i); //set pencolor with index
-		   inc(i);
-				
-		until i=15;
-	    //else
-        exit;
-
-    end	else if MaxColors =256 then
-        i:=0;
-		repeat
-           if (palette256.names[i]=colorname) then
-				   		SetBGColor(i); //set pencolor with index
-		   inc(i);
-				
-		until i=255;
-	    //else
-        exit;
-
-   end;
-end;	
 
 
 //gives you the DWord of the RGB Tuple last used
 //does not return RGB SDL_Color Tuple
 
 function GetFgDWordRGB:DWord;
-begin
-	SDL_GetRenderDrawColor(renderer,r,g,b);
-    case bpp of
-		4:format:=SDL_PIXELFORMAT_INDEX4LSB;
-        8:format:=SDL_PIXELFORMAT_INDEX8;
-        15:format:=SDL_PIXELFORMAT_RGB555;
-        16:format:=SDL_PIXELFORMAT_RGBA4444;
-        24:format:=SDL_PIXELFORMAT_RGB888;
-   //     32:format:=SDL_PIXELFORMAT_RGBA8888;
-    end;
 
-    GetFGDWord:=MapRGBA(format,r,g,b,a); //gimmie the DWord instead
+var
+  somecolor:PSDL_Color;
+  r,g,b,a:PUint8;
+
+begin
+	SDL_GetRenderDrawColor(renderer,r,g,b,a);
+    somecolor^.r:=byte(^r);
+    somecolor^.g:=byte(^g);
+    somecolor^.b:=byte(^b);
+   GetFgDWordRGB:=SDL_MapRGB(MainSurface^.format,somecolor^.r,somecolor^.g,somecolor^.b); //gimmie the DWord instead
 end;
 
 function GetFgDWordRGBA:DWord;
-begin
-	SDL_GetRenderDrawColor(renderer,r,g,b,a);
-    if (bpp < 8) then exit; //rgba not supported
-    case bpp of
-		4:format:=SDL_PIXELFORMAT_INDEX4LSB;
-        8:format:=SDL_PIXELFORMAT_INDEX8;
-        15:format:=SDL_PIXELFORMAT_RGB555;
-        16:format:=SDL_PIXELFORMAT_RGBA4444;
-        24:format:=SDL_PIXELFORMAT_RGB888;
-   //     32:format:=SDL_PIXELFORMAT_RGBA8888;
-    end;
 
-    GetFGDWord:=MapRGBA(format,r,g,b,a); //gimmie the DWord instead
+var
+  somecolor:PSDL_Color;
+  r,g,b,a:PUint8;
+
+begin
+    if (bpp < 8) then exit; //rgba not supported
+
+	SDL_GetRenderDrawColor(renderer,r,g,b,a);
+    somecolor^.r:=byte(^r);
+    somecolor^.g:=byte(^g);
+    somecolor^.b:=byte(^b);
+    somecolor^.a:=byte(^a);
+
+    GetFgDWordRGBA:=SDL_MapRGBA(MainSurface^.format,somecolor^.r,somecolor^.g,somecolor^.b,somecolor^.a); //gimmie the DWord instead
 end;
 
 //doesnt make sence w using _bgcolor as a DWord
@@ -1631,59 +1548,20 @@ end;
 //has a use but its limited.
 
 function GetBgDWordRGB(r,g,b:byte):DWord;
+
 begin
-    case bpp of
-		4:format:=SDL_PIXELFORMAT_INDEX4LSB;
-        8:format:=SDL_PIXELFORMAT_INDEX8;
-        15:format:=SDL_PIXELFORMAT_RGB555;
-        16:format:=SDL_PIXELFORMAT_RGBA4444;
-        24:format:=SDL_PIXELFORMAT_RGB888;
-   //     32:format:=SDL_PIXELFORMAT_RGBA8888;
-    end;
-    
-    GetBgDWordRGB:=MapRGB(format,r,g,b); //returns SDL RGB Tuple 
-    
+//really rare case
+    if MaxColors<255 then exit; //use the other function for this
+    //try to match r g b to r g b in TPaletteXX.colors 
+    //if a match- then use index to fetch the DWord. 
+    //this is done already 
+
+    GetBgDWordRGB:=SDL_MapRGB(MainSurface^.format,ord(r),ord(g),ord(b)); //returns SDL RGB Tuple     
 end;
 
 function GetBgDWordRGBA(r,g,b,a:byte):DWord;
 begin
-    case bpp of
-		4:format:=SDL_PIXELFORMAT_INDEX4LSB;
-        8:format:=SDL_PIXELFORMAT_INDEX8;
-        15:format:=SDL_PIXELFORMAT_RGB555;
-        16:format:=SDL_PIXELFORMAT_RGBA4444;
-        24:format:=SDL_PIXELFORMAT_RGB888;
-   //     32:format:=SDL_PIXELFORMAT_RGBA8888;
-    end;
-
-    GetFGDWord:=MapRGBA(format,r,g,b,a); //gimmie the DWord instead
-end;
-
-
-//WIP
-procedure Blink(Sometext:string);
-//we need to be told when to stop
-//and make sure our coordinates dont get overwridden
-
-// or RenderClear sounds good( background refresh)...
-
-//apple uses a font that blinks??? eh?
-var
-  HowWide:integer;
-
-begin
-  HowWide:=Length(Sometext); //so we know how much of the 'font' to erase-write-erase
-  //fork() so we dont clam up the screen ops or input loop
-
-  repeat
-	  //the method- like backspace but the whole string we were given instead.
-  	  //getxy()
-//      OutTextXY(x,y,string);
-//      delay(500);
-      //clearLine
-  until StopBlinking:=true; //set this and then clear the screen.
-  //merge()
- 
+    GetBgDWordRGBA:=SDL_MapRGBA(MainSurface^.format,ord(r),ord(g),ord(b),ord(a)); //gimmie the DWord instead
 end;
 
 
@@ -1692,30 +1570,51 @@ end;
 procedure clearscreen; 
 
 begin
-	SDL_RenderClear;
+	SDL_RenderClear(renderer);
+end;
+
+procedure clearscreen(index:byte); 
+
+var
+	r,g,b:PUInt8;
+    somecolor:PSDL_Color;
+begin
+    if MaxColors>256 then exit; //not indexed
+    if MaxColors=16 then
+       somecolor:=Tpalette16.colors[index];
+    
+    if MaxColors=256 then
+       somecolor:=Tpalette256.colors[index];
+
+
+    SetPenColor(Renderer,ord(somecolor^.r),ord(somecolor^.g),ord(somecolor^.b),255);
+	SDL_RenderClear(renderer);
 end;
 
 
-//this is off- wouldnt it make sense to STORE the BG color??
-//UH HUH...silly me. see above for HOWTO.
 procedure clearscreen(color:Dword); overload;
 
 var
-	r,g,b:byte;
-
+	r,g,b:PUInt8;
+    somecolor:PSDL_Color;
+    someDword:DWord;
 begin
-    SDL_GetRGB(color,format,r,g,b);
-    SetPenColor(Renderer,ord(r),ord(g),ord(b),255);
-	SDL_RenderClear;
+    SDL_GetRGB(color,MainSurface^.format,r,g,b);
+    somecolor^.r:=byte(^r);
+    somecolor^.g:=byte(^g);
+    somecolor^.b:=byte(^b);
+
+    SetPenColor(Renderer,ord(somecolor^.r),ord(somecolor^.g),ord(somecolor^.b),255);
+	SDL_RenderClear(renderer);
 end;
 
-
+//these two dont need conversion of the data
 procedure clearscreen(r,g,b:byte); overload;
 
 
 begin
 	SetPenColor(Renderer,ord(r),ord(g),ord(b),255);
-	SDL_RenderClear;
+	SDL_RenderClear(renderer);
 end;
 
 
@@ -1723,7 +1622,7 @@ procedure clearscreen(r,g,b,a:byte); overload;
 
 begin
 	SetPenColor(Renderer,ord(r),ord(g),ord(b),ord(a));
-	SDL_RenderClear;
+	SDL_RenderClear(renderer);
 end;
 
 
@@ -1736,66 +1635,72 @@ procedure clearviewport(windownumber:smallint);
 //clears it, doesnt remove or add a "layered window".
 //usually the last viewport set..not necessary the whole "screen"
 var
-  viewport:^SDL_Rect;
+  r,g,b,a:PUInt8;
+  viewport:PSDL_Rect;
   destcolor:longword;
+  Tex:PSDL_Texture;
+  somecolor:PSDL_Color;
 
 begin
-   viewpport.X:=TextRect[windownumber].x;
-   viewpport.Y:=TextRect[windownumber].y;
-   viewpport.W:=TextRect[windownumber].w;
-   viewpport.H:=TextRect[windownumber].h;
+   viewport^.X:=TextRect[windownumber].x;
+   viewport^.Y:=TextRect[windownumber].y;
+   viewport^.W:=TextRect[windownumber].w;
+   viewport^.H:=TextRect[windownumber].h;
    if MaxColors= 16 then
-      destColor:=palette16.colors[_fgcolor];
-   else if MaxColors=256 then
-      destColor:=palette256.colors[_fgcolor];
+      destColor:=Tpalette16.dwords[_fgcolor];
+   if MaxColors=256 then
+      destColor:=Tpalette256.dwords[_fgcolor]
    else if MaxColors>256 then begin
 	   SDL_GetRenderDrawColor(renderer,r,g,b,a); //grab the last rgb pen color
-       destcolor:=MapRGBA(format,r,g,b,a); //gimmie the DWord instead
+       somecolor^.r:=byte(^r);
+       somecolor^.g:=byte(^g);
+       somecolor^.b:=byte(^b);
+       somecolor^.a:=byte(^a);
+
+       destcolor:=SDL_MapRGBA(MainSurface^.format,somecolor^.r,somecolor^.g,somecolor^.b,somecolor^.a); //gimmie the DWord instead
   end;
   SDL_FillRect(MainSurface, viewport,destcolor);
-  Tex2:=createTextureFromSurface(Mainsurface);
-  RenderCopy(Renderer,Tex2);
-  RenderPresent(Renderer);
+  Tex:=SDL_createTextureFromSurface(Renderer,Mainsurface);
+  SDL_RenderCopy(Renderer,Tex,viewport,viewport); //? toy with this...
+  SDL_RenderPresent(Renderer);
 end;
 
 
-
 //do you want fullscreen or not? pathToDriver is obsolete..
-procedure initgraph(graphdriver,graphmode:integer; pathToDriver:string; wantFullScreen:boolean);
+procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
 
 var
-	maxX,maxY,BitDepth,i,numdisplaymodes:integer;
-    SDLFlags:^SDL_Surface.Flags;
-	_initflag:PSDL_Flags; 
+	BitDepth,i,numdisplaymodes:integer;
+	_initflag,_imgflags,my_timer_id:longword; //^SDL_Flags?? no such beast 
     iconpath:string;
- 	flags:longword;
-    imagesON,RamSize,_imgflags:integer;
-	mode:^SDL_DisplayMode;
-    
+    imagesON,RamSize:integer;
+	mode:PSDL_DisplayMode;
+     
 begin
   pathToDriver:='';  //unused- code compatibility
   iconpath:='./sdlbgi.bmp';
-
 
 
    //"usermode" must match available resolutions etc etc etc
    //this is why I removed all of that code..."define what exactly"??
 
   //until we get here, SDL isnt (or cant be) used.
-  //attempt to trigger SDL...
+  //attempt to trigger SDL...on most sytems this takes a split second.
 
   if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
   if WantsJoyPad then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
   if WantsCDROM then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_CDROM;
 
   if ( SDL_Init(_initflag) < 0 ) then begin
-     if IsConsoleInvoked then begin
+       if not IsConsoleInvoked then begin //windows,etc
+          //we cant speak- write something down.
+      //    SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,SDL_GetError);
+          exit;
+       end;
         writeln('EPIC FAILURE: Unable to init SDL: ', SDL_GetError);
-        Halt(0); //nothing setup...so dont un-set anything.
-      end;
-      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt initialize SDL','BYE..',NIL);
-      delay(1000); //~1sec
-      halt(0);
+        //general gfx failure
+        exit; //nothing setup...so dont un-set anything. exit to caller
+  //if we cant init- dont bother with dialogs.
   end;
  //usually we can get at least -here-
 
@@ -1806,7 +1711,7 @@ begin
     imagesON:=IMG_Init(_imgflags);
 
     //not critical, as we have bmp support but lacking very very bad...
-    if((imagesON and _imgflags) != _imgflags) then begin
+    if((imagesON and _imgflags) <> _imgflags) then begin
        writeln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
        writeln('IMG_Init: %s ', IMG_GetError);
     end;
@@ -1835,12 +1740,12 @@ begin
 
 //If we got here- YAY!
 
-{
-not tested and a lot depends on this working
+
+//not tested and a lot depends on this working
    
-  thread:= SDL_CreateThread(IntHandler, "SDL_INP_Handler", NULL); //fork(IntHandler);
+  mythread:= SDL_CreateThread(IntHandler, 'SDL_INP_Handler', Nil); //fork(IntHandler);
  
-  if not (thread) then begin; //we didnt fork....
+  if not (mythread) then begin; //we didnt fork....
      if IsConsoleInvoked then begin
         writeln('EPIC FAILURE: SDL requires multiprocessing. I cant seem to fork. ');
         closegraph;
@@ -1848,13 +1753,8 @@ not tested and a lot depends on this working
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'EPIC FAILURE: Cant init multiprocess. Its required.','BYE..',NIL);
       closegraph;
   end;
-  threadID := SDL_GetThreadID(thread); //we will kil you eventually Mr.Bond....
+  mythreadID := SDL_GetThreadID(mythread); //we will kil you eventually Mr.Bond....
    
-
-if you can see the titlebar but crash or whatever..then we need some more checks...
-SDL isnt complex to get going... most of the following is optional.
-I just ran some additional checks.
-}
 
 //lets get the current refresh rate and set a screen timer to it.
 // we cant fetch this from X11? sure we can.
@@ -1864,40 +1764,45 @@ I just ran some additional checks.
 
 //(try to) get some non critical but important video timing info
   
-  mode := ( SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, 0 );  //record
+  mode^.format := SDL_PIXELFORMAT_UNKNOWN;
+  mode^.w:=0;
+  mode^.h:=0;
+  mode^.refresh_rate:=0;
+  mode^.driverdata:=Nil;
   //for physical screen 0 do..
   
   //attempting to probe VideoModeInfo block when (VESA) isnt initd results in issues....
   
   if(SDL_GetCurrentDisplayMode(0, mode) <> 0) then begin
-    if IsInvokedConsole then begin
+    if IsConsoleInvoked then begin
 			writeln('Cant get current video mode info. Non-critical error.');
     end;
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cant get the data for the current mode.','OK',NIL);
   end;
 
   //dont refresh faster than the screen.
-  if mode.refresh_rate => 0 then 
-     flip_timer_id := SDL_AddTimer(displaymode.refresh_rate,^SDL_NewTimerCallback( @timer_flip ), nil ); 
+  if (mode^.refresh_rate > 0)  then 
+     flip_timer_ms := mode^.refresh_rate 
   else //can we assume 60hz? (hertz to ms=16.66 ad nauseum)
-     flip_timer_id := SDL_AddTimer(16.7,^SDL_NewTimerCallback( @timer_flip ), nil ); 
+     flip_timer_ms := 17;
+
+  { my_timer_id := SDL_AddTimer((33/10)*10, Timer_FLip, Nil);
 	 
-  //sanity check 
-  if not flip_timer_id then begin
-    if IsInvokedConsole then begin
+  if not my_timer_id then begin
+    if IsConsoleInvoked then begin
 			writeln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
 			writeln('you will have to manually update surfaces and the renderer.');
     end;
 
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'WARNING: SDL cant set video callback timer.Manually update surface.','OK',NIL);
   end;
-
+}
 
   CantDoAudio:=false;
     //prepare mixer
   if WantsAudioToo then begin
   	if Mix_OpenAudio( MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 4096 ) < 0 then begin
- 		if IsInvokedConsole then begin
+ 		if IsConsoleInvoked then begin
 			writeln('OH-NO! The mixer cant be setup. All is silent...');
     	end;
 		  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL Audio init error. Audio functions disabled.','OK',NIL);
@@ -1907,9 +1812,17 @@ I just ran some additional checks.
 
   
 //set some sane default variables
-  if (bpp <=8) then begin //assumes too much but the data is the same
-		_fgcolor:=palette16.DWords[15];
-		_bgcolor:=palette16.DWords[0];
+  if (bpp <=8) then begin 
+  //dont set the wrong palette....
+     if bpp=4 then begin
+		_fgcolor:=Tpalette16.DWords[15];
+		_bgcolor:=Tpalette16.DWords[0];
+     end;
+     if bpp=8 then begin
+		_fgcolor:=Tpalette256.DWords[15];
+		_bgcolor:=Tpalette256.DWords[0];
+     end;
+
   end;
   if MaxColors >256 then begin
 	  _fgcolor := $FFFFFFFF;	//Default drawing color = white (15 or 255)
@@ -1918,12 +1831,12 @@ I just ran some additional checks.
 //  linestyle:= Normal; 
 
   new(Event);
+
   LIBGRAPHICS_ACTIVE:=true;  //We are fully operational now.
   paused:=false;
 
-  _graphResult:=0; //we can just check the dialogs (or text output) now.
-  currX:=0;
-  currY:=0;
+  _grResult:=0; //we can just check the dialogs (or text output) now.
+
   where.X:=0;
   where.Y:=0;
 
@@ -1940,10 +1853,10 @@ I just ran some additional checks.
 
 
   //Check for joysticks 
-  if WantsJoyToo then begin
+  if WantsJoyPad then begin
  
     if( SDL_NumJoysticks < 1 ) then
-	    writeln( 'Warning: No joysticks connected!' ); 
+	    writeln( 'Warning: No joysticks connected!' ) 
       else  //Load joystick 
       gGameController := SDL_JoystickOpen( 0 ); 
       if( gGameController = NiL ) then begin  
@@ -1956,10 +1869,10 @@ I just ran some additional checks.
 end; //initgraph
                     
 
-procedure RendedRectangle(x,y,w,h,:integer);
+procedure RendedRectangle(x,y,w,h:integer);
 
 var
-	Rect1:SDL_Rect;
+	Rect1:PSDL_Rect;
 
 begin
 
@@ -1975,20 +1888,24 @@ end;
 
 procedure closegraph;
 var
-	status:integer;
+	status:PInt;
+    waittimer:integer;
+
 //dont want to alloc and then not free...ghosts are not nice...
 begin
 
-  if wantsJoyToo then
+  if wantsJoyPad then
     SDL_JoystickClose( gGameController ); 
   gGameController := Nil;
 
 
   if WantsAudioToo then begin
      Mix_FreeMusic( music );
-     Mix_FreeChunk( sound );
+     Mix_FreeChunk( fx );
      Mix_CloseAudio;
   end;
+  
+
   free(TextFore);
   free(TextBack);
   TTF_CloseFont(ttfFont);
@@ -1997,9 +1914,8 @@ begin
   if wantsFullIMGSupport then 
      IMG_Quit;
 
-  //kill the redraw_timer and then the interrupt handler...
-  
-  if (flip_timer_id <> NULL) then SDL_RemoveTimer(flip_timer_id);
+ 
+   flip_timer_ms:=0; //going down!
  
   //Kill child if it is alive. we know the pid since we assigned it(the OS really knows it better than us)
 
@@ -2013,21 +1929,21 @@ begin
   repeat
      SDL_Delay(1000);  
      dec(waittimer);
-  until waittime=0; //should be more than enough time to exit..
+  until waittimer=0; //should be more than enough time to exit..
   SDL_KillThread(thread);
 
   dispose( Event );
 
   //free viewports
-{
-  x:=32
+
+  x:=32;
   repeat
-	if (Textures[i]<>Nil) then
-		SDL_DestroyTexture(Textures[i]);
+	if (Textures[x]<>Nil) then
+		SDL_DestroyTexture(Textures[x]);
     dec(x);
-  until x:=1;
+  until x=0;
   
-}
+
 
 //Dont free whats not allocated in initgraph.
 //routines should free what they allocate on exit.
@@ -2038,11 +1954,11 @@ begin
   SDL_DestroyWindow ( Window );
 
   SDL_Quit; 
-  LIBGRAPHICS_ACTIVE:=0;  //Unset the variable (and disable all of our other functions in the process)
+  LIBGRAPHICS_ACTIVE:=false;  //Unset the variable (and disable all of our other functions in the process)
 
   if IsConsoleInvoked then begin
      textcolor(7); //..reset standards...
-     clrscr;
+     clrscr; //text clearscreen
      writeln;
   end;
   //unless you want to mimic the last doom screen here...usually were done....
@@ -2051,66 +1967,57 @@ end;
 
 function GetX:word;
 begin
-  x:=currX;
+  x:=Twhere.X;
 end;
 
 function GetY:word;
 begin
-  y:=currY;
+  y:=Twhere.Y;
 end;
 
-function GetXY:where;
+function GetXY:Twhere;
 begin
-   where.X:=currX;
-   where.Y:=currY;
+   X:=Twhere.X;
+   Y:=Twhere.Y;
 end;
 
 
-procedure setgraphmode(graphmode:integer,wantfullscreen:boolean); 
+procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
 //initgraph should call us to prevent code duplication
    
-begin
-//bail if not enabled already.
-
-if (LIBGRAPHICS_INIT=false) then 
 
 begin
-		
-		if IsConsoleEnabled then writeln('Call initgraph before calling setGraphMode.'); 
-		else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Called setGraphMode too early. Call InitGraph first.','OK',NIL);
-	    exit;
-end
-else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setup- initgraph called us
-//FIXME: match this to the include file
+
+//fill the modelist!
 
   case(graphmode) of //we can do fullscreen, but dont force it...
-	     mCGA:
+	     mCGA:begin
 			MaxX:=320;
 			MaxY:=240;
 			BitDepth:=4; 
 			MaxColors:=16;
            NonPalette:=false;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
         //crt mode
-		VGALo:
+		VGALo:begin
 			MaxX:=320;
 			MaxY:=200;
 			BitDepth:=8; 
 			MaxColors:=16;
            NonPalette:=false;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
         //color tv mode
-		VGAMed:
+		VGAMed:begin
             MaxX:=320;
 			MaxY:=240;
 			BitDepth:=8; 
 			MaxColors:=16;
            NonPalette:=false;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
 		//spec breaks here for Borlands VGA support(not much of a specification thx to SDL...)
@@ -2118,13 +2025,13 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
         // if you did that you would have to scale the output...
 		//(more werk???)
 
-		VGAHi:
+		VGAHi:begin
             MaxX:=640;
 			MaxY:=480;
 			BitDepth:=4; 
 			MaxColors:=16;
            NonPalette:=false;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
 		VGAHix256:
@@ -2437,6 +2344,32 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
 		end;
 	    
   end;{case}
+
+//once is enough with this list...
+
+
+
+//if not active:
+
+//are we coming up?
+
+//no? EXIT
+
+
+
+if (LIBGRAPHICS_INIT=false) then 
+
+begin
+		
+		if IsConsoleEnabled then writeln('Call initgraph before calling setGraphMode.'); 
+		else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Called setGraphMode too early. Call InitGraph first.','OK',NIL);
+	    exit;
+end
+else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setup- initgraph called us
+
+
+
+
 	RendedWindow := SDL_CreateWindowAndRenderer(MaxX, MaxY,SDL_WINDOW_OPENGL, window,renderer);
 
 	if ( RendedWindow = NULL ) then begin
@@ -2514,394 +2447,40 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
     Mainsurface := SDL_CreateRGBSurface(0, MaxX, MaxY, bpp, 0, 0, 0, 0);
     if (Mainsurface = NiL) then begin //cant create a surface
         SDL_Log('SDL_CreateRGBSurface failed: %s', SDL_GetError());
-        libGraph:=-1; //probly out of vram
+        _grerror:=-1; //probly out of vram
         //we can exit w failure codes, if we check for them
-        halt(0);
+        closegraph;
     end;
 
+{
   if (bpp<=8) then begin
       if MaxColors=16 then
 			SDL_SetPalette( screen, SDL_LOGPAL or SDL_PHYSPAL, TPalette16.colors, 0, 16 );
 	  else if MaxColors=256 then
 			SDL_SetPalette( screen, SDL_LOGPAL or SDL_PHYSPAL, TPalette256.colors, 0, 256 );
   end;
+}
 
    LIBGRAPHICS_ACTIVE:=true;
    exit; //back to initgraph we go.
 
 end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
 
-  case(graphmode) of //we can do fullscreen, but dont force it...
-	
-		mCGA:
-			MaxX:=320;
-			MaxY:=240;
-			BitDepth:=4;
-			MaxColors:=16;
-           NonPalette:=false;
-		   TrueColor:false;	
-		end;
-
-        //crt mode
-		VGALo:
-			MaxX:=320;
-			MaxY:=200;
-			BitDepth:=8; 
-			MaxColors:=16;
-           NonPalette:=false;
-		   TrueColor:false;	
-		end;
-
-        //color tv mode
-		VGAMed:
-            MaxX:=320;
-			MaxY:=240;
-			BitDepth:=8; 
-			MaxColors:=16;
-           NonPalette:=false;
-		   TrueColor:false;	
-		end;
-
-		//spec breaks here for Borlands VGA support(not much of a specification thx to SDL...)
-		//this is the "default VGA minimum".....since your not running below it, dont ask to set FS in it...
-        // if you did that you would have to scale the output...
-		//(more werk???)
-
-		VGAHi:
-            MaxX:=640;
-			MaxY:=480;
-			BitDepth:=4; 
-			MaxColors:=16;
-           NonPalette:=false;
-		   TrueColor:false;	
-		end;
-
-		VGAHix256:
-            MaxX:=640;
-			MaxY:=480;
-			BitDepth:=8; 
-			MaxColors:=256;
-           NonPalette:=False;
-		   TrueColor:false;	
-		end;
-
-		VGAHix32k: //im not used to these ones (15bits)
-           MaxX:=640;
-		   MaxY:=480;
-		   BitDepth:=15; 
-		   MaxColors:=32768;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		VGAHix64k:
-           MaxX:=640;
-		   MaxY:=480;
-		   BitDepth:=16; 
-		   MaxColors:=65535;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		//standardize these as much as possible....
-
-		m800x600x16:
-            MaxX:=800;
-			MaxY:=600;
-			BitDepth:=4; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:false;	
-		end;
-
-		m800x600x256:
-            MaxX:=800;
-			MaxY:=600;
-			BitDepth:=8; 
-			MaxColors:=256;
-            NonPalette:=false;
-		    TrueColor:false;	
-		end;
-
-
-		m800x600x32k:
-           MaxX:=800;
-		   MaxY:=600;
-		   BitDepth:=15; 
-		   MaxColors:=32768;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		m800x600x64k:
-           MaxX:=800;
-		   MaxY:=600;
-		   BitDepth:=16; 
-		   MaxColors:=65535;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		m1024x768x16:
-            MaxX:=1024;
-			MaxY:=768;
-			BitDepth:=4; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:false;	
-		end;
-
-		m1024x768x256:
-            MaxX:=1024;
-			MaxY:=768;
-			BitDepth:=8; 
-			MaxColors:=256;
-            NonPalette:=false;
-		    TrueColor:false;	
-		end;
-
-		m1024x768x32k:
-           MaxX:=1024;
-		   MaxY:=768;
-		   BitDepth:=15; 
-		   MaxColors:=32768;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		m1024x768x64k:
-           MaxX:=1024;
-		   MaxY:=768;
-		   BitDepth:=16; 
-		   MaxColors:=65535;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		m1280x720x16:
-            MaxX:=1280;
-			MaxY:=720;
-			BitDepth:=4; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:false;	
-		end;
-
-		m1280x720x256:
-            MaxX:=1280;
-			MaxY:=720;
-			BitDepth:=8; 
-			MaxColors:=256;
-            NonPalette:=false;
-		    TrueColor:false;	
-		end;
-
-		m1280x720x32k:
-          MaxX:=1280;
-		   MaxY:=720;
-		   BitDepth:=15; 
-		   MaxColors:=32768;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		m1280x720x64k:
-           MaxX:=1280;
-		   MaxY:=720;
-		   BitDepth:=16; 
-		   MaxColors:=65535;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		m1280x720xMil:
-		   MaxX:=1280;
-		   MaxY:=720;
-		   BitDepth:=24; 
-		   MaxColors:=16777216;
-           NonPalette:=true;
-		   TrueColor:true;	
-		end;
-
-		m1280x1024x16:
-            MaxX:=1280;
-			MaxY:=1024;
-			BitDepth:=4; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:false;	
-		end;
-
-		m1280x1024x256:
-            MaxX:=1280;
-			MaxY:=1024;
-			BitDepth:=8; 
-			MaxColors:=256;
-            NonPalette:=false;
-		    TrueColor:false;	
-		end;
-
-		m1280x1024x32k:
-           MaxX:=1280;
-		   MaxY:=1024;
-		   BitDepth:=15; 
-		   MaxColors:=32768;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		m1280x1024x64k:
-           MaxX:=1280;
-		   MaxY:=1024;
-		   BitDepth:=16; 
-		   MaxColors:=65535;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		m1280x1024xMil:
-           MaxX:=1280;
-		   MaxY:=1024;
-		   BitDepth:=24; 
-		   MaxColors:=16777216;
-           NonPalette:=true;
-		   TrueColor:true;	
-		end;
-
-		m1280x1024xMil2:
-           MaxX:=1280;
-		   MaxY:=1024;
-		   BitDepth:=32; 
-		   MaxColors:=4294967296;
-           NonPalette:=true;
-		   TrueColor:true;	
-		end;
-
- 	    m1366x768x16:
-            MaxX:=1366;
-			MaxY:=768;
-			BitDepth:=4; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:false;	
-		end;
-
-		m1366x768x256:
-            MaxX:=1366;
-			MaxY:=768;
-			BitDepth:=8; 
-			MaxColors:=256;
-            NonPalette:=false;
-		    TrueColor:false;	
-		end;
-
-		m1366x768x32k:
-           MaxX:=1366;
-		   MaxY:=768;
-		   BitDepth:=15; 
-		   MaxColors:=32768;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		m1366x768x64k:
-           MaxX:=1366;
-		   MaxY:=768;
-		   BitDepth:=16; 
-		   MaxColors:=65535;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		m1366x768xMil:
-           MaxX:=1366;
-		   MaxY:=768;
-		   BitDepth:=24; 
-		   MaxColors:=16777216;
-           NonPalette:=true;
-		   TrueColor:true;	
-		end;
-
-		m1366x768xMil2:
-           MaxX:=1366;
-		   MaxY:=768;
-		   BitDepth:=32; 
-		   MaxColors:=4294967296;
-           NonPalette:=true;
-		   TrueColor:true;	
-		end;
-
-		m1920x1080x16:
-            MaxX:=1920;
-			MaxY:=1080;
-			BitDepth:=4; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:false;	
-		end;
-
-		m1920x1080x256:
-            MaxX:=1920;
-			MaxY:=1080;
-			BitDepth:=8; 
-			MaxColors:=256;
-            NonPalette:=false;
-		    TrueColor:false;	
-		end;
-
-		m1920x1080x32k:
-		   MaxX:=1920;
-		   MaxY:=1080;
-		   BitDepth:=15; 
-		   MaxColors:=32768;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		m1920x1080x64k:
-		   MaxX:=1920;
-		   MaxY:=1080;
-		   BitDepth:=16; 
-		   MaxColors:=65535;
-           NonPalette:=true;
-		   TrueColor:false;	
-		end;
-
-		m1920x1080xMil:
- 	       MaxX:=1920;
-		   MaxY:=1080;
-		   BitDepth:=24; 
-		   MaxColors:=16777216;
-           NonPalette:=true;
-		   TrueColor:true;	
-		end;
-
-		m1920x1080xMil2:
- 	       MaxX:=1920;
-		   MaxY:=1080;
-		   BitDepth:=32; 
-		   MaxColors:=4294967296;
-           NonPalette:=true;
-		   TrueColor:true;	
-		end;
-	    
-  end;{case}
-
                    
     if wantFullscreen then begin
-
-        case BitDepth of
-		  4: mode.format:=
+{
+        case bpp of
+		  4: mode^.format:=
 		  8:
           15:
 		  16:
 		  24:      
         end;
-
-        mode.x:=MaxX;
-		mode.y:=MaxY;
-		mode.refresh_rate:=60; //assumed
-		mode.driverdata:=0;
+}
+        mode^.x:=MaxX;
+		mode^.y:=MaxY;
+		mode^.refresh_rate:=60; //assumed
+		mode^.driverdata:=Nil;
 
 		success:=SDL_SetWindowDisplayMode(window,mode);
         if success (<> 0) then begin 
@@ -2942,42 +2521,43 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
 
   //reset palette data
   if bpp=4 then
-    Init16Palette;
+    InitPalette16;
   if bpp=8 then 
-    Init256Palette; 
+    InitPalette256; 
   //then set it back up
+{
   if (bpp<=8) then begin
       if MaxColors=16 then
 			SDL_SetPalette( screen, SDL_LOGPAL or SDL_PHYSPAL, TPalette16.colors, 0, 16 );
 	  else if MaxColors=256 then
 			SDL_SetPalette( screen, SDL_LOGPAL or SDL_PHYSPAL, TPalette256.colors, 0, 256 );
   end;
-
+}
      clearviewscreen;
 end;
 
 function getgraphmode:string; 
 
 var
-	thisMode:^SDL_DisplayMode;
+	thisMode:PSDL_DisplayMode;
     bppstring:string;
-    format:^SDL_PixelFormat;
+    format:PSDL_PixelFormat;
     MaxModes:;
 begin
    if LIBGRAPHICS_ACTIVE then begin 
-        format:=MainSurface.format; 
-		findbpp:=format.BitsPerPixel; //4,8,15,16,24,32
+        format:=MainSurface^.format; 
+		findbpp:=format^.BitsPerPixel; //4,8,15,16,24,32
         SDL_GetCurrentDisplayMode(0, thismode); //go get w,h,format and refresh rate..
 		
 //format should give you a clue as to what bpp you are in.
 
-        findX:=thismode.X;
-		findY:=thismode.Y;
+        findX:=thismode^.X;
+		findY:=thismode^.Y;
 		x:=0;
         //we need to find X,Y,BPP in the modelist somehow...
 		repeat //repeat until we run out of modes. we should hit something..
 			if (findX=MaxX) and (findY=MaxY) and (findbpp=BitDepth) then begin		
-					getgraphmode:=Modelist.modename[x];
+			//typinfo(modelist(ord(x));		getgraphmode:=Modelist^.modename[x];
 					exit;
 				end;
 			inc(x);
@@ -3038,64 +2618,8 @@ and various ways of combining the source and destination data.
 
 
 //procedure HowBlit(currentwriteMode);
-//this can do some whacky tricks too...we are applying a color shift mask to the incoming blit or mini surface...
+//this can do some whacky tricks...we are applying a color shift mask to the incoming blit or mini surface...
 
-}
-
-//ideally call before any putPixel incase we want whacky tricks..
-procedure HowPutPixel(X,Y: integer; var Writemode:currentWriteMode);
-
-begin
-
-    //_fgcolor is a  DWord
-
-    //needs more putPixel(x,y,_fgcolor) for 15bpp plus modes
-    case WriteMode of
-      XORPut:
-        begin
-          _fgColor := _fgcolor Xor _fgColor;
-		  if MaxColors =16 then
-		     SDL_PutPixel(X,Y,palette16.dwords[_fgcolor]);
-		  if MaxColors =256 then
-		     SDL_PutPixel(X,Y,palette256.dwords[_fgcolor]);
-        end;
-      OrPut:
-        begin
-          _fgColor := _fgcolor Or _fgColor;
-	 	  if MaxColors =16 then
-		    SDL_PutPixel(X,Y,palette16.dwords[_fgcolor]);
-		  if MaxColors =256 then
-		    SDL_PutPixel(X,Y,palette256.dwords[_fgcolor]);
-        end;
-      AndPut:
-        begin
-          _fgColor := _fgColor And _fgColor;
-		  if MaxColors =16 then
-		     SDL_PutPixel(X,Y,palette16.dwords[_fgcolor]);
-		  if MaxColors =256 then
-		     SDL_PutPixel(X,Y,palette256.dwords[_fgcolor]);
-        end;
-      NotPut: //yes, the inverse of grey is gray...lol
-        //usually for erasing but not always....
-        begin
-	      _fgColor := MapRGB((MaxColors-r),(MaxColors-g),(MaxColors-b));
-		if MaxColors =16 then
-		  SDL_PutPixel(X,Y,palette16.dwords[_fgcolor]);
-		if MaxColors =256 then
-		  SDL_PutPixel(X,Y,palette256.dwords[_fgcolor]);
-      end
-      Straight: begin
-		if MaxColors =16 then
-			SDL_PutPixel(X,Y,palette16.dwords[_fgcolor]);
-
-		else if MaxColors=256 then
-			SDL_PutPixel(X,Y,palette256.dwords[_fgcolor]);
-	 end;
-   end; //case
-
-end;
-
-{
 
 //GetSurface from Renderer (or Create SurfaceFromRenderer) first
 SDL_ScrollX(Surface,DifX);
@@ -3131,10 +2655,10 @@ function GetPixel(x,y:integer):DWord;
 //this works, its hackish -but it works..SDL_GetPixel is for Surfaces/screens, nor renderers.
 var
   format:longword;
-  TempSurface:^SDL_Surface;
+  TempSurface:PSDL_Surface;
   bpp:byte;
   p:^Uint8; //word or byte pointer
-  GotColor:^SDL_Color;
+  GotColor:PSDL_Color;
   pewpew:longword; //DWord....
   pointpew:PtrUInt;
 
@@ -3146,7 +2670,7 @@ begin
     case bpp of
 		8: begin
 			    if maxColors:=256 then format:=SDL_PIXELFORMAT_INDEX8;
-				else if maxColors:=16 then format:=SDL_PIXELFORMAT_INDEX4LSB; //msb??
+				else if maxColors:=16 then format:=SDL_PIXELFORMAT_INDEX4MSB; 
 		end;
 		15: format:=SDL_PIXELFORMAT_RGB555;
 		16: format:=SDL_PIXELFORMAT_RGBA4444;
@@ -3160,7 +2684,7 @@ begin
     if ((MaxColors=256) or (MaxColors=16)) then TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 8, format); 
     //its weird...get 4bit indexed colors list in longword format but force me into 256 color mode???
 
-    else begin
+    else if (MaxColors>256) then begin
         case (bpp) of
 		    15: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 15, format); 
 			16: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 16, format); 
@@ -3175,13 +2699,13 @@ begin
      end;
 
 
-    SDL_RenderReadPixels(renderer, rect, TempSurface.format, TempSurface.pixels, TempSurface.pitch);
+    SDL_RenderReadPixels(renderer, rect, TempSurface^.format, TempSurface^.pixels, TempSurface^.pitch);
     //read a 1x1 rectangle....
     
     bpp := TempSurface.format.BytesPerPixel /8; //8..16..32....so divide by 8.
     // Here p is the address to the pixel we want to retrieve
     
-    p:= TempSurface.pixels + y * TempSurface.pitch + x * bpp ;
+    p:= TempSurface^.pixels + y * TempSurface^.pitch + x * bpp ;
 
     case (bpp) of 
        1: //256 colors
@@ -3223,28 +2747,9 @@ var
 begin
 //set renderDrawPoint (putPixel) uses fgcolor set with SDL_SEtPenColor or similar
 
-
-  case bpp of
-
-		4: begin
-            format:=SDL_PIXELFORMAT_INDEX4LSB;
-            SDL_RenderDrawPoint( Renderer, X, Y );
-        end;
-        8: begin
-            format:=SDL_PIXELFORMAT_INDEX8;
-            SDL_RenderDrawPoint( Renderer, X, Y );
-        end;
-        15: begin
-
-		     format:=SDL_PIXELFORMAT_RGB555;
-			 SDL_RenderDrawPoint( Renderer, X, Y );
-
-		end;
-        16: format:=SDL_PIXELFORMAT_RGBA4444;
-        24: format:=SDL_PIXELFORMAT_RGB888;
-        32: format:=SDL_PIXELFORMAT_RGBA8888;
+  if (bpp<4) or (bpp >32) then
  
-  end else begin
+  begin
     		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Put Pixel values...','OK',NIL);
 			exit;
   end;
@@ -3510,58 +3015,15 @@ begin
 
 end;
 
-{
-followng code is from FPC graphics unit(mostly sane code)
-
-AUTHORS:                                              
-   Gernot Tenchio      - original version              
-   Florian Klaempfl    - major updates                 
-   Pierre Mueller      - major bugfixes                
-   Carl Eric Codere    - complete rewrite              
-   Thomas Schatzl      - optimizations,routines and    
-                           suggestions.                
-   Jonas Maebe         - bugfixes and optimizations    
-
-}
 
 
-function Long2String(l: longint): string;
-begin
-  str(l, strf)
-end;
-
-
-//Test SDL logging functions... this is to disk.
-
-//logChar is pointless..
-Procedure FileLogString(s: String);
-Begin
-//dont open a file if its already opened and why open/close repeatedly?
-  if LoggingJustStarted then  Append(debuglog);
-
-  if IsConsoleInvoked then
-     write(s);
-  Write(debuglog, s);
-  if donelogging then Close(debuglog);
-End;
-
-Procedure FileLogLn(s: string);
-Begin
-  if LoggingJustStarted then  Append(debuglog);
-  if IsConsoleInvoked then
-     writeln(s);
-  Writeln(debuglog,s);
-  if donelogging then Close(debuglog);
-End;
-{ end fpc code }
-
-function cloneSurface(surface1:SDL_Surface):SDL_Surface;
+function cloneSurface(surface1:PSDL_Surface):PSDL_Surface;
 //i'll take the surface to the copy machine...
 var
    surface2:^SDL_Surface;
 
 begin
-    Surface2 := SDL_ConvertSurface(Surface1, Surface1.format, Surface1.flags);
+    Surface2 := SDL_ConvertSurface(Surface1, Surface1^.format, Surface1^.flags);
 
 end;
 
@@ -3632,8 +3094,8 @@ begin
    Texture[windowCount].H:=ThisRect.H;
 
    SDL_RenderSetViewport( Renderer, ThisRect );  
-   RenderCopy(Texture[windowcount]);
-   RenderPresent;
+   RenderCopy(Renderer,Texture[windowcount]);
+   RenderPresent(renderer);
    
    //further calls are trapped inside...
    ClipPixels:=true;
@@ -3667,14 +3129,14 @@ begin
        //remove the viewport by removing the texture and redrawing the screen.
         SDL_DestroyTexture(Texture[windowcount+1]);
         RenderCopy(Texture[windowcount]);
-        RenderPresent;
+        RenderPresent(renderer);
 		SDL_RenderSetViewport( Renderer, LastRect ); 
         RemoveViewPort:=LastRect;      
    end; 
    //else: last window remaining
    SDL_DestroyTexture(Texture[1]);
    SDL_RenderSetViewport( Renderer,NULL);  //reset to full size "screen"
-   RenderCopy(Texture[0]);
+   RenderCopy(Renderer,Texture[0]);
    RenderPresent; //and update back to the old screen before the viewports came here.
    LastRect:=(0,0,MaxX,MaxY);
    RemoveViewPort:=LastRect;;
@@ -3943,12 +3405,18 @@ procedure invertColors;
 
 //so you see how to do manual shifting etc.. 
 var
-   r, g, b, a:byte;
-
+   r, g, b, a:PUInt8;
+   somecolor:PSDL_Color;
 begin
 
 	SDL_GetRenderDrawColor(renderer, r, g, b, a);
-	SDL_SetRenderDrawColor(renderer, 255 - r, 255 - g, 255 - b, a); 
+
+    somecolor^.r:=byte(^r);
+    somecolor^.g:=byte(^g);
+    somecolor^.b:=byte(^b);
+    somecolor^.a:=byte(^a);
+
+	SDL_SetRenderDrawColor(renderer, 255 - somecolor^.r, 255 - somecolor^.g, 255 - somecolor^.b, somecolor^.a); 
 
 end;
 
