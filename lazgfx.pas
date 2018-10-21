@@ -211,19 +211,114 @@ Mine is WIP. I at least attempt the impossible.
 *Most* 1.2 routines can be upgraded or used with 2.0.
 Error 216 usually indicates BOUNDS errors(alloc and not FREE)
 
-I need "pascal Pointer schooling". I dont deny this.
+----
 
+Colors are bit banged to hell and back.
 
-SDL_Color RGB syntax:
-(points to)
+SDL_Color=record (internal definition)
 
-r,g,b,a:byte;
+	r:byte; //UInt8 in C
+	g:byte;
+	b:byte;
+	a:byte; 
+
+end;
+
+^SDL_Color/PSDL_Color = PUInt8 or ^UInt8;
+
+while a 'char' is also 8bit, a 'Word' is 16.
+(^Word is not correct-its ^Byte)
 
 2 byte take up a WORD(unused)
-4 byte take up a longword/DWord(full rgb tuple plus a)
+4 byte take up a longword/DWord(full rgb tuple plus a or i)
 
-Tuples dont exist in Pascal(or C).Its a Python Thing.
+Tuples (just RGB values) dont exist in Pascal(or C).Its a Python Thing.
 The closest we have is a record and a pointer to one, or an array of one.
+
+---
+4bit->8bit:
+
+just use the first 16 colors of the palette and add more colors to it
+its easier to not do 4bit conversion, but use 8bit color and convert that.
+- is it possible the original 16 colors can point elsewhere- yes, 
+but that would destandardize upscaling the colors
+
+-you cant put whats not there- you can only "dither down" or "fake it" by using "odd patterns".
+what this is -is tricking your eyes with "almost similar pixel data".
+
+
+32bit to RGB 565(16):
+//drop the LSB
+
+NewR: = R shr 3;
+NewG: = G shr 2;
+NewB: = B shr 3;
+NewA:=$ff;
+
+(in mode 5551- we throw the A bit away anyways. shr 3 on all bits)
+
+
+RGB16->32:
+323 multiplier-use FF for a-bit
+
+color := ((R shl 3) or (G shl 2) or (B shl 3) or $FF);
+
+
+normally:
+
+//to get the longword
+
+myColor := (R or G or B or A);
+
+//to break down into components using RGBA mask(ARGB is backwards mask)
+
+Red := (myColor    and 0xFF000000);
+Green := ((myColor and 0x00FF0000) shr 8);
+Blue := ((myColor  and 0x0000FF00) shr 16);
+Alpha := ((myColor and 0x000000FF) shr 24);
+
+BPP are not what you think-complicating the mess:
+
+we all know powers of 2 and binary storage and all that--
+
+
+8bit is paletted RGB 
+(for our use- so is anything less-we ignore alpha-bits here to ease programming hell)
+
+AN odd mobile color map is 332 (8-bit) RGB
+
+15 bit is "a 16bit hack" or "ignorance of the alpha-bit" (in 5551 mode)
+16 bit color mode is one of: 5551 or more commonly 565 "unpaletted" RGB (data needs to converted to/from this mode)
+
+24bit color is often also converted back and forth(usually to lower bpp modes) 
+but is also "unpaletted" RGB888
+
+The only "TRUE COLOR mode" is 32bpp. 
+While 24bit is "effectual" and beyond most eyes to discern, its not TRUE Color mode.
+
+32bit color is the only RGBA mode (8888) in actual existance.
+Stating that you dont support it is saying:
+
+    we dont support alpha blending (and layering)
+
+-Which is BS because most graphics chips do these days.
+-I know for a fact that X11 makes this claim on ATI hardware
+
+
+What this means is that for non-equal modes that are not "byte aligned" or "full bytes" (above 256 colors) 
+you have to do color conversion or the colors will be "off".
+
+which means get and put pixel ops, file load and save ops have to take this into account.
+Its another necessary nightmare if not using 32bit or paletted 256 modes.
+
+Pixel format below try to take this into account.
+Note that some use ARGB instead of the more common RGBA. I havent seen it-but its out there.
+And movies are shot with YUV (COMPOSITE RED,green,blue cable) and converted on the fly.
+
+HDMI standard is "modified encrypted ethernet"(HDCP) with this YUV data.
+Something about yielding better chroma/luminance of colors, etc etc...
+---
+
 
 
 "THIS CODE (WAS) is an ANCIENT mess.."
@@ -231,9 +326,6 @@ The closest we have is a record and a pointer to one, or an array of one.
 16 color **WAS** assumed.  
 256 is the defacto VGA standard. some newer cards refuse anything less.
 32-bit is supported by SDL and I am still tweaking this code for compliance.
-(24-bit should work for now)
-
-48-bit color is theoretical -most HDTV still arent there yet.
 
 
 Note the POSTAL implementation of SDL(steam):
@@ -282,14 +374,11 @@ BPP 	 COLORS
 16		(65536) "thousands" -w alpha 
 
 24		(16,777,216) -TRUE COLOR mode "millions"
+32		(4,294,967,296) --TRUE COLOR(24) plus full byte of transparency
 
 Not yet supported:
 
 30		(1,073,741,824) --DEEP color "billions"
-32		(4,294,967,296) --TRUE COLOR(24) plus full byte of transparency
-
-up and coming bpp(not supported):
-
 36		(68,719,476,736) --DEEP color
 48		(281,474,976,710,656) --VERY DEEP color "trillions" 
 
@@ -1670,7 +1759,7 @@ end;
 procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
 
 var
-	BitDepth,i,numdisplaymodes:integer;
+	bpp,i,numdisplaymodes:integer;
 	_initflag,_imgflags,my_timer_id:longword; //^SDL_Flags?? no such beast 
     iconpath:string;
     imagesON,RamSize:integer;
@@ -1726,7 +1815,7 @@ begin
     graphmode := MaxModes.num; //pick the highest supported by default(1080p x millions)
   end;
 
-  if BitDepth=4 then initPalette16 else if BitDepth=8 then initpalette256; //ignor high color bpp, its not paletted.
+  if bpp=4 then initPalette16 else if bpp=8 then initpalette256; //ignor high color bpp, its not paletted.
   //setup the palette(s) (but only in modes 256 colors or less).
 
   LIBGRAPHICS_INIT:=true; 
@@ -1989,12 +2078,13 @@ procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean);
 begin
 
 //fill the modelist!
+//I have more data to add here.
 
   case(graphmode) of //we can do fullscreen, but dont force it...
 	     mCGA:begin
 			MaxX:=320;
 			MaxY:=240;
-			BitDepth:=4; 
+			bpp:=4; 
 			MaxColors:=16;
            NonPalette:=false;
 		   TrueColor:=false;	
@@ -2004,7 +2094,7 @@ begin
 		VGALo:begin
 			MaxX:=320;
 			MaxY:=200;
-			BitDepth:=8; 
+			bpp:=8; 
 			MaxColors:=16;
            NonPalette:=false;
 		   TrueColor:=false;	
@@ -2014,7 +2104,7 @@ begin
 		VGAMed:begin
             MaxX:=320;
 			MaxY:=240;
-			BitDepth:=8; 
+			bpp:=8; 
 			MaxColors:=16;
            NonPalette:=false;
 		   TrueColor:=false;	
@@ -2028,319 +2118,319 @@ begin
 		VGAHi:begin
             MaxX:=640;
 			MaxY:=480;
-			BitDepth:=4; 
+			bpp:=4; 
 			MaxColors:=16;
            NonPalette:=false;
 		   TrueColor:=false;	
 		end;
 
-		VGAHix256:
+		VGAHix256:begin
             MaxX:=640;
 			MaxY:=480;
-			BitDepth:=8; 
+			bpp:=8; 
 			MaxColors:=256;
            NonPalette:=False;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
-		VGAHix32k: //im not used to these ones (15bits)
+		VGAHix32k:begin //im not used to these ones (15bits)
            MaxX:=640;
 		   MaxY:=480;
-		   BitDepth:=15; 
+		   bpp:=15; 
 		   MaxColors:=32768;
            NonPalette:=true;
-		   TrueColor:false;	
+           TrueColor:=false;
 		end;
 
-		VGAHix64k:
+		VGAHix64k:begin
            MaxX:=640;
 		   MaxY:=480;
-		   BitDepth:=16; 
+		   bpp:=16; 
 		   MaxColors:=65535;
            NonPalette:=true;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
 		//standardize these as much as possible....
 
-		m800x600x16:
+		m800x600x16:begin
             MaxX:=800;
 			MaxY:=600;
-			BitDepth:=4; 
+			bpp:=4; 
 			MaxColors:=16;
             NonPalette:=false;
-		    TrueColor:false;	
+		    TrueColor:=false;	
 		end;
 
-		m800x600x256:
+		m800x600x256:begin
             MaxX:=800;
 			MaxY:=600;
-			BitDepth:=8; 
+			bpp:=8; 
 			MaxColors:=256;
             NonPalette:=false;
-		    TrueColor:false;	
+		    TrueColor:=false;	
 		end;
 
 
-		m800x600x32k:
+		m800x600x32k:begin
            MaxX:=800;
 		   MaxY:=600;
-		   BitDepth:=15; 
+		   bpp:=15; 
 		   MaxColors:=32768;
            NonPalette:=true;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
-		m800x600x64k:
+		m800x600x64k:begin
            MaxX:=800;
 		   MaxY:=600;
-		   BitDepth:=16; 
+		   bpp:=16; 
 		   MaxColors:=65535;
            NonPalette:=true;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
-		m1024x768x16:
+		m1024x768x16:begin
             MaxX:=1024;
 			MaxY:=768;
-			BitDepth:=4; 
+			bpp:=4; 
 			MaxColors:=16;
             NonPalette:=false;
-		    TrueColor:false;	
+		    TrueColor:=false;	
 		end;
 
-		m1024x768x256:
+		m1024x768x256:begin
             MaxX:=1024;
 			MaxY:=768;
-			BitDepth:=8; 
+			bpp:=8; 
 			MaxColors:=256;
             NonPalette:=false;
-		    TrueColor:false;	
+		    TrueColor:=false;	
 		end;
 
-		m1024x768x32k:
+		m1024x768x32k:begin
            MaxX:=1024;
 		   MaxY:=768;
-		   BitDepth:=15; 
+		   bpp:=15; 
 		   MaxColors:=32768;
            NonPalette:=true;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
-		m1024x768x64k:
+		m1024x768x64k:begin
            MaxX:=1024;
 		   MaxY:=768;
-		   BitDepth:=16; 
+		   bpp:=16; 
 		   MaxColors:=65535;
            NonPalette:=true;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
-		m1280x720x16:
+		m1280x720x16:begin
             MaxX:=1280;
 			MaxY:=720;
-			BitDepth:=4; 
+			bpp:=4; 
 			MaxColors:=16;
             NonPalette:=false;
-		    TrueColor:false;	
+		    TrueColor:=false;	
 		end;
 
-		m1280x720x256:
+		m1280x720x256:begin
             MaxX:=1280;
 			MaxY:=720;
-			BitDepth:=8; 
+			bpp:=8; 
 			MaxColors:=256;
             NonPalette:=false;
-		    TrueColor:false;	
+		    TrueColor:=false;	
 		end;
 
-		m1280x720x32k:
+		m1280x720x32k:begin
           MaxX:=1280;
 		   MaxY:=720;
-		   BitDepth:=15; 
+		   bpp:=15; 
 		   MaxColors:=32768;
            NonPalette:=true;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
-		m1280x720x64k:
+		m1280x720x64k:begin
            MaxX:=1280;
 		   MaxY:=720;
-		   BitDepth:=16; 
+		   bpp:=16; 
 		   MaxColors:=65535;
            NonPalette:=true;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
-		m1280x720xMil:
+		m1280x720xMil:begin
 		   MaxX:=1280;
 		   MaxY:=720;
-		   BitDepth:=24; 
+		   bpp:=24; 
 		   MaxColors:=16777216;
            NonPalette:=true;
-		   TrueColor:true;	
+		   TrueColor:=true;	
 		end;
 
-		m1280x1024x16:
+		m1280x1024x16:begin
             MaxX:=1280;
 			MaxY:=1024;
-			BitDepth:=4; 
+			bpp:=4; 
 			MaxColors:=16;
             NonPalette:=false;
-		    TrueColor:false;	
+		    TrueColor:=false;	
 		end;
 
-		m1280x1024x256:
+		m1280x1024x256:begin
             MaxX:=1280;
 			MaxY:=1024;
-			BitDepth:=8; 
+			bpp:=8; 
 			MaxColors:=256;
             NonPalette:=false;
-		    TrueColor:false;	
+		    TrueColor:=false;	
 		end;
 
-		m1280x1024x32k:
+		m1280x1024x32k:begin
            MaxX:=1280;
 		   MaxY:=1024;
-		   BitDepth:=15; 
+		   bpp:=15; 
 		   MaxColors:=32768;
            NonPalette:=true;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
-		m1280x1024x64k:
+		m1280x1024x64k:begin
            MaxX:=1280;
 		   MaxY:=1024;
-		   BitDepth:=16; 
+		   bpp:=16; 
 		   MaxColors:=65535;
            NonPalette:=true;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
-		m1280x1024xMil:
+		m1280x1024xMil:begin
            MaxX:=1280;
 		   MaxY:=1024;
-		   BitDepth:=24; 
+		   bpp:=24; 
 		   MaxColors:=16777216;
            NonPalette:=true;
-		   TrueColor:true;	
+		   TrueColor:=true;	
 		end;
 
-		m1280x1024xMil2:
+		m1280x1024xMil2:begin
            MaxX:=1280;
 		   MaxY:=1024;
-		   BitDepth:=32; 
+		   bpp:=32; 
 		   MaxColors:=4294967296;
            NonPalette:=true;
-		   TrueColor:true;	
+		   TrueColor:=true;	
 		end;
 
- 	    m1366x768x16:
+ 	    m1366x768x16:begin
             MaxX:=1366;
 			MaxY:=768;
-			BitDepth:=4; 
+			bpp:=4; 
 			MaxColors:=16;
             NonPalette:=false;
-		    TrueColor:false;	
+		    TrueColor:=false;	
 		end;
 
-		m1366x768x256:
+		m1366x768x256:begin
             MaxX:=1366;
 			MaxY:=768;
-			BitDepth:=8; 
+			bpp:=8; 
 			MaxColors:=256;
             NonPalette:=false;
-		    TrueColor:false;	
+		    TrueColor:=false;	
 		end;
 
-		m1366x768x32k:
+		m1366x768x32k:begin
            MaxX:=1366;
 		   MaxY:=768;
-		   BitDepth:=15; 
+		   bpp:=15; 
 		   MaxColors:=32768;
            NonPalette:=true;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
-		m1366x768x64k:
+		m1366x768x64k:begin
            MaxX:=1366;
 		   MaxY:=768;
-		   BitDepth:=16; 
+		   bpp:=16; 
 		   MaxColors:=65535;
            NonPalette:=true;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
-		m1366x768xMil:
+		m1366x768xMil:begin
            MaxX:=1366;
 		   MaxY:=768;
-		   BitDepth:=24; 
+		   bpp:=24; 
 		   MaxColors:=16777216;
            NonPalette:=true;
-		   TrueColor:true;	
+		   TrueColor:=true;	
 		end;
 
-		m1366x768xMil2:
+		m1366x768xMil2:begin
            MaxX:=1366;
 		   MaxY:=768;
-		   BitDepth:=32; 
+		   bpp:=32; 
 		   MaxColors:=4294967296;
            NonPalette:=true;
-		   TrueColor:true;	
+		   TrueColor:=true;	
 		end;
 
-		m1920x1080x16:
+		m1920x1080x16:begin
             MaxX:=1920;
 			MaxY:=1080;
-			BitDepth:=4; 
+			bpp:=4; 
 			MaxColors:=16;
             NonPalette:=false;
-		    TrueColor:false;	
+		    TrueColor:=false;	
 		end;
 
-		m1920x1080x256:
+		m1920x1080x256:begin
             MaxX:=1920;
 			MaxY:=1080;
-			BitDepth:=8; 
+			bpp:=8; 
 			MaxColors:=256;
             NonPalette:=false;
-		    TrueColor:false;	
+		    TrueColor:=false;	
 		end;
 
-		m1920x1080x32k:
+		m1920x1080x32k:begin
 		   MaxX:=1920;
 		   MaxY:=1080;
-		   BitDepth:=15; 
+		   bpp:=15; 
 		   MaxColors:=32768;
            NonPalette:=true;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
-		m1920x1080x64k:
+		m1920x1080x64k:begin:
 		   MaxX:=1920;
 		   MaxY:=1080;
-		   BitDepth:=16; 
+		   bpp:=16; 
 		   MaxColors:=65535;
            NonPalette:=true;
-		   TrueColor:false;	
+		   TrueColor:=false;	
 		end;
 
-		m1920x1080xMil:
+		m1920x1080xMil:begin  
  	       MaxX:=1920;
 		   MaxY:=1080;
-		   BitDepth:=24; 
+		   bpp:=24; 
 		   MaxColors:=16777216;
            NonPalette:=true;
-		   TrueColor:true;	
+		   TrueColor:=true;	
 		end;
 
-		m1920x1080xMil2:
+		m1920x1080xMil2: begin
  	       MaxX:=1920;
 		   MaxY:=1080;
-		   BitDepth:=32; 
+		   bpp:=32; 
 		   MaxColors:=4294967296;
            NonPalette:=true;
-		   TrueColor:true;	
+		   TrueColor:=true;	
 		end;
 	    
   end;{case}
@@ -2410,7 +2500,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
     //either way we should have a window and renderer by now...   
    if wantFullscreen then begin
        //I dont know about double buffers yet but this looks yuumy..
-       //SDL_SetVideoMode(MaxX, MaxY, BitDepth, SDL_DOUBLEBUF|SDL_FULLSCREEN);
+       //SDL_SetVideoMode(MaxX, MaxY, bpp, SDL_DOUBLEBUF|SDL_FULLSCREEN);
 
        flags:=(SDL_GetWindowFlags(window));
        flags:=flags or SDL_WINDOW_FULLSCREEN_DESKTOP; //fake it till u make it..
@@ -2490,7 +2580,7 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
     //either way we should have a window and renderer by now...   
    if wantFullscreen then begin
        //I dont know about double buffers yet but this looks yuumy..
-       //SDL_SetVideoMode(MaxX, MaxY, BitDepth, SDL_DOUBLEBUF|SDL_FULLSCREEN);
+       //SDL_SetVideoMode(MaxX, MaxY, bpp, SDL_DOUBLEBUF|SDL_FULLSCREEN);
 
        flags:=(SDL_GetWindowFlags(window));
        flags:=flags or SDL_WINDOW_FULLSCREEN_DESKTOP; //fake it till u make it..
@@ -2556,7 +2646,7 @@ begin
 		x:=0;
         //we need to find X,Y,BPP in the modelist somehow...
 		repeat //repeat until we run out of modes. we should hit something..
-			if (findX=MaxX) and (findY=MaxY) and (findbpp=BitDepth) then begin		
+			if (findX=MaxX) and (findY=MaxY) and (findbpp=bpp) then begin		
 			//typinfo(modelist(ord(x));		getgraphmode:=Modelist^.modename[x];
 					exit;
 				end;
