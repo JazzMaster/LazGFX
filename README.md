@@ -8,7 +8,11 @@ A VB(visual Basic or VB.NET) - or even python- could fork from this, if needed.
 -Who nose, I might even just fork it myself!
 
 
-state:  **COMPILING**  -up until line 1399 in main unit.
+state:  **COMPILING**  -up until line 2774 in main unit.
+
+Multiple safety and paranoia checks will still have to be done to ensure accuracy-
+This only checks my syntax.
+
 
 
 This unit uses **modified** JEDI headers.

@@ -46,6 +46,7 @@
     next: PSDL_WindowUserData;
   end;
 
+
   {* Define the SDL window structure, corresponding to toplevel windows *}
   TSDL_Window = record
     magic: Pointer;
@@ -80,6 +81,8 @@
     prev: PSDL_Window;
     next: PSDL_Window;
   end;
+  
+
 
   {**
    * Get the shape parameters of a shaped window.

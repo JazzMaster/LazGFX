@@ -65,8 +65,7 @@ type
    *  A structure representing rendering state
    *}
 
-  PPSDL_Renderer = ^SDL_Renderer;
-  SDL_Renderer= ^TSDL_Renderer;
+  PPSDL_Renderer = ^PSDL_Renderer;
   PSDL_Renderer = ^TSDL_Renderer;
   TSDL_Renderer = record
     end;

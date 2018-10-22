@@ -259,7 +259,7 @@ NewA:=$ff;
 
 
 RGB16->32:
-323 multiplier-use FF for a-bit
+323 left shift
 
 color := ((R shl 3) or (G shl 2) or (B shl 3) or $FF);
 
@@ -281,6 +281,7 @@ BPP are not what you think-complicating the mess:
 
 we all know powers of 2 and binary storage and all that--
 
+(try not to confuse BIT with BYTE here)
 
 8bit is paletted RGB 
 (for our use- so is anything less-we ignore alpha-bits here to ease programming hell)
@@ -307,61 +308,76 @@ Stating that you dont support it is saying:
 
 What this means is that for non-equal modes that are not "byte aligned" or "full bytes" (above 256 colors) 
 you have to do color conversion or the colors will be "off".
+SDL claims to be able to handle some of this for us.
 
 which means get and put pixel ops, file load and save ops have to take this into account.
 Its another necessary nightmare if not using 32bit or paletted 256 modes.
 
-Pixel format below try to take this into account.
-Note that some use ARGB instead of the more common RGBA. I havent seen it-but its out there.
-And movies are shot with YUV (COMPOSITE RED,green,blue cable) and converted on the fly.
+Post 1990s/2000s movies are shot with YUV (COMPOSITE RED,green,blue cable) and converted on the fly.
 
 HDMI standard is "modified encrypted ethernet"(HDCP) with this YUV data.
 Something about yielding better chroma/luminance of colors, etc etc...
 ---
 
 
-
-"THIS CODE (WAS) is an ANCIENT mess.."
-
-16 color **WAS** assumed.  
-256 is the defacto VGA standard. some newer cards refuse anything less.
-32-bit is supported by SDL and I am still tweaking this code for compliance.
-
-
-Note the POSTAL implementation of SDL(steam):
+Note the HALF-LIFE/POSTAL implementation of SDL(steam):
 
     start with a window
     set window to FS (hide the window)
     draw to sdl buffer offscreen and/or blit(invisible rendering)
     renderPresent  (making content visible)
 
-this is the proper workflow. especially for "these old modes"..
-Otherwise you are hardware flipping and using a slow screen surface..not wise.
+this is the proper workflow.
 
--or-
+Something to be aware of:
 
-you could be over-rendering....
+Most Games use transparency(PNG) for "invisible background" effects.
+
+WHile this is tru, however, BMPs can also be used w colorkey values.
+
+SDL_BlitSurface (srcSurface,srcrect,dstSurface,dstrect);
+SDL_SetColorKey(Mainsurface,SDL_TRUE,DWord);
 
 
-Most Games use transparency for "invisible background" effects.
-Doing this with PNG may not work as intended-
+
+-for example
 
    quite frankly using compressed textures (JPEG) results in artifacting at hi resolutions 
-   or when thigns are streetched too much.
+   or when things are streetched too much. The reason is twofold: JPEG is 8bit(yes it is!) 
+        and the data is stretched too much(pixelation and compression artifacts appear)
 
-PNG-Lite may come to the rescue- but I need the Pascal headers, not the C ones for that.
+JPEG2000,WEBP,PNG,TIFF have higher bpp by default than most JPEG files.
+RAW mode is just that- RAW data (with added light data from the camera usually)
+
+PNG can be quantized-Quantization is not compression- its downgrading the color sheme used in storing the color
+and then compensating for it by dithering.Some 3D math algorithms are used.
+(Beyond the scope of this code)
+
+PNG itself may or may not work as intended with a black color as a "hole".This is a known SDL issue.
+PNG-Lite may come to the rescue- but I need the Pascal headers, not the C ones.
+
 
 Not all games use a full 256-color (8x8 bit) palette
 This is even noted in SkyLander games lately with Activision.
-
+"Bright happy cheery" modes are often "limited palettes" in use.
 
 Most older games clear either VRAM or RAM while running (cheat) to accomplish most effects.
 Most FADE TO BLACK arent just visuals, they clear VRAM in the process.
 
+Fading is easy- taking away and adding color---not so much.
+However- its not impossible.
+    you need two palettes for each color  :-)  and you need to step the colors used between the two values
+    switching all colors or each individual color straight to grey wont work- the entire image would go grey.
+    you want gracefully delayed steps(and block user input while doing it)
+
+HMMM-
+   re-adding a (256 dithered or 256 colored) movie/show like "I LOVE LUCY" by palette switching each 
+   individual frame until there are no more?
+
+   I havent seen a tool to do this- thats doesnt mean that its impossible to make one....
+
+
 Read "Racing the beam"...and see Super Mario TP7 source code for more details.
-
-
-The code- (as a DWord) should support 32bpp- not sure that SDL does in practice.
 
 
 Color Modes:
@@ -370,11 +386,11 @@ BPP 	 COLORS
 4		(16)
 8		(256)
 
-15		(32768) "thousands" - usually no alpha
-16		(65536) "thousands" -w alpha 
+15		(32768) "thousands" - no alpha
+16		(65536) "thousands" -w or wo alpha 
 
-24		(16,777,216) -TRUE COLOR mode "millions"
-32		(4,294,967,296) --TRUE COLOR(24) plus full byte of transparency
+24		(16,777,216) -TRUE COLOR mode "millions" - no alpha
+32		(4,294,967,296) --(TRUE COLOR(24) plus full alpha-bit)
 
 Not yet supported:
 
@@ -678,16 +694,6 @@ only so many can do it at once, first come- first served
 - but theres more than one toilet
 }
 
-const
-//drawing width of lines in pixels
-//otherwise, which half do we draw? top or bottom? how about both with a middle...
-  NormWidth  = 1;
-  WideWidth = 3;
-  ThickWidth =5;
-  VeryThickWidth =7;
-  VeryVeryThickWidth=9; //lay it on me
-
-
 
 type  
 
@@ -698,8 +704,15 @@ type
 //adjust the variables accordingly. This is mostly for records and objects.
 
 
-//should we need to abort...
+//drawing width of lines in pixels
 
+  linestyles=( NormWidth  = 1,
+  WideWidth = 3,
+  ThickWidth =5,
+  VeryThickWidth =7,
+  VeryVeryThickWidth=9);
+
+//should we need to abort...
   grErrorType=(OK,NoGrMem,NoFontMem,FontNotFound,InvalidMode,GenError,IoError,InvalidFontType);
 
 
@@ -819,7 +832,7 @@ var
     TextFore,TextBack : PSDL_Color; //font fg and bg...
 
     filename:String;
-    fontpath:PChar; // "C:\windows\fonts\*.ttf" (one at a time) or "/usr/share/fonts/*.ttf"
+    fontpath,iconpath:PChar; // "C:\windows\fonts\*.ttf" (one at a time) or "/usr/share/fonts/*.ttf"
     font_size:integer; 
     style:byte; 
     outline:longint;
@@ -887,6 +900,8 @@ Then these can be used properly.
    
   himode,lomode:integer;
 
+  mode:PSDL_DisplayMode;
+  r,g,b,a:PUInt8;
 
 //ideally we could fork for rendering and then wait for renderer to (fail) exit...
 //not sure if this is required....or not...
@@ -1684,7 +1699,6 @@ end;
 procedure clearscreen(color:Dword); overload;
 
 var
-	r,g,b:PUInt8;
     somecolor:PSDL_Color;
     someDword:DWord;
 begin
@@ -1764,7 +1778,7 @@ var
     iconpath:string;
     imagesON,RamSize:integer;
 	mode:PSDL_DisplayMode;
-     
+
 begin
   pathToDriver:='';  //unused- code compatibility
   iconpath:='./sdlbgi.bmp';
@@ -2074,6 +2088,9 @@ end;
 procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
 //initgraph should call us to prevent code duplication
    
+var
+	flags:longint;
+    IsThere,RendedWindow:integer;
 
 begin
 
@@ -2085,16 +2102,6 @@ begin
 			MaxX:=320;
 			MaxY:=240;
 			bpp:=4; 
-			MaxColors:=16;
-           NonPalette:=false;
-		   TrueColor:=false;	
-		end;
-
-        //crt mode
-		VGALo:begin
-			MaxX:=320;
-			MaxY:=200;
-			bpp:=8; 
 			MaxColors:=16;
            NonPalette:=false;
 		   TrueColor:=false;	
@@ -2181,23 +2188,6 @@ begin
 		   TrueColor:=false;	
 		end;
 
-		m800x600x64k:begin
-           MaxX:=800;
-		   MaxY:=600;
-		   bpp:=16; 
-		   MaxColors:=65535;
-           NonPalette:=true;
-		   TrueColor:=false;	
-		end;
-
-		m1024x768x16:begin
-            MaxX:=1024;
-			MaxY:=768;
-			bpp:=4; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:=false;	
-		end;
 
 		m1024x768x256:begin
             MaxX:=1024;
@@ -2226,14 +2216,6 @@ begin
 		   TrueColor:=false;	
 		end;
 
-		m1280x720x16:begin
-            MaxX:=1280;
-			MaxY:=720;
-			bpp:=4; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:=false;	
-		end;
 
 		m1280x720x256:begin
             MaxX:=1280;
@@ -2269,15 +2251,6 @@ begin
 		   MaxColors:=16777216;
            NonPalette:=true;
 		   TrueColor:=true;	
-		end;
-
-		m1280x1024x16:begin
-            MaxX:=1280;
-			MaxY:=1024;
-			bpp:=4; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:=false;	
 		end;
 
 		m1280x1024x256:begin
@@ -2316,7 +2289,7 @@ begin
 		   TrueColor:=true;	
 		end;
 
-		m1280x1024xMil2:begin
+{		m1280x1024xMil2:begin
            MaxX:=1280;
 		   MaxY:=1024;
 		   bpp:=32; 
@@ -2324,16 +2297,7 @@ begin
            NonPalette:=true;
 		   TrueColor:=true;	
 		end;
-
- 	    m1366x768x16:begin
-            MaxX:=1366;
-			MaxY:=768;
-			bpp:=4; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:=false;	
-		end;
-
+}
 		m1366x768x256:begin
             MaxX:=1366;
 			MaxY:=768;
@@ -2370,7 +2334,7 @@ begin
 		   TrueColor:=true;	
 		end;
 
-		m1366x768xMil2:begin
+{		m1366x768xMil2:begin
            MaxX:=1366;
 		   MaxY:=768;
 		   bpp:=32; 
@@ -2378,15 +2342,7 @@ begin
            NonPalette:=true;
 		   TrueColor:=true;	
 		end;
-
-		m1920x1080x16:begin
-            MaxX:=1920;
-			MaxY:=1080;
-			bpp:=4; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:=false;	
-		end;
+}
 
 		m1920x1080x256:begin
             MaxX:=1920;
@@ -2406,7 +2362,7 @@ begin
 		   TrueColor:=false;	
 		end;
 
-		m1920x1080x64k:begin:
+		m1920x1080x64k:begin
 		   MaxX:=1920;
 		   MaxY:=1080;
 		   bpp:=16; 
@@ -2424,6 +2380,7 @@ begin
 		   TrueColor:=true;	
 		end;
 
+{
 		m1920x1080xMil2: begin
  	       MaxX:=1920;
 		   MaxY:=1080;
@@ -2432,7 +2389,7 @@ begin
            NonPalette:=true;
 		   TrueColor:=true;	
 		end;
-	    
+}	    
   end;{case}
 
 //once is enough with this list...
@@ -2451,49 +2408,46 @@ if (LIBGRAPHICS_INIT=false) then
 
 begin
 		
-		if IsConsoleEnabled then writeln('Call initgraph before calling setGraphMode.'); 
+		if IsConsoleInvoked then writeln('Call initgraph before calling setGraphMode.') 
 		else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Called setGraphMode too early. Call InitGraph first.','OK',NIL);
 	    exit;
 end
 else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setup- initgraph called us
 
 
+	RendedWindow := SDL_CreateWindowAndRenderer(MaxX, MaxY,SDL_WINDOW_OPENGL, @window,@renderer);
 
-
-	RendedWindow := SDL_CreateWindowAndRenderer(MaxX, MaxY,SDL_WINDOW_OPENGL, window,renderer);
-
-	if ( RendedWindow = NULL ) then begin
+	if ( RendedWindow <>0 ) then begin
         //try software first...
 
-         //posX,PosY,sizeX,sizeY,physScreenNum
-         window = SDL_CreateWindow('SDLBGI Application', SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
-    	 if (window = NULL) then begin
+         //posX,PosY,sizeX,sizeY,flags
+         window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
+    	 if (window = Nil) then begin
  			if IsConsoleInvoked then begin
 	    	   	writeln('Something Fishy. No hardware render support and cant create a window.');
 	    	   	writeln('SDL reports: ',' ', SDL_GetError);      
 	    	end;
 	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy. No hardware render support and cant create a window.','BYE..',NIL);
 			
-			_graphResult:=-1;
+			_grResult:=-1;
 	    	closegraph;
         end;
 
         //we have a window but are forced into SW rendering(why?)
     	renderer := SDL_CreateSoftwareRenderer(Mainsurface);
-		if (renderer = NULL ) then begin
+		if (renderer = Nil ) then begin
  			if IsConsoleInvoked then begin
 	    	   	writeln('Something Fishy. No hardware render support and cant setup a software one.');
 	    	   	writeln('SDL reports: ',' ', SDL_GetError);      
 	    	end;
 	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy. No hardware render support and cant setup a software one.','BYE..',NIL);
-	    	_graphResult:=-1;
+	    	_grResult:=-1;
 	    	closegraph;
 		end;
+
    end; 
    //we have arenderer and HW window, but no surface yet
-    SDL_WM_SetIcon (SDL_LoadBMP(iconpath), NULL);
-    free (iconpath);
-    SDL_WM_SetCaption('SDLBGI Application', 0);  // Set the default libgraph window caption
+    SDL_WM_SetIcon (SDL_LoadBMP(iconpath), Nil);
  
 
 
@@ -2537,7 +2491,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
     Mainsurface := SDL_CreateRGBSurface(0, MaxX, MaxY, bpp, 0, 0, 0, 0);
     if (Mainsurface = NiL) then begin //cant create a surface
         SDL_Log('SDL_CreateRGBSurface failed: %s', SDL_GetError());
-        _grerror:=-1; //probly out of vram
+        _grresult:=-1; //probly out of vram
         //we can exit w failure codes, if we check for them
         closegraph;
     end;
@@ -2557,7 +2511,6 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
 end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
 
                    
-    if wantFullscreen then begin
 {
         case bpp of
 		  4: mode^.format:=
@@ -2567,16 +2520,16 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
 		  24:      
         end;
 }
-        mode^.x:=MaxX;
-		mode^.y:=MaxY;
+        mode^.w:=MaxX;
+		mode^.h:=MaxY;
 		mode^.refresh_rate:=60; //assumed
 		mode^.driverdata:=Nil;
 
 		success:=SDL_SetWindowDisplayMode(window,mode);
-        if success (<> 0) then begin 
+        if (success <> 0) then begin 
 			//cant do it, sorry.
 
- 
+        end;
     //either way we should have a window and renderer by now...   
    if wantFullscreen then begin
        //I dont know about double buffers yet but this looks yuumy..
@@ -2626,13 +2579,18 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
      clearviewscreen;
 end;
 
+end;
+
 function getgraphmode:string; 
 
 var
 	thisMode:PSDL_DisplayMode;
     bppstring:string;
     format:PSDL_PixelFormat;
-    MaxModes:;
+    MaxMode:integer;
+    findX,findY:word;
+    findbpp:byte;
+
 begin
    if LIBGRAPHICS_ACTIVE then begin 
         format:=MainSurface^.format; 
@@ -2641,24 +2599,25 @@ begin
 		
 //format should give you a clue as to what bpp you are in.
 
-        findX:=thismode^.X;
-		findY:=thismode^.Y;
+        findX:=thismode^.w;
+		findY:=thismode^.h;
 		x:=0;
         //we need to find X,Y,BPP in the modelist somehow...
 		repeat //repeat until we run out of modes. we should hit something..
 			if (findX=MaxX) and (findY=MaxY) and (findbpp=bpp) then begin		
 			//typinfo(modelist(ord(x));		getgraphmode:=Modelist^.modename[x];
 					exit;
-				end;
+			end;
+            findbpp:=findbpp * findbpp; //findbpp^2
 			inc(x);
-		until x=32;
+		until x=32; //hi(ModeList);
 
    end;   
 end;    
 
 procedure restorecrtmode; //wrapped closegraph function
 begin
-  if (not LIBGRAPHICS_ACTIVE) then  //if not in use, then dont call me...
+  if (not LIBGRAPHICS_ACTIVE) then begin //if not in use, then dont call me...
 
 	if IsConsoleEnabled then 
         writeln('you didnt call initGraph yet...try again?') 
@@ -2672,13 +2631,13 @@ end;
 function getmaxX:word;
 begin
    if LIBGRAPHICS_ACTIVE then
-     getMaxX:=(MainSurface.w - 1); 
+     getMaxX:=(MainSurface^.w - 1); 
 end;
 
 function getmaxY:word;
 begin
    if LIBGRAPHICS_ACTIVE then
-     GetMaxY:=(MainSurface.h - 1); 
+     GetMaxY:=(MainSurface^.h - 1); 
 end;
 
 { 
@@ -2704,7 +2663,7 @@ and various ways of combining the source and destination data.
 //NewLayer is a loaded (BMP) pointer (filled rect?)
 //Surface is defined already
 
-// SDL_BlitSurface(NewLayer, NULL,MainSurface,NULL);
+// SDL_BlitSurface(NewLayer, nil,MainSurface,nil);
 
 
 //procedure HowBlit(currentwriteMode);
@@ -2747,10 +2706,14 @@ var
   format:longword;
   TempSurface:PSDL_Surface;
   bpp:byte;
-  p:^Uint8; //word or byte pointer
+  p:pointer; //the pixel data we want 
   GotColor:PSDL_Color;
   pewpew:longword; //DWord....
   pointpew:PtrUInt;
+  r,g,b,a:PUInt8;
+  index:byte;
+  someDWord:DWord;
+
 
 begin
 	rect^.x:=x;
@@ -2759,11 +2722,17 @@ begin
 	rect^.w:=1;
     case bpp of
 		8: begin
-			    if maxColors:=256 then format:=SDL_PIXELFORMAT_INDEX8;
-				else if maxColors:=16 then format:=SDL_PIXELFORMAT_INDEX4MSB; 
+			    if maxColors=256 then format:=SDL_PIXELFORMAT_INDEX8
+				else if maxColors=16 then format:=SDL_PIXELFORMAT_INDEX4MSB; 
 		end;
 		15: format:=SDL_PIXELFORMAT_RGB555;
-		16: format:=SDL_PIXELFORMAT_RGBA4444;
+
+//we assume on 16bit that we are in 565 not 5551, we should not assume
+		16: begin
+			
+			format:=SDL_PIXELFORMAT_RGB565;
+
+        end;
 		24: format:=SDL_PIXELFORMAT_RGB888;
 		32: format:=SDL_PIXELFORMAT_RGBA8888;
 
@@ -2771,7 +2740,7 @@ begin
 
 
     //(we do this backwards....rendered to surface of the size of 1 pixel)
-    if ((MaxColors=256) or (MaxColors=16)) then TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 8, format); 
+    if ((MaxColors=256) or (MaxColors=16)) then TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 8, format) 
     //its weird...get 4bit indexed colors list in longword format but force me into 256 color mode???
 
     else if (MaxColors>256) then begin
@@ -2788,37 +2757,128 @@ begin
 		end;
      end;
 
-
-    SDL_RenderReadPixels(renderer, rect, TempSurface^.format, TempSurface^.pixels, TempSurface^.pitch);
     //read a 1x1 rectangle....
-    
-    bpp := TempSurface.format.BytesPerPixel /8; //8..16..32....so divide by 8.
-    // Here p is the address to the pixel we want to retrieve
-    
-    p:= TempSurface^.pixels + y * TempSurface^.pitch + x * bpp ;
+    SDL_RenderReadPixels(renderer, rect, format, TempSurface^.pixels, TempSurface^.pitch);
 
+
+    p:=TempSurface^.pixels;  
+    bpp := TempSurface^.format^.BytesPerPixel; 
+    //The C is flawed! 15bpp not taken into account.
+    //ignorance is stupidity and laziness!
+
+    // Here TempSurface^.pixels is the address to the pixel data (1px) we want to retrieve
+    
+
+{
+
+"nuking the problem" (unnessessary overcomplication)
+ the problem - not well documented for surfaces in C-
+
+is thusly:
+
+  P can be of any size up to 32bit values (because sdl doesnt support 64bit modes)
+
+  is P a byte? (16/256 colors)
+  is P a Word? NO. NEVER.Not enough BPP data returned.
+  is P a partial DWord? (15/16bit/24bit colors) - spew SDL_Color data (for each byte inside P), 
+      then fetch an appropriate DWord from that
+      (this is a bitwise operation, so we need the DWord inside the pointer to work with the data)
+
+  is P a DWord? (32bit colors)
+
+no type conversion is needed as pointers are flexible
+however endianness, although it should be checked for (ALWALYS) plays no role in how P is interpreted.
+
+-and people wonder why thier data coming back from P is flawed?? mhm...
+
+-you nuked it!
+
+}
     case (bpp) of 
-       1: //256 colors
+       8:begin //256 colors
         //now take the longword output 
-        GetPixel:=SDL_GetRGBA(p, TempSurface.format, GotColor.r, GotColor.g, GotColor.b, GotColor.a);
-        
-      2: //16bit
-        GetPixel:=SDL_GetRGBA(Longint(p), TempSurface.format, GotColor.r, GotColor.g, GotColor.b, GotColor.a);
-        
-      3://24bit
-        if(SDL_BYTEORDER = SDL_BIG_ENDIAN) then
-            pewpew:=(p[0] shl 16 or p[1] shl 8 or p[2]);
-            GetPixel:=SDL_GetRGBA(pewpew, TempSurface.format, GotColor.r, GotColor.g, GotColor.b, GotColor.a);
 
-        else (SDL_BYTEORDER = SDL_SMALL_ENDIAN) then
-            pewpew:=(p[0] or p[1] shl 8 or p[2] shl 16);
-            GetPixel:=SDL_GetRGBA(pewpew, TempSurface.format, GotColor.r, GotColor.g, GotColor.b, GotColor.a);
+          //check for the hidden 4bpp modes we made available
+          if MaxColors=16 then begin
+             index:=ord(Byte(^p));
+             GetPixel:=Tpalette16.Dwords[index];
+          end;
 
-      4: //32bit
-        pointpew:=p;
-        GetPixel:=SDL_GetRGBA(pointpew, TempSurface.format, GotColor.r, GotColor.g, GotColor.b, GotColor.a);
-        
-      else:
+          //ok safely in 256 colors mode
+          if MaxColors=256 then begin
+             index:=ord(Byte(^p));
+             GetPixel:=Tpalette256.Dwords[index];
+          end;
+          exit;
+      end;
+
+//these three need some work
+//not its not a trick, we need the alpha-bit set to FF on non 32bit colors.
+//its ignored but its also "padded data"
+
+      15: begin //15bit
+            //to do this one- we split out the RGB pairs, shift them,then recombine them.
+            SDL_GetRGB(Longword(^p),TempSurface^.format,r,g,b);
+
+			//play fetch            
+
+             gotcolor^.r:=(byte(^r) );
+		     gotcolor^.g:=(byte(^g) );;
+	         gotcolor^.b:=(byte(^b) );
+
+            //shift adjust me
+			gotcolor^.r:= (gotcolor^.r shr 3);
+			gotcolor^.g:= (gotcolor^.g shr 3);
+			gotcolor^.b:= (gotcolor^.b shr 3) ;
+
+     //repack
+            someDWord:= SDL_MapRGB(TempSurface^.format,gotcolor^.r,gotcolor^.g,gotcolor^.b);
+            GetPixel:=someDWord;
+            exit;
+      end;
+      16: begin //16bit-565
+            //this is set, but anyways...
+        //    if (TempSurface^.format=SDL_PIXELFORMAT_RGB565) then begin
+
+            SDL_GetRGB(Longword(^p),TempSurface^.format,r,g,b);
+
+			//play fetch            
+
+             gotcolor^.r:=(byte(^r) );
+		     gotcolor^.g:=(byte(^g) );;
+	         gotcolor^.b:=(byte(^b) );
+
+            //shift adjust me
+			gotcolor^.r:= (gotcolor^.r shr 3);
+			gotcolor^.g:= (gotcolor^.g shr 2);
+			gotcolor^.b:= (gotcolor^.b shr 3) ;
+
+    //repack
+            someDWord:= SDL_MapRGB(TempSurface^.format,gotcolor^.r,gotcolor^.g,gotcolor^.b);
+            GetPixel:=someDWord;
+      		exit;
+      end;
+
+
+      24: begin //24bit
+      //this is set, but anyways...
+            SDL_GetRGB(Longword(^p),TempSurface^.format,r,g,b);
+
+			//play fetch            
+
+             gotcolor^.r:=(byte(^r) );
+		     gotcolor^.g:=(byte(^g) );;
+	         gotcolor^.b:=(byte(^b) );
+    //repack
+            someDWord:= SDL_MapRGB(TempSurface^.format,gotcolor^.r,gotcolor^.g,gotcolor^.b);
+            GetPixel:=someDWord;
+			exit;
+      end;
+      32: //32bit
+
+	        GetPixel:=DWord(p);
+   
+      else
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get Pixel values...','OK',NIL);
        
     end; //case
@@ -2828,11 +2888,7 @@ begin
 end;
 
 
-Procedure PutPixel(Renderer:^SDL_Renderer; x,y:Word);
-
-var
-  someDWord:DWord;
-
+Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
 
 begin
 //set renderDrawPoint (putPixel) uses fgcolor set with SDL_SEtPenColor or similar
@@ -2847,7 +2903,7 @@ begin
 end;
 
 
-procedure Line(renderer1:^SDL_Renderer; X1, Y1, X2, Y2: word; LineStyle:Linestyles);
+procedure Line(renderer1:PSDL_Renderer; X1, Y1, X2, Y2: word; LineStyle:Linestyles);
 
 var
    x:integer;
@@ -2858,73 +2914,45 @@ var
 
 begin
 
-  if LineStyle=normalLine then begin //this is the skinny line...
-      case bpp of
-		8:begin
-{	  	   	if MaxColors =16 then
-		    	   SDL_SetRenderDrawColor(renderer, palette16.colors[_fgcolor].r,palette16.colors[_fgcolor].g,palette16.colors[_fgcolor].b,$ff);
-    	    else if MaxColors =256 then
-				   SDL_SetRenderDrawColor(renderer, palette256.colors[_fgcolor].r,palette256.colors[_fgcolor].g,palette256.colors[_fgcolor].b,$ff);
- }   	    SDL_RenderDrawLine(renderer,x1, y1, x2, y2);   
+  if LineStyle=NormWidth then begin //this is the skinny line...
+    
+    	    SDL_RenderDrawLine(renderer,x1, y1, x2, y2);   
   		    exit;
-		end;
-       15:begin
 
-	{		GetRGB(HexColor,format,rgbColor.r,rgbColor.g,rgbColor.b);
-			SDL_SetRenderDrawColor(renderer, r, g, b, $FF);
-     }  		SDL_RenderDrawLine(renderer,x1, y1, x2, y2); 
-	   
-       end;
-       16,24,32:begin
-
-		{	GetRGBA(HexColor,format,rgbColor.r,rgbColor.g,rgbColor.b,rgbColor.a);
-			SDL_SetRenderDrawColor(renderer, r, g, b, a);
-      } 		SDL_RenderDrawLine(renderer,x1, y1, x2, y2); 
-	   end;
- 
   end 
-  else if LineStyle=ThickLine or LineStyle=VeryThickLine then begin
+  else begin
 
-  //this gets weird...its like drawing many lines but all at the same time...
-  //as is "this" so above and below....
+    //basically draw the line, then fatten it
 
-  	//ThickLine=3
-  	//VeryThickLine=6
-  	x:=1;
-  	repeat {
-		 case bpp of
+    //the original line, untouched.  
+	SDL_RenderDrawLine(renderer,x1, y1, x2, y2); 
+    x:=1;
 
-			15:begin
-		         SDL_SetRenderDrawColor(renderer, r, g, b, $FF);
-			end;
-			16,24,32:begin
-		         SDL_SetRenderDrawColor(renderer, r, g, b, a);	
-			end;
-
-         end:
-         SDL_SetRenderDrawColor(renderer, r, g, b, $FF);}
-		 //draw one side
-         SDL_RenderDrawLine(renderer,x1, y1-1, x2, y2-1); 	
+    repeat
+    if odd(x) then begin
+  
+		//draw one side
+        SDL_RenderDrawLine(renderer,x1, y1-x, x2, y2-x); 	
  
-    	 //the original line, untouched.  
-		SDL_RenderDrawLine(renderer,x1, y1, x2, y2); 
-
 		//the other side of the thick line
-		SDL_RenderDrawLine(renderer,x1, y1+1, x2, y2+1); 
+		SDL_RenderDrawLine(renderer,x1, y1+x, x2, y2+x); 
+     	inc(x);
+	end;
+    inc(x);
 
-    	 inc(x);
-  	until x=LineStyle;
+  	until x=ord(Linestyle);
   SDL_RenderPresent(renderer);
   end;
 end;
 
 
 
-procedure Rectangle(x,y,w,h,:integer);
+procedure Rectangle(x,y,w,h:integer);
 //fill rectagle starting at x,y to w,h
-//rectangle should already be defined..
+
 
 begin
+// if w=h then IsSquare:=true;
 
     new(Rect);
 	rect.x:=x;
@@ -3225,7 +3253,7 @@ begin
    end; 
    //else: last window remaining
    SDL_DestroyTexture(Texture[1]);
-   SDL_RenderSetViewport( Renderer,NULL);  //reset to full size "screen"
+   SDL_RenderSetViewport( Renderer,nil);  //reset to full size "screen"
    RenderCopy(Renderer,Texture[0]);
    RenderPresent; //and update back to the old screen before the viewports came here.
    LastRect:=(0,0,MaxX,MaxY);
