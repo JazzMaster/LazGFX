@@ -1,3 +1,4 @@
+
 //greyscale palettes are required for either loading or displaying in BW, or some subset thereof.
 //this isnt "exactly" duplicated code
 
@@ -13,7 +14,14 @@
 
 //the only guaranteed perfect palette code is (m)CGA -tweaked by me, and Greyscale 256.
 //(greyscale mCGA is a hackish guess based on rough math, given 14 colors, and also black and white)
+// 256 should mimic xterm colors IF the endianess is correct and I dont need DWord hex math ops
 
+//the question becomes- do we really need to set the DWords by hand.. (such a PITA)
+//while I did this thinking YES, possibly no. AYE AYE AYE!
+
+//SDL performs the bit-flapping for us. so- if we set the Grey256 color value as a RGBA record/struct(c) entry 
+//then we should be able to pull it back as a unknown DWord(in theory).
+//(SDL_Map and SDL_Get RGB/RGBA are here for this purpose)
 
 procedure initPaletteGrey16;
 
@@ -101,7 +109,7 @@ TPalette16GRey.DWords[13]:=$ddddddff;
 TPalette16GRey.DWords[14]:=$eeeeeeff;
 TPalette16GRey.DWords[15]:=$ffffffff; 
 
-
+SDL_SetPaletteColors(palette,Tpalette16GRey^.colors,0,16);
 end;
 
 
@@ -109,308 +117,308 @@ procedure initPaletteGrey256;
 
 //easy peasy to setup.
 
-
 var
     i,num:integer;
 
 
 begin  
 
-
 //(we dont setup valuelist by hand this time)
 
    i:=0;
-   num:=0; 
   repeat 
-      Tpalette256.colors[num]^.r:=Byte(longint(i));
-      Tpalette256.colors[num]^.g:=Byte(longint(i));
-      Tpalette256.colors[num]^.b:=Byte(longint(i));
-      Tpalette256.colors[num]^.a:=$ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
+      Tpalette256Grey.colors[num]^.r:=Byte(longint(i));
+      Tpalette256Grey.colors[num]^.g:=Byte(longint(i));
+      Tpalette256Grey.colors[num]^.b:=Byte(longint(i));
+      Tpalette256Grey.colors[num]^.a:=$ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
       inc(i); //notice the difference <-HERE where RGB are the same values
-      inc(num); 
-  until num=768;
+  until i=255;
 
 	
 //00-FF as shown above with all value the same in the DWord except the Alpha/transparency Bit, which stays at FF
-//these need to be corrected before use
-TPalette256.DWords[0]:=$000000ff;
-TPalette256.DWords[1]:=$010101ff;
-TPalette256.DWords[2]:=$020202ff;
-
-TPalette256.DWords[3]:=$808000ff;
-TPalette256.DWords[4]:=$000080ff;
-TPalette256.DWords[5]:=$800080ff;
-TPalette256.DWords[6]:=$008080ff;
-TPalette256.DWords[7]:=$c0c0c0ff;
-TPalette256.DWords[8]:=$808080ff;
-TPalette256.DWords[9]:=$ff0000ff;
-TPalette256.DWords[10]:=$00ff00ff;
-TPalette256.DWords[11]:=$ffff00ff;
-TPalette256.DWords[12]:=$0000ffff;
-TPalette256.DWords[13]:=$ff00ffff;
-TPalette256.DWords[14]:=$00ffffff;
-TPalette256.DWords[15]:=$ffffffff;
-
-TPalette256.DWords[16]:=$000000ff;
-TPalette256.DWords[17]:=$00005fff;
-TPalette256.DWords[18]:=$000087ff;
-TPalette256.DWords[19]:=$0000afff;
-TPalette256.DWords[20]:=$0000d7ff;
-TPalette256.DWords[21]:=$0000ffff;
-TPalette256.DWords[22]:=$005f00ff;
-TPalette256.DWords[23]:=$005f5fff;
-TPalette256.DWords[24]:=$005f87ff;
-TPalette256.DWords[25]:=$005fafff;
-TPalette256.DWords[26]:=$005fd7ff;
-TPalette256.DWords[27]:=$005fffff;
-TPalette256.DWords[28]:=$008700ff;
-TPalette256.DWords[29]:=$00875fff;
-TPalette256.DWords[30]:=$008787ff;
-
-TPalette256.DWords[31]:=$0087afff;
-TPalette256.DWords[32]:=$0087d7ff;
-TPalette256.DWords[33]:=$0087ffff;
-TPalette256.DWords[34]:=$00af00ff;
-TPalette256.DWords[35]:=$00af5fff;
-TPalette256.DWords[36]:=$00af87ff;
-TPalette256.DWords[37]:=$00afafff;
-TPalette256.DWords[38]:=$00afd7ff;
-TPalette256.DWords[39]:=$00afffff;
-TPalette256.DWords[40]:=$00d700ff;
-TPalette256.DWords[41]:=$00d75fff;
-TPalette256.DWords[42]:=$00d787ff;
-TPalette256.DWords[43]:=$00d7afff;
-TPalette256.DWords[44]:=$00d7d7ff;
-TPalette256.DWords[45]:=$00d7ffff;
-
-TPalette256.DWords[46]:=$00ff00ff;
-TPalette256.DWords[47]:=$00ff5fff;
-TPalette256.DWords[48]:=$00ff87ff;
-TPalette256.DWords[49]:=$00ffafff;
-TPalette256.DWords[50]:=$00ffd7ff;
-TPalette256.DWords[51]:=$00ffffff;
-TPalette256.DWords[52]:=$5f0000ff;
-TPalette256.DWords[53]:=$5f005fff;
-TPalette256.DWords[54]:=$5f0087ff;
-TPalette256.DWords[55]:=$5f00afff;
-TPalette256.DWords[56]:=$5f00d7ff;
-TPalette256.DWords[57]:=$5f00ffff;
-TPalette256.DWords[58]:=$5f5f00ff;
-TPalette256.DWords[59]:=$5f5f5fff;
-TPalette256.DWords[60]:=$5f5f87ff;
-
-TPalette256.DWords[61]:=$5f5fafff;
-TPalette256.DWords[62]:=$5f5fd7ff;
-TPalette256.DWords[63]:=$5f5fffff;
-TPalette256.DWords[64]:=$5f8700ff;
-TPalette256.DWords[65]:=$5f875fff;
-TPalette256.DWords[66]:=$5f8787ff;
-TPalette256.DWords[67]:=$5f87afff;
-TPalette256.DWords[68]:=$5f87d7ff;
-TPalette256.DWords[69]:=$5f87ffff;
-TPalette256.DWords[70]:=$5faf00ff;
-TPalette256.DWords[71]:=$5faf5fff;
-TPalette256.DWords[72]:=$5faf87ff;
-TPalette256.DWords[73]:=$5fafafff;
-TPalette256.DWords[74]:=$5fafd7ff;
-TPalette256.DWords[75]:=$5fafffff;
-
-TPalette256.DWords[76]:=$5fd700ff;
-TPalette256.DWords[77]:=$5fd75fff;
-TPalette256.DWords[78]:=$5fd787ff;
-TPalette256.DWords[79]:=$5fd7afff;
-TPalette256.DWords[80]:=$5fd7d7ff;
-TPalette256.DWords[81]:=$5fd7ffff;
-TPalette256.DWords[82]:=$5fff00ff;
-TPalette256.DWords[83]:=$5fff5fff;
-TPalette256.DWords[84]:=$5fff87ff;
-TPalette256.DWords[85]:=$5fffafff;
-TPalette256.DWords[86]:=$5fffd7ff;
-TPalette256.DWords[87]:=$5fffffff;
-TPalette256.DWords[88]:=$870000ff;
-TPalette256.DWords[89]:=$87005fff;
-TPalette256.DWords[90]:=$870087ff;
-
-TPalette256.DWords[91]:=$8700afff;
-TPalette256.DWords[92]:=$8700d7ff;
-TPalette256.DWords[93]:=$8700ffff;
-TPalette256.DWords[94]:=$875f00ff;
-TPalette256.DWords[95]:=$875f5fff;
-TPalette256.DWords[96]:=$875f87ff;
-TPalette256.DWords[97]:=$875fafff;
-TPalette256.DWords[98]:=$875fd7ff;
-TPalette256.DWords[99]:=$875fffff;
-TPalette256.DWords[100]:=$878700ff;
-TPalette256.DWords[101]:=$87875fff;
-TPalette256.DWords[102]:=$878787ff;
-TPalette256.DWords[103]:=$8787afff;
-TPalette256.DWords[104]:=$8787d7ff;
-TPalette256.DWords[105]:=$8787ffff;
-
-TPalette256.DWords[106]:=$87af00ff;
-TPalette256.DWords[107]:=$87af5fff;
-TPalette256.DWords[108]:=$87af87ff;
-TPalette256.DWords[109]:=$87afafff;
-
-TPalette256.DWords[110]:=$87afd7ff;
-TPalette256.DWords[111]:=$87afffff;
-TPalette256.DWords[112]:=$87d700ff;
-TPalette256.DWords[113]:=$87d75fff;
-TPalette256.DWords[114]:=$87d787ff;
-TPalette256.DWords[115]:=$87d7afff;
-TPalette256.DWords[116]:=$87d7d7ff;
-TPalette256.DWords[117]:=$87d7ffff;
-TPalette256.DWords[118]:=$87ff00ff;
-TPalette256.DWords[119]:=$87ff5fff;
-TPalette256.DWords[120]:=$87ff87ff;
-
-TPalette256.DWords[121]:=$87ffafff;
-TPalette256.DWords[122]:=$87ffd7ff;
-TPalette256.DWords[123]:=$87ffffff;
-TPalette256.DWords[124]:=$af0000ff;
-TPalette256.DWords[125]:=$af005fff;
-TPalette256.DWords[126]:=$af0087ff;
-TPalette256.DWords[127]:=$af00afff;
-TPalette256.DWords[128]:=$af00d7ff;
-TPalette256.DWords[129]:=$af00ffff;
-TPalette256.DWords[130]:=$af5f00ff;
-TPalette256.DWords[131]:=$af5f5fff;
-TPalette256.DWords[132]:=$af5f87ff;
-TPalette256.DWords[133]:=$af5fafff;
-TPalette256.DWords[134]:=$af5fd7ff;
-TPalette256.DWords[135]:=$af5fffff;
-
-TPalette256.DWords[136]:=$af8700ff;
-TPalette256.DWords[137]:=$af875fff;
-TPalette256.DWords[138]:=$af8787ff;
-TPalette256.DWords[139]:=$af87afff;
-TPalette256.DWords[140]:=$af87d7ff;
-TPalette256.DWords[141]:=$af87ffff;
-TPalette256.DWords[142]:=$afaf00ff;
-TPalette256.DWords[143]:=$afaf5fff;
-TPalette256.DWords[144]:=$afaf87ff;
-TPalette256.DWords[145]:=$afafafff;
-TPalette256.DWords[146]:=$afafd7ff;
-TPalette256.DWords[147]:=$afafffff;
-TPalette256.DWords[148]:=$afd700ff;
-TPalette256.DWords[149]:=$afd75fff;
-TPalette256.DWords[150]:=$afd787ff;
-
-TPalette256.DWords[151]:=$afd7afff;
-TPalette256.DWords[152]:=$afd7d7ff;
-TPalette256.DWords[153]:=$afd7ffff;
-TPalette256.DWords[154]:=$afff00ff;
-TPalette256.DWords[155]:=$afff5fff;
-TPalette256.DWords[156]:=$afff87ff;
-TPalette256.DWords[157]:=$afffafff;
-TPalette256.DWords[158]:=$afffd7ff;
-TPalette256.DWords[159]:=$afffffff;
-TPalette256.DWords[160]:=$d70000ff;
-TPalette256.DWords[161]:=$d7005fff;
-TPalette256.DWords[162]:=$d70087ff;
-TPalette256.DWords[163]:=$d700afff;
-TPalette256.DWords[164]:=$d700d7ff;
-TPalette256.DWords[165]:=$d700ffff;
-
-TPalette256.DWords[166]:=$d75f00ff;
-TPalette256.DWords[167]:=$d75f5fff;
-TPalette256.DWords[168]:=$d75f87ff;
-TPalette256.DWords[169]:=$d75fafff;
-TPalette256.DWords[170]:=$d75fd7ff;
-TPalette256.DWords[171]:=$d75fffff;
-TPalette256.DWords[172]:=$d78700ff;
-TPalette256.DWords[173]:=$d7875fff;
-TPalette256.DWords[174]:=$d78787ff;
-TPalette256.DWords[175]:=$d787afff;
-TPalette256.DWords[176]:=$d787d7ff;
-TPalette256.DWords[177]:=$d787ffff;
-TPalette256.DWords[178]:=$d7af00ff;
-TPalette256.DWords[179]:=$d7af5fff;
-TPalette256.DWords[180]:=$d7af87ff;
-
-TPalette256.DWords[181]:=$d7afafff;
-TPalette256.DWords[182]:=$d7afd7ff;
-TPalette256.DWords[183]:=$d7afffff;
-TPalette256.DWords[184]:=$d7d700ff;
-TPalette256.DWords[185]:=$d7d75fff;
-TPalette256.DWords[186]:=$d7d787ff;
-TPalette256.DWords[187]:=$d7d7afff;
-TPalette256.DWords[188]:=$d7d7d7ff;
-TPalette256.DWords[189]:=$d7d7ffff;
-TPalette256.DWords[190]:=$d7ff00ff;
-TPalette256.DWords[191]:=$d7ff5fff;
-TPalette256.DWords[192]:=$d7ff87ff;
-TPalette256.DWords[193]:=$d7ffafff;
-TPalette256.DWords[194]:=$d7ffd7ff;
-TPalette256.DWords[195]:=$d7ffffff;
-
-TPalette256.DWords[196]:=$ff0000ff;
-TPalette256.DWords[197]:=$ff005fff;
-TPalette256.DWords[198]:=$ff0087ff;
-TPalette256.DWords[199]:=$ff00afff;
-TPalette256.DWords[200]:=$ff00d7ff;
-TPalette256.DWords[201]:=$ff00ffff;
-TPalette256.DWords[202]:=$ff5f00ff;
-TPalette256.DWords[203]:=$ff5f5fff;
-TPalette256.DWords[204]:=$ff5f87ff;
-TPalette256.DWords[205]:=$ff5fafff;
-TPalette256.DWords[206]:=$ff5fd7ff;
-TPalette256.DWords[207]:=$ff5fffff;
-TPalette256.DWords[208]:=$ff8700ff;
-TPalette256.DWords[209]:=$ff875fff;
-TPalette256.DWords[210]:=$ff8787ff;
-
-TPalette256.DWords[211]:=$ff87afff;
-TPalette256.DWords[212]:=$ff87d7ff;
-TPalette256.DWords[213]:=$ff87ffff;
-TPalette256.DWords[214]:=$ffaf00ff;
-TPalette256.DWords[215]:=$ffaf5fff;
-TPalette256.DWords[216]:=$ffaf87ff;
-TPalette256.DWords[217]:=$ffafafff;
-TPalette256.DWords[218]:=$ffafd7ff;
-TPalette256.DWords[219]:=$ffafffff;
-TPalette256.DWords[220]:=$ffd700ff;
-
-TPalette256.DWords[221]:=$ffd75fff;
-TPalette256.DWords[222]:=$ffd787ff;
-TPalette256.DWords[223]:=$ffd7afff;
-TPalette256.DWords[224]:=$ffd7d7ff;
-
-TPalette256.DWords[225]:=$ffd7ffff;
-TPalette256.DWords[226]:=$ffff00ff;
-TPalette256.DWords[227]:=$ffff5fff;
-TPalette256.DWords[228]:=$ffff87ff;
-TPalette256.DWords[229]:=$ffffafff;
-TPalette256.DWords[230]:=$ffffd7ff;
+//FIXME: these need to be corrected 
 
 
-TPalette256.DWords[231]:=$ffffffff;
-TPalette256.DWords[232]:=$080808ff;
-TPalette256.DWords[233]:=$121212ff;
-TPalette256.DWords[234]:=$1c1c1cff;
-TPalette256.DWords[235]:=$262626ff;
-TPalette256.DWords[236]:=$303030ff;
-TPalette256.DWords[237]:=$3a3a3aff;
-TPalette256.DWords[238]:=$444444ff;
-TPalette256.DWords[239]:=$4e4e4eff;
-TPalette256.DWords[240]:=$585858ff;
-TPalette256.DWords[241]:=$626262ff;
-TPalette256.DWords[242]:=$6c6c6cff;
-TPalette256.DWords[243]:=$767676ff;
-TPalette256.DWords[244]:=$808080ff;
-TPalette256.DWords[245]:=$8a8a8aff;
-TPalette256.DWords[246]:=$949494ff;
-TPalette256.DWords[247]:=$9e9e9eff;
-TPalette256.DWords[248]:=$a8a8a8ff;
-TPalette256.DWords[249]:=$b2b2b2ff;
-TPalette256.DWords[250]:=$bcbcbcff;
-TPalette256.DWords[251]:=$c6c6c6ff;
-TPalette256.DWords[252]:=$d0d0d0ff;
-TPalette256.DWords[253]:=$dadadaff;
-TPalette256.DWords[254]:=$e4e4e4ff;
-TPalette256.DWords[255]:=$eeeeeeff;
+Tpalette256Grey.DWords[0]:=$000000ff;
+//the only gauranteed correct values are 0 and 255 right now.
+//this will have to be manually set according to the above math.
 
+Tpalette256Grey.DWords[1]:=$111111ff;
+Tpalette256Grey.DWords[2]:=$222222ff;
+Tpalette256Grey.DWords[3]:=$333333ff;
+Tpalette256Grey.DWords[4]:=$444444ff;
+Tpalette256Grey.DWords[5]:=$555555ff;
+Tpalette256Grey.DWords[6]:=$666666ff;
+Tpalette256Grey.DWords[7]:=$777777ff;
+Tpalette256Grey.DWords[8]:=$888888ff;
+Tpalette256Grey.DWords[9]:=$999999ff;
+Tpalette256Grey.DWords[10]:=$aaaaaaff;
+Tpalette256Grey.DWords[11]:=$bbbbbbff;
+Tpalette256Grey.DWords[12]:=$ccccccff;
+Tpalette256Grey.DWords[13]:=$ddddddff;
+Tpalette256Grey.DWords[14]:=$eeeeeeff;
+Tpalette256Grey.DWords[15]:=$ffffffff; 
 
+Tpalette256Grey.DWords[16]:=$000000ff;
+Tpalette256Grey.DWords[17]:=$00005fff;
+Tpalette256Grey.DWords[18]:=$000087ff;
+Tpalette256Grey.DWords[19]:=$0000afff;
+Tpalette256Grey.DWords[20]:=$0000d7ff;
+Tpalette256Grey.DWords[21]:=$0000ffff;
+Tpalette256Grey.DWords[22]:=$005f00ff;
+Tpalette256Grey.DWords[23]:=$005f5fff;
+Tpalette256Grey.DWords[24]:=$005f87ff;
+Tpalette256Grey.DWords[25]:=$005fafff;
+Tpalette256Grey.DWords[26]:=$005fd7ff;
+Tpalette256Grey.DWords[27]:=$005fffff;
+Tpalette256Grey.DWords[28]:=$008700ff;
+Tpalette256Grey.DWords[29]:=$00875fff;
+Tpalette256Grey.DWords[30]:=$008787ff;
+
+Tpalette256Grey.DWords[31]:=$0087afff;
+Tpalette256Grey.DWords[32]:=$0087d7ff;
+Tpalette256Grey.DWords[33]:=$0087ffff;
+Tpalette256Grey.DWords[34]:=$00af00ff;
+Tpalette256Grey.DWords[35]:=$00af5fff;
+Tpalette256Grey.DWords[36]:=$00af87ff;
+Tpalette256Grey.DWords[37]:=$00afafff;
+Tpalette256Grey.DWords[38]:=$00afd7ff;
+Tpalette256Grey.DWords[39]:=$00afffff;
+Tpalette256Grey.DWords[40]:=$00d700ff;
+Tpalette256Grey.DWords[41]:=$00d75fff;
+Tpalette256Grey.DWords[42]:=$00d787ff;
+Tpalette256Grey.DWords[43]:=$00d7afff;
+Tpalette256Grey.DWords[44]:=$00d7d7ff;
+Tpalette256Grey.DWords[45]:=$00d7ffff;
+
+Tpalette256Grey.DWords[46]:=$00ff00ff;
+Tpalette256Grey.DWords[47]:=$00ff5fff;
+Tpalette256Grey.DWords[48]:=$00ff87ff;
+Tpalette256Grey.DWords[49]:=$00ffafff;
+Tpalette256Grey.DWords[50]:=$00ffd7ff;
+Tpalette256Grey.DWords[51]:=$00ffffff;
+Tpalette256Grey.DWords[52]:=$5f0000ff;
+Tpalette256Grey.DWords[53]:=$5f005fff;
+Tpalette256Grey.DWords[54]:=$5f0087ff;
+Tpalette256Grey.DWords[55]:=$5f00afff;
+Tpalette256Grey.DWords[56]:=$5f00d7ff;
+Tpalette256Grey.DWords[57]:=$5f00ffff;
+Tpalette256Grey.DWords[58]:=$5f5f00ff;
+Tpalette256Grey.DWords[59]:=$5f5f5fff;
+Tpalette256Grey.DWords[60]:=$5f5f87ff;
+
+Tpalette256Grey.DWords[61]:=$5f5fafff;
+Tpalette256Grey.DWords[62]:=$5f5fd7ff;
+Tpalette256Grey.DWords[63]:=$5f5fffff;
+Tpalette256Grey.DWords[64]:=$5f8700ff;
+Tpalette256Grey.DWords[65]:=$5f875fff;
+Tpalette256Grey.DWords[66]:=$5f8787ff;
+Tpalette256Grey.DWords[67]:=$5f87afff;
+Tpalette256Grey.DWords[68]:=$5f87d7ff;
+Tpalette256Grey.DWords[69]:=$5f87ffff;
+Tpalette256Grey.DWords[70]:=$5faf00ff;
+Tpalette256Grey.DWords[71]:=$5faf5fff;
+Tpalette256Grey.DWords[72]:=$5faf87ff;
+Tpalette256Grey.DWords[73]:=$5fafafff;
+Tpalette256Grey.DWords[74]:=$5fafd7ff;
+Tpalette256Grey.DWords[75]:=$5fafffff;
+
+Tpalette256Grey.DWords[76]:=$5fd700ff;
+Tpalette256Grey.DWords[77]:=$5fd75fff;
+Tpalette256Grey.DWords[78]:=$5fd787ff;
+Tpalette256Grey.DWords[79]:=$5fd7afff;
+Tpalette256Grey.DWords[80]:=$5fd7d7ff;
+Tpalette256Grey.DWords[81]:=$5fd7ffff;
+Tpalette256Grey.DWords[82]:=$5fff00ff;
+Tpalette256Grey.DWords[83]:=$5fff5fff;
+Tpalette256Grey.DWords[84]:=$5fff87ff;
+Tpalette256Grey.DWords[85]:=$5fffafff;
+Tpalette256Grey.DWords[86]:=$5fffd7ff;
+Tpalette256Grey.DWords[87]:=$5fffffff;
+Tpalette256Grey.DWords[88]:=$870000ff;
+Tpalette256Grey.DWords[89]:=$87005fff;
+Tpalette256Grey.DWords[90]:=$870087ff;
+
+Tpalette256Grey.DWords[91]:=$8700afff;
+Tpalette256Grey.DWords[92]:=$8700d7ff;
+Tpalette256Grey.DWords[93]:=$8700ffff;
+Tpalette256Grey.DWords[94]:=$875f00ff;
+Tpalette256Grey.DWords[95]:=$875f5fff;
+Tpalette256Grey.DWords[96]:=$875f87ff;
+Tpalette256Grey.DWords[97]:=$875fafff;
+Tpalette256Grey.DWords[98]:=$875fd7ff;
+Tpalette256Grey.DWords[99]:=$875fffff;
+Tpalette256Grey.DWords[100]:=$878700ff;
+Tpalette256Grey.DWords[101]:=$87875fff;
+Tpalette256Grey.DWords[102]:=$878787ff;
+Tpalette256Grey.DWords[103]:=$8787afff;
+Tpalette256Grey.DWords[104]:=$8787d7ff;
+Tpalette256Grey.DWords[105]:=$8787ffff;
+
+Tpalette256Grey.DWords[106]:=$87af00ff;
+Tpalette256Grey.DWords[107]:=$87af5fff;
+Tpalette256Grey.DWords[108]:=$87af87ff;
+Tpalette256Grey.DWords[109]:=$87afafff;
+
+Tpalette256Grey.DWords[110]:=$87afd7ff;
+Tpalette256Grey.DWords[111]:=$87afffff;
+Tpalette256Grey.DWords[112]:=$87d700ff;
+Tpalette256Grey.DWords[113]:=$87d75fff;
+Tpalette256Grey.DWords[114]:=$87d787ff;
+Tpalette256Grey.DWords[115]:=$87d7afff;
+Tpalette256Grey.DWords[116]:=$87d7d7ff;
+Tpalette256Grey.DWords[117]:=$87d7ffff;
+Tpalette256Grey.DWords[118]:=$87ff00ff;
+Tpalette256Grey.DWords[119]:=$87ff5fff;
+Tpalette256Grey.DWords[120]:=$87ff87ff;
+
+Tpalette256Grey.DWords[121]:=$87ffafff;
+Tpalette256Grey.DWords[122]:=$87ffd7ff;
+Tpalette256Grey.DWords[123]:=$87ffffff;
+Tpalette256Grey.DWords[124]:=$af0000ff;
+Tpalette256Grey.DWords[125]:=$af005fff;
+Tpalette256Grey.DWords[126]:=$af0087ff;
+Tpalette256Grey.DWords[127]:=$af00afff;
+Tpalette256Grey.DWords[128]:=$af00d7ff;
+Tpalette256Grey.DWords[129]:=$af00ffff;
+Tpalette256Grey.DWords[130]:=$af5f00ff;
+Tpalette256Grey.DWords[131]:=$af5f5fff;
+Tpalette256Grey.DWords[132]:=$af5f87ff;
+Tpalette256Grey.DWords[133]:=$af5fafff;
+Tpalette256Grey.DWords[134]:=$af5fd7ff;
+Tpalette256Grey.DWords[135]:=$af5fffff;
+
+Tpalette256Grey.DWords[136]:=$af8700ff;
+Tpalette256Grey.DWords[137]:=$af875fff;
+Tpalette256Grey.DWords[138]:=$af8787ff;
+Tpalette256Grey.DWords[139]:=$af87afff;
+Tpalette256Grey.DWords[140]:=$af87d7ff;
+Tpalette256Grey.DWords[141]:=$af87ffff;
+Tpalette256Grey.DWords[142]:=$afaf00ff;
+Tpalette256Grey.DWords[143]:=$afaf5fff;
+Tpalette256Grey.DWords[144]:=$afaf87ff;
+Tpalette256Grey.DWords[145]:=$afafafff;
+Tpalette256Grey.DWords[146]:=$afafd7ff;
+Tpalette256Grey.DWords[147]:=$afafffff;
+Tpalette256Grey.DWords[148]:=$afd700ff;
+Tpalette256Grey.DWords[149]:=$afd75fff;
+Tpalette256Grey.DWords[150]:=$afd787ff;
+
+Tpalette256Grey.DWords[151]:=$afd7afff;
+Tpalette256Grey.DWords[152]:=$afd7d7ff;
+Tpalette256Grey.DWords[153]:=$afd7ffff;
+Tpalette256Grey.DWords[154]:=$afff00ff;
+Tpalette256Grey.DWords[155]:=$afff5fff;
+Tpalette256Grey.DWords[156]:=$afff87ff;
+Tpalette256Grey.DWords[157]:=$afffafff;
+Tpalette256Grey.DWords[158]:=$afffd7ff;
+Tpalette256Grey.DWords[159]:=$afffffff;
+Tpalette256Grey.DWords[160]:=$d70000ff;
+Tpalette256Grey.DWords[161]:=$d7005fff;
+Tpalette256Grey.DWords[162]:=$d70087ff;
+Tpalette256Grey.DWords[163]:=$d700afff;
+Tpalette256Grey.DWords[164]:=$d700d7ff;
+Tpalette256Grey.DWords[165]:=$d700ffff;
+
+Tpalette256Grey.DWords[166]:=$d75f00ff;
+Tpalette256Grey.DWords[167]:=$d75f5fff;
+Tpalette256Grey.DWords[168]:=$d75f87ff;
+Tpalette256Grey.DWords[169]:=$d75fafff;
+Tpalette256Grey.DWords[170]:=$d75fd7ff;
+Tpalette256Grey.DWords[171]:=$d75fffff;
+Tpalette256Grey.DWords[172]:=$d78700ff;
+Tpalette256Grey.DWords[173]:=$d7875fff;
+Tpalette256Grey.DWords[174]:=$d78787ff;
+Tpalette256Grey.DWords[175]:=$d787afff;
+Tpalette256Grey.DWords[176]:=$d787d7ff;
+Tpalette256Grey.DWords[177]:=$d787ffff;
+Tpalette256Grey.DWords[178]:=$d7af00ff;
+Tpalette256Grey.DWords[179]:=$d7af5fff;
+Tpalette256Grey.DWords[180]:=$d7af87ff;
+
+Tpalette256Grey.DWords[181]:=$d7afafff;
+Tpalette256Grey.DWords[182]:=$d7afd7ff;
+Tpalette256Grey.DWords[183]:=$d7afffff;
+Tpalette256Grey.DWords[184]:=$d7d700ff;
+Tpalette256Grey.DWords[185]:=$d7d75fff;
+Tpalette256Grey.DWords[186]:=$d7d787ff;
+Tpalette256Grey.DWords[187]:=$d7d7afff;
+Tpalette256Grey.DWords[188]:=$d7d7d7ff;
+Tpalette256Grey.DWords[189]:=$d7d7ffff;
+Tpalette256Grey.DWords[190]:=$d7ff00ff;
+Tpalette256Grey.DWords[191]:=$d7ff5fff;
+Tpalette256Grey.DWords[192]:=$d7ff87ff;
+Tpalette256Grey.DWords[193]:=$d7ffafff;
+Tpalette256Grey.DWords[194]:=$d7ffd7ff;
+Tpalette256Grey.DWords[195]:=$d7ffffff;
+
+Tpalette256Grey.DWords[196]:=$ff0000ff;
+Tpalette256Grey.DWords[197]:=$ff005fff;
+Tpalette256Grey.DWords[198]:=$ff0087ff;
+Tpalette256Grey.DWords[199]:=$ff00afff;
+Tpalette256Grey.DWords[200]:=$ff00d7ff;
+Tpalette256Grey.DWords[201]:=$ff00ffff;
+Tpalette256Grey.DWords[202]:=$ff5f00ff;
+Tpalette256Grey.DWords[203]:=$ff5f5fff;
+Tpalette256Grey.DWords[204]:=$ff5f87ff;
+Tpalette256Grey.DWords[205]:=$ff5fafff;
+Tpalette256Grey.DWords[206]:=$ff5fd7ff;
+Tpalette256Grey.DWords[207]:=$ff5fffff;
+Tpalette256Grey.DWords[208]:=$ff8700ff;
+Tpalette256Grey.DWords[209]:=$ff875fff;
+Tpalette256Grey.DWords[210]:=$ff8787ff;
+
+Tpalette256Grey.DWords[211]:=$ff87afff;
+Tpalette256Grey.DWords[212]:=$ff87d7ff;
+Tpalette256Grey.DWords[213]:=$ff87ffff;
+Tpalette256Grey.DWords[214]:=$ffaf00ff;
+Tpalette256Grey.DWords[215]:=$ffaf5fff;
+Tpalette256Grey.DWords[216]:=$ffaf87ff;
+Tpalette256Grey.DWords[217]:=$ffafafff;
+Tpalette256Grey.DWords[218]:=$ffafd7ff;
+Tpalette256Grey.DWords[219]:=$ffafffff;
+Tpalette256Grey.DWords[220]:=$ffd700ff;
+
+Tpalette256Grey.DWords[221]:=$ffd75fff;
+Tpalette256Grey.DWords[222]:=$ffd787ff;
+Tpalette256Grey.DWords[223]:=$ffd7afff;
+Tpalette256Grey.DWords[224]:=$ffd7d7ff;
+
+Tpalette256Grey.DWords[225]:=$ffd7ffff;
+Tpalette256Grey.DWords[226]:=$ffff00ff;
+Tpalette256Grey.DWords[227]:=$ffff5fff;
+Tpalette256Grey.DWords[228]:=$ffff87ff;
+Tpalette256Grey.DWords[229]:=$ffffafff;
+Tpalette256Grey.DWords[230]:=$ffffd7ff;
+
+Tpalette256Grey.DWords[231]:=$ffffffff;
+Tpalette256Grey.DWords[232]:=$080808ff;
+Tpalette256Grey.DWords[233]:=$121212ff;
+Tpalette256Grey.DWords[234]:=$1c1c1cff;
+Tpalette256Grey.DWords[235]:=$262626ff;
+Tpalette256Grey.DWords[236]:=$303030ff;
+Tpalette256Grey.DWords[237]:=$3a3a3aff;
+Tpalette256Grey.DWords[238]:=$444444ff;
+Tpalette256Grey.DWords[239]:=$4e4e4eff;
+Tpalette256Grey.DWords[240]:=$585858ff;
+Tpalette256Grey.DWords[241]:=$626262ff;
+Tpalette256Grey.DWords[242]:=$6c6c6cff;
+Tpalette256Grey.DWords[243]:=$767676ff;
+Tpalette256Grey.DWords[244]:=$808080ff;
+Tpalette256Grey.DWords[245]:=$8a8a8aff;
+Tpalette256Grey.DWords[246]:=$949494ff;
+Tpalette256Grey.DWords[247]:=$9e9e9eff;
+Tpalette256Grey.DWords[248]:=$a8a8a8ff;
+Tpalette256Grey.DWords[249]:=$b2b2b2ff;
+Tpalette256Grey.DWords[250]:=$bcbcbcff;
+Tpalette256Grey.DWords[251]:=$c6c6c6ff;
+Tpalette256Grey.DWords[252]:=$d0d0d0ff;
+Tpalette256Grey.DWords[253]:=$dadadaff;
+Tpalette256Grey.DWords[254]:=$e4e4e4ff;
+
+TPalette16GRey.DWords[255]:=$ffffffff; 
+
+SDL_SetPaletteColors(palette,Tpalette256Grey^.colors,0,256);
 
 end;
 
@@ -570,9 +578,10 @@ TPalette16.DWords[14]:=$007f7fff;
 
 TPalette16.DWords[15]:=$ffffffff;
 
+SDL_SetPaletteColors(palette,Tpalette16^.colors,0,16);
 end;
 
-//type defined in the palette header file
+
 procedure Save16Palette(filename:string);
 
 var
@@ -589,7 +598,12 @@ Begin
 	
 End;
 
-procedure Read16Palette(filename:string);
+//we should ask if we want to read a color or BW file, else we duplicate code for one line of changes.
+//there is a way to check- but we would have to peek inside the file or just display it and assume things.
+//this could shove a BW file in the color section or a color file in the BW section...
+//anyway, theres two sets of arrays and you can reset to defaults if you need to.
+
+procedure Read16Palette(filename:string; ReadColorFile:boolean);
 
 Var
 	palette16File  : File of TRec16;
@@ -600,12 +614,18 @@ Begin
 	Assign(palette16File, filename);
 	ReSet(palette16File);
     Seek(palette16File, 0); //find first record
-    
-	Read(palette16File, TPalette16); //read everything in
+    if ReadColorFile =true then
+		Read(palette16File, TPalette16); //read everything in
+	else
+		Read(palette16File, TPalette16GRey); 
+	    
 	Close(palette16File);
 	
      SDL_AllocPalette(16);    
-     SDL_SetPaletteColors(palette,Tpalette16^.colors,0,16);
+    if ReadColorFile =true then
+          SDL_SetPaletteColors(palette,Tpalette16^.colors,0,16)
+    else
+          SDL_SetPaletteColors(palette,Tpalette16GRey^.colors,0,16)
 
 end;
 
@@ -1725,6 +1745,7 @@ TPalette256.DWords[253]:=$dadadaff;
 TPalette256.DWords[254]:=$e4e4e4ff;
 TPalette256.DWords[255]:=$eeeeeeff;
 
+SDL_SetPaletteColors(palette,Tpalette256^.colors,0,256);
 end;
 
 
@@ -1766,7 +1787,7 @@ Begin
 
 	Read(palette256File, TPalette256); 
 	Close(palette256File);
-//    SDL_SetPalette( screen, SDL_LOGPAL or SDL_PHYSPAL, Tpalette16.colors, 0, 16 );
+    SDL_SetPaletteColors(palette,Tpalette256^.colors,0,256);
 
 end;
 

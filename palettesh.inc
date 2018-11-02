@@ -735,11 +735,10 @@ end;
 
 var
 //this one is unorthodox due to the totally destructive downsizing and image degredation needed
+//and its "best guess"
   GreyList16:array [0..48] of byte;
+
   valuelist16: array [0..48] of byte;
-  
-//in case you want B/W greyscale images or modes or other cruft  
-  GreyList256:array [0..767] of byte;
   valuelist256: array [0..767] of byte;
 
   TPalette16:TRec16;
@@ -749,14 +748,4 @@ var
   TPalette256Grey:TRec256;
 
 //exported functions/proceedures
-
-procedure initPaletteGrey16;
-procedure initPalette256Grey;
-procedure initPalette16;
-procedure initPalette256;
-
-procedure Save16Palette(filename:string);
-procedure Read16Palette(filename:string);
-procedure Save256Palette(filename:string);
-procedure Read256Palette(filename:string);
 
