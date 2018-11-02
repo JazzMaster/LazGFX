@@ -604,11 +604,8 @@ Begin
 	Read(palette16File, TPalette16); //read everything in
 	Close(palette16File);
 	
-	//how do we do this without surfaces?
-	//denies an array and wants ONE COLOR?
-//    SDL_SetPalette( MainSurface, SDL_LOGPAL or SDL_PHYSPAL, Tpalette16.colors, 0, 16 );
-    
-    //SDL_SetPaletteColors(palette,Tpalette16.colors,0,16);
+     SDL_AllocPalette(16);    
+     SDL_SetPaletteColors(palette,Tpalette16^.colors,0,16);
 
 end;
 

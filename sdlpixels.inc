@@ -357,7 +357,7 @@ const
                            (Integer('U') shl 24);
 
 type
-  SDL_Color = ^TSDL_Color;
+  SDL_Color = TSDL_Color;
   PSDL_Color = ^TSDL_Color;
   TSDL_Color = record
     r: UInt8;
@@ -366,13 +366,12 @@ type
     a: UInt8;
   end;
 
-  TSDL_Colour = TSDL_Color;
-  PSDL_Colour = ^TSDL_Colour;
-
+//pallettes are max 256 colors in nature
+  SDL_Palette = TSDL_Palette;
   PSDL_Palette = ^TSDL_Palette;
   TSDL_Palette = record
     ncolors: SInt32;
-    colors: PSDL_Color;
+    colors: array [0..255] of PSDL_Color;  //SDL wiki: colors:^SDL_Color -an array of SDL_Color(s) representing the palette
     version: UInt32;
     refcount: SInt32;
   end;

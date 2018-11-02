@@ -1,7 +1,7 @@
 Ah the life of Pi...O you meant the Raspberry pie...
 MHM..
-Fpc is portable to ARM HF and FPC should work.
 
+(ARM-HF build)
 
 It is **quite possible** to use this for classroom Pi experimentation.
 Move over scratch and claw-here comes "Sammie the Turtle" with re-implemented TURTLE Graphix 2.0!
