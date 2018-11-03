@@ -216,6 +216,20 @@ While we could reasonably use X11 CoreLibs, **its NOT PORTABLE** !
 
 Dependencies:
 
+        (INSTALL ME FIRST!!)
+
+NOTE:
+    
+        CMake
+        libudev-dev
+
+are reccommended as some other libs depend on these. (udev is for USB devices support)
+
+        libOpenMPT (Tracker/mikmod format "game" audio support)
+        libOpen_vr (VR helmet support)
+
+are being considered (need pascal headers)- SDL looks like it supports the IO methods.
+
 
 UNIX/Lin-ux:
 
@@ -236,21 +250,124 @@ The libaries will *probably already* (cross fingers) be installed.
 
 You may have to install the developer packages,however. 
 Ive noticed also that "preinstalled" might point to version 1, not version 2.
+Double check version 2 is installed.
+
+M$FT Visual Studio "Code" can be found here:
+
+        https://code.visualstudio.com/docs/setup/linux
 
 
-MAC and Sin(Windows):
+
+Cross building to Sin(windows):
+
+		MinGW (MINimum GNU for Windows) is probly a best bet. Go install it.
+        "sudo apt-get install build essential fpc" inside bash if you are running Centennial edition or higher Win10.
 
         Compressed sub-units are HERE, go install SDL (and the source code headers)
             from the main site and make SURE its "version 2".
 
-Mac will need XCode(UI) to fire up fpc. 
-
-"Lazarus on Mac" doesnt really exist, the LCL and XCode, however, DOES.
-
-Now: 
-
         go fetch and install both FreePascal (fpc) and Lazarus also.
 
+        Visual Studio Installer is enclosed, but its a "rolling release" sort of application.
+
+        Microsoft Visual Studio is over 15GB installed (YIKES!!) and unknown compatibility or syntax.
+
+
+	For SIN there is a WinAPI port: http://math.ubbcluj.ro/~sberinde/wingraph/main.html
+	- or you can browse the files here, which is the same thing.
+
+	The guy seems to have a better WinAPI direct access than the FPC team, therefore his unit 
+	(as per 2010) AFAIK is far superior. I doubt much has changed in FPC, all of the docs still point to JEDI
+	residing on sourceforge (via PGD website). It isnt there. Its on Github (and dodgy at best.)
+
+	This above uses WinAPI, not SDL for BGI support. So dont come beggin me for help.
+	It is the windows equivalent of using X11 core libs. 
+
+	WinDos, WinMouse, and WinCrt units I believe were rewritten in Delphi by Borland.
+    The FPC equivalents should work ok.
+
+    Wise to install the following:
+
+
+Mac:
+		
+		Mac should import the necessary units via IFDEFS. Let me know if Im off.
+		(Build for Linux x64 on Ubuntu at the moment.)
+
+
+	OS9 was removed support years ago...not sure if it has a FPC use these days
+	FPK and others had some ability to program but dont ask me where to find abandoned alpha level code.
+
+
+
+	Otherwise you need XCode installed
+		
+	Setup SDL First, then FPC. 
+
+	For SDL in C, Try the directions here: 
+			
+			http://lazyfoo.net/tutorials/SDL/01_hello_SDL/mac/index.php
+			(You will need XCode 6.1, "Yo-sem-i-te" is assumed.)
+
+	The IFDEFS in the Pascal code 'should' pull in everything SDL.
+	There is no "Lazarus" in MacOSX, you use XCode and link in the LCL routines instead.
+
+	I have a Mac available but Im working from a Linux box.
+
+        Compressed sub-units are HERE, go install SDL (and the source code headers)
+            from the main site and make SURE its "version 2".
+
+        Visual Studio Installer is enclosed, but its a "rolling release" sort of application.
+
+
+NOTE:
+
+        "Lazarus on Mac" doesnt really exist, the LCL and XCode, however, DOES.
+        This unit WILL NOT WORK/BUILD without XCODE, FPC and SDL installed and operating under OSX.
+        
+
+MOBILE:
+
+        ModeList support is experimental (or non-existant) right now.
+
+	(without this nothing works)
+
+    Android (Java and Pascal to Java Porting) I need help with anyways.
+    iDevices are impossible due to Apple OBJ-C proprietary licensure (unless you want to rewrite this unit back to OBJ-C)
+	
+	Once you get this down and have all your secret keys-- you should have a fine day. Eventually.
+		
+
+ALL ELSE FAILS: 
+		
+	Revert to SDL and its manuals, both off and online.
+    DO NOT attempt to rewrite this main unit core routines, they are modelled after SDLv2.
+    I am aware of the "Surface is really a Texture" code tweaks that have not been fully implemented yet.
+
+    If you want v1 instead, then FORK this!! (maybe we can merge it back later as an IFDDEF)
+    -I hear HedgeWars uses v1 if you are code inclined to wade thru the sources.
+		
+    Surface routines and PageFlipping are SDLv1, not v2. My focus is version 2.
+
+
+Current critical BUGS:
+
+BUG1:
+
+        The Modelist is incomplete. Without it- NOTHING works.
+        While it CAN function, use is severly crippled right now if we tried. Better to wait.
+
+BUG2:
+    
+        Some missing vars(oversight or undefined due to edits) prevent building past  90% mark
+        Too many "formward declaration doesnt match...." errors otherwise- I moved code around.
+
+BUG3:
+
+        Palette Grey 256 is out of spec(AYE AYE AYE)....but this should be the next to last edit 
+            for the "palette include" files.
+
+        (Learn to count in HEX....)
 
 
 ## Why Pascal and why now and why THIS WAY?
@@ -375,79 +492,16 @@ By default the makefile compiles for :
 		linux 32/64 
 
 All in one go.
+If you have issues, ensure you are building from a LINUX host.
+The makefile is not designed for MAC, MOBILE, nor Windows.
 
+Although you CAN build from inside windows thru MinGW or similar TO Linux--its far easier to go the other way.
 
+MinGW is the (assumed target) if you build this way.
+I just run FPC over the main unit file right now. Nothing fancy.
 
-Cross building to Sin(windows):
-
-		There are ways to crossbuild on one system for others. TO SIN is easier than FROM it.
-		MinGW (MINimum GNU for Windows) is probly a best bet. 
-        Im not working on this right now.
-        Microsoft Visual Studio is over 15GB installed (YIKES!!) and unknown compatibility or syntax.
-
-
-	For SIN there is a WinAPI port: http://math.ubbcluj.ro/~sberinde/wingraph/main.html
-	- or you can browse the files here, which is the same thing.
-
-	The guy seems to have a better WinAPI direct access than the FPC team, therefore his unit 
-	(as per 2010) AFAIK is far superior. I doubt much has changed in FPC, all of the docs still point to JEDI
-	residing on sourceforge (via PGD website). It isnt there. Its on Github (and dodgy at best.)
-
-	This above uses WinAPI, not SDL for BGI support. So dont come beggin me for help.
-	It is the windows equivalent of using X11 core libs. 
-
-	WinDos, WinMouse, and WinCrt units I believe were rewritten in Delphi by Borland.
-    The FPC equivalents should work ok.
-
-Mac:
-		
-		Mac should import the necessary units via IFDEFS. Let me know if Im off.
-		(Build for Linux x64 on Ubuntu at the moment.)
-
-
-	OS9 was removed support years ago...not sure if it has a FPC use these days
-	FPK and others had some ability to program but dont ask me where to find abandoned alpha level code.
-
-
-	Otherwise you need XCode installed
-		
-	Setup SDL First, then FPC. 
-
-	For SDL in C, Try the directions here: 
-			
-			http://lazyfoo.net/tutorials/SDL/01_hello_SDL/mac/index.php
-			(You will need XCode 6.1, "Yo-sem-i-te" is assumed.)
-
-	The IFDEFS in the Pascal code 'should' pull in everything SDL.
-	There is no "Lazarus" in MacOSX, you use XCode and link in the LCL routines instead.
-
-	I have a Mac available but Im working from a Linux box.
-
-    OSX/XCode may or may not build.
-
-
-MOBILE:
-
-        ModeList support is experimental (or non-existant) right now.
-
-	(without this nothing works)
-
-    Android (Java and Pascal to Java Porting) I need help with anyways.
-    iDevices are impossible due to Apple OBJ-C proprietary licensure (unless you want to rewrite this unit back to OBJ-C)
-	
-	Once you get this down and have all your secret keys-- you should have a fine day. Eventually.
-		
-
-ALL ELSE FAILS: 
-		
-	Revert to SDL and its manuals, both off and online.
-    DO NOT attempt to rewrite this main unit core routines, they are modelled after SDLv2.
-    I am aware of the "Surface is really a Texture" code tweaks that have not been fully implemented yet.
-
-    If you want v1 instead, then FORK this!! (maybe we can merge it back later as an IFDDEF)
-    -I hear HedgeWars uses v1 if you are code inclined to wade thru the sources.
-		
-    Surface routines and PageFlipping are SDLv1, not v2. My focus is version 2.
+I dont know how to link this thru M$FT VS without using it- it uses project files like Lazarus and Delphi.
+-I havent gotten that far yet.
 
 
 ### DEMOS!!! LOADS OF DEMOS!!!
