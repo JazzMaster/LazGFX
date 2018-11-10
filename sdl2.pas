@@ -139,8 +139,11 @@ unit sdl2;
     {$F+,Q-,R-,S-,I-,A+}
   {$ENDIF}
 {$ELSE}
-  {$MODE DELPHI}
+  {$MODE DELPHI} //dont force delphi mode unless using it- JEDI is slanted torawrds that, which is wrong.
 {$ENDIF}
+
+//BP7 but assumes a 16bit OVL unit- there is a 32bit available.
+//-I have it.
 
 {$IFDEF LINUX}
 {$DEFINE UNIX}

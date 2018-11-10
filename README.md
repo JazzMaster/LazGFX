@@ -207,16 +207,8 @@ While we could reasonably use X11 CoreLibs, **its NOT PORTABLE** !
 
 
 
-### Depends
 
-"Well that Depends..if you are wearing any (Depends) .. or shitting yourself"
-        
-        - Some Old Fart
-
-
-Dependencies:
-
-        (INSTALL ME FIRST!!)
+### Dependencies (INSTALL ME FIRST!!):
 
 NOTE:
     
@@ -286,8 +278,6 @@ Cross building to Sin(windows):
 	WinDos, WinMouse, and WinCrt units I believe were rewritten in Delphi by Borland.
     The FPC equivalents should work ok.
 
-    Wise to install the following:
-
 
 Mac:
 		
@@ -328,9 +318,9 @@ NOTE:
 
 MOBILE:
 
-        ModeList support is experimental (or non-existant) right now.
-
+     ModeList support is experimental (or non-existant) right now.
 	(without this nothing works)
+
 
     Android (Java and Pascal to Java Porting) I need help with anyways.
     iDevices are impossible due to Apple OBJ-C proprietary licensure (unless you want to rewrite this unit back to OBJ-C)
@@ -344,10 +334,11 @@ ALL ELSE FAILS:
     DO NOT attempt to rewrite this main unit core routines, they are modelled after SDLv2.
     I am aware of the "Surface is really a Texture" code tweaks that have not been fully implemented yet.
 
-    If you want v1 instead, then FORK this!! (maybe we can merge it back later as an IFDDEF)
+    If you want v1 instead, then FORK ME- and get to work!! (maybe we can merge it back later as an IFDDEF)
     -I hear HedgeWars uses v1 if you are code inclined to wade thru the sources.
 		
-    Surface routines and PageFlipping are SDLv1, not v2. My focus is version 2.
+    Surface routines and PageFlipping are SDLv1, not v2. 
+    My focus is version 2.
 
 
 Current critical BUGS:
@@ -473,7 +464,8 @@ Incomplete or untested:
 		3D OGL routines(QUADS, etc)
 
 
-TCanvas Demo(patched from "Getting Started with Lazarus and Freepascal" to work):
+This is from the TCanvas Demo
+(patched from "Getting Started with Lazarus and Freepascal"):
 
 
 Come Set Sail!
@@ -514,29 +506,27 @@ Demos at first will focus on BGI graphics "quality" and "basic logic".
 Planned demos:
 
 
-FLAT-
-
-Board Games:
+Board Games/Card Games:
 
 	Othello, 2d chess, sorry, pente...
-
-Card Games:
-
-	Basic Solitare, Poker, etc.
+	Solitare, Poker, etc.
 	
 	
 SIDESCROLLER(collision based) 2d/3d games:
     
-    OpenSonic/Mayro remake etc. etc. etc.
+    OpenSonic (allegro sources in C) /Mayro (SMC) remake ...
+    "Super Nintendo" or "SEGA MegaDrive/Genesis" level or slightly above it. 
+        
+        RedBook CDROM/CDDA support is untested.
 
         
 3D-        
    
-    Yet to be determined (OpenFreeSpace??)
+    OpenFreeSpace??
+    OpenMorrowwind/Elsewyre??
 	OpenSkyRim?? 
-
-
-
+    Open (world of) WarCraft??
+    OpenStarFlight?? (Original by E-Arts was for the BGI but tweaked in assembler to use elliptic curves on an 8088.)
 
 
 #### COPYLEFT

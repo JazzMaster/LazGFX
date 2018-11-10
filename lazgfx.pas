@@ -582,9 +582,47 @@ SemiDirect MultiMedia OverLayer - should be the unit name.
 }
 
 
-
 uses
-//need to reconsult the JEDI code again --mostly there.
+
+// A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust "console" logging...
+
+  {$IFDEF LCL}
+    {$IFDEF MSWINDOWS}
+      {$DEFINE NOCONSOLE }
+    {$ENDIF}
+    //LCL is linked in but we are not in windows
+      crt,   
+  {$ENDIF}
+
+//cant use crtstuff if theres no crt units available..
+
+{$IFNDEF NOCONSOLE}
+    crtstuff,
+{$ENDIF}
+
+//build with the LCL (you get rid of the ugly ass SDL dialogs):
+
+//  Lazarus Menu:  "View" menu, under "Debug Windows" there is an entry for a "console output" 
+//however, if you are not in a input loop or waiting for keypress- 
+// you will not get output until your program is complete (and has stopped execution)
+
+// In this case- Lazarus Menu:   Run -> Run Parameters, then check the box for "Use launching application".
+// (You may have to 'chmod +x' that script.)
+
+// you will have to setup and manage "windows" yourself, and handle dialogs accordingly.
+//HINT: (its the window with the dots on it)
+
+
+
+//to build without the LCL:
+
+// Just make a normal "most basic" program and call me or SDL directly in your "uses clause"
+// You will find that the LCL may be a burden or get in your way- we only need it to setup "the window"- 
+//     but..SDL can do that for us- (so its a great help).
+
+
+//there are parts of SDl that we can get rid of. They are hard to read, seem to be wrapped "do nothing routines", etc.
+
 
 {$ifdef unix} cthreads,ctypes,cmem,sysUtils,crt,{$endif}
 
@@ -602,24 +640,9 @@ uses
 
 {$ifdef debug} ,heaptrc {$endif} //logger
 
-{$IFDEF windows} 
-//these are in the other package I pointed to in the readme...
-//no guarantee, YMMV... this uses WinAPI, not SDL. I dont know if the two are compatible.
-//it would be nice to use standardized routines but I think FPC hooks are the issue, not SDL.
-   {$IFDEF CONSOLE}
-	  ,wincrt, crtstuff
-   {$ENDIF}   
-//   ,windos 
-{$ENDIF}
-
-//dont ask....need (HX)dpmi at minimal
-{$IFDEF go32v2}
-  ,dos,crt,crtstuff
-{$ENDIF}
 
 //sdl_net
 //YAASSS!! networking!!!
-
 
 //Carbon is OS 8 and 9 to OSX API
 {$ifdef mac} 
@@ -645,19 +668,8 @@ uses
 {$endif}
 
 
-
 //Altogether we are talking PCs running OSX, OS9, OS8 (heaven forbid), Windows(sin), and most unices.
 //Some android (as a unice subderivative)
-
-// A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust "console" logging...
-  {$IFDEF LCL}
-    {$IFDEF MSWINDOWS}
-      {$DEFINE NOCONSOLE }
-    {$ENDIF}
-  {$ENDIF}
-
-//include the default data for the basic core routines.
-//we need both of these.
 
 ;
 

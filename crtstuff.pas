@@ -1,7 +1,7 @@
 Unit crtstuff;
 // "This shit is ancient..."
 //this is an advanced "ncurses" interface -written for DOS , 
-// but mostly applicable in console mode(no X11) and xterminals also due to fpc being ported.
+// but mostly applicable in console mode(no X11) 
 
 //this is shit not found in CRT unit.
 // I need to check my code...GAWD...this is older than dirt and waaay off...
@@ -10,31 +10,75 @@ interface
 
 uses
 
-//microshaft ways are not our own...sadly...
-// and Id prefer you use me under Linux....
-{$IFDEF windows}
-   wincrt;
-{$ELSE}
-	Crt;
+//we dont load if theres no CRT unit to use- check is in lazgfx.pas unit.
+
+
+//(Hx)DPMI loader and 32bit cpu preferred.
+
+//dos mode FPC - go is another language
+{$IFDEF go32v2} 
+//be sure that crt sources are recompiled(cant distribute sources), 
+//this is a "dinosaur PC" 
+// -OR- 
+//we use the modded timer fixes (runtime 200 error in Delay routine)
+
+  ,dos,crt; //FPC doesnt suffer from the RT200 bug, only BP/TP7.
 {$ENDIF}
+
+//check for BP/TP7
+
+{$IFDEF ver70}
+  {$IFDEF Debug}
+    {$F+,D+,Q-,L+,R+,I-,S+,Y+,A+}
+  {$ELSE}
+    {$F+,Q-,R-,S-,I-,A+}
+  {$ENDIF}
+
+
+//quirky build mode fix
+   {$IFDEF MSDOS}
+     {$DEFINE NO_EXPORTS}
+   {$ENDIF MSDOS}
+
+//forcidng this is wrong, what if its the 16bit, not the 32 it one?
+   {$IFDEF DPMI}
+     {$DEFINE BP_DPMI}
+   {$ENDIF}
+
+   ,NewDelay; //patch crt unit - or patch your binary program once built
+{$ENDIF}
+
+{
+We can use 'sets' with input
+
+repeat
+  YN := Readkey;
+Until (YN IN ['N','n']);
+}
 
 const
 
-//minus one??
+//line 25 scrolls, line 24 is for status messages
+//Indenting by one character gives us a nice, margin, tho..
+//tricky, not impossible.
+
    MAXCRTCOL=80;
-   MAXCRTROW=24;
+   MAXCRTROW=23;
+
 
 type
-   crtcommand =(Home,Clear,Eraseol,Up,Down,Left,Right,Beep); //you could use funky ansi methods here...
+   crtcommand =(Home,Clear,Eraseol,Up,Down,Left,Right,Beep); 
+//you could use funky ansi methods here...like linux does
+//I am using standard routines
 
    charset=set of char;
    Pchar=^Char;
+   PString=AnsiString;
    str80=string[80];
    str256=string[255];
    
 
 var
-   IsInvokedConsole:boolean; //flip one or the other....this can be read by the SDLBGI port code if set.
    col,row,x,y:integer;
    prompt:str80;
    valid:charset; 
