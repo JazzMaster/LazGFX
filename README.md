@@ -3,12 +3,17 @@ An Extended SDL replacement of the "Borland Graphics Interface" (BGI)
 For Lazarus/FPC 
 
 (SEMI-PURE Pascal is used here)
-
-A VB(visual Basic or VB.NET) - or even python- could fork from this, if needed.
--Who nose, I might even just fork it myself!
+-DONT EVEN ASK about assembler.
 
 
-state:  **COMPILING**  -up until line 2774 in main unit.
+A Basic(FreeBasic/QB64),VB(gambas or VB.NET) - or even python- could fork from this, if needed.
+-Who knows, I might even just fork it myself!
+
+
+state:  **COMPILING** (variable syntax check in progress)
+**WHEN THIS SAYS LINKING, a RELEASE IS EMMINENT.**
+
+MODELIST "UNDER CONSTRUCTION" as is "GREY 256 Palettes".  
 
 Multiple safety and paranoia checks will still have to be done to ensure accuracy-
 Those checks are not here yet- be aware of this.
@@ -16,19 +21,15 @@ Those checks are not here yet- be aware of this.
 
 This unit uses **modified** JEDI headers.
 
-While the C Syntax is correct when utilizing SDL, the PASCAL needed some adjustment.
+While the "C Syntax" is correct when utilizing SDL, the PASCAL needed some adjustment.
 It makes more sense to use similar syntax, if possible.
-Why this wasnt corrected and the patches released is beyond me- quite frankly thats BULLSHIT!
-
-        "If its half-assed, its as good as NEVER DONE."
-    
--A US Navy Chief
+Why this wasnt corrected and the patches released is beyond me- 
 
 
 ### What is it, what does it do?
 
 Its a GRAPHICS MODE "Canvas", not unlike TCanvas. You draw with it.
-There is a reason Im redoing this. 
+(There is a reason Im redoing this.) 
 
 Windows uses its own internal Canvas Routines (not the whole BGI) for those hdd pie charts, for example...
 
@@ -188,8 +189,24 @@ I know JEDI is broken in places and I appreciate the help in fixing it.
 
 Allegro is now on a similar path to SDL but not-so-much better maintained.
 (Its also not on GH)
+
+There is yet another method to do this in C. (libmlv3- a SMFL port)
+SFML is unfinished and "missing in many places".
+SFML lacks "Basics". We have those routines.
 		
--SO NOW YOU KNOW.
+SDL is a way to also learn OpenGL in a way that builds. 
+Lazarus OGL demos DO NOT work correctly.
+
+
+#### can we add routines??
+
+SURE! 
+
+But Id advise looking into the C projects already active.
+This being said- DO NOT link into C versions of libgraph. They are lacking too much.
+
+You need to translate the headers(properly) to use the C.
+See JEDI sources for examples.
 
 
 #### Focus:
@@ -352,8 +369,9 @@ BUG2:
     
         Some missing vars(oversight or undefined due to edits) prevent building past  90% mark
         Too many "formward declaration doesnt match...." errors otherwise- I moved code around.
+        THis bug will solve itself.
 
-BUG3:
+BUG3(non-critical):
 
         Palette Grey 256 is out of spec(AYE AYE AYE)....but this should be the next to last edit 
             for the "palette include" files.
@@ -369,9 +387,8 @@ BUG3:
 		-Linux has never had a graphics engine or BGI. EVER. Only TCanvas has come close(incomplete).
 		-GVision for Linux (Pascal version of Win311) never took off. Thats Obj-C, Qt or GTK youre looking at.
 		-JEDI doesnt stand for what you think it does- its incomplete, missing, and now depreciated.
-		-Castle engine is good, potentially missing in places things we should have and requires OpenGL knowhow.
+		-Castle engine is good, potentially "missing in places" things we should have and requires OpenGL knowhow.
 		-X11 "core primitives" are non-portable. Mac uses Quartz and Sin uses DirectX and WinAPI.
-		-If you have a better way-show me the PASCAL code, but it must get the job done (and compile).
 		-Open Source is a "vague comment". It doesnt guarantee the code works, nor for you.
 		-This isnt a "class project", its my passion.
 
@@ -444,6 +461,7 @@ Provides(these parts should be working):
 		Lines
 		Rectagles/Squares
         Straight OGL Pyramid (tetrahedron) spinning demo
+        SDL_Keypressed
 
 To exit the OGL demo:
 
@@ -455,25 +473,25 @@ Although it calls SDL, it DOES NOT invoke event handling(which is wrong) so the 
 
 Incomplete or untested:
 
-		Input from keyboard
+		Input handling from keyboard,mouse,joystick,haptic  (in renderloop within a unit)                
+        SDL_Readkey
+        SDL_Readline (should be used with dialog input, normally)
+
 		Polygons
 		Circles/Ellipses
 		Fills(incomplete as of yet)
-
-		More Advanced functions
-		3D OGL routines(QUADS, etc)
-
-
-This is from the TCanvas Demo
-(patched from "Getting Started with Lazarus and Freepascal"):
+        2d OGL Routines(QUADS, etc)
+		3D OGL routines(spheres, tubes,pyramids,multi-faceted objects)
 
 
-Come Set Sail!
-(-And yes, I will add Alpha masked layers to my next iteration of this.)
+#### Examples 
 
 
 ![Lazarus Boat](./boatdemo/boat.png)
 
+![MouseTest](./mousetest.png)
+
+![NASA Rendered Orbits](./nasa-orbits-of-comets.png)
 
 
 ### Lets run "make"....

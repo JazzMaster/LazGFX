@@ -1,5 +1,4 @@
 type
-//required
 
 	graphics_modes=(
 
@@ -13,13 +12,11 @@ m1280x1024x256,m1280x1024x32k,m1280x1024x64k,m1280x1024xMil,
 m1366x768x256,m1366x768x32k,m1366x768x64k,m1366x768xMil,
 m1920x1080x256,m1920x1080x32k,m1920x1080x64k,m1920x1080xMil);
 
-
-//it appears we need the structure but not the data, as its assigned in the initGraph and sub units
-//with Modelist.bpp do --case Modelist.bpp of ()
+//data is in the main unit Init routines.
 
 Tmodes=record
 //non-negative and some values are yuuge
-	DriverNumber:byte;
+	ModeNumber:byte;
   	ModeName:array [Low(graphics_modes)..High(graphics_modes)] of string;
  	MaxColors:array [Low(graphics_modes)..High(graphics_modes)] of DWord; //QWord??
     bpp:array [Low(graphics_modes)..High(graphics_modes)] of byte;
