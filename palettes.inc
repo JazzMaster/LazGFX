@@ -131,7 +131,7 @@ begin
       Tpalette256Grey.colors[num]^.g:=Byte(longint(i));
       Tpalette256Grey.colors[num]^.b:=Byte(longint(i));
       Tpalette256Grey.colors[num]^.a:=$ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
-      inc(i); //notice the difference <-HERE where RGB are the same values
+      inc(i); //notice the difference <-HERE ..where RGB are the same values
   until i=255;
 
 	

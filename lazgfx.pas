@@ -790,7 +790,7 @@ var
     font_size:integer; 
     style:byte; 
     outline:longint;
-    grErrorStrings: array [low(grerrorType)..high(grErrorType)] of string; //or typinfo value thereof..
+    grErrorStrings: array [low(grerrorType) .. high(grErrorType)] of string; //or typinfo value thereof..
     AspectRatio:real; //computed from (AspectX mod AspectY)
 
 {
@@ -2026,18 +2026,50 @@ begin
    Y:=Twhere.Y;
 end;
 
+{
+ Draw an Texture to an Renderer at x, y. 
+ preserve the texture's width and height- also taking a clip of the texture if desired
+
+- we can use just RenderCopy, but it doesnt take stretching or clipping into account.(its sloppy)
+
+I didnt write this (stackExchange in C) but it makes sense and SDL is at least "GPL", so we are "safe in licensing".
+
+}
+
+procedure renderTexture( tex:PSDL_Texture;  ren:PSDL_Renderer;  x,y:integer;  clip:PSDL_Rect);
+
+var
+  dst:PSDL_Rect;
+
+begin
+	
+	dst^.x := x;
+	dst^.y := y;
+	if (clip <> Nil)then begin
+		dst^.w := clip^.w;
+		dst^.h := clip^.h;
+	end;
+	else begin
+		SDL_QueryTexture(tex, NULL, NULL, dst^.w, dst^.h);
+	end;
+	SDL_RenderCopy(ren, tex, clip, dst); //clip is either Nil(whole surface) or assigned
+
+end;
 
 procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
 //initgraph should call us to prevent code duplication
-   
+//exporting a record is safer..but may change "a chunk of code" in places.   
 var
 	flags:longint;
     IsThere,RendedWindow:integer;
 
 begin
+//I can do this two ways- "upscale the small resolutions" no longer supported 
+//-or- 
+//just "refuse fullscreen".
 
-//fill the modelist!
-//I have more data to add here.
+//add UpScaled:=true??
+// if UpScaled then ForceFatPixels=true (2x or 4x pixel sizes)
 
   case(graphmode) of //we can do fullscreen, but dont force it...
 	     mCGA:begin
@@ -2651,8 +2683,8 @@ all work similarly.
 
 function GetPixel(x,y:integer):DWord;
 
-//this function is "inconsistently fucked" from C...so lets standardize it...
-//this works, its hackish -but it works..SDL_GetPixel is for Surfaces/screens, nor renderers.
+// this function is "inconsistently fucked" from C...so lets standardize it...
+// this works, its hackish -but it works..SDL_GetPixel is for Surfaces/screens, not renderers.
 var
   format:longword;
   TempSurface:PSDL_Surface;
@@ -2782,13 +2814,12 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
 			gotcolor^.g:= (gotcolor^.g shr 3);
 			gotcolor^.b:= (gotcolor^.b shr 3) ;
 
-     //repack
+            //repack
             someDWord:= SDL_MapRGB(TempSurface^.format,gotcolor^.r,gotcolor^.g,gotcolor^.b);
             GetPixel:=someDWord;
             exit;
       end;
       16: begin //16bit-565
-            //this is set, but anyways...
         //    if (TempSurface^.format=SDL_PIXELFORMAT_RGB565) then begin
 
             SDL_GetRGB(Longword(^p),TempSurface^.format,r,g,b);
@@ -2804,7 +2835,7 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
 			gotcolor^.g:= (gotcolor^.g shr 2);
 			gotcolor^.b:= (gotcolor^.b shr 3) ;
 
-    //repack
+           //repack
             someDWord:= SDL_MapRGB(TempSurface^.format,gotcolor^.r,gotcolor^.g,gotcolor^.b);
             GetPixel:=someDWord;
       		exit;
@@ -2812,15 +2843,14 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
 
 
       24: begin //24bit
-      //this is set, but anyways...
             SDL_GetRGB(Longword(^p),TempSurface^.format,r,g,b);
 
 			//play fetch            
 
              gotcolor^.r:=(byte(^r) );
-		     gotcolor^.g:=(byte(^g) );;
+		     gotcolor^.g:=(byte(^g) );
 	         gotcolor^.b:=(byte(^b) );
-    //repack
+           //repack
             someDWord:= SDL_MapRGB(TempSurface^.format,gotcolor^.r,gotcolor^.g,gotcolor^.b);
             GetPixel:=someDWord;
 			exit;
@@ -2910,7 +2940,7 @@ begin
     rect.w:=w;
     rect.h:=h;
 	SDL_RenderDrawRect(renderer, rect);
-  //  SDL_RenderPresent(renderer);
+    SDL_RenderPresent(renderer);
     free(Rect);
 end;
 
@@ -3297,48 +3327,36 @@ begin
 end;
 
 
-//alloc a new surface and flap data onto screen -or- scrape data off of surface into a file.
+
+//alloc a new texture and flap data onto screen (or scrape data off of it) into a file.
 
 
 //yes we can do other than BMP.
-//routines are "hacked together" but "seem to be working ok".
 
-procedure LoadExtendedImage(filename:string; Rect:PSDL_Rect);
+procedure LoadImage(filename:string; Rect:PSDL_Rect);
 //Rect: I need to know what size you want the imported image, and where you want it.
 
 var
-  Newsurface:PSDL_surface;
   tex:PSDL_Texture;
 
 begin
 
-    Newsurface:= NiL;
-    Newsurface := IMG_Load(filename); //Works with PNG images and more...
- 
-    //Filling texture with the image using a surface
-    tex := SDL_CreateTextureFromSurface(renderer, NewSurface); 
-    SDL_FreeSurface(surface);
-    SDL_RenderCopy(renderer, tex, Nil, rect);
-    SDL_FreeTexture(tex);
+    tex:= NiL;
+    Tex:=IMG_LoadTexture(renderer,filename);
+    SDL_RenderCopy(renderer, tex, Nil, rect); //rect should be the size of the image
 end;
 
-
-procedure LoadBMPImage(filename:string; Rect:PSDL_Rect);
+procedure LoadImageStretched(filename:string);
 
 var
-  Newsurface:PSDL_surface;
-  NewTex:PSDL_Texture;
+  tex:PSDL_Texture;
 
 begin
-// if IsGameEngine then  paused:=true;
-   NewSurface:=SDL_LoadBMP(filename);
-   NewTex:=SDL_CreateTextureFromSurface(renderer,NewSurface);
-   SDL_FreeSurface(surface);
-   SDL_RenderCopy(renderer, texture, Nil, rect); //for maps, give me a rect instead of "using nil here"
-   SDL_FreeTexture(NewTex);
-end;
 
-//saving PNG is weird, requires extra headers for 8bit images.
+    tex:= NiL;
+    Tex:=IMG_LoadTexture(renderer,filename); 
+    SDL_RenderCopy(renderer, tex, Nil, Nil); 
+end;
 
 
 procedure PlotPixelWNeighbors(x,y:integer);
@@ -3363,7 +3381,7 @@ end;
 
 
 procedure SaveBMPImage(filename:string);
-
+//hmmm stuck with this for time being
 var
   ScreenData:Pointer;
   infosurface,savesurface:PSDL_Surface;
@@ -3400,6 +3418,10 @@ end;
 
 //Rect: X,Y,W,H
 function GetPixels(Rect:PSDL_Rect):pointer;
+//this does NOT return a single pixel by default and iswritten intentionally that way.
+//GetPixel(one) checks also the output pointer and fudges it into a single "SDL_Color".
+
+//this expects YOU to handle the array of data
 var
 
   pitch:integer;
@@ -3410,13 +3432,31 @@ begin
    pixels:=Nil;
    pitch:=0;
 
-//case format of...
+                 
+    case bpp of
+		8: begin
+			    if maxColors=256 then format:=SDL_PIXELFORMAT_INDEX8
+				else if maxColors=16 then format:=SDL_PIXELFORMAT_INDEX4MSB; 
+		end;
+		15: format:=SDL_PIXELFORMAT_RGB555;
 
+//we assume on 16bit that we are in 565 not 5551, we should not assume
+		16: begin
+			
+			format:=SDL_PIXELFORMAT_RGB565;
+
+        end;
+		24: format:=SDL_PIXELFORMAT_RGB888;
+		32: format:=SDL_PIXELFORMAT_RGBA8888;
+
+    end;
 //format and rect we already can derive
 //pixels and pitch will be returned for the given rect in SDL_Color format given by our set definition
 //rect is Nil to copy the entire rendering target
 
-   AttemptRead:= SDL_RenderReadPixels( renderer, rect, format, pixels, pitch)
+   AttemptRead:= SDL_RenderReadPixels( renderer, rect, format, pixels, pitch);
+   
+   //pitch at this point could be 2,3,4,etc.. and must otherwise be taken into account.
    if (AttemptRead<0) then begin
      //error: cant read pixels
      exit;
