@@ -115,6 +115,24 @@ in these regards. I do not write OOP level garbage, I find object code and repea
 
 I have my own "methods" if I need object-related routines. They work.
 
+version 2:
+
+Do routines disappear- 
+
+        knowing that /dev/cdrom is the active SDL_CDROM device
+        knowing that /dev/dsp (oss) /dev/snd/XYZ (alsa,pulse) are sound/MIDI devices
+        knowing that /dev/input/jsX is the joystick
+        /dev/input/ -the mouse, and even haptic device input
+
+when the codebase changed(we need these routines) or can they still be used?
+
+Because rewriting (optimized) routines(in C) instead of "writing the code correctly in the first place" is pure bullshit.
+If youre going to rewrite code- make it optimal- and DO IT RIGHT. Dont drop useful routines and make others have to rewrite your code for you.
+
+Bottom LINE:
+
+        STOP BEING LAZY!
+
 
 #### OpenGL(3D)
 
