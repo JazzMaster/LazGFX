@@ -208,13 +208,26 @@ I know JEDI is broken in places and I appreciate the help in fixing it.
 Allegro is now on a similar path to SDL but not-so-much better maintained.
 (Its also not on GH)
 
-There is yet another method to do this in C. (libmlv3- a SMFL port)
+There is yet another method to do this in C. 
 SFML is unfinished and "missing in many places".
-SFML lacks "Basics". We have those routines.
+SFML lacks "Basics". MLV3 aims to fix this.
 		
 SDL is a way to also learn OpenGL in a way that builds. 
 Lazarus OGL demos DO NOT work correctly.
 
+WinAPI and xAPI(x11) ARE more efficient- DO use hardware graphics(usually).
+The reasoning behind SDL- at the moment- is due to "compatibility" and "syntax".
+
+Once I can find the docs, I may rewrite an "effectual SDL layer" using IFDEFs instead.
+(THIS is the correct way to do things. x11 and Windows already use "base graphics routines"-why reInvent the wheel
+unless its broken?)
+
+Scaling and aspect ratios probly need to be added in, regardless.
+Palettes are undefined normally- and video modes probed- however "these old modes" are not longer supported.
+(Ive implemented a few hacks to get around this.)
+
+Im not against C- Im against BAD CODE in GENERAL. (C is usually coded wrong- the logic is funky)
+If anything, its the core routines that will need changing.
 
 #### can we add routines??
 
@@ -222,6 +235,7 @@ SURE!
 
 But Id advise looking into the C projects already active.
 This being said- DO NOT link into C versions of libgraph. They are lacking too much.
+(You will probably confuse the existing code if you do.)
 
 You need to translate the headers(properly) to use the C.
 See JEDI sources for examples.

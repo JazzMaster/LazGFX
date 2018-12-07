@@ -2,19 +2,19 @@ Unit LazGFX;
 
 {
 A "fully creative rewrite" of the "Borland Graphic Interface" in SDL (c) 2017-18 Richard Jasmin
-with the assistance of others.
+-with the assistance of others.
 
 LPGL v2 ONLY. 
 You may NOT use a higher version.
 
 Commercial software is allowed- provided I get the backported changes and modifications.
-I dont care what use the source code for- just give me credit.
+I dont care what you use the source code for- just give me credit.
 
 You must cite original authors and sub authors, as appropriate(standard attribution rules).
 DO NOT CLAIM THIS CODE AS YOUR OWN and you MAY NOT remove this notice.
 
 GetText .po can handle translations- if you know how to use it. 
-I dont.
+I dont. YET.
 Thats the joke at the end of the README.
 
 }
@@ -55,15 +55,12 @@ What you wont get is the LCL and components and nice UI- but we are using SDL fo
 :-P
 
 
-While Id reccommend the 2nd- Lord knows what you are using this for.
-Most Game finished products (and Game consoles dont have a debugging output window)
+While Id reccommend the 2nd method- Lord knows what you are using this for.
+Most Games (and Game consoles dont have a debugging output window)
 
 -THIS CODE WILL CHECK WHICH IS USED and log accordingly.
 
 ---
-mem optim:
-
-destroySurface(mainsurface); needs to be used.
 
 we need to switch to Texture ops, not Surface ones and take full use of the GPU.
 I have not done this yet as there are a shitton of surface ops (or WERE) here.
@@ -98,7 +95,7 @@ I am working on cleaning this up.
 How to write good games:
 
 SDL1.2
-SDL2.0 (renderer and render to textures as surfaces)
+SDL2.0 (renderer and "render to textures as surfaces")
 SDL_GPU
 OGL_SDL (assisted)
 OGL (straight)
@@ -413,8 +410,10 @@ You cant support portable Apple devices. Apple forbids it w FPC.
 Pixel rendering (the old school methods)
 
 We have to "lock pixels" to work with them, then "unlock pixels" and "pageFlip". 
+Texture rendering(SDL2) uses the VRAM for ops -whereby SDL1 uses RAM and CPU(Surfaces).
+
 Our ops are restricted, even yet to "pixels" and not groups of them.
-TandL is a pixel-based operation.
+TandL is a "pixel-based operation".
 
 There may be bugs in my math. I havent checked yet.
 (I cant be as bad as -"multiplying (safely) your tokens on ETH/EXP by zero", though.)
@@ -442,10 +441,10 @@ Some idiot wrote the code wrong and it needs to be updated for FILE STREAM IO.
 Logging will be forced in the folowing conditions:
 
     under windows LCL is checked for- this is a known Lazarus issue.
-    under linux with LCL compiled in
+    under linux with LCL compiled in-caller isnt a console or VT or Xerm (usually)
 
 
-Original code derived from the following:
+Code upgraded from the following:
 
 	original *VERY FLAWED* port (in C) coutesy: Faraz Shahbazker <faraz_ms@rediffmail.com>
 	unfinished port (from go32v2 in FPC) courtesy: Evgeniy Ivanov <lolkaantimat@gmail.com> 
@@ -531,6 +530,8 @@ SemiDirect MultiMedia OverLayer - should be the unit name.
 
 uses
 
+	ctypes,
+	
 // A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust "console" logging...
 
   {$IFDEF LCL}
@@ -538,7 +539,7 @@ uses
       {$DEFINE NOCONSOLE }
     {$ENDIF}
     //LCL is linked in but we are not in windows. Not critical. If you want output, set it up.
-      crt,   
+      crt, LazUtils,  
   {$ENDIF}
 
 //cant use crtstuff if theres no crt units available..
@@ -571,24 +572,23 @@ uses
 //there are parts of SDL that we can get rid of. They are hard to read, seem to be wrapped "do nothing routines", etc.
 
 
-{$ifdef unix} cthreads,ctypes,cmem,sysUtils,crt,{$endif}
+{$ifdef unix} cthreads,cmem,sysUtils,{$endif}
 
 //FPC generic units(OS independent)
-  SDL2,SDL2_Image,SDL2_TTF,strings,typinfo
+  SDL2,SDL2_Image,SDL2_TTF,strings,typinfo,
 
-//GL, GLU
-//math
+//GL, GLU,math
 
 //SDL2_gfx is untested as of yet. functions start with GPU_ not SDL_
 
-{$ifdef debug} ,heaptrc {$endif} //logger
+{$ifdef debug} heaptrc, {$endif} //logger
 
 
 //sdl_net (-YAASSS!! networking!!!)
 
 //Carbon is OS 8 and 9 to OSX API
 {$ifdef mac} 
-  ,MacOSAll
+  MacOSAll,
 {$endif}
 
 //Cocoa (OBJ-C) is the new API
@@ -667,9 +667,13 @@ type
   VeryThickWidth =7,
   VeryVeryThickWidth=9);
 
-//should we need to abort...
+//C function style syntax
   grErrorType=(OK,NoGrMem,NoFontMem,FontNotFound,InvalidMode,GenError,IoError,InvalidFontType);
 
+//Pascal defines:
+//memAllocError =
+//FNF=error 2
+//IoERROR=
 
   TArcCoordsType = record
       x,y : word;
@@ -3028,13 +3032,15 @@ var
 begin
   if LIBGRAPHICS_ACTIVE then begin
       maxmodetest:=detectgraph;
-      getmaxmode:=modeList.Modename[maxmodetest];
+      getmaxmode:=ModeName;
   end;
 end;
 
 
 //the only real use for the "driver" setting...
 procedure getmoderange(graphdriver:integer);
+var
+     maxmodetest:MaxModeSupported;
 begin
 
 	if not graphdriver = detect then begin
@@ -3055,7 +3061,7 @@ begin
 
 	end else begin
         if (graphdriver=DETECT) then begin
-	    	himode:=MaxModeSupported.num;
+            himode:=detectgraph;	 //unfortunate probe here...   	
 	    	lomode:= mCGA; //no less than this.
 		end else begin
 			if IsConsoleEnabled then
@@ -3068,12 +3074,28 @@ end; //getModeRange
 
 procedure installUserFont(fontpath:string; font_size:integer; style:fontflags; outline:boolean);
 
-//MOD: SDL, not BGI .CHR files which is where most code comes from.
+{
+MOD: SDL, not BGI .CHR files which is where most code comes from.
+SDL uses TTF Fonts
 
-//font_size: some number in px =12,18, etc
-//path: (varies by OS) to font we want....
-//style: TTF_STYLE_UNDERLINE or TTF_STYLE_ITALIC --see SDL_TTF unit
-//outline: make it an outline (hackish- the font isnt stroke filled like normal)
+font_size: some number in px =12,18, etc
+path: (varies by OS) to font we want....
+
+style is one of: 
+		TTF_STYLE_NORMAL
+		TTF_STYLE_UNDERLINE
+		TTF_STYLE_ITALIC 
+		TTF_STYLE_BOLD
+		TTF_STYLE_ITALIC
+		TTF_STYLE_UNDERLINE
+		TTF_STYLE_STRIKETHROUGH
+
+
+outline: make it an outline (instead of drawn "stroked", the font is drawn inverted-hollow)
+
+fontpath: MUST BE SPECIFIED - you will crash TTF routines(and possibly SDL and everything on top of it- if you dont)
+-code is like a stack of cards in that way.
+}
 
 begin
   
@@ -3086,10 +3108,14 @@ begin
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: I cant engage the font engine, sirs. ','OK',NIL);
 		
     _graphResult:=-3; //the most likely cause, not enuf ram.
-    closegraph;
+    exit;
  
   end;
-
+  if FontPath:='' then begin
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: No Font Specified to Load. ','OK',NIL);
+		_graphResult:=-7; //error 7 or 8....FontNotFound(Nothing)
+		exit;
+  end;
   ttfFont := TTF_OpenFont( fontpath, font_size ); //should import and make a surface, like bmp loading
   //fg and bg color should be set for us(or changed by the user in some other procedure)
   new(TextFore);
@@ -3106,90 +3132,128 @@ begin
 
 end;
 
+{
+you could use this:
+
+  or just "NOT FREE" the pixels you need to clone, once you rendercopy and RenderPresent-then you have the pixels
+      instead of "losing them". 
+
+(Its an odd rare case,such as TnL not discussed here)
 
 
 function cloneSurface(surface1:PSDL_Surface):PSDL_Surface;
-//i'll take the surface to the copy machine...
+//Lets take the surface to the copy machine...
 var
    surface2:^SDL_Surface;
 
 begin
     Surface2 := SDL_ConvertSurface(Surface1, Surface1^.format, Surface1^.flags);
-
-end;
-
-
-{
-procedure bar3d ( left, top, right, bottom:integer topflag:boolean);
-
-var
-   y,x:integer;
-begin
-
-//GetSurfaceFromRenderer
-
-  DrawFilledRectangle(left, top, right, bottom); //draw a bar then round it.
-
-  GotoXY(right, bottom);
-
-//get x,y and draw from here, do not call gotoXY
-  linerel(depth*cos(PI/6), -depth*sin(PI/6));
-  linerel(0, top-bottom);
-
-  if (topflag) then begin
-    
-      linerel(left-right, 0);
-      linerel(left, top);
-      GotoXY(right, top);
-      linerel(depth*cos(PI/6), -depth*sin(PI/6));
-  end;	
-
-//surfaceToTex
-//renderTex
-//renderPresent
-
 end;
 }
-	
 
-//these are BGI implementation, which is why its weird.
+//modified BGI implementation- If the math is off, dont blame me.
+
+procedure bar3d ( Rect:PSDL_Rect);
+//"flowchart presentation" and in some cases, "Luna Theme in XP"....
+
+
+var
+   y,x,w,h:word;
+   top,left,right,bottom: word; 
+  
+begin
+  topleft:=GetXY(x,y); //absolute 1D location in a 2D structure in VRAM(weird)
+  //(X*Y mod Pitch)?? 
+  
+  bottomright:=(GetXY(x,y)+GetXY(w,h));
+  left:=x;
+  top:=y;
+  bottom:=GetXY(y,h);
+  right:=GetXY(x,h);
+  
+  Lock;
+  SDL_RenderFillRect(renderer, rect);
+  GotoXY(right, bottom);
+  linerel(h*cos(PI/6), (-h)*sin(PI/6) );
+  linerel(0, top-bottom);
+  Unlock;
+
+end;
+
+	
+{
+these are BGI implementation, which is why its weird.
+A TON of functions actually depend on the SET data co-ords of the VIEWPORT-
+   how far on screen can we safely write to- in this case- we DO NOT wrap text or other objects or pixels. 
+
+(We only do that in text mode)
+
+Its like setting a "window" buondary without the "Window" interface.
+
+ 
+}
 
 procedure SetViewPort(X1, Y1, X2, Y2: Word);
 
 var
-    ThisRect,LastRect:^SDL_Rect;
+    ThisRect,LastRect:PSDL_Rect;
+    ScreenData:Pointer;
+    infosurface,savesurface:PSDL_Surface;
+
+
 begin
    if WindowCount=0 then begin 
-      LastRect.X:=0;
-      LastRect.Y:=0;
-      LastRect.W:=MaxX;
-      LastRect.H:=MaxY;
+      LastRect^.X:=0;
+      LastRect^.Y:=0;
+      LastRect^.W:=MaxX;
+      LastRect^.H:=MaxY;
    end
    else begin
       SDL_RenderGetViewport(renderer,Lastrect);
    end;
    inc(windowcount);
-   ThisRect.X:=X1;
-   ThisRect.Y:=Y1;
-   ThisRect.W:=X2;
-   ThisRect.H:=Y2;
+   ThisRect^.X:=X1;
+   ThisRect^.Y:=Y1;
+   ThisRect^.W:=X2;
+   ThisRect^.H:=Y2;
 
-   //we want to manually set the tex size yet go grab the screen and copy whats there..
+   //we want to manually set the texture size yet go grab the viewport and copy whats there..
    //the reason why is so we can 'undo it'
+   //LINUX claims of xor,xnor "not being supported"- so let "work around it".
+   
+  saveSurface = NiL;
+  infosurface:=Nil;
+  ScreenData:=Nil;
+  ScreenData:=GetPixels(ThisRect);
   
-   Texture[windowcount]:=CreateTextureFromSurface(screen);
-   //might be clipped
-   Texture[windowCount].X:=ThisRect.X;
-   Texture[windowCount].Y:=ThisRect.Y;
-   Texture[windowCount].W:=ThisRect.W;
-   Texture[windowCount].H:=ThisRect.H;
+  infoSurface := SDL_GetWindowSurface(SDLWindow);
+  saveSurface := SDL_CreateRGBSurfaceWithFormatFrom(ScreenData, infoSurface^.w, infoSurface^.h, infoSurface^.format^.BitsPerPixel, (infoSurface^.w * infoSurface^.format^.BytesPerPixel), infoSurface^.format);
+
+  if (saveSurface = NiL) then begin
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt create SDL_Surface from renderer pixel data','OK',NIL);
+      //LogLn(SDL_GetError);
+      exit;
+                    
+  end;
+   
+   Texture[windowcount]:=CreateTextureFromSurface(saveSurface);
+
+   SDL_FreeSurface(saveSurface);
+   saveSurface = NiL;
+   infosurface:=Nil;
+   ScreenData:=Nil;
+  
+   Texture[windowCount]^.X:=ThisRect^.X;
+   Texture[windowCount]^.Y:=ThisRect^.Y;
+   Texture[windowCount]^.W:=ThisRect^.W;
+   Texture[windowCount]^.H:=ThisRect^.H;
 
    SDL_RenderSetViewport( Renderer, ThisRect );  
    RenderCopy(Renderer,Texture[windowcount]);
    RenderPresent(renderer);
    
-   //further calls are trapped inside...
-   ClipPixels:=true;
+   //"Clipping" is a joke- we always clip.
+   //The trick is: do we zoom out? In Most cases- NO. We zoom IN.
 
 end;
 
@@ -3199,23 +3263,23 @@ function RemoveViewPort(windowcount:byte):SDL_Rect;
 //return with the last window coords..(we might be trying to write to them)
 //and redraw the prior window as if the new one was not there(not an easy task).
 var
-  ThisRect,LastRect:^SDL_Rect;
+  ThisRect,LastRect:PSDL_Rect;
 
 begin
 
    if windowCount=0 then exit else //you must be crazy...closegraph.
    if windowcount > 1 then begin
-  		ThisRect.X:=Texture[windowCount].X;
-		ThisRect.Y:=Texture[windowCount].Y;
-	    ThisRect.W:=Texture[windowCount].W;
-	    ThisRect.H:=Texture[windowCount].H;
+  		ThisRect^.X:=Texture[windowCount]^.X;
+		ThisRect^.Y:=Texture[windowCount]^.Y;
+	    ThisRect^.W:=Texture[windowCount]^.W;
+	    ThisRect^.H:=Texture[windowCount]^.H;
 
   		dec(windowCount);
 
-        LastRect.X:=Texture[windowCount].X;
- 	    LastRect.Y:=Texture[windowCount].Y;
- 	    LastRect.W:=Texture[windowCount].W;
-	    LastRect.H:=Texture[windowCount].H;
+        LastRect^.X:=Texture[windowCount]^.X;
+ 	    LastRect^.Y:=Texture[windowCount]^.Y;
+ 	    LastRect^.W:=Texture[windowCount]^.W;
+	    LastRect^.H:=Texture[windowCount]^.H;
    
        //remove the viewport by removing the texture and redrawing the screen.
         SDL_DestroyTexture(Texture[windowcount+1]);
@@ -3230,7 +3294,7 @@ begin
    RenderCopy(Renderer,Texture[0]);
    RenderPresent; //and update back to the old screen before the viewports came here.
    LastRect:=(0,0,MaxX,MaxY);
-   RemoveViewPort:=LastRect;;
+   RemoveViewPort:=LastRect;
 end;
 
 
@@ -3238,7 +3302,9 @@ end;
 //return values can be ignored(unless there are problems) these are proceedures.
 
 SDL_GradientFillRect( Surface,Rect, RGBStartColor, RGBEndColor, GradientStyle);
-
+Surface2Texture(surface,texture)
+RenderCopy(renderer,tex)
+renderPresent
 
 // Rounded-Corner Rectangle (3DBAR)
 
@@ -3296,18 +3362,28 @@ filledTrigonColor(renderer, x1, y1, x2, y2, x3, y3, colour);
 filledTrigonRGBA(renderer, x1, y1, x2, y2, x3, y3,r, g, b, a); 
 
 //these are confusing...you need to pass in multiple point(s)...
+
+Points=record
+   X,Y:integer; 
+end;
+
+while num < maxpoints
+point:array [0..num] of Points
+else exit //throwerror
+
 SDL_RenderDrawPoints(points,num)
 
 
 // Filled Polys 
 
-filledPolygonColor(renderer, vx, vy,num, colour); 
-filledPolygonRGBA(renderer, vx, vy,num, r, g, b, a); 
+filledPolygonColor(renderer, vx, vy,numpts, color); 
+filledPolygonRGBA(renderer, vx, vy,numpts, r, g, b, a); 
 
 }
 
 
 //compatibility
+//these were hooks to load or unload "driver support code modules" (mostly for DOS)
 procedure InstallUserDriver(Name: string; AutoDetectPtr: Pointer);
 begin
    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Function No longer supported: InstallUserDriver','OK',NIL);
@@ -3321,6 +3397,8 @@ end;
 
 
 function GetMaxColor: word;
+//Use "MaxColors" if looking to use Random(Color).
+//This gives you the HUMAN READABLE MAX amount of colors available.
   
 begin
       GetMaxColor:=MaxColors+1; // based on an index of zero so add one 255=>256
@@ -3343,7 +3421,7 @@ begin
 
     tex:= NiL;
     Tex:=IMG_LoadTexture(renderer,filename);
-    SDL_RenderCopy(renderer, tex, Nil, rect); //rect should be the size of the image
+    SDL_RenderCopy(renderer, tex, Nil, rect); //PutImage at x,y but only for size of WxH
 end;
 
 procedure LoadImageStretched(filename:string);
@@ -3355,28 +3433,62 @@ begin
 
     tex:= NiL;
     Tex:=IMG_LoadTexture(renderer,filename); 
-    SDL_RenderCopy(renderer, tex, Nil, Nil); 
+    SDL_RenderCopy(renderer, tex, Nil, Nil); //scales image to output window size(size of undefined Rect)
 end;
 
 
 procedure PlotPixelWNeighbors(x,y:integer);
-//this makes the bigger dots 
+//this makes the bigger Pixels
+ 
 // (in other words "blocky bullet holes"...)  
+// EXPERT topic: smoothing reduces jagged edges
 begin                
-   //more efficient to render a 3x3 Rect.
+   //more efficient to render a Rect.
 
    New(Rect);
    Rect.x:=x;
    Rect.y:=y;
-   Rect.w:=3;
-   Rect.h:=3;
+   case LineStyle of
+       NormalWidth: begin
+             Rect.w:=2;
+			 Rect.h:=2;   
+       end;
+       ThickWidth: begin  
+             Rect.w:=4;
+			 Rect.h:=4;   
+       end;
+       VeryThickWidth: begin
+             Rect.w:=6;
+			 Rect.h:=6;   
+       end;
+       VeryVeryThickWidth: begin  
+             Rect.w:=8;
+			 Rect.h:=8;   
+       end;
+   end;
    SDL_RenderFillRect(renderer, rect);
 // limit calls to "render present"
 //   SDL_RenderPresent(renderer);
    Free(Rect);
    //now restore x and y
-   x:=x+2;
-   y:=y+2;   
+   case LineStyle of
+		NormalWidth:begin
+			x:=x+2;
+			y:=y+2;   		
+		end;
+		ThickWidth:begin
+			x:=x+4;
+			y:=y+4;  
+		end;
+		VeryThickWidth: begin
+            x:=x+6;
+			y:=y+6;  
+       end;
+       VeryVeryThickWidth: begin  
+            x:=x+8;
+			y:=y+8;  
+       end;
+   end;
 end;
 
 
@@ -3394,14 +3506,14 @@ begin
   saveSurface = NiL;
   infosurface:=Nil;
   ScreenData:=Nil;
-
-  ScreenData:=GetPixels(Nil);
-
+  ScreenData:=GetPixels(Nil); 
+  
   infoSurface := SDL_GetWindowSurface(SDLWindow);
-  saveSurface := SDL_CreateRGBSurfaceWithFormatFrom(ScreenData, infoSurface^.w, infoSurface^.h, infoSurface^.format^.BitsPerPixel, (infoSurface.w * infoSurface.format.BytesPerPixel), infoSurface^.format);
+  saveSurface := SDL_CreateRGBSurfaceWithFormatFrom(ScreenData, infoSurface^.w, infoSurface^.h, infoSurface^.format^.BitsPerPixel, (infoSurface^.w * infoSurface^.format^.BytesPerPixel), infoSurface^.format);
 
   if (saveSurface = NiL) then begin
-      //ERROR: ("Couldn't create SDL_Surface from renderer pixel data", SDL_GetError);
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt create SDL_Surface from renderer pixel data','OK',NIL);
+      //LogLn(SDL_GetError);
       exit;
                     
   end;
@@ -3413,22 +3525,41 @@ begin
   inc(Screenshots);
 end;
 
-//rect size could be 1px for all we know- or the entire rendering surface...
 //note this function is "slow ASS"
 
-//Rect: X,Y,W,H
-function GetPixels(Rect:PSDL_Rect):pointer;
-//this does NOT return a single pixel by default and iswritten intentionally that way.
-//GetPixel(one) checks also the output pointer and fudges it into a single "SDL_Color".
 
-//this expects YOU to handle the array of data
+function GetPixels(Rect:PSDL_Rect):pointer;
+//this does NOT return a single pixel by default and is written intentionally that way.
+//GetPixel checks also the output pointer length and fudges it into a single "SDL_Color".
+
+//this routine expects YOU to handle the array of data
+//SDL_Color SDL_Color SDL_Color .....
+
 var
 
   pitch:integer;
-  pixels:pointer; //array [0..x*y] of SDL_Color
+  pixels:pointer; //^array [0..x*y] of SDL_Color
+
+{
+  the array size is dependant on current screen resoluton- I can only give MAXIMUM defaults if I set this value.
+  This is an SDL_Color limitation. If it were me, Id just copy the array in 2D, not 1D.
+  Yes, technically, even kernel write to screen are stored in VRAM(or buffers) as:
+		[X,Y,RGBColor] however...SDL treats it as a 1D array.
+  I didnt design SDL, sorry. Maybe thats why its SLOW???
+  src: VGA graphics 101 - address A000, 386+ VRAM (and LFB) access.
+  NOTE: 
+     You probly CANNOT directly write there.. (blame X11 or Windows or Apple)
+     (Because youre staring at the array right now, reading this.)
+}
+
   AttemptRead:integer;
 
 begin
+   if ((Rect^.w=1) or (Rect^.h=1)) then begin      
+     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'USE GetPixel. This routine FETCHES MORE THAN ONE','OK',NIL);
+     exit;
+   end;
+
    pixels:=Nil;
    pitch:=0;
 
@@ -3458,7 +3589,8 @@ begin
    
    //pitch at this point could be 2,3,4,etc.. and must otherwise be taken into account.
    if (AttemptRead<0) then begin
-     //error: cant read pixels
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to read pixel data failed.','OK',NIL);
+      //LogLn(SDL_GetError);
      exit;
    end;
    GetPixels:=pixels;
@@ -3484,20 +3616,23 @@ begin
 
 end;
 
+{
+Blinking: 
 
-//if you want to blink circles etc...I wil leave this to the reader.
-//it can be done- but its very unused code. Ususally reserved for text warnings,notices, etc.
-//so anyway- heres how to do it.
+if you want to blink circles etc...I wil leave this to the reader.
+it can be done- but its very unused code. Ususally reserved for text warnings,notices, etc.
+so anyway- heres how to do it.
 
-// blink used to be set at value 128;
+blink used to be set at value 128;
 
-// Color:=color+Blink; -is the old way.
-// Blink('string'); -is the new way.
+ Color:=color+Blink; -is the old way.
+ Blink('string'); -is the new way.
 
-//update your code. 
-//CANTFIX: and WONTFIX: this. 
-//(This was a hardwired spec in the past and is not anymore.)
+update your code. 
+CANTFIX: and WONTFIX: this. 
+(This was a hardwired spec in the past and is not anymore.)
 
+}
 
 procedure blinkText(Text:string);
 
@@ -3533,7 +3668,7 @@ procedure STOPBlinkText;
 begin
             blink:=false; //kill the loop
 			delay(1000); //wait for routine to safely exit.
-			killPID(BlinkPID);
+			killPID(BlinkPID); //BLAM! DIE.
 			BlinkPID:=Nil;
 end;
 
@@ -3544,32 +3679,58 @@ begin  //main()
 {$ifdef unix}
 IsConsoleApp:=true; //All Linux apps are console apps-SMH.
 
-  if (GetEnvironmentVariable('DISPLAY') = Nil) then begin
-  //NO X11 was loaded
-    
-    writeln('Incorrectly called. SDL NEEDS X11 but X11 was never started.');
-    writeln('Further: OpenGL isnt available until X11 Core loads.');
-    writeln('Either that or you forgot to set the DISPLAY variable.');
-    PressAnyKey; //crtstuff routine
-    halt(0);
-  end;
+  if (GetEnvironmentVariable('DISPLAY') = Nil) then LoadlibSVGA:=true;
+
+{
+  libSVGA note:
+		NO- Im not rewriting THAT TOO!
+
+  -Although maybe we could "hook the C"-inadvertently enabling FreeDOS support for "SDL and associates"
+   Graphics modes. There is some BASIC support with HXDPMI and its associate Win32 loaders....
+   (I have personally not had a practical use for it yet.) 
+   
+  PCs boot in x86 mode-(or emu86 mode) in 8bit-jump to 16/32/64 bits unless EFI loaded (into 64). 
+  FREEDOS takes advantage of emu86 mode-(so does DosBox--or is it DosEmu)??
+  Anyway- DPMI kicks us back into 16 and 32 bit operating modes.
+  
+  in all practicallity- libSVGA libs may set the screen up--
+  but everyone depends on libX11, libCocoa(OSX),libCarbon(OSX),or WinAPI these days...
+  you are going to be limited to the LFB--which is very slow compared to NATIVE DRIVERS.
+  
+  There's no reason we shouldnt utilize libSVGA if its our only option, however.
+  This may require - as a result SDLv1, not SDLv2- due to video ram constraints.
+  
+  (There has to be some reason you arent running X11....)
+  
+  if X11 EVER gets loaded- then libSVGA is out-of-the-question.
+  libSVGA is extremely unpractical on most modern day "workstations" and "common PCs".
+  (This is why it has no future support in FreePascal)
+  
+  But let's say you are running a specific setup (NASA? BOEING? FLight controls, etc.) and dont want X11:
+  -what then?
+       
+       You can load the driver module and associated LFB- but is it "accelerated" without X11? 
+  
+  This is the case of "Nuking it" or "not thinking at all" when writing code- instead of planning for "as many
+  as possible" scenarios.
+  
+  A more NATIVE OPTION- would be to do Fullscreen "initgraph" within X11/Windows/OSX.
+  This unit DOES accomplish this.
+}
+{$ENDIF}
 
 //while I dont like the assumption that all linux apps are console apps- technically its true.
 
 //I dont see the need for the LCL with SDL/OGL but anyways...
-  {$IFDEF LCL}
+{$IFDEF LCL}
         QuietlyLog:=true;
-        IsConsoleInvoked:=false; //ui app
-  {$endif}
-
+        {$IFDEF windows}
+			IsConsoleInvoked:=false; //ui app- NO CONSOLE AVAILABLE
+        {$ENDIF}
 {$ENDIF}
 
-{$IFDEF NOCONSOLE}
-    IsConsoleEnabled:=false; //GUI APP
-    QuietlyLog:=true;
-{$ENDIF}
 
-//with initgraph as a function it returns one of these codes
+//with initgraph (as a function) it returns one of these codes
 //these are the strings of the error codes
 
    screenshots:=00000000;
