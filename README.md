@@ -262,6 +262,7 @@ While we could reasonably use X11 CoreLibs, **its NOT PORTABLE** !
 NOTE:
     
         CMake
+        CMake-Gui
         libudev-dev
 
 are reccommended as some other libs depend on these. (udev is for USB devices support)
@@ -270,6 +271,7 @@ are reccommended as some other libs depend on these. (udev is for USB devices su
         libOpen_vr (VR helmet support)
 
 are being considered (need pascal headers)- SDL looks like it supports the IO methods.
+**STEAM uses these**
 
 
 UNIX/Lin-ux:
@@ -309,13 +311,13 @@ Cross building to Sin(windows):
 
         go fetch and install both FreePascal (fpc) and Lazarus also.
 
-        Visual Studio Installer is enclosed, but its a "rolling release" sort of application.
+        Visual Studio "Code" Installer is enclosed, but its a "rolling release" sort of application.
+        Microsoft Visual Studio(classic) is over 15GB installed (YIKES!!) and unknown compatibility or syntax.
 
-        Microsoft Visual Studio is over 15GB installed (YIKES!!) and unknown compatibility or syntax.
 
-
-	For SIN there is a WinAPI port: http://math.ubbcluj.ro/~sberinde/wingraph/main.html
-	- or you can browse the files here, which is the same thing.
+	For SIN there is a WinAPI port: http://math.ubbcluj.ro/~sberinde/wingraph/main.html	
+	(or you can browse the files here, which is the same thing. 
+	WARNING: The colors DO NOT conform to XTerm standards, nor CGA standards-mine DO)
 
 	The guy seems to have a better WinAPI direct access than the FPC team, therefore his unit 
 	(as per 2010) AFAIK is far superior. I doubt much has changed in FPC, all of the docs still point to JEDI
@@ -324,8 +326,7 @@ Cross building to Sin(windows):
 	This above uses WinAPI, not SDL for BGI support. So dont come beggin me for help.
 	It is the windows equivalent of using X11 core libs. 
 
-	WinDos, WinMouse, and WinCrt units I believe were rewritten in Delphi by Borland.
-    The FPC equivalents should work ok.
+	WinDos, WinMouse, and WinCrt units were re-written by this guy, it seems.
 
 
 Mac:

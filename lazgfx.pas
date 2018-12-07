@@ -2066,6 +2066,9 @@ procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean);
 var
 	flags:longint;
     IsThere,RendedWindow:integer;
+    //MainSurface:PSDL_Surface; -this needs to be a global
+    //window:PSDL_Window;
+    //renderer:PSDL_Renderer;
 
 begin
 //I can do this two ways- "upscale the small resolutions" no longer supported 
@@ -2073,7 +2076,7 @@ begin
 //just "refuse fullscreen".
 
 //add UpScaled:=true??
-// if UpScaled then ForceFatPixels=true (2x or 4x pixel sizes)
+// if UpScaled then  "Linestyle>Normal then call PutNearestNeighborPixel"
 
   case(graphmode) of //we can do fullscreen, but dont force it...
 	     mCGA:begin
@@ -2373,31 +2376,28 @@ begin
 //once is enough with this list...
 
 
-
 //if not active:
-
 //are we coming up?
-
 //no? EXIT
-
-
 
 if (LIBGRAPHICS_INIT=false) then 
 
 begin
 		
 		if IsConsoleInvoked then writeln('Call initgraph before calling setGraphMode.') 
-		else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Called setGraphMode too early. Call InitGraph first.','OK',NIL);
+		else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'setGraphMode called too early. Call InitGraph first.','OK',NIL);
 	    exit;
 end
-else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setup- initgraph called us
+else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //initgraph called us
 
+ //   window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
+//    renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-	RendedWindow := SDL_CreateWindowAndRenderer(MaxX, MaxY,SDL_WINDOW_OPENGL, @window,@renderer);
+	RendedWindow := SDL_CreateWindowAndRenderer(MaxX, MaxY,SDL_WINDOW_OPENGL, window,renderer);
 
 	if ( RendedWindow <>0 ) then begin
-        //try software first...
-
+    //No hardware renderer....
+    
          //posX,PosY,sizeX,sizeY,flags
          window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
     	 if (window = Nil) then begin
@@ -2451,16 +2451,20 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
     	         writeln('Unable to set FS: ', getmodename(graphmode));
     	         writeln('SDL reports: ',' ', SDL_GetError);      
      	      end;
-//throwning an error here might fuck with a game or something. Note the error and carry on.
-//    	      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
+
               FSNotPossible:=true;      
        
        //if we failed then just gimmie a yuge window..      
        SDL_SetWindowSize(window, MaxX, MaxY);
+       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
+
        end;
 
     end; 
 
+//when ready to draw-use lock to setup a texture target, unlocking will call renderPresent for us.
+
+ {
     //we can create a surface down to 1bpp, but we CANNOT SetVideoMode <8 bpp
     //I think this is a HW limitation in X11,etc.
 
@@ -2473,7 +2477,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //setu
         //we can exit w failure codes, if we check for them
         closegraph;
     end;
-
+}
 
   if (bpp<=8) then begin
       if MaxColors=16 then
@@ -2514,8 +2518,9 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
 
 		success:=SDL_SetWindowDisplayMode(window,mode);
         if (success <> 0) then begin 
-			//cant do it, sorry.
-
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set DisplayMode.','OK',NIL);
+			//LogLn(SDL_GetError);
+			exit;
         end;
     //either way we should have a window and renderer by now...   
    if wantFullscreen then begin
@@ -2539,12 +2544,13 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
     	         writeln('Unable to set FS: ', getmodename(graphmode));
     	         writeln('SDL reports: ',' ', SDL_GetError);      
      	      end;
-//throwning an error here might fuck with a game or something. Note the error and carry on.
-//    	      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
               FSNotPossible:=true;      
        
-       //if we failed then just gimmie a yuge window..      
-       SDL_SetWindowSize(window, MaxX, MaxY);
+          //if we failed then just gimmie a yuge window..      
+          SDL_SetWindowSize(window, MaxX, MaxY);
+          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
+          //LogLn(SDL_GetError);
+          exit;
        end;
 
     end;
@@ -2555,21 +2561,22 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
   if bpp=8 then 
     InitPalette256; 
   //then set it back up
-{
+
+//SDL_SetPalette has been correctly patched now
   if (bpp<=8) then begin
       if MaxColors=16 then
 			SDL_SetPalette( screen, SDL_LOGPAL or SDL_PHYSPAL, TPalette16.colors, 0, 16 );
 	  else if MaxColors=256 then
 			SDL_SetPalette( screen, SDL_LOGPAL or SDL_PHYSPAL, TPalette256.colors, 0, 256 );
   end;
-}
+
      clearviewscreen;
 end;
 
 end;
 
 function getgraphmode:string; 
-
+//needs testing
 var
 	thisMode:PSDL_DisplayMode;
     bppstring:string;
@@ -2580,24 +2587,20 @@ var
 
 begin
    if LIBGRAPHICS_ACTIVE then begin 
-        format:=MainSurface^.format; 
-		findbpp:=format^.BitsPerPixel; //4,8,15,16,24,32
         SDL_GetCurrentDisplayMode(0, thismode); //go get w,h,format and refresh rate..
-		
-//format should give you a clue as to what bpp you are in.
-
         findX:=thismode^.w;
 		findY:=thismode^.h;
 		x:=0;
         //we need to find X,Y,BPP in the modelist somehow...
 		repeat //repeat until we run out of modes. we should hit something..
-			if (findX=MaxX) and (findY=MaxY) and (findbpp=bpp) then begin		
-			//typinfo(modelist(ord(x));		getgraphmode:=Modelist^.modename[x];
+			if (findX=MaxX) and (findY=MaxY) and (thismode^.format^.BitsPerPixel=bpp) then begin		
+			       		
+			        getgraphmode:=modename;
 					exit;
 			end;
-            findbpp:=findbpp * findbpp; //findbpp^2
+            bpp:=bpp * bpp; //bpp^2
 			inc(x);
-		until x=32; //hi(ModeList);
+		until hi(graphics_modes);
 
    end;   
 end;    
@@ -2610,26 +2613,31 @@ begin
         writeln('you didnt call initGraph yet...try again?') 
     else
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Restore WHAT exactly?','Clarify the Stupid',NIL);
-		  
   end;
   closegraph;
 end;
 
 function getmaxX:word;
+var
+	w,h:word;
+	
 begin
    if LIBGRAPHICS_ACTIVE then
-     getMaxX:=(MainSurface^.w - 1); 
+   //pulling from ModeList data is much faster than querying the renderer or unfetching rendered surface data
+   //if graphics is active- assume we have the data set.
+     getMaxX:=(MaxX - 1); 
 end;
 
 function getmaxY:word;
 begin
    if LIBGRAPHICS_ACTIVE then
-     GetMaxY:=(MainSurface^.h - 1); 
+     GetMaxY:=(MaxY - 1); 
 end;
 
 { 
 
-Blitter, Blittering, Blits, BitBlit
+Blitter, Blittering, Blits, BitBlit (or RenderCopy- with a maybe on freeSurface..)
+
 Wikipedia-
 
 A blitter is a circuit, sometimes as a coprocessor or a logic block on a microprocessor, 
@@ -2647,8 +2655,8 @@ A "blit operation" is more than a memory copy, because it can involve data that'
 (hence the bit in bit blit), handling transparent pixels (pixels which should not overwrite the destination data), 
 and various ways of combining the source and destination data.
 
-//NewLayer is a loaded (BMP) pointer (filled rect?)
-//Surface is defined already
+//NewLayer is a loaded (BMP) pointer (filled rect)
+
 
 // SDL_BlitSurface(NewLayer, nil,MainSurface,nil);
 
@@ -2876,7 +2884,7 @@ end;
 Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
 
 begin
-//set renderDrawPoint (putPixel) uses fgcolor set with SDL_SEtPenColor or similar
+//renderDrawPoint (putPixel) uses fgcolor set with SDL_SEtPenColor or similar
 
   if (bpp<4) or (bpp >32) then
  
@@ -2892,10 +2900,6 @@ procedure Line(renderer1:PSDL_Renderer; X1, Y1, X2, Y2: word; LineStyle:Linestyl
 
 var
    x:integer;
-   HexColor:Dword;
-   rgbColor:PSDL_Color;
-   r,g,b,a:byte;
-   returnvalue:longword;
 
 begin
 
@@ -2939,12 +2943,13 @@ begin
 // if w=h then IsSquare:=true;
 
     new(Rect);
-	rect.x:=x;
-    rect.y:=y;
-    rect.w:=w;
-    rect.h:=h;
+	rect^.x:=x;
+    rect^.y:=y;
+    rect^.w:=w;
+    rect^.h:=h;
+    lock;
 	SDL_RenderDrawRect(renderer, rect);
-    SDL_RenderPresent(renderer);
+    unLock;
     free(Rect);
 end;
 
@@ -2953,12 +2958,13 @@ procedure FilledRectangle(x,y,w,h,:integer);
 
 begin
 	New(Rect);
-	rect.x:=x;
-    rect.y:=y;
-    rect.w:=w;
-    rect.h:=h;
+	rect^.x:=x;
+    rect^.y:=y;
+    rect^.w:=w;
+    rect^.h:=h;
+    Lock;
 	SDL_RenderFillRect(renderer, rect);
-    SDL_RenderPresent(renderer);
+    Unlock;
     free(Rect);
 end;
 
@@ -2967,56 +2973,65 @@ function getdrivername:string;
 begin
 //not really used anymore-this isnt dos
 
-
-   getdrivername:='X11Unix.bgi'; //be a smartASS
+   getdrivername:='Internal.SDL'; //be a smartASS
 end;
 
 
 
-Function detectGraph:boolean; //should return max mode supported(enum)
+Function detectGraph:integer; //should return max mode supported(enum value)
 
 //we detected a mode or we didnt. If we failed, exit. (we should have at least one graphics mode)
-//if we succeeeded- get the highest mode and return the modelist.
+//if we succeeeded- get the highest mode.
+
+//we only need the entire list (enum) while probing. The DATA is in the initgraph subroutine.
 
 var
 
     testbpp:integer;
 
 begin
-//ignore the returned data..this should be boolean not return (0 or some number)...thats BAD C.
-//and can someone shove a hole in there? USUAlly.
 
-// this is the "shove a byte where a boolean goes bug" in C...(boolean words etc..)
-//if its zero then its not ok. we dont want any other mode or similar mode...
+//if InitGraph then...
+//(AND ONLY WHILE INITing....initgraph needs to call us)
 
-//the trick is to prevent SDL from setting "whatever is closest"..we want this mode and only this...
-//most people dont usually care but with the BGI -WE DO.
+{
+ignore the returned data..this should be boolean not return (0 or some number)...thats BAD C.
+and can someone shove a hole in there? USUAlly.....
 
+this is the "shove a byte where a boolean goes bug" in C...(boolean words etc..)
+if its zero then its not ok. we dont want any other mode or similar mode...
 
-	i:=31; //might be off again...
-	for (i downto 1) do begin
+the trick is to prevent SDL from setting "whatever is closest"..we want this mode and only this...
+most people dont usually care but with the BGI -WE DO.
+
+moreso SDL may limit us by screen posibilities or card capabilities- not via software, like it should.
+for example: we could pass in 1366x720 w 4:2:2 color mode set and still completely FAIL.
+
+the only way to test in such a case- is the old school SLOW ASS way.
+-check EACH mode- one at a time.
+}
+
+	i:=hi(graphics_modes); 
+	repeat
 
    		testbpp:=SDL_VideoModeOK(modelist.width[i], modelist.height[i], modelist.bpp[i], _initflag); //flags from initgraph
-   		if(testbpp=0) then begin //mode not available
-      		if i>1 then dec(i);
+   		if(testbpp=0) then begin //mode not available      		
 			DetectGraph:=false; 
         end else if (testbpp=1) then begin 
             
-            MaxModeSupported.num:=i; //the mode number
             //initGraph just wants the number of the enum value, which we check for
-            DetectGraph:=true; //we passed
+            DetectGraph:=i; //we passed
             exit;
     	end;
-
-	end; //for loop
+		dec(i);
+	until i:=1;
     //there is still one mode remaining.
 	testbpp:=SDL_VideoModeOK(modelist.width[i], modelist.height[i], modelist.bpp[i], _initflag);		         
 	if (testbpp=0) then begin //did we run out of modes?
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There are no graphics modes available to set. Bailing..','OK',NIL);
 		CloseGraph; 
 	end;
-	MaxModeSupported.num:=i; //integer
-	DetectGraph:=true;
+	DetectGraph:=i;
 
 	//usermode should be within these parameters, however, since that cant be checked for...
 	//why not just remove it(usermode)? [enforce sanity]
@@ -3032,7 +3047,7 @@ var
 begin
   if LIBGRAPHICS_ACTIVE then begin
       maxmodetest:=detectgraph;
-      getmaxmode:=ModeName;
+      //getmaxmode:=funky typinfo crap goes here  (maxmodetest); --since we may be set lower.
   end;
 end;
 
