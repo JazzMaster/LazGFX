@@ -601,14 +601,14 @@ procedure Read16Palette(filename:string; ReadColorFile:boolean);
 Var
 	palette16File  : File of TRec16;
 	i,num            : integer;
-//palette:PSDL_Palette;
+    palette:PSDL_Palette;
 
 Begin
 	Assign(palette16File, filename);
 	ReSet(palette16File);
     Seek(palette16File, 0); //find first record
     if ReadColorFile =true then
-		Read(palette16File, TPalette16); //read everything in
+		Read(palette16File, TPalette16) //read everything in
 	else
 		Read(palette16File, TPalette16GRey); 
 	    
@@ -616,9 +616,10 @@ Begin
 	
      SDL_AllocPalette(16);    
     if ReadColorFile =true then
-          SDL_SetPaletteColors(palette,Tpalette16^.colors,0,16)
+          
+          SDL_SetPaletteColors(palette,Tpalette16.colors,0,16)
     else
-          SDL_SetPaletteColors(palette,Tpalette16GRey^.colors,0,16);
+          SDL_SetPaletteColors(palette,Tpalette16GRey.colors,0,16);
 
 end;
 
@@ -1738,7 +1739,6 @@ TPalette256.DWords[253]:=$dadadaff;
 TPalette256.DWords[254]:=$e4e4e4ff;
 TPalette256.DWords[255]:=$eeeeeeff;
 
-SDL_SetPaletteColors(palette,Tpalette256^.colors,0,256);
 end;
 
 
@@ -1767,11 +1767,12 @@ Begin
 End;
 
 
-procedure Read256Palette(filename:string);
+procedure Read256Palette(filename:string; ReadColorFile:boolean);
 
 Var
 	palette256File  : File of TRec256;
 	i,num            : integer;
+    palette: PSDL_Palette;
 
 Begin
 	Assign(palette256File, filename);
@@ -1782,9 +1783,9 @@ Begin
 	Close(palette256File);	
     SDL_AllocPalette(256);    
     if ReadColorFile =true then
-          SDL_SetPaletteColors(palette,Tpalette256^.colors,0,256)
+          SDL_SetPaletteColors(palette,Tpalette256.colors,0,256)
     else
-          SDL_SetPaletteColors(palette,Tpalette256GRey^.colors,0,256);
+          SDL_SetPaletteColors(palette,Tpalette256GRey.colors,0,256);
 
 end;
 

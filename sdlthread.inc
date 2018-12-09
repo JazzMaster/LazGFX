@@ -20,7 +20,7 @@ type
   TSDL_ThreadFunction = function(data: Pointer): Integer; cdecl;
 
   {* The SDL thread ID *}
-//  SDL_ThreadID = Longword;
+  PSDL_ThreadID =^TSDL_ThreadID;
   TSDL_ThreadID = LongWord;
 
   PSDL_Thread = ^TSDL_Thread;

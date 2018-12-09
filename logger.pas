@@ -1,13 +1,18 @@
 unit logger;
 
-var
+const
+  critical='CRITICAL ERROR: ';
+  normal='HMM: ';
+  warning='WARNING: ';
 
-  critical,normal,warning:string;
+var
+   output: file; //untyped text
+   logging,donelogging:boolean;
 
 interface
 
-Procedure FileLogString(s: String);
-Procedure FileLogLn(s: string);
+Procedure LogString(s: String);
+Procedure LogLn(s: string);
 
 
 implementation
@@ -26,6 +31,11 @@ AUTHORS:
 }
 
 
+//more advanced debugging requires everything be converted to a string
+//SDL_GetError for example may spit out other crud...
+
+//byte, word 2string, real2string,int2string
+
 function Long2String(l: longint): string;
 begin
   str(l, strf)
@@ -34,48 +44,34 @@ end;
 //end FPC code - the rest has been modified "for an EXPLICIT PURPOSE"
 
 
-//logChar is pointless..
-Procedure FileLogString(s: String);
+Procedure LogString(s: String);
 var
    output: file; //untyped text
 
 Begin
-//dont open a file if its already opened and why open/close repeatedly?
-  if NotLogging then begin 
-    Assign(output,'lazgfx.log'); 
-    Append(debuglog);
- end;
-  if IsConsoleInvoked then
-     write(s);
   Write(otuput, s);
-  if donelogging then Close(debuglog);
 End;
 
-Procedure FileLogLn(s: string);
-var
-   output: file; //untyped text
+//use me unless you need other variables added to the output.
+//remember- files WRAP at odd points, depending on the width of the viewing application and output monitor.
+Procedure LogLn(s: string);
 
 Begin
-
-//dont open a file if its already opened and why open/close repeatedly?
-  if NotLogging then begin 
-    Assign(output,'lazgfx.log'); 
-    Append(debuglog);
- end;
-  if IsConsoleInvoked then
-     writeln(s);
   Writeln(otuput,s);
-  if donelogging then Close(debuglog);
 End;
 
-
+procedure StopLogging; //finalization
+//call just before SDL_Quit
 begin
-//so we can compile custom error messages
-   critical:='*** CRITICAL ERROR!! ';
-   normal:='*** STATUS: ';
-   warning:='*** WARNING!! ';
+    donelogging:=true;
+    logging:=false;
+    Close(output);
+end;
 
-
+begin //init - main()
+    Assign(output,'lazgfx-debug.log'); 
+    Append(output); //do not re-write or re-set.
+    Logging:=true;
 end.
  
 

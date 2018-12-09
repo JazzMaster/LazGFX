@@ -70,13 +70,14 @@ function SDL_DEFINE_PIXELFOURCC(A,B,C,D: Variant): Variant;
 #define SDL_DEFINE_PIXELFORMAT(type, order, layout, bits, bytes) \
     ((1 << 28) | ((type) << 24) | ((order) << 20) | ((layout) << 16) | \
      ((bits) << 8) | ((bytes) << 0))
-       }
+    }
 
 function SDL_PIXELFLAG(X: Cardinal): Cardinal;
 function SDL_PIXELTYPE(X: Cardinal): Cardinal;
 function SDL_PIXELORDER(X: Cardinal): Cardinal;
 function SDL_PIXELLAYOUT(X: Cardinal): Cardinal;
 function SDL_BITSPERPIXEL(X: Cardinal): Cardinal;
+
      {
 #define SDL_BYTESPERPIXEL(X) \
     (SDL_ISPIXELFORMAT_FOURCC(X) ? \
@@ -97,8 +98,10 @@ function SDL_BITSPERPIXEL(X: Cardinal): Cardinal;
       (SDL_PIXELORDER(format) == SDL_PACKEDORDER_ABGR) || \
       (SDL_PIXELORDER(format) == SDL_PACKEDORDER_BGRA)))
 
+
   function SDL_IsPixelFormat_FOURCC(format: Variant);
 
+}
   {* Note: If you modify this list, update SDL_GetPixelFormatName() *}
 
 const
@@ -357,7 +360,7 @@ const
                            (Integer('U') shl 24);
 
 type
-  SDL_Color = TSDL_Color;
+
   PSDL_Color = ^TSDL_Color;
   TSDL_Color = record
     r: UInt8;
@@ -367,7 +370,7 @@ type
   end;
 
 //pallettes are max 256 colors in nature
-  SDL_Palette = TSDL_Palette;
+
   PSDL_Palette = ^TSDL_Palette;
   TSDL_Palette = record
     ncolors: SInt32;
@@ -375,6 +378,10 @@ type
     version: UInt32;
     refcount: SInt32;
   end;
+
+  PSDL_Colors=^TSDL_Colors;
+  TSDL_Colors = array [0..255] of PSDL_Color;
+     
 
   {**
    *  Everything in the pixel format structure is read-only.
@@ -472,7 +479,7 @@ function SDL_SetPixelFormatPalette(format: PSDL_PixelFormat; palette: PSDL_Palet
    *  0 on success, or -1 if not all of the colors could be set.
    *}
 
-function SDL_SetPaletteColors(palette: PSDL_Palette; const colors: PSDL_Color; firstcolor: SInt32; ncolors: SInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetPaletteColors' {$ENDIF} {$ENDIF};
+function SDL_SetPaletteColors(palette: PSDL_Palette; colors: TSDL_Colors; firstcolor: SInt32; ncolors: SInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetPaletteColors' {$ENDIF} {$ENDIF};
 
   {**
    *  Free a palette created with SDL_AllocPalette().

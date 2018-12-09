@@ -1,6 +1,8 @@
 
 Unit grText;
-//graphics text functions
+//graphics text functions-not fully implemented, just the basics.
+
+//vericle text- one char per "line" until end of screen or text- then pushes to the right.
 
 interface 
 uses
@@ -11,20 +13,22 @@ type
   str256=string(256);
 
 
-// The text pointer 
-
-TP=record
-  x,y:integer;
-end;
-
-// Screen position pointer
-
-CP = record 
-   x,y:integer;
-end;
 				
 {$I bgisdl.inc}
 
+procedure backspace( Font:^SDL_FontInfo, ch:char);
+procedure OutText(text:PChar);
+procedure OutTextLn(text:PChar);
+function grReadkey:char;
+function grReadString:string;
+function kbhit:char;
+function grReadLineWithLimits:string;
+
+procedure grWriteChar(c:char);
+procedure outtextXY(x,y:integer; textstring:PChar);
+function textheight (textstring:string):integer;
+function textwidth (text:string)integer;
+procedure gettextsettings(var textinfo : textsettingstype);
 
 procedure GetTextSettings(var TextInfo : TextSettingsType);
 function  TextHeight(const TextString : string) : word;
@@ -155,6 +159,7 @@ begin
   Y:=newY;
 
 end;
+
 //put into handler code...
 function grReadkey:char;
 var
@@ -425,7 +430,6 @@ begin
  end;
 end;
 
-
 procedure gettextsettings(var textinfo : textsettingstype);
 begin
   textinfo.font      := font;
@@ -436,7 +440,9 @@ begin
 end;
 
 
-{
+//this isnt right-STYLE = BOLD,ITALIC,etc.
+
+
 procedure settextstyle(fontname:string direction:boolean; textsize:integer);
 //backwads compatible with some changes
 begin
@@ -449,7 +455,7 @@ begin
 
   SDL_SetFont(fontname,direction,textsize); 
 end;
-}
+
 
 
 
@@ -467,8 +473,8 @@ begin
          _graphresult:=grError;
          exit;
     end;
-    Currenttextinfo.horiz:=horiz;
-    Currenttextinfo.vert:=vert;
+
+//should be a enum- horiz,vert
 
 end;
 

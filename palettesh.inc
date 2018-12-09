@@ -73,6 +73,7 @@ colors:
 }
 type
 
+
 //There IS a way to ge the Names listed here- the magic type info library
 //this cuts down on spurious string data and standardizes the palette names a bit also
 
@@ -426,7 +427,7 @@ tfsG11,
 tfsG12,
 tfsG13,
 tfsG14,
-tfsGWhite,
+tfsG15,
 
 tfsG16,
 tfsG17,
@@ -692,13 +693,13 @@ tfsG251,
 tfsG252,
 tfsG253,
 tfsG254,
-tfsG255
+tfsGWhite
 
 );
 
 TRec16=record
   
-	colors:array [0..15] of PSDL_COLOR; //this is setup later on. 
+	colors:TSDL_COLORS; 
 
 {SDL defines this is as:
 
@@ -727,7 +728,7 @@ end;
 
 TRec256=record
 
-  colors:array [0..255] of PSDL_COLOR; //this is setup later on. 
+  colors:TSDL_COLORS; //this is setup later on. 
   DWords:array [0..255] of DWord;
 
 end;
@@ -742,10 +743,9 @@ var
   valuelist256: array [0..767] of byte;
 
   TPalette16:TRec16;
-  TPalette16Grey:TRec256;
+  TPalette16Grey:TRec16;
 
   TPalette256:TRec256;
   TPalette256Grey:TRec256;
 
-//exported functions/proceedures
 

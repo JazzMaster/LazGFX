@@ -412,6 +412,8 @@ Pixel rendering (the old school methods)
 We have to "lock pixels" to work with them, then "unlock pixels" and "pageFlip". 
 Texture rendering(SDL2) uses the VRAM for ops -whereby SDL1 uses RAM and CPU(Surfaces).
 
+rendering is a one-way street, however.
+
 Our ops are restricted, even yet to "pixels" and not groups of them.
 TandL is a "pixel-based operation".
 
@@ -423,21 +425,23 @@ MessageBox:
 
 With Working messageBox(es) we dont need the console.
 
-InGame_MsgBox() routines (like what Skyrim uses) still needs to be implemented.
+InGame_MsgBox() routines (OVERLAYS like what Skyrim uses) still needs to be implemented.
 FurtherMore, they need to match your given palette scheme.
 
-I will provide the extended asciii-ish character set to work with(those box characters).
+I will provide the extended asciii-ish character set to work with.
 
 GVision, routines can now be used where they could not before.
 GVision requires Graphics modes(provided here) and TVision routines be present(or similar ones written).
-FPC team is refusing to fix TVision bugs. This is wrong.
+FPC team is refusing to fix TVision bugs. 
+
+This is wrong.
 
 debugging(captains log):
         
         Logging was fixed, but its not "perfect".
-        All SDL functions should be logged. None in fact are. OOPS.
+        All SDL functions should be logged. 
 
-Some idiot wrote the code wrong and it needs to be updated for FILE STREAM IO.
+Some idiot wrote the logging  code wrong and it needs to be updated for FILE STREAM IO.
 Logging will be forced in the folowing conditions:
 
     under windows LCL is checked for- this is a known Lazarus issue.
@@ -449,14 +453,17 @@ Code upgraded from the following:
 	original *VERY FLAWED* port (in C) coutesy: Faraz Shahbazker <faraz_ms@rediffmail.com>
 	unfinished port (from go32v2 in FPC) courtesy: Evgeniy Ivanov <lolkaantimat@gmail.com> 
 	some early and or unfinished FPK (FPC) and LCL graphics unit sources 
-	SDLUtils(drawing primitives) [SDL v1.2+ -in Pascal]
-    JEDI SDl headers(unfinished) and in some places- not needed.
+	SDLUtils(Get nad PutPixel) SDL v1.2+ -in Pascal
+    JEDI SDL headers(unfinished) and in some places- not needed.
+    libSVGA Lazarus wiki found here: http://wiki.lazarus.freepascal.org/svgalib
+    libSVGA in C: http://www.svgalib.org/jay/beginners_guide/beginners_guide.html
 
 manuals:
     SDL1.2 pdf
     Borland BGI documentation by QUE Publishing    
     TCanvas LCL Documentation (different implementation of a 'SDL_screen') 
-    Lazarus Programming (a very rare book) by Blaise Pascal Magazine
+    Lazarus Programming by Blaise Pascal Magazine ISBN 9789490968021 
+    Getting started w Lazarus and FP ISBN 9781507632529
     JEDI chm file
 	TurboVision(TVision) references (where I can find them and understand them.)
 
@@ -464,9 +471,6 @@ manuals:
 NOTE: All visual rendering routines are 'far calls' if you insist building for DOS.
 (I really cant help you if you do, but dont drop 32+ cpu support. I will merge the code if you fork it, however.)
 
-
-plotting pixels and lines is notoriously slow. dont make it worse. 
-lock and unlock only where necessary.
 
 
 to animate- screen savers, etc...you need to (page)flip/rendercopy and slow down rendering timers.
@@ -499,22 +503,26 @@ Palettes:
   The holes are standardized to xterm specs. I think theres like 5.
 
 
-I wonder if DirectX .DDS files are SDL Surfaces??? HMMMM....
+I wonder if DirectX .DDS files are SDL Surfaces in disguise??? HMMMM....
 (There is a C library to load ANY texture into RAM and work with all types of them.)
-
+Im betting they are "not off by much".
 Im seeing a Ton of correlation between OGL/SDL and DirectX (and people think there isnt any).
 
 
 NOTE:
 
-SDL is screwed up somewhere-
+OpenGL bug:
 "You should not expect to be able to render, or receive events on any thread other than the main one. "
-"You must render in the same routine that handles input"
+
+SDL bug:
+"You must render in the same routine that handles input(only in the main program-this is a library)"
 
 
 Tris (triangles, trigons), polys are not ported from SDL yet. This requires much more than 
 just dropping a routine in here- you have to know how the original routine wants the data-
 get it in the right format, call the routine, and if needed-catch errors.
+
+The biggest problem woth SDL is "the bloody syntax".
 
 This is why the code is taking so long.
 
@@ -523,7 +531,7 @@ SDL is not SIMPLE.
 The BGI was SIMPLE.
 SemiDirect MultiMedia OverLayer - should be the unit name.
 
- --Jazz (comments by me unless otherwise noted)
+ --Jazz (comments -and code- by me unless otherwise noted)
 
 }
 
@@ -575,13 +583,14 @@ uses
 {$ifdef unix} cthreads,cmem,sysUtils,{$endif}
 
 //FPC generic units(OS independent)
-  SDL2,SDL2_Image,SDL2_TTF,strings,typinfo
+  SDL2,SDL2_Image,SDL2_TTF,strings,typinfo,math,logger
 
-//GL, GLU,math
+//GL, GLU
 
-//SDL2_gfx is untested as of yet. functions start with GPU_ not SDL_
+//SDL2_gfx is untested as of yet. functions start with GPU_ not SDL_. 
+//The entire SDL is NOT duplicated there. gfx is "specific optimized routines"
 
-{$ifdef debug} ,heaptrc {$endif} //logger
+{$ifdef debug} ,heaptrc {$endif} 
 
 
 //sdl_net (-YAASSS!! networking!!!)
@@ -652,13 +661,6 @@ only so many can do it at once, first come- first served
 
 type  
 
-//FIXME:
-//typedefines need to be prefaced with a T as in: "TSomething=something else"
-
-//becuse otherwise we confuse the compiler etc.
-//adjust the variables accordingly. This is mostly for records and objects.
-
-
 //drawing width of lines in pixels
 
   linestyles=( NormWidth  = 1,
@@ -681,7 +683,7 @@ type
       xend,yend : word;
   end;
 
-//for GotoXY()
+//for MoveRel(ative)
   Twhere=record
      x,y:word;
   end;
@@ -704,6 +706,7 @@ type
 //This is a 8x8 Font pattern (in HEX) according to the BGI sources
 
    FillSettingsType = (clear,lines,slashes,THslashes,THBackSlashes,BackSlashes,SMBoxes,rhombus,wall,widePTs,DensePTS);
+//Borland VGA256 sources (expansion pack) has the deatils-which are temporarily outside of this repo ATM
 
 {
 
@@ -777,12 +780,15 @@ const
 var
     where:Twhere;
 	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop:boolean;
-    X,Y,_grResult:integer;
+    X,Y:integer;
+    _grResult:grErrortype;
     gGameController:PSDL_Joystick;
     Renderer:PSDL_Renderer;
-    Surface,FontSurface : PSDL_Surface; //main drawing screen
+    //MainSurface??
+    Surface,FontSurface : PSDL_Surface; //TnL mostly at this point, and for hacks
     window:PSDL_Window; //A window... heh..."windows" he he...
-    MainTexture,Texture:PSDL_Texture;
+    // no such beast as a MAIN TEXTURE.
+    //its on path to the renderer or its made new
     Rect1,srcR,destR,TextRect:PSDL_Rect;
     rmask,gmask,bmask,amask:longword;
 
@@ -790,9 +796,24 @@ var
     TextFore,TextBack : PSDL_Color; //font fg and bg...
 
     filename:String;
-    fontpath,iconpath:PChar; // "C:\windows\fonts\*.ttf" (one at a time) or "/usr/share/fonts/*.ttf"
+    fontpath,iconpath:PChar; // "C:\windows\fonts\*.ttf" or "/usr/share/fonts/*.ttf"
+{
+
+Fonts:
+Most OSes have a default of:
+
+    Serif
+    Sans(Serif)
+    Gothic
+    Terminal(Code)
+    Tri-Plex
+
+and as a result, some basic fonts are also included. (Royalty FREE-in case youre wondering)
+
+}
+
     font_size:integer; 
-    style:byte; 
+    style:byte; //BOLD,ITALIC,etc.
     outline:longint;
     grErrorStrings: array [low(grerrorType) .. high(grErrorType)] of string; //or typinfo value thereof..
     AspectRatio:real; //computed from (AspectX mod AspectY)
@@ -815,7 +836,7 @@ Atari modes, etc. were removed. (double the res and we will talk)
   screenshots:longint;
 
   NonPalette, TrueColor,WantsAudioToo,WantsCDROM:boolean;	
-  Blink:boolean=false;
+  Blink:boolean;
   CenterText:boolean=false; //see crtstuff unit for the trick
   
   MaxX,MaxY:word;
@@ -827,6 +848,9 @@ Atari modes, etc. were removed. (double the res and we will talk)
   flip_timer_ms:integer; //Time in MS between Render calls.
   //ideally ignore this and use GetTicks estimates with "Deltas"
   //this is bare minimum support.
+
+//ideally we could fork for rendering and then wait for renderer to exit(or fail)...
+//we should be using Pascal instead of SDL routines-the C is a mess.
 
   thread:PSDL_Thread;
   threadID:PSDL_threadID;
@@ -852,18 +876,38 @@ Atari modes, etc. were removed. (double the res and we will talk)
   CurrentMode:PSDL_DisplayMode; //^SDL_DisplayMode
   r,g,b,a:PUInt8; //^Byte
 
-  //this might be an internal reserved word- if so, change it.(TextureFormat)
-  format:Longword;
-  MainTexture:PSDL_Texture;
+  //(TextureFormat) Longint?
+  format:integer;
 
-//ideally we could fork for rendering and then wait for renderer to exit(or fail)...
-
+//forward declared defines
 
 procedure RoughSteinbergDither(filename,filename2:string);
 
-//need to make sure Textures arent blindly drawn into, that we use these "functions"
-procedure lock;
-procedure unlock;
+{
+locking and unlocking Texture may prove futile -but changing contexts is not
+query pixelFormat (of the Texture) is required for any color conversion to take place.
+
+no fetching (peeking) is done on the Texture without the "queried pixelFormat data"
+this is normally already set for surface ops when we made the surface(and kept until surface is freed)
+
+destroying MainSurface(especially in software) is disasterous. 
+(clone MainSurface and destroy the clone.)
+
+The reason is thus:
+
+   As with ( bpp<24)- these modes arenormally unsupported
+   Which means more work(werk werk werk)
+
+otherwise you will need to make another one -(with the correct format )before doing anything else on screen.
+
+In many ways SDL2 builds on SDLv1.2 and cant function without it.
+
+}
+
+procedure lock(Tex:PSDL_Texture);
+procedure lockwRect(Tex:PSDL_Texture; Rect:PSDL_Rect);
+function lockNewTexture:Maintexture;
+procedure unlock(Tex:PSDL_Texture);
 
 procedure timer_flip(flip_timer_ms:longint);
 function GetRGBfromIndex(index:byte):PSDL_Color; 
@@ -910,15 +954,15 @@ function GetPixel(x,y:integer):DWord;
 Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
 procedure Line(renderer1:PSDL_Renderer; X1, Y1, X2, Y2: word; LineStyle:Linestyles);
 procedure Rectangle(x,y,w,h:integer);
-procedure FilledRectangle(x,y,w,h,:integer);
+procedure FilledRectangle(x,y,w,h:integer);
 function getdrivername:string;
 Function detectGraph:integer;
 function getmaxmode:string;
 procedure getmoderange(graphdriver:integer);
-procedure installUserFont(fontpath:string; font_size:integer; style:fontflags; outline:boolean);
+procedure installUserFont(fontpath:string; font_size:integer; style:byte; outline:boolean);
 procedure bar3d ( Rect:PSDL_Rect);
 procedure SetViewPort(X1, Y1, X2, Y2: Word);
-function RemoveViewPort(windowcount:byte):SDL_Rect;
+function RemoveViewPort(windowcount:byte):PSDL_Rect;
 procedure InstallUserDriver(Name: string; AutoDetectPtr: Pointer);
 procedure RegisterBGIDriver(driver: pointer);
 function GetMaxColor: word;
@@ -930,7 +974,6 @@ function GetPixels(Rect:PSDL_Rect):pointer;
 procedure invertColors;
 procedure blinkText(Text:string);
 procedure STOPBlinkText;
-
 
 
 
@@ -975,7 +1018,7 @@ where.X and where.Y
 
 const
 //I dont care how many you have, but "minus one" is the MAXIMUM ALLOWED.
-   maxMode:=(hi(GraphicsModes)-1);
+   maxMode=Ord(High(Graphics_Modes))-1;
 
 
 implementation
@@ -1048,48 +1091,109 @@ Got weird fucked up c boolean evals? (JEEZ theyre a BITCH to understand....)
 //which surface do we lock/unlock??
 //solve for X -by providing it.
 
-procedure lock;
+//Unlike Surfaces-
+//MainTexture is a global definition- not an actual Texture. It contains no data until passed.
+//It IS DESTROYED when passing to the renderer in 90% of cases
+//(Rendering is a one-way street).
 
+procedure lock(Tex:PSDL_Texture);
+
+var
+  w,h,pitch:integer;
+  pixels:^longword;
 
 begin
-  if (LIBGRAPHICS_ACTIVE=false) then
+  pixels:=Nil;
+  pitch:=0;
+  if (LIBGRAPHICS_ACTIVE=false) then begin
     writeln('I cant lock a Texture if we are not active: Call initgraph first');
     exit;    
   end;
-  Maintexture:=Nil; //if we dont clear it before calling, results are unpredictable.
-  Maintexture := SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_TARGET, MaxX, MaxY);
   if (Tex = Nil) then begin
      if IsConsoleInvoked then
-		writeln('Cannot Alloc Texture.');
-     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Alloc Texture.','OK',NIL);
+		writeln('Cannot Lock unassigned Texture.');
+        //LogLn('Cant Lock unassigned Texture');
+     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Lock an unassigned Texture.','OK',NIL);
      exit;
   end;
-
-  SDL_SetRenderTarget(renderer, texture);
+  SDL_QueryTexture(tex, format, Nil, w, h);
+  SDL_SetRenderTarget(renderer, tex);
+  SDL_LockTexture(tex,Nil,pixels,pitch);
 
 end;
 
+procedure lockwRect(Tex:PSDL_Texture; Rect:PSDL_Rect);
+
+var
+  w,h,pitch:integer;
+  pixels:^longword;
+
+begin
+  if (LIBGRAPHICS_ACTIVE=false) then begin
+    writeln('I cant lock a Texture if we are not active: Call initgraph first');
+    exit;    
+  end;
+  if (Tex = Nil) then begin
+     if IsConsoleInvoked then
+		writeln('Cannot Lock unassigned Texture.');
+        //LogLn('Cant Lock unassigned Texture');
+     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Lock an unassigned Texture.','OK',NIL);
+     exit;
+  end;
+  SDL_QueryTexture(tex, format, rect, w, h);
+  SDL_SetRenderTarget(renderer, tex);
+  SDL_LockTexture(tex,Nil,pixels,pitch);
+end;
+
+function lockNewTexture:Maintexture;
+
+var
+  tex:PSDL_Texture;
+
+begin
+  if (LIBGRAPHICS_ACTIVE=false) then begin
+    writeln('I cant lock a Texture if we are not active: Call initgraph first');
+    exit;    
+  end;
+//case bpp of... sets PixelFormat(forcibly)
+
+  tex:=Nil; //if we dont clear it before calling, results are unpredictable.
+  tex:= SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_TARGET, MaxX, MaxY);
+  if (tex = Nil) then begin
+     if IsConsoleInvoked then
+		writeln('Cannot Alloc Texture.');
+        //LogLn('Cant Alloc Texture');
+     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Alloc Texture.','OK',NIL);
+     exit;
+  end;
+  SDL_QueryTexture(tex, format, Nil, w, h);
+  SDL_SetRenderTarget(renderer, tex);
+  SDL_LockTexture(tex,Nil,pixels,pitch);
+  lockNewTexture:=Tex; //kick it back
+end;
+
 //call when done drawing pixels
-procedure unlock;
+procedure unlock(Tex:PSDL_Texture);
 
 begin
 
-  if (LIBGRAPHICS_ACTIVE=false) then
+  if (LIBGRAPHICS_ACTIVE=false) then begin
     writeln('I cant unlock a Texture if we are not active: Call initgraph first');
     exit;    
   end;
 
 //we are done playing with pixels so....
+SDL_UnLockTexture(tex);
 
 //get stuff ready for the renderer and render.
-  SDL_SetRenderTarget(renderer, NULL);
-  SDL_RenderCopy(renderer, MainTexture, NULL, NULL);
-  SDL_FreeTexture(MainTexure); 
+  SDL_SetRenderTarget(renderer, NiL);
+  SDL_RenderCopy(renderer, tex, NiL, NiL);
+  SDL_DestroyTexture(tex); 
 
 end;
 
 
-
+{ TmerTicks is in another unit...
 procedure timer_flip(flip_timer_ms:longint); //triggered by SDL timer according to screen refresh rate
 //16.7 (or 17) is 60Hz refresh
 
@@ -1099,6 +1203,8 @@ begin
          SDL_RenderPresent(Renderer);  
    end else exit; //do other stuff instead of updating the screen.
 end;
+}
+
 
 //semi-generic color functions
 
@@ -1116,7 +1222,7 @@ begin
 	      somecolor:=Tpalette16.colors[index] //literally get the SDL_color from the index
     else if MaxColors=256 then
 	      somecolor:=Tpalette256.colors[index]; 
-    GetRGBFromIndex:=someRGB;
+    GetRGBFromIndex:=somecolor;
   end else begin
     if IsConsoleInvoked then
 		writeln('Attempt to fetch RGB from non-Indexed color.Wrong routine called.');
@@ -1138,15 +1244,16 @@ begin
 	      somecolor:=Tpalette16.DWords[index] //literally get the DWord from the index
     else if MaxColors=256 then
 	      somecolor:=Tpalette256.DWords[index]; 
-    GetRGBFromIndex:=somecolor;
+    
+   GetDWordFromIndex:=somecolor;
   end else begin
-   if IsConsoleInvoked then
-		writeln('Attempt to fetch indexed DWord from non-indexed color');
-   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to fetch indexed DWord from non-indexed color','OK',NIL); 
-   exit;
+      if IsConsoleInvoked then
+	    	writeln('Attempt to fetch indexed DWord from non-indexed color');
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to fetch indexed DWord from non-indexed color','OK',NIL); 
+      exit;
 
+  end;
 end;
-
 
 
 
@@ -1157,17 +1264,13 @@ var
     r,g,b:PUInt8;
 
 begin
+
   if bpp=8 then begin
    if (MaxColors=256) then begin
 	   i:=0;
-	   while (i<256) do begin
+	   while (i<255) do begin
 		    if (Tpalette256.dwords[i] = input) then begin //did we find a match?
-	    	   SDL_GetRGB(Tpalette256.DWords[i],MainSurface^.format,r,g,b);
-               somedata^.r:=byte(^r);
-               somedata^.g:=byte(^g);
-               somedata^.b:=byte(^b);
-               somedata^.a:= $ff;
- 			   GetRGBFromHex:=somedata;
+ 			   GetRGBFromHex:=Tpalette256.colors[i];
                exit;
            
            end else
@@ -1181,12 +1284,7 @@ begin
 	    while (i<16) do begin
 
 		    if (Tpalette16.dwords[i] = input) then begin//did we find a match?
-	    	   SDL_GetRGB(Tpalette16.DWords[i],MainSurface^.format,r,g,b);
-			   somedata^.r:=byte(^r);
-               somedata^.g:=byte(^g);
-               somedata^.b:=byte(^b);
-               somedata^.a:= $ff;
-               GetRGBFromHex:=somedata;
+               GetRGBFromHex:=Tpalettes16.colors[i];
                exit;
             end else
 				inc(i);  //no
@@ -1195,15 +1293,47 @@ begin
       exit;
 
    end;
+  end else if (bpp >8) then begin
+  
+       if IsConsoleInvoked then begin
+             writeln('Wrong routine called. Try: TrueColorGetRGBfromHex');
+             //LogLn('Wrong routine called. Try: TrueColorGetRGBfromHex');
+       end;
+       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Wrong routine called. Try: TrueColorGetRGBfromHex','OK',NIL); 
+ end;
+end;
 
 
-   //True color modes
-	   SDL_GetRGB(input,MainSurface^.format,r,g,b);
+function TrueColorGetRGBfromHex(input:DWord; Texture:PSDL_Texture):PSDL_Color;
+//I need to know from which Texture- (pre RenderCopy) that you want to get the data from.
+//the reason why is that we DONT HAVE the RGB values- in paletted mode- WE DO.
+//(we need to query a Texture to do this.)
+
+var
+	pitch,format,i:integer;
+    somedata:PSDL_Color; 
+    r,g,b:PUInt8;
+    pixelFormat:PSDL_PixelFormat;
+
+begin
+  pitch:=0;
+  SDL_QueryTexture(texture, format, Nil, w, h);
+
+lock;
+
+pixelFormat^.format := format;
+// Now you want to format the color to a correct format that SDL can use.
+// Basically we convert our RGB color to a hex-like BGR color.
+somecolor := SDL_MapRGB(pixelFormat, R, G, B);
+
        somedata^.r:=byte(^r);
        somedata^.g:=byte(^g);
        somedata^.b:=byte(^b);
-       somedata^.a:= $ff;
-   	   GetRGBFromHex:=somedata;
+
+// Also don't forget to unlock your texture once you're done.
+UnLock;
+
+   	   TrueColorGetRGBfromHex:=somedata;
 end;
 
 function GetRGBAFromHex(input:DWord):PSDL_Color;
@@ -1978,7 +2108,7 @@ begin
   mode^.driverdata:=Nil;
   //for physical screen 0 do..
   
-  //attempting to probe VideoModeInfo block when (VESA) isnt initd results in issues....
+  //The SDl equivalent error of: attempting to probe VideoModeInfo block when (VESA) isnt initd results in issues....
   
   if(SDL_GetCurrentDisplayMode(0, mode) <> 0) then begin
     if IsConsoleInvoked then
@@ -2113,14 +2243,8 @@ begin
   //we can however, trip the loop to exit...
 
   exitloop:=true;
-  SDL_WaitThread(thread,status);
-
-  waittimer :=3;
-  repeat
-     SDL_Delay(1000);  
-     dec(waittimer);
-  until waittimer=0; //should be more than enough time to exit..
-  SDL_KillThread(thread);
+  SDL_DetachThread(thread); 
+  //KillPID(thread);
   Thread:=Nil;
   Event:=Nil;
 
@@ -2169,17 +2293,23 @@ end;
 
 function GetX:word;
 begin
-  x:=Twhere.X;
+  x:=where.X;
 end;
 
 function GetY:word;
 begin
-  y:=Twhere.Y;
+  y:=where.Y;
 end;
 
-function GetXY:Twhere; //needs to be a longword
+function GetXY:longint; 
+//This is the 1D location in the 2D graphics area(yes, its weird)
+var
+  whereAreWE:longint;
+
 begin
-   //Twhere:=X*Pitch*Y; -or something like this
+  x:=where.X;
+  y:=where.Y;
+  GetXY := y * (pitch mod (sizeof(byte))) + x; //byte or word
 end;
 
 {
@@ -2547,9 +2677,9 @@ end
 else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //initgraph called us
 
  //   window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
-//    renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+//    renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED|SDL_RENDERER_PRESENTVSYNC);
 
-	RendedWindow := SDL_CreateWindowAndRenderer(MaxX, MaxY,SDL_WINDOW_OPENGL, window,renderer);
+	RendedWindow := SDL_CreateWindowAndRenderer(MaxX, MaxY,0, window,renderer);
 
 	if ( RendedWindow <>0 ) then begin
     //No hardware renderer....
@@ -2582,8 +2712,6 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
    end; 
    //we have arenderer and HW window, but no surface yet
     SDL_WM_SetIcon (SDL_LoadBMP(iconpath), Nil);
- 
-
 
     //either way we should have a window and renderer by now...   
    if wantFullscreen then begin
@@ -2594,11 +2722,9 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
        flags:=flags or SDL_WINDOW_FULLSCREEN_DESKTOP; //fake it till u make it..
        //we dont want to change HW videomodes because 4bpp isnt supported.
        
-       
-       if ((flags and SDL_WINDOW_FULLSCREEN_DESKTOP) <> 0) then begin
-            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 'linear');
-            SDL_RenderSetLogicalSize(renderer, MaxX, MaxY);
-       end;
+       //autoscale us to the monitors actual resolution
+       SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 'linear');
+       SDL_RenderSetLogicalSize(renderer, MaxX, MaxY);
 
 	   IsThere:=SDL_SetWindowFullscreen(window, flags);
 
@@ -2618,22 +2744,24 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 
     end; 
 
-//when ready to draw-use lock to setup a texture target, unlocking will call renderPresent for us.
 
- {
     //we can create a surface down to 1bpp, but we CANNOT SetVideoMode <8 bpp
     //I think this is a HW limitation in X11,etc.
 
+    //Renderer says nothing about DEPTH, plenty about SIZE of output...
+
     //syntax: flags, w,h,bpp,rmask,gmask,bmask,amask
 
+   
     Mainsurface := SDL_CreateRGBSurface(0, MaxX, MaxY, bpp, 0, 0, 0, 0);
     if (Mainsurface = NiL) then begin //cant create a surface
-        SDL_Log('SDL_CreateRGBSurface failed: %s', SDL_GetError);
+        //LogLn('SDL_CreateRGBSurface failed');
+        //LogLn(SDL_GetError);
         _grresult:=-1; //probly out of vram
         //we can exit w failure codes, if we check for them
         closegraph;
     end;
-}
+
 
   if (bpp<=8) then begin
       if MaxColors=16 then

@@ -52,6 +52,11 @@ uses
    dos,crt,NewDelay; //patch crt unit - or patch your binary program once built
 {$ENDIF}
 
+//weird logic- but if we were linked in or called- there must be a crt unit (somewhere) loaded.
+
+uses
+   crt;
+
 {
 We can use 'sets' with input
 
