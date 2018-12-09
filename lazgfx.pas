@@ -575,20 +575,20 @@ uses
 {$ifdef unix} cthreads,cmem,sysUtils,{$endif}
 
 //FPC generic units(OS independent)
-  SDL2,SDL2_Image,SDL2_TTF,strings,typinfo,
+  SDL2,SDL2_Image,SDL2_TTF,strings,typinfo
 
 //GL, GLU,math
 
 //SDL2_gfx is untested as of yet. functions start with GPU_ not SDL_
 
-{$ifdef debug} heaptrc, {$endif} //logger
+{$ifdef debug} ,heaptrc {$endif} //logger
 
 
 //sdl_net (-YAASSS!! networking!!!)
 
 //Carbon is OS 8 and 9 to OSX API
 {$ifdef mac} 
-  MacOSAll,
+  ,MacOSAll
 {$endif}
 
 //Cocoa (OBJ-C) is the new API
@@ -857,6 +857,80 @@ Atari modes, etc. were removed. (double the res and we will talk)
   MainTexture:PSDL_Texture;
 
 //ideally we could fork for rendering and then wait for renderer to exit(or fail)...
+
+
+procedure RoughSteinbergDither(filename,filename2:string);
+
+//need to make sure Textures arent blindly drawn into, that we use these "functions"
+procedure lock;
+procedure unlock;
+
+procedure timer_flip(flip_timer_ms:longint);
+function GetRGBfromIndex(index:byte):PSDL_Color; 
+function GetDWordfromIndex(index:byte):DWord; 
+function GetRGBFromHex(input:DWord):PSDL_Color;
+function GetRGBAFromHex(input:DWord):PSDL_Color;
+function GetIndexFromHex(input:DWord):byte;
+function GetColorNameFromHex(input:dword):string;
+function GetFgRGB:PSDL_Color;
+function GetFgRGBA:PSDL_Color;
+function GetFGName:string;
+function GetBGName:string;
+function GetBGColorIndex:byte;
+function GetFGColorIndex:byte;
+procedure setFGColor(color:byte);
+procedure setFGColor(someDword:dword); overload;
+procedure setFGColor(r,g,b:word); overload;
+procedure setFGColor(r,g,b,a:word); overload;
+procedure setBGColor(index:byte);
+procedure setBGColor(someDword:DWord); overload;
+procedure setBGColor(r,g,b:word); overload;
+procedure setBGColor(r,g,b,a:word); overload;
+function GetFgDWordRGBA:DWord;
+function GetBgDWordRGB(r,g,b:byte):DWord;
+function GetBgDWordRGBA(r,g,b,a:byte):DWord;
+procedure clearscreen; 
+procedure clearscreen(index:byte); overload;
+procedure clearscreen(color:Dword); overload;
+procedure clearscreen(r,g,b:byte); overload;
+procedure clearscreen(r,g,b,a:byte); overload;
+procedure clearviewport(windownumber:smallint);
+procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
+procedure closegraph;
+function GetX:word;
+function GetY:word;
+function GetXY:Twhere; 
+procedure renderTexture( tex:PSDL_Texture;  ren:PSDL_Renderer;  x,y:integer;  clip:PSDL_Rect);
+procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
+function getgraphmode:string; 
+procedure restorecrtmode;
+function getmaxX:word;
+function getmaxY:word;
+function GetPixel(x,y:integer):DWord;
+Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
+procedure Line(renderer1:PSDL_Renderer; X1, Y1, X2, Y2: word; LineStyle:Linestyles);
+procedure Rectangle(x,y,w,h:integer);
+procedure FilledRectangle(x,y,w,h,:integer);
+function getdrivername:string;
+Function detectGraph:integer;
+function getmaxmode:string;
+procedure getmoderange(graphdriver:integer);
+procedure installUserFont(fontpath:string; font_size:integer; style:fontflags; outline:boolean);
+procedure bar3d ( Rect:PSDL_Rect);
+procedure SetViewPort(X1, Y1, X2, Y2: Word);
+function RemoveViewPort(windowcount:byte):SDL_Rect;
+procedure InstallUserDriver(Name: string; AutoDetectPtr: Pointer);
+procedure RegisterBGIDriver(driver: pointer);
+function GetMaxColor: word;
+procedure LoadImage(filename:string; Rect:PSDL_Rect);
+procedure LoadImageStretched(filename:string);
+procedure PlotPixelWNeighbors(x,y:integer);
+procedure SaveBMPImage(filename:string);
+function GetPixels(Rect:PSDL_Rect):pointer;
+procedure invertColors;
+procedure blinkText(Text:string);
+procedure STOPBlinkText;
+
 
 
 

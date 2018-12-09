@@ -8,7 +8,6 @@ Unit crtstuff;
 
 interface
 
-uses
 
 //we dont load if theres no CRT unit to use- check is in lazgfx.pas unit.
 
@@ -21,13 +20,18 @@ uses
 //this is a "dinosaur PC" 
 // -OR- 
 //we use the modded timer fixes (runtime 200 error in Delay routine)
+uses
 
-  ,dos,crt; //FPC doesnt suffer from the RT200 bug, only BP/TP7.
-{$ENDIF}
+  dos,crt; //FPC doesnt suffer from the RT200 bug, only BP/TP7.
 
 //check for BP/TP7
+{$ENDIF}
+
 
 {$IFDEF ver70}
+
+uses
+
   {$IFDEF Debug}
     {$F+,D+,Q-,L+,R+,I-,S+,Y+,A+}
   {$ELSE}
@@ -45,7 +49,7 @@ uses
      {$DEFINE BP_DPMI}
    {$ENDIF}
 
-   ,NewDelay; //patch crt unit - or patch your binary program once built
+   dos,crt,NewDelay; //patch crt unit - or patch your binary program once built
 {$ENDIF}
 
 {
