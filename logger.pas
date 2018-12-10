@@ -1,15 +1,16 @@
 unit logger;
 
+interface
 const
   critical='CRITICAL ERROR: ';
   normal='HMM: ';
   warning='WARNING: ';
 
 var
-   output: file; //untyped text
+   output: Text; //untyped text
    logging,donelogging:boolean;
 
-interface
+
 
 Procedure LogString(s: String);
 Procedure LogLn(s: string);
@@ -37,19 +38,20 @@ AUTHORS:
 //byte, word 2string, real2string,int2string
 
 function Long2String(l: longint): string;
+var
+  strf:string;
 begin
-  str(l, strf)
+  str(l, strf);
+  Long2String:=strf;
 end;
 
 //end FPC code - the rest has been modified "for an EXPLICIT PURPOSE"
 
 
 Procedure LogString(s: String);
-var
-   output: file; //untyped text
 
 Begin
-  Write(otuput, s);
+  Write(output, s);
 End;
 
 //use me unless you need other variables added to the output.
@@ -57,7 +59,7 @@ End;
 Procedure LogLn(s: string);
 
 Begin
-  Writeln(otuput,s);
+  Writeln(output,s);
 End;
 
 procedure StopLogging; //finalization
