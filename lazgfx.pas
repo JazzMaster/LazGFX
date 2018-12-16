@@ -619,9 +619,9 @@ uses
 
 
 //FPC generic units(OS independent)
-  SDL2,SDL2_Image,SDL2_TTF,strings,typinfo,math,logger
+  SDL2,SDL2_Image,SDL2_TTF,SDL2_mixer,strings,typinfo,math,logger
 
-//GL, GLU
+//GL, GLU - not used yet, but works.
 
 //SDL2_gfx is untested as of yet. functions start with GPU_ not SDL_. 
 //The entire SDL is NOT duplicated there. gfx is "specific optimized routines"
@@ -742,21 +742,6 @@ type
      x,y:word;
   end;
 
-//tris,polys,etc.
-  TPoint=record 
-//this is correct and there is (NOW) a way to dyn load records and arrays of records w FPC,
-//this DOES NOT APPLY to TP/BP and derivatives.
-
-    x,y:word;
-  end;
-
-//TRIs always -and only have- 3 points.
-
-  Tripoint=record
-     x1,y1:word;
-     x2,y2:word;
-     x3,y3:word;
-  end;
 
 //graphdriver is not really used half the time anyways..most people probe.
 //these are range checked numbers internally.
@@ -833,6 +818,10 @@ var
 //modelist hacking
     mode:TSDL_DisplayMode;
     modeP:PSDL_DisplayMode;
+
+    eventLock: PSDL_Mutex;
+    eventWait: PSDL_Cond;
+    eventTimer: PSDL_TimerID;
 
     palette:PSDL_Palette;
     where:Twhere;
@@ -1186,6 +1175,39 @@ while  (display_index <= display_count) do begin
     
 end;
 
+
+{
+
+Graphics detection is a wonky process.
+1- find whats supported
+2- find highest supported mode(backwards) in that list
+3- use it, or try to.
+
+repeat num 2 and 3 if you fail- until no modes work
+
+blindly setting says:
+
+I was THIS mode, and none other- it had better be supported (but is it?)
+(try or fail)
+
+Although generally in SDL(and on hardware) smaller windows and color depths are supported(emulation),
+SDL -by itself- might not support that mode.
+
+VGA supports mCGA -(but HDMI might not support either)
+
+Do we care- as mostly we are setting windows sizes? Not usually.
+WE could care less if the data is scaled on fullsceen-since we arent responsible for the scaling
+
+(whether things look good- is another matter)
+
+A TON of old code was written when pixels were actually visible. NOT THE CASE, anymore.
+
+DetectGraph is here more for compatibility than anything else.
+It seems to be used as often as DEFINED modes.
+
+-Custom modes are usually hackish anyways.
+
+}
 
 procedure IntHandler;
 //This is a dummy routine.
@@ -2164,12 +2186,20 @@ begin
 end;
 
 
+//not too perferctly sure about this as it could be demo code-pulls from mutex unit.
+function videoCallback(interval: Uint32; param: pointer): Uint32; {$IFNDEF __GPC__} cdecl; {$ENDIF}
+begin
+   SDL_RenderPresent;
+   SDL_CondBroadcast(eventWait);
+   result := interval;
+end;
+
 //NEW: do you want fullscreen or not?
 procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
 
 var
 	bpp,i:integer;
-	_initflag,_imgflags,my_timer_id:longword; //PSDL_Flags?? no such beast 
+	_initflag,_imgflags,video_timer_id:longword; //PSDL_Flags?? no such beast 
     iconpath:string;
     imagesON,FetchGraphMode:integer;
 	mode:PSDL_DisplayMode;
@@ -2183,6 +2213,7 @@ begin
    //this is why I removed all of that code..."define what exactly"??
 
   //attempt to trigger SDL...on most sytems this takes a split second- and succeeds.
+  _initflag:= SDL_INIT_VIDEO or SDL_INIT_TIMER;
 
   if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
   if WantsJoyPad then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
@@ -2246,14 +2277,38 @@ begin
 
 //if we fpforked- we should come right back. 
 
+//events and callbacks seem to flow from interrupt code in C..
+//a BIG PITA- and VERY SPECIFIC CODE.
+
+//this data seems to hidden in all the lines of C and barely made reference to.
+//also needs to be checked for SDLv2 compliance.
+
+   eventLock:= nil;
+   eventWait:= nil;
+   eventTimer:= nil;
+
+  eventLock := SDL_CreateMutex;
+   if eventLock = nil then
+   begin
+      if IsConsoleInvoked then
+          writeln('Error: cant create a mutex');
+          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Error: cant create a mutex','OK',NIL);
+      closegraph;
+   end;
+
+   eventWait := SDL_CreateCond;
+   if eventWait = nil then
+   begin
+      if IsConsoleInvoked then
+          writeln('Error: cant create a condition variable.');
+          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Error: cant create a condition variable.','OK',NIL);
+      closegraph;
+   end;
+
 
 //lets get the current refresh rate and set a screen timer to it.
 // we cant fetch this from X11? sure we can.
 
-//this is important later on..you will see w game development and physics(Y do you think yer using SDL?).
-
-
-//(try to) get some non critical but important video timing info
   
   mode^.format := SDL_PIXELFORMAT_UNKNOWN;
   mode^.w:=0;
@@ -2272,39 +2327,36 @@ begin
 
   //dont refresh faster than the screen.
   if (mode^.refresh_rate > 0)  then 
-     flip_timer_ms := mode^.refresh_rate 
-  else //can we assume 60hz? (hertz to ms=16.66 ad nauseum)
+     flip_timer_ms := mode^.refresh_rate;
+  else
      flip_timer_ms := 16.66;
 
-//Theres a pascal way to do Timers and timing based on clock deltas
-
-  { my_timer_id := SDL_AddTimer((33/10)*10, Timer_FLip, Nil);
-	 
-  if not my_timer_id then begin
+  video_timer_id := SDL_AddTimer(flip_timer_ms, videoCallback, nil);
+  if video_timer_id=Nil then begin
     if IsConsoleInvoked then begin
-			writeln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
-			writeln('you will have to manually update surfaces and the renderer.');
+		writeln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
+		writeln('you will have to manually update surfaces and the renderer.');
     end;
-
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'WARNING: SDL cant set video callback timer.Manually update surface.','OK',NIL);
   end;
-}
 
+  
   CantDoAudio:=false;
     //prepare mixer
   if WantsAudioToo then begin
+    //audioFlags:=??;
+    Mix_Init(AudioFlags);
+    AudioSystemCheck:=Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2, chunksize); //cd audio quality
+    if AudioSystemCheck = ?? then begin
 
-    {
-
-       figure something out
-
-    }
+    end;
 
   end;
 //set some sane default variables
   _fgcolor := $FFFFFFFF;	//Default drawing color = white (15)
   _bgcolor := $000000FF;	//default background = black(0)
   someLineType:= NormalWidth; 
+
 
   new(Event);
 
@@ -2364,8 +2416,18 @@ begin
   gGameController := Nil;
 
   if WantsAudioToo then begin
-  
+    Mix_CloseAudio; //close- even if playing
+    Mix_Quit;
   end;
+
+   SDL_DestroyMutex(eventLock);
+   eventLock := nil;
+
+   SDL_DestroyCond(eventWait);
+   eventWait := nil;
+
+   SDL_RemoveTimer(eventTimer);
+   eventTimer := nil;
   
   if (TextFore <> Nil) then begin
 	TextFore:=Nil;
@@ -2504,16 +2566,20 @@ var
     mode:PSDL_DisplayMode;
 
 begin
+//we can do fullscreen, but dont force it...
 //"upscale the small resolutions" is done with fullscreen.
+//(so dont worry if the video hardware doesnt support it)
 
-  case(graphmode) of //we can do fullscreen, but dont force it...
+  case(graphmode) of 
 	     mCGA:begin
 			MaxX:=320;
 			MaxY:=240;
 			bpp:=4; 
 			MaxColors:=16;
-           NonPalette:=false;
-		   TrueColor:=false;	
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
 		end;
 
         //color tv mode
@@ -2522,8 +2588,11 @@ begin
 			MaxY:=240;
 			bpp:=8; 
 			MaxColors:=16;
-           NonPalette:=false;
-		   TrueColor:=false;	
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+
 		end;
 
 		//spec breaks here for Borlands VGA support(not much of a specification thx to SDL...)
@@ -2536,8 +2605,11 @@ begin
 			MaxY:=480;
 			bpp:=4; 
 			MaxColors:=16;
-           NonPalette:=false;
-		   TrueColor:=false;	
+            NonPalette:=false;
+    		TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+
 		end;
 
 		VGAHix256:begin
@@ -2545,8 +2617,11 @@ begin
 			MaxY:=480;
 			bpp:=8; 
 			MaxColors:=256;
-           NonPalette:=False;
-		   TrueColor:=false;	
+            NonPalette:=False;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+
 		end;
 
 		VGAHix32k:begin //im not used to these ones (15bits)
@@ -2556,6 +2631,9 @@ begin
 		   MaxColors:=32768;
            NonPalette:=true;
            TrueColor:=false;
+           XAspect:=4;
+           YAspect:=3; 
+
 		end;
 
 		VGAHix64k:begin
@@ -2565,6 +2643,9 @@ begin
 		   MaxColors:=65535;
            NonPalette:=true;
 		   TrueColor:=false;	
+           XAspect:=4;
+           YAspect:=3; 
+
 		end;
 
 		//standardize these as much as possible....
@@ -2576,6 +2657,9 @@ begin
 			MaxColors:=16;
             NonPalette:=false;
 		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+
 		end;
 
 		m800x600x256:begin
@@ -2585,6 +2669,9 @@ begin
 			MaxColors:=256;
             NonPalette:=false;
 		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+
 		end;
 
 
@@ -2595,6 +2682,9 @@ begin
 		   MaxColors:=32768;
            NonPalette:=true;
 		   TrueColor:=false;	
+           XAspect:=4;
+           YAspect:=3; 
+
 		end;
 
 
@@ -2605,6 +2695,9 @@ begin
 			MaxColors:=256;
             NonPalette:=false;
 		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+
 		end;
 
 		m1024x768x32k:begin
@@ -2614,6 +2707,9 @@ begin
 		   MaxColors:=32768;
            NonPalette:=true;
 		   TrueColor:=false;	
+           XAspect:=4;
+           YAspect:=3; 
+
 		end;
 
 		m1024x768x64k:begin
@@ -2623,6 +2719,9 @@ begin
 		   MaxColors:=65535;
            NonPalette:=true;
 		   TrueColor:=false;	
+           XAspect:=4;
+           YAspect:=3; 
+
 		end;
 
 
@@ -2633,6 +2732,9 @@ begin
 			MaxColors:=256;
             NonPalette:=false;
 		    TrueColor:=false;	
+            XAspect:=16;
+            YAspect:=9; 
+
 		end;
 
 		m1280x720x32k:begin
@@ -2642,6 +2744,9 @@ begin
 		   MaxColors:=32768;
            NonPalette:=true;
 		   TrueColor:=false;	
+           XAspect:=16;
+           YAspect:=9; 
+
 		end;
 
 		m1280x720x64k:begin
@@ -2651,6 +2756,9 @@ begin
 		   MaxColors:=65535;
            NonPalette:=true;
 		   TrueColor:=false;	
+           XAspect:=16;
+           YAspect:=9; 
+
 		end;
 
 		m1280x720xMil:begin
@@ -2660,6 +2768,9 @@ begin
 		   MaxColors:=16777216;
            NonPalette:=true;
 		   TrueColor:=true;	
+           XAspect:=16;
+           YAspect:=9; 
+
 		end;
 
 		m1280x1024x256:begin
@@ -2669,6 +2780,9 @@ begin
 			MaxColors:=256;
             NonPalette:=false;
 		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+
 		end;
 
 		m1280x1024x32k:begin
@@ -2678,6 +2792,9 @@ begin
 		   MaxColors:=32768;
            NonPalette:=true;
 		   TrueColor:=false;	
+           XAspect:=4;
+           YAspect:=3; 
+
 		end;
 
 		m1280x1024x64k:begin
@@ -2687,6 +2804,9 @@ begin
 		   MaxColors:=65535;
            NonPalette:=true;
 		   TrueColor:=false;	
+           XAspect:=4;
+           YAspect:=3; 
+
 		end;
 
 		m1280x1024xMil:begin
@@ -2696,6 +2816,9 @@ begin
 		   MaxColors:=16777216;
            NonPalette:=true;
 		   TrueColor:=true;	
+           XAspect:=4;
+           YAspect:=3; 
+
 		end;
 
 {		m1280x1024xMil2:begin
@@ -2705,6 +2828,9 @@ begin
 		   MaxColors:=4294967296;
            NonPalette:=true;
 		   TrueColor:=true;	
+           XAspect:=4;
+           YAspect:=3; 
+
 		end;
 }
 		m1366x768x256:begin
@@ -2714,6 +2840,9 @@ begin
 			MaxColors:=256;
             NonPalette:=false;
 		    TrueColor:=false;	
+            XAspect:=16;
+            YAspect:=9; 
+
 		end;
 
 		m1366x768x32k:begin
@@ -2723,6 +2852,9 @@ begin
 		   MaxColors:=32768;
            NonPalette:=true;
 		   TrueColor:=false;	
+           XAspect:=16;
+           YAspect:=9; 
+
 		end;
 
 		m1366x768x64k:begin
@@ -2732,6 +2864,9 @@ begin
 		   MaxColors:=65535;
            NonPalette:=true;
 		   TrueColor:=false;	
+           XAspect:=16;
+           YAspect:=9; 
+
 		end;
 
 		m1366x768xMil:begin
@@ -2741,6 +2876,9 @@ begin
 		   MaxColors:=16777216;
            NonPalette:=true;
 		   TrueColor:=true;	
+           XAspect:=16;
+           YAspect:=9; 
+
 		end;
 
 {		m1366x768xMil2:begin
@@ -2750,6 +2888,9 @@ begin
 		   MaxColors:=4294967296;
            NonPalette:=true;
 		   TrueColor:=true;	
+           XAspect:=16;
+           YAspect:=9; 
+
 		end;
 }
 
@@ -2760,6 +2901,9 @@ begin
 			MaxColors:=256;
             NonPalette:=false;
 		    TrueColor:=false;	
+            XAspect:=16;
+            YAspect:=9; 
+
 		end;
 
 		m1920x1080x32k:begin
@@ -2769,6 +2913,9 @@ begin
 		   MaxColors:=32768;
            NonPalette:=true;
 		   TrueColor:=false;	
+           XAspect:=16;
+           YAspect:=9; 
+
 		end;
 
 		m1920x1080x64k:begin
@@ -2778,6 +2925,9 @@ begin
 		   MaxColors:=65535;
            NonPalette:=true;
 		   TrueColor:=false;	
+           XAspect:=16;
+           YAspect:=9; 
+
 		end;
 
 		m1920x1080xMil:begin  
@@ -2787,6 +2937,9 @@ begin
 		   MaxColors:=16777216;
            NonPalette:=true;
 		   TrueColor:=true;	
+           XAspect:=16;
+           YAspect:=9; 
+
 		end;
 
 {
@@ -2797,6 +2950,9 @@ begin
 		   MaxColors:=4294967296;
            NonPalette:=true;
 		   TrueColor:=true;	
+           XAspect:=16;
+           YAspect:=9; 
+
 		end;
 }	    
   end;{case}

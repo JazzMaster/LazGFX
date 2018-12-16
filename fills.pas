@@ -23,5 +23,19 @@ begin
   if (a < b) then min := a;
 end;
 
+//there are three types of fills:
+// SOLID
+// Gradients
+// Pattern (blitter) -original BGI implementation
+
+{
+
+pattern started as an 8x8 VGA ASCII implementation
+        (a scale-able font)
+
+a blit would be better- and easily constrained in a circle or ellipse - not just a rect.
+
+
+}
 
 end.﻿

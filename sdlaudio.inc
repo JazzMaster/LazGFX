@@ -1,4 +1,4 @@
-//from sdl_audio.h
+//from sdl_audio.h (v2)
  {**
    *   Audio format flags.
    *

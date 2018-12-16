@@ -11,71 +11,76 @@ seen as pipes or wires in 3d.
 
 Please close your polys. Unless of course you like running into pipes or staples or quills....ouch!
 
-This is more for 20 sided dice, stop signs, those weird structures in math class you had to build...etc.
+This is more for 20 sided dice, stop signs, those weird paper structures in math class you had to build...etc.
+
+Remember this is SDL code- not BGI.
+
+I suppose I can throw all of these in here:
+
+(done)Tri-3
+??-7
+
+
+(Poly >8) 
+
+Reason for doing so is this:
+        speed
+If we dont have to guess at sizeof(polypts) [based off of numpoints given] then we have less to worry about.
+Pre defines are also faster- and only linked in (usually) if used.
+ 
+Its internally a form of range checking.
+
+(A Pentagon can only have five points-you cant memory leak predefined ranges, theres nothing to overflow,unlike C.)
 
 }
 
 
 interface
 Uses
-	math,SDL;
+//main unit headers at minimal needed
 
-var
-
-  _scanlist:scanpt; //Stores the scanlist for a polygon
-
-//reads number of vertices into argument pointer and returns allocated list of vertices, 
-//which can be used for drawpoly or fillpoly.
-  getpoly:^int;
-
+	sdlbgi,math,SDL;
 
 type
-
-//prev and next chain of points....
-  scanpt:^scln;
-  scln=record; 
-      x,y:integer;
-  end;
+//this is going to be compied back- no worry.
+    polypts=record
+        x,y:integer;
+    end;
 
 var
-  fillpoly : procedure(numpoints : word;var polypoints);
-
-procedure drawpoly(numpoints:integer, polypoints:^int);
+//0 index
+    Rhombus:array [0..3] of polypts;
+    Pentagon:array [0..4] of polypts;
+    Hexagon:array [0..5] of polypts;
+    Octogon:array [0..7] of polypts;
 
 implementation
 
+procedure Draw_Pentagon;
 
-procedure drawpoly(numpoints : word;var polypoints);
-{draw a traced polygon}
-var
-  i : word;
-  points : ^polygon;
 begin
-  points := @polypoints;
-  for i := 0 to numpoints-1 do
-  line(points^[i].x,points^[i].y,points^[(i+1) mod numpoints].x,points^[(i+1) mod numpoints].y);
+  if GRAPHICS_ACTIVE= false then exit; //no surface/texture
+
+  //check range
+  if ((x<0) or (y<0) or (x1<0) or (y1<0) or (x2<0) or (y2<0) or (x3<0) or (y3<0) or (x4<0) or (y4<0)) then exit; 
+  if ((x>MaxX) or (y>MaxY) or (x1>MaxX) or (y1>MaxY) or (x2>MaxX) or (y2>MaxY) or (x3>MaxX) or (y3>MaxY) or (x4>MaxX) or (y4>MaxY)) then exit; 
+    
+  SDL_RenderLine(x,y,x1,y1);
+  SDL_RenderLine(x1,y1,x2,y2);
+  SDL_RenderLine(x2,y2,x3,y3);
+  SDL_RenderLine(x3,y3,x4,y4);
+  SDL_RenderLine(x4,y4,x,y); //always return to origin to complete the poly
+  end;
 end;
 
+//procedure Draw_FillPentagon;
 
-//Im noticing that a ton of the font routines use .CHR (old school fonts)
-//although we *could* support them, this is very ancient tech. Id rather use TTF straight-up.
+//filled polys are a touch different. unless you want to rewrite the code, use SDL_RenderFillPoly
+// and pad the routine as needed.
 
-{??
-procedure SetTextJustify(horiz,vert : word);
 
-begin
-    if (horiz<0) or (horiz>2) or (vert<0) or (vert>2) then
-    begin
-         _graphresult:=grError;
-         exit;
-    end;
-    Currenttextinfo.horiz:=horiz;
-    Currenttextinfo.vert:=vert;
-end;
-
-}
-
-begin
+begin //main()
+    //only put init routines to setup poly data here.
 
 end.
 

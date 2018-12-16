@@ -200,11 +200,17 @@ procedure Mix_FreeMusic(music: PMix_Music) cdecl; external MIX_LibName {$IFDEF D
      You must successfully call Mix_OpenAudio() before calling these functions.
      This API is only available in SDL_mixer 1.2.9 and later.
 
-     // usage...
-     int i;
-     const int total = Mix_GetNumChunkDecoders();
-     for (i = 0; i < total; i++)
-         printf("Supported chunk decoder: [%s]\n", Mix_GetChunkDecoder(i));
+     // usage... (if you hand me C in PASCAL- I will beat you. -Jazz)
+     var
+         i:integer;
+         total:integer;
+
+     total:= Mix_GetNumChunkDecoders();
+     i = 0;
+     repeat
+         writeln("Supported chunk decoder: ", Int2Str(Mix_GetChunkDecoder(i)));
+         inc(i);
+     until i < total;
 
      Appearing in this list doesn't promise your specific audio file will
      decode...but it's handy to know if you have, say, a functioning Timidity
@@ -474,12 +480,7 @@ function Mix_SetPosition(channel: Integer; angle: SInt16; distance: UInt8): Inte
    *}
 function Mix_SetDistance(channel: Integer; distance: UInt8): Integer cdecl; external MIX_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_MIX_SetDistance' {$ENDIF} {$ENDIF};
 
-{*
- * !!! FIXME : Haven't implemented, since the effect goes past the
- *              end of the sound buffer. Will have to think about this.
- *               --ryan.
- *}
-//#if 0
+
 {* Causes an echo effect to be mixed into a sound. (echo) is the amount
  *  of echo to mix. 0 is no echo, 255 is infinite (and probably not
  *  what you want).
@@ -495,8 +496,8 @@ function Mix_SetDistance(channel: Integer; distance: UInt8): Integer cdecl; exte
  *  nonzero if reversing effect is enabled.
  *  Error messages can be retrieved from Mix_GetError().
  *}
-//extern no_parse_DECLSPEC int SDLCALL Mix_SetReverb(int channel, Uint8 echo);
-//#endif
+
+//function Mix_SetReverb(channel:integer;echo:UInt8): Integer cdecl; external Mix_SetReverb {$IFDEF DELPHI} {$IFDEF MACOS} name '_MIX_SetReverb' {$ENDIF} {$ENDIF};
 
   {* Causes a channel to reverse its stereo. This is handy if the user has his
    *  speakers hooked up backwards, or you would like to have a minor bit of
