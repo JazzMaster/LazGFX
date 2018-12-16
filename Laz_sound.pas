@@ -3,6 +3,8 @@ Unit Laz_Sound;
 interface
 
 //briefly, this defines all notes
+//Ive been coding this shit- since- 95??? (like forever)
+
 type
 
     Notes=(A,B,C,D,E,F,G);
@@ -40,6 +42,58 @@ const
     half=500;
     whole=1000;
 
+{
+
+JazzMans guide to playing REAL music on the computer:
+
+Good music is played by chords, over time- shifting to other chords over and over again.
+Computers have one thing going for them. Timeslicing.
+
+By timeslicing- 
+    we cut the chord into notes(of the stumming hand for a guitar)
+
+We play one note at a time, play another (accompaning note), then another until the chord is complete.
+Then we play another chord in the same manner. 
+
+We do "this" over and over. 
+Most people call this method PLAYING MUSIC.
+
+We build up- in effect- to playing songs, by dividing the task of "playing chords".
+
+
+The question becomes what the delay between notes in a chord is.
+Find this- and we can "play chords" on a computer.
+
+(Usually, at this point we are dealing with waveforms- or compressed waveforms.
+However, it can be done)
+
+We are in effect- teaching the computer- or telling it (sans AI)- how to play music.
+
+This of course doesnt include "swayed notes" or "string bending" 
+    -what a lot of guitarists do with music.
+
+The "hawaiian warble" is produced by drop tuning(slack tuning) guitars, ukeleles and similar stringed intruments.
+It sounds awesome- but is hard on the computer to pull off.
+
+(You are effectively DE-TUNEing notes-AND the note is effected by the thickness of the strings-
+and furthermore by how its played)
+
+So the types of music- and how its played has some limits. 
+
+At least without AI- 
+    which requires FX modification of an in-flight audio note.
+    FX require some Processor PUNCH as it is. Even Milisecond delays are a BIG NO-NO. (and very detectable)
+
+This said- we should still be able to RENDER SOUND (to the ears) much like we do with video on screen.
+In fact- even 8088s can be forced into "audio blurs" by repeating notes at an extremely high rate of speed.
+-Ive done it.
+
+5-7-9 seems to be the magic guitar combo.
+    5th root note-lets say A (open... 3rd fret- doesnt matter)
+    7th harmonic of the above
+    9th hrmonic of the above 5th root note
+
+}
 
 procedure LoadSoundFont;
 {
