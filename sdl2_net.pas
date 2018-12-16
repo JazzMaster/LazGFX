@@ -34,6 +34,39 @@ unit sdl2_net;
 
 {$INCLUDE jedi.inc}
 
+{
+
+The best way to visualize a socket- is just that- a power socket and plug.
+
+TCP:
+
+    Needs a three-way handshake to communicate
+    SYN/ACK SYN/ACK SYN/ACK
+    A Three-way connection termination sequence
+
+UDP:
+
+    Think TV/FM/AM/SW broadcast
+    Nothing is verified- its blindly sent(and hopefully recieved in order, in time)
+
+Networking has SEVEN layers.
+
+Application- This code(or yours)
+(Level4-6)
+Routers
+Bridges
+Physical wire
+
+You have to drop levels, then climb back up every time. Its funky- but its how its done.
+
+SRC:
+
+    MCP and MCSE Certification manuals for NT4(Microsoft)
+
+We will get to the sequence in a minute.
+
+}
+
 interface
 
 uses SDL2;

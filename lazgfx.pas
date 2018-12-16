@@ -818,6 +818,8 @@ var
 //modelist hacking
     mode:TSDL_DisplayMode;
     modeP:PSDL_DisplayMode;
+    chunk: PMix_Chunk; 
+    music: PMix_Music;
 
     eventLock: PSDL_Mutex;
     eventWait: PSDL_Cond;
@@ -2217,7 +2219,8 @@ begin
 
   if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
   if WantsJoyPad then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
- 
+//if WantInet then SDLNet_Init;
+
   if ( SDL_Init(_initflag) < 0 ) then begin
      //we cant speak- write something down.
 
@@ -2411,12 +2414,21 @@ var
 //free only what is allocated, nothing more- then make sure pointers are empty.
 begin
 
+  //if wantsInet then
+//  SDLNet_Quit;
+
   if wantsJoyPad then
     SDL_JoystickClose( gGameController ); 
   gGameController := Nil;
 
   if WantsAudioToo then begin
     Mix_CloseAudio; //close- even if playing
+
+    if chunk<>Nil then
+        Mix_FreeChunk(chunk); 
+    if music<> Nil then 
+        Mix_FreeMusic(music);
+
     Mix_Quit;
   end;
 
