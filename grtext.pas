@@ -160,118 +160,7 @@ begin
 
 end;
 
-//put into handler code...
-function grReadkey:char;
-var
-      quit:boolean;
-      c:char;
-      event:SDL_Event;
-	  somestring:string;
-
-begin
-    quit:=false;
-    while not quit
-	if (SDL_PollEvent( event )) 
-	  case( event.type ) of
-	  SDL_KEYDOWN:
-	    c=event.key.keysym.sym;
-	    if (isprint(c) then begin  //I dont care if you hit enter.
-	      if echo=true then begin
-			somestring[1]:=c;
-			MPutString(somestring);	
-          end;		
-          grReadkey:=c;    
-	      exit;
-        end;
-	  SDL_ACTIVEEVENT:
-	    if ((event.active.state = SDL_APPINPUTFOCUS) and event.active.gain) then
-	      //resume
-	    break;
-	  SDL_QUIT:
-	    quit = true;
-	    exit;
-	  else:
-	    //SDL_PushEvent(event); or
-		//SDL_WaitEVent(0);
-	    exit;
-	  end else begin
-	    SDL_WaitEvent(0);
-	  end;
-    end;
-end;                
-
-function grReadString:string;
-//this is where we fucked up...console has a bug in it when SDL is active...so use a "hacked SDL readline"....
-// all were doing anyways is fetching multiple keypresses until <return> or <enter> is hit...
-//(so do it in a non-blocking event-driven way.)
-
-var
-      quit:boolean;
-      c:char;
-      i:integer;
-      somedata:string;
-      event:SDL_Event;
-
-begin
-    quit:=false;
-    while not quit
-	if (SDL_PollEvent( event )) 
-	  case( event.type ) of
-	  SDL_KEYDOWN:
-	    c=event.key.keysym.sym;
-	    if (isprint(c)) then begin  
-	      i:=0;
-          repeat 
-			c:=grReadkey;
-
-            somedata[i]:=c;
-            inc(i);
-          until (c=SDLK_RETURN) or (i=len(somedata));
-          
-        end;
-        grReadString:=somedata;
-	    exit;
-	  SDL_ACTIVEEVENT:
-	    if ((event.active.state = SDL_APPINPUTFOCUS) and event.active.gain) then
-	      //resume
-	    break;
-	  SDL_QUIT:
-	    quit := true;
-	    exit;
-	  else:
-	 //   SDL_PushEvent(event); or
-	//	SDL_WaitEvent(0);
-	    exit;
-	  end else begin
-	    SDL_WaitEvent(0);
-	  end;
-    end;
-end;                
-
-//integrate w interrupt routine. grReadkey
-function kbhit:char;
-
-var
-  c:char;
-
-begin
-  if (LIBGRAPHICS_ACTIVE=0) then
-    ch:=readkey;
-
-  else begin	
-       event:^SDL_Event;
-      if(SDL_PollEvent(&event) and (event.type = SDL_KEYDOWN)) then begin
-	    SDL_PushEvent(&event);
-	    kbhit:=(event.key.keysym.sym);
-  end;
-  
-  if ((event.type = SDL_ACTIVEEVENT) and (event.active.state = SDL_APPINPUTFOCUS) and event.active.gain) then
-	  //resume
-      
-end;
-
-
-
+{
 function grReadLineWithLimits:string;
 
 var
@@ -357,7 +246,7 @@ begin
 	    makespace(internalFont,'_'); //erase the text-cursor 
 	  end;
     end;
-end;
+end;}
 
 		
 procedure grWriteChar(c:char);

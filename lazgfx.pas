@@ -225,7 +225,7 @@ Memory addressing MMU/PMU, etc. allows such things that Borland Pascal does not 
 Apparently the SDL/JEDI never got the 64-bit bugfix(GitHub, people...).
 (A longword is not a longword when its a QWord...)
 
-FIXME: Error 216 usually indicates BOUNDS errors(memory alloc and not FREE-a memory leak)
+USERFIXME: Error 216 usually indicates BOUNDS errors(memory alloc and not FREE--a "memory leak")
 
 ----
 
@@ -539,23 +539,24 @@ Im seeing a Ton of correlation between OGL/SDL and DirectX (and people think the
 NOTE:
 
 OpenGL bug:
-"You should not expect to be able to render, or receive events on any thread other than the main one. "
+"Rendering onto more than one windows renderer can cause issues"
 
 SDL bug:
 "You must render in the same routine that handles input(only in the main program-this is a library)"
 
+SDL routines require more than just dropping a routine in here- 
+    you have to know how the original routine wants the data-
+        get it in the right format
+        call the routine
+        and if needed-catch errors.
 
-Tris (triangles, trigons), polys are not ported from SDL yet. This requires much more than 
-just dropping a routine in here- you have to know how the original routine wants the data-
-get it in the right format, call the routine, and if needed-catch errors.
-
-The biggest problem woth SDL is "the bloody syntax".
-
+The biggest problem with SDL is "the bloody syntax".
 This is why the code is taking so long.
 
 
 SDL is not SIMPLE. 
 The BGI was SIMPLE.
+
 SemiDirect MultiMedia OverLayer - should be the unit name.
 
  --Jazz (comments -and code- by me unless otherwise noted)
@@ -571,26 +572,38 @@ uses
 //aka Threads and EventCallback hooks-Pascal(C too as it were..) has its own faster itnernals.
 //we link into a lot of C- but still...
 
-//Threads and fpfork, not C-fork() requires baseunix unit
-//cthreads has to be the first unit.
+//Threads and fpfork(forking), requires baseunix unit
+//cthreads has to be the first unit in this case-it so happens to support the C version.
 
-{$ifdef unix} cthreads,cmem,sysUtils,baseunix,{$endif}
+//if we need to use one or the other- 
+//  we will use CThreads. Currently the syntax is for "Pascal Threads".
 
-//cint,uint,PTRUint,PTRUSINT,sint,bent... (JK)...etc.
-	ctypes,
+
+    cthreads,cmem,ctypes,sysUtils,{$ifdef unix}baseunix,{$endif}
+
+//cint,uint,PTRUint,PTR-USINT,sint...etc.
+
 	
 // A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust "console" logging...
 
+{$IFDEF MSWINDOWS} //as if theres a non-MS WINDOWS?
+      MMsystem, //audio subsystem
+{$ENDIF}
+
+
   {$IFDEF LCL}
     {$IFDEF MSWINDOWS}
-      MMsystem,
       {$DEFINE NOCONSOLE }
     {$ENDIF}
     //LCL is linked in but we are not in windows. Not critical. If you want output, set it up.
       LazUtils,  
   {$ENDIF}
 
-//cant use crtstuff if theres no crt units available..
+//cant use crtstuff if theres no crt units available.
+
+//its possible to have a Windows "console app" thru FPC,
+//just not thru Lazarus(I wish Linux was the same way, its not).
+//This may have to do with how the window rendering code(WinAPI) is initd.
 
 {$IFNDEF NOCONSOLE}
     crt,crtstuff,
@@ -598,23 +611,30 @@ uses
 
 //if you build with the LCL (you get rid of the ugly ass SDL dialogs):
 
+//Linux NOTE:
 //  Lazarus Menu:  "View" menu, under "Debug Windows" there is an entry for a "console output" 
-//however, if you are not in a input loop or waiting for keypress- 
+
+//however, if you are in a input loop or waiting for keypress- 
 // you will not get output until your program is complete (and has stopped execution)
+
 
 // In this case- Lazarus Menu:   Run -> Run Parameters, then check the box for "Use launching application".
 // (You may have to 'chmod +x' that script.)
 
 // you will have to setup and manage "windows" yourself, and handle dialogs accordingly.
-//HINT: (its the window with the dots on it)
+//HINT: (its the window with the dots on it inside Lazarus)
+
+//the backend is straight pascal w hooks for "Lazarus windowed objects".
+//(QtCreator(QT) uses similar for C/C++.)
 
 
 
 //to build without the LCL:
 
-// Just make a normal "most basic" program and call me or SDL directly in your "uses clause"
-// You will find that the LCL may be a burden or get in your way- we only need it to setup "the window"- 
-//     but..SDL can do that for us- (so its a great help).
+// Just make a normal "most basic" program and call me or SDL directly in your "uses clause".
+
+// You will find that the LCL may be a burden or get in your way- 
+//we dont really use the fundamentals of OBJFPC, OBJPAS, or Lazarus beyond basic functions.
 
 
 
@@ -628,9 +648,10 @@ uses
 
 {$ifdef debug} ,heaptrc {$endif} 
 
-
 //sdl2_net 
-//havent the faintest clue on this (unit) yet....I know all about networking and "layered programming"
+
+//UDP or TCP?? and port number??
+//there is a process to using net- check that unit.
 
 
 //Carbon is OS 8 and 9 to OSX API
@@ -749,8 +770,8 @@ type
 	graphics_driver=(DETECT, CGA, VGA,VESA); //cga,vga,vesa,hdmi,hdmi1.2
 
 
-//This is a 8x8 Font pattern (in HEX) according to the BGI sources
-//(but a BLITTER BITMAP in SDL)
+//This is a 8x8 (or 8x12) Font pattern (in HEX) according to the BGI sources
+//(A BLITTER BITMAP in SDL)
 
    FillSettingsType = (clear,lines,slashes,THslashes,THBackSlashes,BackSlashes,SMBoxes,rhombus,wall,widePTs,DensePTS);
 //Borland VGA256 sources (expansion pack) has the deatils-which are temporarily outside of this repo ATM
@@ -836,15 +857,12 @@ const
 
 var
 
-//modelist hacking
-    mode:TSDL_DisplayMode;
-    modeP:PSDL_DisplayMode;
     chunk: PMix_Chunk; 
     music: PMix_Music;
 
     eventLock: PSDL_Mutex;
     eventWait: PSDL_Cond;
-    eventTimer: PSDL_TimerID;
+    video_timer_id: PSDL_TimerID;
 
     palette:PSDL_Palette;
     where:Twhere;
@@ -899,7 +917,8 @@ and as a result, some basic fonts are also included. (Royalty FREE-in case youre
 older modes are not used, so y keep them in the list??
  (M)CGA because well..I think you KNOW WHY Im being called here....
 
- mode13h : "SEY-GAH"...would just not be the same wo 320x200x256...
+ mode13h(320x200x16 or x256) : EXTREMELY COMMON GAME PROGRAMMING
+ (we use the more square pixel mode)
 
 Atari modes, etc. were removed. (double the res and we will talk)
 
@@ -911,6 +930,17 @@ Atari modes, etc. were removed. (double the res and we will talk)
   WantsJoyPad:boolean;
   screenshots:longint;
 
+//CDROM access is very limited and ancient. (Removed after SDLv1.2.)
+
+//Used mostly for Audio CDs and RedBook Audio Games.
+//This said- I have some emulators(in C) that access the Linux CDROM device....
+//the code is old (Red Hat v7? vs RHEL v7) but builds "with a few hacks".
+
+//such games have CDROM Modeswitch delays in accessing data while playing audio tracks(game skippage).
+
+//Descent II(PC) and SonicCD(PC and SEGA CD Emu) come to mind.
+//you would want ogg or mp3 or wav files these days- on some sort of storage medium.
+
   NonPalette, TrueColor,WantsAudioToo,WantsCDROM:boolean;	
   Blink:boolean;
   CenterText:boolean=false; //see crtstuff unit for the trick
@@ -921,12 +951,12 @@ Atari modes, etc. were removed. (double the res and we will talk)
   _fgcolor, _bgcolor:DWord;	//this is modified due to hi and true color support.
   //do not use old school index numbers. FETCH the index based DWord instead.  
   
-  flip_timer_ms:real; //Time in MS between Render calls.
+  flip_timer_ms:Longint; //Time in MS between Render calls. (longint orlongword) -in C.
+
   //ideally ignore this and use GetTicks estimates with "Deltas"
   //this is bare minimum support.
 
-//ideally we could fpfork for rendering and then wait for renderer to exit(or fail)...
-//we should be using Pascal instead of SDL routines-the C is a mess.
+//ideally we could mutex the renderer - but thats in a program, not this unit.
 
  
   EventThread:Longint; //fpc uses Longint
@@ -957,6 +987,10 @@ Atari modes, etc. were removed. (double the res and we will talk)
 
 //variable sized array- assigned at runtime.
     modeList:array of TSDL_DisplayMode;
+
+//modelist hacking
+    mode:TSDL_DisplayMode;
+    modeP:PSDL_DisplayMode;
 
 
 //forward declared defines
@@ -1155,12 +1189,12 @@ var
 
 begin
    display_count := SDL_GetNumVideoDisplays; //1->display0
-   SDL_Log('Number of displays: ', display_count);
+   LogLn('Number of displays: ', display_count);
    display_index := 0;
 
 //for each monitor do..
 while  (display_index <= display_count) do begin
-    SDL_Log('Display: ', display_index);
+    LogLn('Display: ', display_index);
 
     modes_count := SDL_GetNumDisplayModes(display_index); //max number of supported modes
     setLength(modeList, modes_count);
@@ -1170,18 +1204,18 @@ while  (display_index <= display_count) do begin
     //do for each mode in the number of possible modes
     while ( mode_index <= modes_count ) do begin
 
-        mode.format:= SDL_PIXELFORMAT_UNKNOWN;
-        mode.w:= 0;
-        mode.h:= 0;
-        mode.refresh_rate:= 0;
-        mode.driverdata:= Nil;
+        mode^.format:= SDL_PIXELFORMAT_UNKNOWN;
+        mode^.w:= 0;
+        mode^.h:= 0;
+        mode^.refresh_rate:= 0;
+        mode^.driverdata:= Nil;
 
         modeP:^mode;
 
         if (SDL_GetDisplayMode(display_index, mode_index, modeP) = 0) then begin //mode supported
 
             //Log: pixelFormat(bpp)MaxX,MaXy,refrsh_rate            
-            SDL_Log(SDL_BITSPERPIXEL(mode.format),' bpp', mode.w, ' x ',mode.h, '@ ',mode.refresh_rate,'Hz ');
+            LogLn(IntToStr(SDL_BITSPERPIXEL(mode^.format)),' bpp', IntToStr(mode^.w), ' x ',IntToStr(mode^.h), '@ ',IntToStr(mode^.refresh_rate),' Hz ');
 
             //store data in a modeList array
                 modeList[i]^.format:=SDL_BITSPERPIXEL(mode.format;            
@@ -1255,7 +1289,60 @@ begin
 
     MoonOrange:=false;
     repeat
-      //NO OP
+      delay(1000);
+
+{ 
+this is how to do it- 
+is there a faster way once the input handler is reassigned?
+we shall see..
+
+var
+      kbhit,GetString,quit,echo:boolean;
+      GetChar,c:char;
+      event:SDL_Event;
+	  somestring:string;
+      i:integer;
+
+//Readkey,KeyPressedm and ReadString combo with one handler.
+
+	if ((SDL_PollEvent( event ) <> Nil) and (event^.type = SDL_KEYDOWN))) then begin
+        SDL_PushEvent(event);
+	    kbhit:=true;
+
+	  case( event.type ) of
+	  SDL_KEYDOWN:
+	    c=event.key.keysym.sym;
+	    if (isprint(c)) then begin  
+	      i:=0;
+          if GetString=true then begin
+              repeat 
+                somestring[i]:=c;
+                inc(i);
+              until (c=SDLK_RETURN) or (i=len(somestring));
+          end else begin
+             GetChar:=c;    
+          end;
+        end; //Is printable char
+            
+	    exit;
+      end;
+	  SDL_ACTIVEEVENT:
+	//    if ((event.active.state = SDL_APPINPUTFOCUS) and event.active.gain) then
+	      //resume
+	    break;
+	  SDL_QUIT:
+	    MoonOrange := true;
+	    exit;
+	  else:
+	    //SDL_PushEvent(event); or
+		//SDL_WaitEVent(0);
+	    exit;
+	  end else begin
+	    SDL_WaitEvent(0);
+	  end;
+    end;
+
+}
 
     until MoonOrange=true;
     //exit gracefully.
@@ -1339,8 +1426,23 @@ begin
     //else exit: no UNlocking needed
 end;
 
+//depending on how you call or if "MainSurface" isnt what you want.
+procedure lock(someSurface:PSDL_Surface); overload;
+begin
+    if SDL_MustLock(someSurface)=true then
+        SDL_LockSurface(someSurface);
+    //else exit: no locking needed
+end;
 
-{$ifdef windows}
+
+procedure unlock(someSurface:PSDL_Surface);; overload;
+begin
+    if SDL_MustLock(someSurface)=true then
+           SDL_UnlockSurface(someSurface);
+    //else exit: no UNlocking needed
+end;
+
+
 procedure Texlock(Tex:PSDL_Texture);
 
 var
@@ -1363,8 +1465,9 @@ begin
   end;
   SDL_QueryTexture(tex, format, Nil, w, h);
   SDL_SetRenderTarget(renderer, tex);
+{$ifdef windows}
   SDL_LockTexture(tex,Nil,pixels,pitch);
-
+{$ifdef}
 end;
 
 procedure TexlockwRect(Tex:PSDL_Texture; Rect:PSDL_Rect);
@@ -1387,7 +1490,9 @@ begin
   end;
   SDL_QueryTexture(tex, format, rect, w, h);
   SDL_SetRenderTarget(renderer, tex);
+{$ifdef windows}
   SDL_LockTexture(tex,Nil,pixels,pitch);
+{$endif}
 end;
 
 function lockNewTexture:Maintexture;
@@ -1413,7 +1518,9 @@ begin
   end;
   SDL_QueryTexture(tex, format, Nil, w, h);
   SDL_SetRenderTarget(renderer, tex);
+{$ifdef windows}
   SDL_LockTexture(tex,Nil,pixels,pitch);
+{$endif}
   lockNewTexture:=Tex; //kick it back
 end;
 
@@ -1426,9 +1533,10 @@ begin
     writeln('I cant unlock a Texture if we are not active: Call initgraph first');
     exit;    
   end;
-
-//we are done playing with pixels so....
-SDL_UnLockTexture(tex);
+{$ifdef windows}
+    //we are done playing with pixels so....
+    SDL_UnLockTexture(tex);
+{$endif}
 
 //get stuff ready for the renderer and render.
   SDL_SetRenderTarget(renderer, NiL);
@@ -1436,19 +1544,6 @@ SDL_UnLockTexture(tex);
   SDL_DestroyTexture(tex); 
 
 end;
-{$endif}
-
-{ TmerTicks is in another unit...
-procedure timer_flip(flip_timer_ms:longint); //triggered by SDL timer according to screen refresh rate
-//16.7 (or 17) is 60Hz refresh
-
-begin
-   if (not Paused) then begin //if paused then ignore screen updates
-      if (TimerTicks mod flip_timer_ms) then 
-         SDL_RenderPresent(Renderer);  
-   end else exit; //do other stuff instead of updating the screen.
-end;
-}
 
 
 //semi-generic color functions
@@ -1547,6 +1642,7 @@ begin
        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Wrong routine called. Try: TrueColorGetRGBfromHex','OK',NIL); 
  end;
 end;
+
 
 //its either we hack this to hell- or reimplement MainSurface- the easier option.
 //MainSurface^.PixelFormat is unknown-but assignable.
@@ -2096,12 +2192,25 @@ end;
 
 //end color ops
 
+
 procedure clearscreen; 
+//this is an alias routine
 
 begin
-	SDL_RenderClear(renderer);
+    if LIBGRAPHICS_ACTIVE=true then
+        clearDevice;
+    else //use crt unit
+        clrscr;
 end;
 
+//BGI spec
+procedure clearDevice;
+
+begin
+    SDL_RenderClear(renderer);
+end;
+
+//all of these need to be rewritten-syn tax has been paid- calling convention is incorrect.
 procedure clearscreen(index:byte); overload;
 
 var
@@ -2192,15 +2301,20 @@ begin
 	SDL_RenderClear(renderer);
 end;
 
-//this is for added-on "windows" without handles...not the whole screen.
+//end hack
 
-procedure clearviewport(windownumber:smallint);
+//this is for dividing up the screen or dialogs (in game or in app)
+
+//spec says clear the last one assigned
+procedure clearviewport;
+
 //clears it, doesnt remove or add a "layered window".
 //usually the last viewport set..not necessary the whole "screen"
 var
   viewport:PSDL_Rect;
 
 begin
+//if windownumber isnt set- this cant work. 
    viewport^.X:= texBounds[windownumber]^.x;
    viewport^.Y:= texBounds[windownumber]^.y;
    viewport^.W:= texBounds[windownumber]^.w;
@@ -2208,13 +2322,23 @@ begin
    SDL_RenderFillRect(Renderer, viewport);
 end;
 
+//needs testing- source is objfpc, this isnt.
+function videoCallback(interval: Uint32; param: pointer): Uint32; cdecl; 
+//this is a funky interrupt-ish callback in C. Its very specific code.
+//that said, IO is pushed, then popped -from CPU registers in weird ways- why this is so specific.
 
-//not too perferctly sure about this as it could be demo code-pulls from mutex unit.
-function videoCallback(interval: Uint32; param: pointer): Uint32; {$IFNDEF __GPC__} cdecl; {$ENDIF}
+//we dont always need the input params, nor the interval- its already assigned before we are called.
+//(but it has to be given to us)
+
 begin
-   SDL_RenderPresent;
+   if (not Paused) then begin //if paused then ignore screen updates
+
+//timer unit- not compile checked yet
+//      if (TimerTicks mod interval) then 
+           SDL_RenderPresent;
+   end;
    SDL_CondBroadcast(eventWait);
-   result := interval;
+   videoCallback := 0; //we have to return something-the what, we should be defining.
 end;
 
 //NEW: do you want fullscreen or not?
@@ -2222,14 +2346,23 @@ procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathT
 
 var
 	bpp,i:integer;
-	_initflag,_imgflags,video_timer_id:longword; //PSDL_Flags?? no such beast 
+	_initflag,_imgflags:longword; //PSDL_Flags?? no such beast 
     iconpath:string;
     imagesON,FetchGraphMode:integer;
 	mode:PSDL_DisplayMode;
 
 begin
+
+  if LIBGRAPHICS_ACTIVE then begin
+    if ISConsoleInvoked then begin
+        writeln('Graphics already active.');
+        //LogLn('Graphics already active.');
+    end;
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Initgraph: Graphics already active.','OK',NIL);	
+    exit;
+  end;
   pathToDriver:='';  //unused- code compatibility
-  iconpath:='./sdlbgi.bmp';
+  iconpath:='./sdlbgi.bmp'; //sdl2.0 doesnt use this.
 
 
    //"usermode" must match available resolutions etc etc etc
@@ -2245,12 +2378,16 @@ begin
   if ( SDL_Init(_initflag) < 0 ) then begin
      //we cant speak- write something down.
 
+     if ISConsoleInvoked then begin
+        writeln('Critical ERROR: Cant Init SDL for some reason.');
+        writeln(SDL_GetError);
+     end;
      // LogLn('Critical ERROR: Cant Init SDL for some reason.');    
      //  LogLN(SDL_GetError);
 
      //if we cant init- dont bother with dialogs.
      _grResult:=GenError; //gen error
-     exit;
+     halt(0); //the other routines are now useless- since we didnt init- dont just exit the routine.
 
   end;
  
@@ -2283,11 +2420,11 @@ begin
     Fetchgraphmode := DetectGraph; //need to kick back the higest supported mode...
   end;
 
-
   
   LIBGRAPHICS_INIT:=true; 
   LIBGRAPHICS_ACTIVE:=false; 
 
+//sets up mode- then clears it in standard "BGI" fashion.
   SetGraphMode(Graphmode,wantFullScreen);
 
 //no atexit handler needed, just call CloseGraph
@@ -2309,7 +2446,6 @@ begin
 
    eventLock:= nil;
    eventWait:= nil;
-   eventTimer:= nil;
 
   eventLock := SDL_CreateMutex;
    if eventLock = nil then
@@ -2353,7 +2489,7 @@ begin
   if (mode^.refresh_rate > 0)  then 
      flip_timer_ms := mode^.refresh_rate;
   else
-     flip_timer_ms := 16.66;
+     flip_timer_ms := 17; //has to be longint/longword, not real.
 
   video_timer_id := SDL_AddTimer(flip_timer_ms, videoCallback, nil);
   if video_timer_id=Nil then begin
@@ -2395,10 +2531,6 @@ begin
   //Hide, mouse.
 //  SDL_ShowCursor(SDL_DISABLE);
 
-  //you know if you can see a black screen...we are good..but I could remove this code.
-  // default sanity sez white text on a black screen is golden.
-  SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
-  SDL_RenderClear(Renderer);
 
 //set some sensible input specs
   //SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
@@ -2536,6 +2668,9 @@ var
 //free only what is allocated, nothing more- then make sure pointers are empty.
 begin
 
+  LIBGRAPHICS_ACTIVE:=false;  //Unset the variable (and disable all of our other functions in the process)
+  
+
   //if wantsInet then
 //  SDLNet_Quit;
 
@@ -2554,14 +2689,20 @@ begin
     Mix_Quit;
   end;
 
+//let me check the syntax here
+
+//  video_timer_id := SDL_AddTimer(flip_timer_ms, videoCallback, nil);
+
+//   SDL_RemoveTimer(videocallback);
+//   eventTimer := nil;
+
+
    SDL_DestroyMutex(eventLock);
    eventLock := nil;
 
    SDL_DestroyCond(eventWait);
    eventWait := nil;
 
-   SDL_RemoveTimer(eventTimer);
-   eventTimer := nil;
   
   if (TextFore <> Nil) then begin
 	TextFore:=Nil;
@@ -2577,9 +2718,8 @@ begin
   if wantsFullIMGSupport then 
      IMG_Quit;
 
- 
-   flip_timer_ms:=0; //stop all render loops
-  die:=9;
+
+  die:=9; //signal number 9=kill
   //Kill child if it is alive. we know the pid since we assigned it(the OS really knows it better than us)
 
   //were stuck in a loop
@@ -2593,11 +2733,11 @@ begin
   dispose( Event );
   //free viewports
 
-  x:=32;
+  x:=8;
   repeat
 	if (Textures[x]<>Nil) then
-		Textures[x]:=Nil;
 		SDL_DestroyTexture(Textures[x]);
+		Textures[x]:=Nil;
     dec(x);
   until x=0;
   
@@ -2606,27 +2746,28 @@ begin
 //routines should free what they allocate on exit.
 
   if (MainSurface<> Nil) then begin
-	MainSurface:= Nil;
 	SDL_FreeSurface( MainSurface );
+	MainSurface:= Nil;
   end;	
+
   if (Renderer<> Nil) then begin
     Renderer:= Nil;
 	SDL_DestroyRenderer( Renderer );
   end;	
+
   if (Window<> Nil) then begin
 	Window:= Nil;
   	SDL_DestroyWindow ( Window );
   end;	
 
   SDL_Quit; 
-  LIBGRAPHICS_ACTIVE:=false;  //Unset the variable (and disable all of our other functions in the process)
+
 
   if IsConsoleInvoked then begin
      
          textcolor(7); //..reset standards...
          clrscr; //text clearscreen
-
-     writeln;
+         writeln;
   end;
   //unless you want to mimic the last doom screen here...usually were done....  
   //Yes you can override this function- if you need a shareware screen on exit..Hackish, but it works.
@@ -3208,6 +3349,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
             SDL_SetPaletteColors(palette,TPalette256.colors,0,256);
   end;
 
+  SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
+  SDL_RenderClear(Renderer);
 
    LIBGRAPHICS_ACTIVE:=true;
    exit; //back to initgraph we go.
@@ -3291,8 +3434,9 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
 	  else if MaxColors=256 then
             SDL_SetPaletteColors(palette,TPalette256.colors,0,256);
   end;
+  SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
+  SDL_RenderClear(Renderer);
 
-     clearscreen;
 end;
 
 end;
@@ -3385,20 +3529,32 @@ and various ways of combining the source and destination data.
 
 //NewLayer is a loaded (BMP) pointer (filled rect)
 
-
 // SDL_BlitSurface(NewLayer, nil,MainSurface,nil);
 
 
 //procedure HowBlit(currentwriteMode);
-//this can do some whacky tricks...we are applying a color shift mask to the incoming blit or mini surface...
+    //perpixel anything is horrendously slow. use the "blitting cpu functions" to our advantage instead.
 
+--shift the palette,stupid
+    --apply the shifted palette to the blit
+        BLIT
+        RenderCopy 
+        reset the palette and renderPresent
 
-//GetSurface from Renderer (or Create SurfaceFromRenderer) first
+        //xorBlit
+        //andBlit
+        //orBlit
+        //notBlit(inverted colors)
+
+//GetSurface from Renderer (or Create SurfaceFromRenderer) 
 SDL_ScrollX(Surface,DifX);
 SDL_ScrollY(Surface,DifY);
-//Then render it back as a "texture"
+//Then renderCopy it back as a "texture"
 
 
+if youre looking for batched ops:
+
+procedure BatchRenderPixels;
 var 
   PolyArray=array[1..points] of SDL_Point;
 
@@ -3409,15 +3565,12 @@ begin
   polyarray[2].x:=7
   polyarray[2].y:=7
 
-
   SDL_RenderDrawPoints( renderer,polyarray,points);  
 end;
 
-    SDL_RenderDrawLines
-    SDL_RenderDrawRects
-    SDL_RenderFillRects
 
-all work similarly.
+Polygons:
+    SDL_RenderDrawLines(renderer,LineData,numLines);
 
 }
 
@@ -3612,7 +3765,7 @@ end;
 Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
 
 begin
-//renderDrawPoint (putPixel) uses fgcolor set with SDL_SDL_SetRenderDrawColor or similar
+//SDL_renderDrawPoint uses _fgcolor set with SDL_SetRenderDrawColor
 
   if (bpp<4) or (bpp >32) then
  
@@ -3621,6 +3774,7 @@ begin
 			exit;
   end;
   SDL_RenderDrawPoint( Renderer, X, Y );
+  
 end;
 
 
@@ -3630,7 +3784,7 @@ var
    x:integer;
 
 begin
-
+  
   if LineStyle=NormalWidth then begin //this is the skinny line...
     
     	    SDL_RenderDrawLine(renderer,x1, y1, x2, y2);   
@@ -3658,42 +3812,43 @@ begin
     inc(x);
 
   	until x=ord(Linestyle);
-  SDL_RenderPresent(renderer);
+  
+//  SDL_RenderPresent(renderer);
   end;
 end;
 
 
 procedure Rectangle(x,y,w,h:integer);
-//fill rectagle starting at x,y to w,h
+//draw rectagle starting at x,y to w,h
 
+var
+    rect1:PSDL_Rect;
 
 begin
 // if w=h then IsSquare:=true;
 
-    new(Rect);
-	rect^.x:=x;
-    rect^.y:=y;
-    rect^.w:=w;
-    rect^.h:=h;
-    lock;
-	SDL_RenderDrawRect(renderer, rect);
-    unLock;
-    free(Rect);
+    new(Rect1);
+	rect1^.x:=x;
+    rect1^.y:=y;
+    rect1^.w:=w;
+    rect1^.h:=h;
+  	SDL_RenderDrawRect(renderer, rect1);
+    free(Rect1);
 end;
 
 
 procedure FilledRectangle(x,y,w,h:integer);
+var
+    rect1:PSDL_Rect;
 
 begin
-	New(Rect);
-	rect^.x:=x;
-    rect^.y:=y;
-    rect^.w:=w;
-    rect^.h:=h;
-    Lock;
-	SDL_RenderFillRect(renderer, rect);
-    Unlock;
-    free(Rect);
+	New(Rect1);
+	rect1^.x:=x;
+    rect1^.y:=y;
+    rect1^.w:=w;
+    rect1^.h:=h;
+	SDL_RenderFillRect(renderer, rect1);
+    free(Rect1);
 end;
 
 
@@ -3705,8 +3860,11 @@ begin
 end;
 
 
+//FIXME:dont use Graphics_mode=detect for the moment.
+//(reqd fix for version 1.0)
 
-Function detectGraph:integer; //should return max mode supported(enum value)
+Function detectGraph:byte; //should return max mode supported(enum value) -but cant be negative
+//called *once* per "graphics init"-which is only called if not active.
 
 //we detected a mode or we didnt. If we failed, exit. (we should have at least one graphics mode)
 //if we succeeeded- get the highest mode.
@@ -3723,33 +3881,48 @@ begin
 //(AND ONLY WHILE INITing....initgraph needs to call us)
 
 {
-ignore the returned data..this should be boolean not return (0 or some number)...thats BAD C.
-and can someone shove a hole in there? USUAlly.....
+BAD C detected!
 
 this is the "shove a byte where a boolean goes bug" in C...(boolean words etc..)
 if its zero then its not ok. we dont want any other mode or similar mode...
+in this case-
+    if its 1, we found the mode.
 
 the trick is to prevent SDL from setting "whatever is closest"..we want this mode and only this...
 most people dont usually care but with the BGI -WE DO.
 
-moreso SDL may limit us by screen posibilities or card capabilities- not via software, like it should.
-for example: we could pass in 1366x720 w 4:2:2 color mode set and still completely FAIL.
+SDL_VideoModeOK:
+    this is SDLv1.2 code
+    IT also assumes that you want to switch physical screen modes(we dont) 
+        (like telling X11 to drop to 320x240x256-we dont want this)
+        -we will stretch for higher resolutions, or use a window for lower resolutions
 
-the only way to test in such a case- is the old school SLOW ASS way.
--check EACH mode- one at a time.
+SDL2:
+
+    How do we scan the unknown? 
+    1- ask SDL for supported list of Modes supported (solve X by providing it)
+    2- we have to compare it to something. This is the puzzle-to what? 
+        we are set higher than the mode we want. (We WANT the unsupported modes and depths)
+
+so- we get the current screen resolution and check if requested mode is smaller-if so, GOOD.
+(if its bigger, then we have a problem. DROP one mode with same color depth.)
+
+
 }
 
-    i:=(Ord(High(Graphics_Modes))-1)
-	 
+{    i:=(Ord(High(Graphics_Modes))-1)
+
+    //CurrentMode:=SDL_GetCurrentMode	 
 	repeat
 
    		testbpp:=SDL_VideoModeOK(modelist.width[i], modelist.height[i], modelist.bpp[i], _initflag); //flags from initgraph
-   		if(testbpp=0) then begin //mode not available      		
-			DetectGraph:=false; 
-        end else if (testbpp=1) then begin 
+
+        //if Currentmode=ModeRequested (testbpp=1) then...
+	 
+        if (testbpp=1) then begin 
             
             //initGraph just wants the number of the enum value, which we check for
-            DetectGraph:=i; //we passed
+            DetectGraph:=byte(i); 
             exit;
     	end;
 		dec(i);
@@ -3757,26 +3930,30 @@ the only way to test in such a case- is the old school SLOW ASS way.
     //there is still one mode remaining.
 	testbpp:=SDL_VideoModeOK(modelist.width[i], modelist.height[i], modelist.bpp[i], _initflag);		         
 	if (testbpp=0) then begin //did we run out of modes?
+        if IsConsoleInvoked then
+            writeln('We ran out of modes to check.');
+            //LogLn('We ran out of modes to check.');
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There are no graphics modes available to set. Bailing..','OK',NIL);
 		CloseGraph; 
 	end;
-	DetectGraph:=i;
+	DetectGraph:=byte(i);
 
 	//usermode should be within these parameters, however, since that cant be checked for...
 	//why not just remove it(usermode)? [enforce sanity]
     //otherwise we need to see if its valid data too....or skew up SDL window output and rendering.....
     //-which is wrong.
+}
 
 end; //detectGraph
 
 
 function getmaxmode:string;
 var
-   maxmodetest:MaxModeSupported;
+   maxmodetest:byte;
 begin
   if LIBGRAPHICS_ACTIVE then begin
       maxmodetest:=detectgraph;
-      //getmaxmode:=funky typinfo crap goes here  (maxmodetest); --since we may be set lower.
+      getmaxmode:=GetEnumName(TypeInfo(graphics_modes, Ord(maxmodetest); //use the number and get the string of it.
   end;
 end;
 

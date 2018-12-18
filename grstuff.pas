@@ -1,11 +1,12 @@
-unit GrTxtStuff﻿;
+unit GrStuff﻿;
 
 //this unit sort of overrides crtstuff in SDL.
-//since writeln-> outText and input is 'handled' things are a "touch" different.
+//writeln-> outText 
 
 //extra routines for working w graphics mode text
 //we can hack back vga 'graphics characters' now(that unix is missing)...he he he..
 interface
+
 
 
 implementation
