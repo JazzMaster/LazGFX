@@ -5,42 +5,58 @@ interface
 //briefly, this defines all notes
 //Ive been coding this shit- since- 95??? (like forever)
 
+
 type
 
-    Notes=(A,B,C,D,E,F,G);
-    Octaves=(1,2,3,4,5,6,7); //Or "octave window"
-    NoteFXtype=(None,Sharp,Flat); //Flat of one is Sharp of another. At least in Guitar
-    Instruments=(Pianos,Guitars,Lutes,Harps,Drums,Flutes,Oboes,Uprights,Violins,Ukeleles,Banjoes); //SoundFont defined- this is to look at
+    Notes=record
+        A,B,C,D,E,F,G: real; //freq
+    end;
+
+    InstrumentTypes=(Pianos,Guitars,Lutes,Harps,Drums,Flutes,Oboes,Uprights,Violins,Ukeleles,Banjoes); //SoundFont defined- this is to look at
+
+    //must support at least 3 FX at the same time to support a electric guitar (as a practical application).
+    EffectType=(None,Echo,WahWah,Reverb,Flange,Distort,Fuzz); //this is what guitar pedals do
+    //Loop- just reset the playing pointer location.
+    
+    InstrumentNotes=record
+        Octaves:array [0..6] of Notes;
+        Flats,Sharps: array [0..6] of Notes;
+    end;
 
 var
-    //"whacky Pascal redefinitions" to use the enums
-    Octave:Octaves;
-    Note:Notes;
-    NoteFX:NoteFXtype;
 
-//realistically- this is whats used
-//FX are based on instrument used- Grand Piano is "fairly basic plucked" CLEAN TONE.
+    Instrument:array[0..hi(InstrumentTypes)] of InstrumentNotes;
+    EffectTheNote:boolean;
+
+
+implementation
+
+{
+its a but funky- but code is not music, by itself.
+frequencies have to come from a table somewhere- wikipedia??
+
+using real values because on certain instruments things can sound canned, or FLAT.
+
+for each instrument (banjo,flutes,drums) do begin
+    x:=0;
+    repeat
+        InstrumentNotes.Octaves[x].A=(frequency)440;
+        InstrumentNotes.Octaves[x].B=(frequency)440;
+        InstrumentNotes.Octaves[x].C=(frequency)440;
+        InstrumentNotes.Octaves[x].D=(frequency)440;
+        InstrumentNotes.Octaves[x].E=(frequency)440;
+        InstrumentNotes.Octaves[x].F=(frequency)440;
+        InstrumentNotes.Octaves[x].G=(frequency)440;
+        inc(x);
+    until x=ord(hi(InstrumentTypes));
+end;
+}
+
+//FX are based on instrument used- Grand Piano (and computer) is/are "fairly basic plucked" CLEAN TONE.
 
 //(normal Pianos have Pedals for FX-I never understood thier use)
 
-const
-//frequencies in Hz
-//seven octaves standard "GAMUT" -as it were
 
-//some instruments go higher, some lower
-
-//"Grand Piano computer" example
-
-    middleA=440;
-    middleC=220;
-
-//delays(in ms)
-
-    sixteenth=63; //62.5
-    eigth=125;
-    quarter=250;
-    half=500;
-    whole=1000;
 
 {
 
@@ -128,14 +144,16 @@ For the basics:
 Note definitions, scalle definitions (never thought Id be re writing this code)
 Are included here. There are several implementations and I am trying to standardize these also.
 
-A=440Hz
+See above code before just dropping shit here.
 
 
 }
 
-implementation
-
-
-
 begin //main()
+//suppose we should do so OS level checks here, like checking if OSS device exists,ALSA device exists, PA device exists
+//and appropriate kernel modules are loaded.
+
+//windows: (the driver)
+//less of an issue w SDL and Windows- more for Unices.
+
 end.

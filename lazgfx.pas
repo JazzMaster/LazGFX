@@ -750,6 +750,7 @@ type
 
 
 //This is a 8x8 Font pattern (in HEX) according to the BGI sources
+//(but a BLITTER BITMAP in SDL)
 
    FillSettingsType = (clear,lines,slashes,THslashes,THBackSlashes,BackSlashes,SMBoxes,rhombus,wall,widePTs,DensePTS);
 //Borland VGA256 sources (expansion pack) has the deatils-which are temporarily outside of this repo ATM
@@ -780,10 +781,16 @@ most computers support up to 1080p output..it will take some more lotta years fo
 
 var
 
-  texBounds: array [0..32] of PSDL_Rect;
-  textures: array [0..32] of PSDL_Texture;
+//I doubt we need much more than 4 viewports. Dialogs are handled seperately(and then removed)
+
+  texBounds: array [0..4] of PSDL_Rect;
+  textures: array [0..4] of PSDL_Texture;
+
   somelineType:linestyles;
 //you only scroll,etc within a viewport- you cant escape from it without help.
+//you can flip between them, however.
+
+//think minimaps in games like Warcraft and Skyrim
 
 
 { I think Im going to leave this as an excercise to the user rather than dictate archane methods.
@@ -791,6 +798,20 @@ var
 SDL Events fire after EVENT variable is assigned a pointer and either polling or event checking is enabled.
 NOT UTIL- so we should be "safe" to not check input until the user program calling us needs it.
 
+THAT SAID:
+
+    initgraph enables the event handler.
+
+So you need some sort of input (and window event) detection in your code SETUP --BEFORE calling initgraph.
+SDL will work-you just wont be able to process input correctly, or do anything.
+
+SDL will close the app and at the window managers request(I hope) without direct code intervention.
+But- its unsafe to assume things.
+
+This is like "interrupt based kernel programming"- DO NOT code as if "waiting on input"- 
+    pray it happens, continue on- if it doesnt.
+
+(events may still yet fire)
 
 	KeyDownEventDefault:KeyDownEvent; //dont process here
 	PauseRoutineDefault:PauseRoutine;  
@@ -811,7 +832,7 @@ NOT UTIL- so we should be "safe" to not check input until the user program calli
 const
    //Analog joystick dead zone 
    JOYSTICK_DEAD_ZONE = 8000;
-   //joysticks seem to be slow to respond in some games, I wonder why....
+   //joysticks seem to be slow to respond in some games....
 
 var
 
@@ -2405,6 +2426,107 @@ begin
     end; 
   end; //Joypad 
 end; //initgraph
+
+
+{ 
+
+//these two are completely untested and syntax unchecked.
+//they are not, by themselves "feature coplete dialogs", nor do they check input.
+
+//I said Id get to the line characters..here we go.
+procedure DrawSingleLinedWindowDialog(Rect:PSDL_Rect; colorToSet:DWord);
+
+var
+    UL,UR,LL,LR:Points; //see header file(polypts is ok here)
+    ShrunkenRect,NewRect:PSDL_Rect;
+
+begin
+    lockwNewTexture;
+    SDL_SetViewPort(Rect);
+
+    //corect me if Im off- this is guesstimate math here, not actual.
+    //the corner co ords
+    UL.x:=x+2;
+    UL.y:=y+2;
+    LL.x:=h-2;
+    LL.y:=x+2;
+    UR.x:=w-2;
+    UR.y:=y+2;
+    LR.x:=w-2;
+    LR.y:=h-2;
+    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetPenColor(ColorToSet);
+    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
+
+//go in some more- dont over ride the "window decoration"
+    UL.x:=x+4;
+    UL.y:=y+4;
+    LL.x:=h-4;
+    LL.y:=x+4;
+    UR.x:=w-4;
+    UR.y:=y+4;
+    LR.x:=w-4;
+    LR.y:=h-4;
+    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetViewPort(ShrunkenRect);
+
+    unlock;
+
+end;
+
+procedure DrawDoubleLinedWindowDialog(Rect:PSDL_Rect);
+
+var
+    UL,UR,LL,LR:Points; //see header file(polypts is ok here)
+    ShrunkenRect,NewRect:PSDL_Rect;
+
+begin
+    lockwNewTexture;
+    SDL_SetViewPort(Rect);
+
+    //corect me if Im off- this is guesstimate math here, not actual.
+    //the corner co ords
+    UL.x:=x+2;
+    UL.y:=y+2;
+    LL.x:=h-2;
+    LL.y:=x+2;
+    UR.x:=w-2;
+    UR.y:=y+2;
+    LR.x:=w-2;
+    LR.y:=h-2;
+    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetPenColor(ColorToSet);
+    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
+    
+    //do this again- further in
+    UL.x:=x+4;
+    UL.y:=y+4;
+    LL.x:=h-4;
+    LL.y:=x+4;
+    UR.x:=w-4;
+    UR.y:=y+4;
+    LR.x:=w-4;
+    LR.y:=h-4;
+    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetPenColor(ColorToSet);
+    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
+    
+//go in some more- dont over ride the "window decoration"
+    UL.x:=x+6;
+    UL.y:=y+6;
+    LL.x:=h-6;
+    LL.y:=x+6;
+    UR.x:=w-6;
+    UR.y:=y+6;
+    LR.x:=w-6;
+    LR.y:=h-6;
+    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetViewPort(ShrunkenRect);
+
+    unlock;
+
+end;
+}
 
 procedure closegraph;
 var
