@@ -39,6 +39,9 @@ I write CODE for a living.
 Everything is mutable."
 
 
+FIXME: Logging and dialogs w writeln are WIP. This shouldnt be.
+Its because the logger calls arent here yet. MY BAD.
+
 Some notes before we begin:
 
 There are two ways to invoke this-
@@ -798,6 +801,10 @@ most computers support up to 1080p output..it will take some more lotta years fo
 {$INCLUDE palettesh.inc}
 {$INCLUDE modelisth.inc}
 
+//color conversion procs etc...taking up waay too much room in here...
+{$INCLUDE colormodsh.inc}
+
+
 //This is for updating sections or "viewports".
 
 var
@@ -1024,15 +1031,14 @@ Sometimes, however, surface ops make more logical sense.
 procedure lock;
 procedure unlock;
 
-//OpenGL bug where Windows got optimzed, but Unices didnt--WRONG BTW! (WRITE UNIVERSAL CODE)
-{$ifdef windows}
+//works around SDL OpenGL bug where Windows got optimzed, but Unices didnt--WRONG BTW! (WRITE UNIVERSAL CODE)
 procedure Texlock(Tex:PSDL_Texture);
 procedure TexlockwRect(Tex:PSDL_Texture; Rect:PSDL_Rect);
 function lockNewTexture:Maintexture;
 procedure TexUnlock(Tex:PSDL_Texture);
-{$endif}
 
-procedure timer_flip(flip_timer_ms:longint);
+
+//videoCallback
 
 function GetRGBfromIndex(index:byte):PSDL_Color; 
 function GetDWordfromIndex(index:byte):DWord; 
@@ -1168,6 +1174,7 @@ implementation
 
 {$INCLUDE palettes.inc}
 {$INCLUDE modelist.inc}
+{$INCLUDE colormods.inc}
 
 {
 
@@ -1179,7 +1186,7 @@ making a 16 or 256 palette and/or modelist file
 
 }
 
-//this was ported from C- 
+//this was ported from (SDL) C- 
 //https://stackoverflow.com/questions/37978149/sdl1-sdl2-resolution-list-building-with-a-custom-screen-mode-class
 
 function FetchModeList:modelist;
@@ -1281,6 +1288,7 @@ begin
   if (EventThread=0) then begin //we didnt fpfork....
      if IsConsoleInvoked then begin
         writeln('EPIC FAILURE: SDL requires multiprocessing. I cant seem to fpfork. ');
+        LogLn('EPIC FAILURE: SDL requires multiprocessing. I cant seem to fpfork.');
         closegraph;
      end;
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'EPIC FAILURE: Cant fpfork. I need to. CRITICAL ERROR.','BYE..',NIL);
@@ -1459,7 +1467,7 @@ begin
   if (Tex = Nil) then begin
      if IsConsoleInvoked then
 		writeln('Cannot Lock unassigned Texture.');
-        //LogLn('Cant Lock unassigned Texture');
+        LogLn('Cant Lock unassigned Texture');
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Lock an unassigned Texture.','OK',NIL);
      exit;
   end;
@@ -1484,7 +1492,7 @@ begin
   if (Tex = Nil) then begin
      if IsConsoleInvoked then
 		writeln('Cannot Lock unassigned Texture.');
-        //LogLn('Cant Lock unassigned Texture');
+        LogLn('Cant Lock unassigned Texture');
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Lock an unassigned Texture.','OK',NIL);
      exit;
   end;
@@ -1512,7 +1520,7 @@ begin
   if (tex = Nil) then begin
      if IsConsoleInvoked then
 		writeln('Cannot Alloc Texture.');
-        //LogLn('Cant Alloc Texture');
+        LogLn('Cant Alloc Texture');
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Alloc Texture.','OK',NIL);
      exit;
   end;
@@ -1637,7 +1645,7 @@ begin
   
        if IsConsoleInvoked then begin
              writeln('Wrong routine called. Try: TrueColorGetRGBfromHex');
-             //LogLn('Wrong routine called. Try: TrueColorGetRGBfromHex');
+             LogLn('Wrong routine called. Try: TrueColorGetRGBfromHex');
        end;
        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Wrong routine called. Try: TrueColorGetRGBfromHex','OK',NIL); 
  end;
@@ -2175,7 +2183,7 @@ begin
 //really rare case
     if (MaxColors<=255) then exit; //use the other function for this
        if IsConsoleInvoked then begin
-          //LogLn('Trying to fetch background color -when we have it- in Paletted mode.');
+          LogLn('Trying to fetch background color -when we have it- in Paletted mode.');
           writeln('We have the background color in paletted modes!');
           exit;
        end;
@@ -2221,7 +2229,7 @@ begin
         if IsConsoleInvoked then
            writeln('ERROR: i cant do that. not indexed.');
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempting to clearscreen(index) with non-indexed data.','OK',NIL);   
-        //LogLn('Attempting to clearscreen(index) with non-indexed data.');           
+        LogLn('Attempting to clearscreen(index) with non-indexed data.');           
         exit; 
     end;
     if MaxColors=16 then
@@ -2356,7 +2364,7 @@ begin
   if LIBGRAPHICS_ACTIVE then begin
     if ISConsoleInvoked then begin
         writeln('Graphics already active.');
-        //LogLn('Graphics already active.');
+        LogLn('Graphics already active.');
     end;
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Initgraph: Graphics already active.','OK',NIL);	
     exit;
@@ -2382,8 +2390,8 @@ begin
         writeln('Critical ERROR: Cant Init SDL for some reason.');
         writeln(SDL_GetError);
      end;
-     // LogLn('Critical ERROR: Cant Init SDL for some reason.');    
-     //  LogLN(SDL_GetError);
+       LogLn('Critical ERROR: Cant Init SDL for some reason.');    
+       LogLN(SDL_GetError);
 
      //if we cant init- dont bother with dialogs.
      _grResult:=GenError; //gen error
@@ -2401,7 +2409,7 @@ begin
     if((imagesON and _imgflags) <> _imgflags) then begin
        if IsConsoleInvoked then begin
 		 writeln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
-		 //LogLn(IMG_GetError);
+		 LogLn(IMG_GetError);
 	   end;
 	   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'IMG_Init: Failed to init required JPG, PNG, and TIFF support','OK',NIL);	
     end;
@@ -2551,7 +2559,7 @@ begin
 	        if IsConsoleInvoked then 
 		    	writeln( 'Warning: Unable to open game controller! SDL Error: ', SDL_GetError); 
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: Unable to open game controller!','OK',NIL);
-            //LogLn(SDL_GetError);
+            LogLn(SDL_GetError);
             noJoy:=true;
         end;
         noJoy:=false;
@@ -3470,7 +3478,7 @@ begin
 			inc(x);
 		end;
         if IsConsoleInvoked then begin
-            //LogLN('Cant find current mode in modelist.');
+            LogLN('Cant find current mode in modelist.');
             writeln('Cant find current mode in modelist.');
         end;
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: Cant find current mode in modelist.','OK',NIL);        
@@ -4092,12 +4100,10 @@ begin
   bottom:=GetXY(y,h);
   right:=GetXY(x,h);
   
-  Lock;
   SDL_RenderFillRect(renderer, rect);
   GotoXY(right, bottom);
   linerel(h*cos(PI/6), (-h)*sin(PI/6) );
   linerel(0, top-bottom);
-  Unlock;
 
 end;
 
@@ -4152,7 +4158,7 @@ begin
 
   if (saveSurface = NiL) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt create SDL_Surface from renderer pixel data','OK',NIL);
-      //LogLn(SDL_GetError);
+      LogLn(SDL_GetError);
       exit;
                     
   end;
@@ -4218,34 +4224,13 @@ begin
    RemoveViewPort:=LastRect;
 end;
 
-
 {
-//return values can be ignored(unless there are problems) these are proceedures.
-
-SDL_GradientFillRect( Surface,Rect, RGBStartColor, RGBEndColor, GradientStyle);
-Surface2Texture(surface,texture)
-RenderCopy(renderer,tex)
-renderPresent
-
-// Rounded-Corner Rectangle (3DBAR)
-
-roundedRectangleColor(renderer, x1, y1, x2, y2, rad, colour); 
-roundedRectangleRGBA(renderer, x1, y1, x2, y2, rad, r, g, b, a); 
-
-// Rounded-Corner Filled rectangle (Box or button) 
-
-roundedBoxColor(renderer,x1, y1, x2, y2, rad,colour); 
-roundedBoxRGBA(renderer, x1, y1, x2, y2, rad,r, g, b, a); 
+#FIXME: finish these
 
 // Circle 
 
 circleColor(renderer,x, y, rad,colour); 
 circleRGBA(renderer,x, y, rad, r, g, b, a); 
-
-// Arc 
-
-arcColor(renderer, x, y, rad, start, finish,colour); 
-arcRGBA(renderer,x, y, rad, start, finish, r, g, b, a); 
 
 //Filled Circle
 
@@ -4262,6 +4247,41 @@ ellipseRGBA(renderer,x, y, rx, ry, r, g, b, a);
 filledEllipseColor(renderer, x, y, rx, ry,colour); 
 filledEllipseRGBA(renderer,x, y, rx, ry, r, g, b, a); 
 
+// Trigon /Triangle 
+
+trigonColor(renderer, x1, y1, x2, y2, x3, y3,colour); 
+trigonRGBA(renderer, x1, y1, x2, y2, x3, y3,r, g, b, a); 
+
+// Filled Trigon 
+
+filledTrigonColor(renderer, x1, y1, x2, y2, x3, y3, colour); 
+filledTrigonRGBA(renderer, x1, y1, x2, y2, x3, y3,r, g, b, a); 
+
+
+}
+
+
+{
+//return values can be ignored(unless there are problems) these are proceedures.
+
+
+// Rounded-Corner Rectangle (3DBAR)
+
+roundedRectangleColor(renderer, x1, y1, x2, y2, rad, colour); 
+roundedRectangleRGBA(renderer, x1, y1, x2, y2, rad, r, g, b, a); 
+
+// Rounded-Corner Filled rectangle (Box or button) 
+
+roundedBoxColor(renderer,x1, y1, x2, y2, rad,colour); 
+roundedBoxRGBA(renderer, x1, y1, x2, y2, rad,r, g, b, a); 
+
+
+// Arc 
+
+arcColor(renderer, x, y, rad, start, finish,colour); 
+arcRGBA(renderer,x, y, rad, start, finish, r, g, b, a); 
+
+
 // Pie 
 
 pieColor(renderer,x, y, rad, start, finish, colour); 
@@ -4272,15 +4292,7 @@ pieRGBA(renderer,x, y, rad, start, finish, r, g, b, a);
 filledPieColor(renderer,x, y, rad, start, finish, colour); 
 filledPieRGBA(renderer, x, y, rad, start, finish, r, g, b, a); 
 
-// Trigon /Triangle 
 
-trigonColor(renderer, x1, y1, x2, y2, x3, y3,colour); 
-trigonRGBA(renderer, x1, y1, x2, y2, x3, y3,r, g, b, a); 
-
-// Filled Trigon 
-
-filledTrigonColor(renderer, x1, y1, x2, y2, x3, y3, colour); 
-filledTrigonRGBA(renderer, x1, y1, x2, y2, x3, y3,r, g, b, a); 
 
 //these are confusing...you need to pass in multiple point(s)...
 
@@ -4434,7 +4446,8 @@ begin
 
   if (saveSurface = NiL) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt create SDL_Surface from renderer pixel data','OK',NIL);
-      //LogLn(SDL_GetError);
+      
+      LogLn(SDL_GetError);
       exit;
                     
   end;
@@ -4511,7 +4524,8 @@ begin
    //pitch at this point could be 2,3,4,etc.. and must otherwise be taken into account.
    if (AttemptRead<0) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to read pixel data failed.','OK',NIL);
-      //LogLn(SDL_GetError);
+      
+      LogLn(SDL_GetError);
      exit;
    end;
    GetPixels:=pixels;
@@ -4655,7 +4669,7 @@ IsConsoleApp:=true; //All Linux apps are console apps-SMH.
 
 //I dont see the need for the LCL with SDL/OGL but anyways...
 {$IFDEF LCL}
-        QuietlyLog:=true;
+        Log:=true;
         {$IFDEF windows}
 			IsConsoleInvoked:=false; //ui app- NO CONSOLE AVAILABLE
         {$ENDIF}
@@ -4666,15 +4680,14 @@ IsConsoleApp:=true; //All Linux apps are console apps-SMH.
 //these are the strings of the error codes
 
    screenshots:=00000000;
+
    grError[0]:='No Error';
    grError[1]:='Not enough memory for graphics';
    grError[2]:='Not enough memory to load font';
    grError[3]:='Font file not found';
    grError[4]:='Invalid graphics mode';
-   grError[5]:='General unspecified Graphics error';
+   grError[5]:='General Graphics error';
    grError[6]:='Graphics I/O error';
    grError[7]:='Invalid font';
-
-//graphmode data is not here- its in the "init routine".
 
 end.

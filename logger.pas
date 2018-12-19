@@ -11,9 +11,10 @@ var
    logging,donelogging:boolean;
 
 
-
+function Long2String(l: longint): string;
 Procedure LogString(s: String);
 Procedure LogLn(s: string);
+procedure StopLogging; //finalization
 
 
 implementation
@@ -51,6 +52,7 @@ end;
 Procedure LogString(s: String);
 
 Begin
+//  Write(Date,Time,': ');
   Write(output, s);
 End;
 
@@ -59,6 +61,7 @@ End;
 Procedure LogLn(s: string);
 
 Begin
+//  Write(Date,Time,': ');
   Writeln(output,s);
 End;
 
@@ -74,6 +77,7 @@ begin //init - main()
     Assign(output,'lazgfx-debug.log'); 
     Append(output); //do not re-write or re-set.
     Logging:=true;
+   donelogging:=false;
 end.
  
 
