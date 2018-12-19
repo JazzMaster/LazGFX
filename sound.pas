@@ -24,7 +24,6 @@ Dont be fooled, you can play any of these...^^
 }
 
 uses 
-	SDLBGI, 
     SDL2_mixer;
  
 var
@@ -75,6 +74,18 @@ some sound effects in MegaZeux did this too.
 
 }
 
+//experimental tempermental AT BEST due at SDl 2 changes
+procedure PlayWAV;
+
+begin
+{$ifdef windows}
+    sndPlaySound('C:\sounds\test.wav', snd_Async or snd_NoDefault);
+{$endif}
+
+end;
+
+
+
 //double check w the spec...
 procedure Load_Music(WhatVolume:integer; musicFile:string);
 
@@ -86,33 +97,22 @@ begin
   //load music
   music := Mix_LoadMUS( MusicFile );
   if music = nil then begin
-    ShowMessage('Music file load failure.');
+//    ShowMessage('Music file load failure.');
     exit;
   end;
+
   Mix_VolumeMusic( WhatVolume ); 
-  if PlayNow then Play_Music(music) else exit; 
+  if Paused then exit
+  else Play_Music(music);
 end;
 
 procedure Play_Music(var music:pointer);
 
 begin
-    if Mix_PlayMusic( music, 0 ) < 0 then showmessage('I cant play for some reason...Hmph..');
+    if Paused then exit;
+    if Mix_PlayMusic( music, 0 ) < 0 then 
+//    showmessage('I cant play for some reason...Hmph..');
 end;
 
-{
-part of the physics engine...not written yet..
-fine for apps but not a library or unit.
-
-
-  //on collision load sound - 8 layers of effects possible.
-  sound := Mix_LoadWAV( FXFile );
-  if sound = nil then ShowMessage('FX load failure.');
-  Mix_VolumeChunk( sound, MIX_MAX_VOLUME );
-
-  
-  //set these keys in the Keyboard handler
-  if PauseMusic then Mix_PauseMusic;
-  else if not PauseMusic then Mix_ResumeMusic;
-}
   
 end.
