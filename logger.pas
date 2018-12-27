@@ -1,5 +1,8 @@
 unit logger;
 
+uses
+    sysutils;
+
 interface
 const
   critical='CRITICAL ERROR: ';
@@ -9,10 +12,10 @@ const
 var
    output: Text; //untyped text
    logging,donelogging:boolean;
+   MyTime: TDateTime;
 
 
 function Long2String(l: longint): string;
-Procedure LogString(s: String);
 Procedure LogLn(s: string);
 procedure StopLogging; //finalization
 
@@ -48,20 +51,15 @@ end;
 
 //end FPC code - the rest has been modified "for an EXPLICIT PURPOSE"
 
-
-Procedure LogString(s: String);
-
-Begin
-//  Write(Date,Time,': ');
-  Write(output, s);
-End;
+//usually you want to write a line.
 
 //use me unless you need other variables added to the output.
 //remember- files WRAP at odd points, depending on the width of the viewing application and output monitor.
 Procedure LogLn(s: string);
 
 Begin
-//  Write(Date,Time,': ');
+  Write((DateTimeToStr(MyTime)),' : ');
+  Writeln(s); //to the debugging output console first, then file.
   Writeln(output,s);
 End;
 
@@ -73,11 +71,14 @@ begin
     Close(output);
 end;
 
+
 begin //init - main()
+
+    MyTime:= Now;
     Assign(output,'lazgfx-debug.log'); 
     Append(output); //do not re-write or re-set.
     Logging:=true;
-   donelogging:=false;
+    donelogging:=false;
 end.
  
 

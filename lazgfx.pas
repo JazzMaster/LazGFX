@@ -1722,484 +1722,6 @@ begin
   iconpath:='./sdlbgi.bmp'; //sdl2.0 doesnt use this.
 
 
-   //"usermode" must match available resolutions etc etc etc
-   //this is why I removed all of that code..."define what exactly"??
-
-  //attempt to trigger SDL...on most sytems this takes a split second- and succeeds.
-  _initflag:= SDL_INIT_VIDEO or SDL_INIT_TIMER;
-
-  if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
-  if WantsJoyPad then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
-//if WantInet then SDLNet_Init;
-
-  if ( SDL_Init(_initflag) < 0 ) then begin
-     //we cant speak- write something down.
-
-     if ISConsoleInvoked then begin
-        writeln('Critical ERROR: Cant Init SDL for some reason.');
-        writeln(SDL_GetError);
-     end;
-       LogLn('Critical ERROR: Cant Init SDL for some reason.');    
-       LogLN(SDL_GetError);
-
-     //if we cant init- dont bother with dialogs.
-     _grResult:=GenError; //gen error
-     halt(0); //the other routines are now useless- since we didnt init- dont just exit the routine.
-
-  end;
- 
-
-  if wantsFullIMGSupport then begin
-
-    _imgflags:= IMG_INIT_JPG or IMG_INIT_PNG or IMG_INIT_TIF;
-    imagesON:=IMG_Init(_imgflags);
-
-    //not critical, as we have bmp support but now are limping very very bad...
-    if((imagesON and _imgflags) <> _imgflags) then begin
-       if IsConsoleInvoked then begin
-		 writeln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
-		 LogLn(IMG_GetError);
-	   end;
-	   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'IMG_Init: Failed to init required JPG, PNG, and TIFF support','OK',NIL);	
-    end;
-  end;
-
-// im going to skip the RAM requirements code and instead haarp on proper rendering requirements.
-// note that a 12 yr old notebook-try as it may- might not have enough vRAM to pull things off.
-// can you squeeze the code to fit into a 486??---you are pushing it.
-//(You are better off using SDLv1 instead)
-
-
-  if (graphdriver = DETECT) then begin
-	//probe for it, dumbass...NEVER ASSUME.
-    Fetchgraphmode := DetectGraph; //need to kick back the higest supported mode...
-  end;
-
-  
-  LIBGRAPHICS_INIT:=true; 
-  LIBGRAPHICS_ACTIVE:=false; 
-
-//sets up mode- then clears it in standard "BGI" fashion.
-  SetGraphMode(Graphmode,wantFullScreen);
-
-//no atexit handler needed, just call CloseGraph
-//that was a nasty SDL surprise...
-
-
-//If we got here- YAY!
-
-//fpfork the event handler
-  IntHandler;
-
-//if we fpforked- we should come right back. 
-
-//events and callbacks seem to flow from interrupt code in C..
-//a BIG PITA- and VERY SPECIFIC CODE.
-
-//this data seems to hidden in all the lines of C and barely made reference to.
-//also needs to be checked for SDLv2 compliance.
-
-   eventLock:= nil;
-   eventWait:= nil;
-
-  eventLock := SDL_CreateMutex;
-   if eventLock = nil then
-   begin
-      if IsConsoleInvoked then
-          writeln('Error: cant create a mutex');
-          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Error: cant create a mutex','OK',NIL);
-      closegraph;
-   end;
-
-   eventWait := SDL_CreateCond;
-   if eventWait = nil then
-   begin
-      if IsConsoleInvoked then
-          writeln('Error: cant create a condition variable.');
-          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Error: cant create a condition variable.','OK',NIL);
-      closegraph;
-   end;
-
-
-//lets get the current refresh rate and set a screen timer to it.
-// we cant fetch this from X11? sure we can.
-
-  
-  mode^.format := SDL_PIXELFORMAT_UNKNOWN;
-  mode^.w:=0;
-  mode^.h:=0;
-  mode^.refresh_rate:=0;
-  mode^.driverdata:=Nil;
-  //for physical screen 0 do..
-  
-  //The SDl equivalent error of: attempting to probe VideoModeInfo block when (VESA) isnt initd results in issues....
-  
-  if(SDL_GetCurrentDisplayMode(0, mode) <> 0) then begin
-    if IsConsoleInvoked then
-			writeln('Cant get current video mode info. Non-critical error.');
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cant get the data for the current mode.','OK',NIL);
-  end;
-
-  //dont refresh faster than the screen.
-  if (mode^.refresh_rate > 0)  then 
-     flip_timer_ms := mode^.refresh_rate;
-  else
-     flip_timer_ms := 17; //has to be longint/longword, not real.
-
-  video_timer_id := SDL_AddTimer(flip_timer_ms, videoCallback, nil);
-  if video_timer_id=Nil then begin
-    if IsConsoleInvoked then begin
-		writeln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
-		writeln('you will have to manually update surfaces and the renderer.');
-    end;
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'WARNING: SDL cant set video callback timer.Manually update surface.','OK',NIL);
-  end;
-
-  
-  CantDoAudio:=false;
-    //prepare mixer
-  if WantsAudioToo then begin
-    //audioFlags:=??;
-    Mix_Init(AudioFlags);
-    AudioSystemCheck:=Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2, chunksize); //cd audio quality
-    if AudioSystemCheck = ?? then begin
-
-    end;
-
-  end;
-//set some sane default variables
-  _fgcolor := $FFFFFFFF;	//Default drawing color = white (15)
-  _bgcolor := $000000FF;	//default background = black(0)
-  someLineType:= NormalWidth; 
-
-
-  new(Event);
-
-  LIBGRAPHICS_ACTIVE:=true;  //We are fully operational now.
-  paused:=false;
-
-  _grResult:=OK; //we can just check the dialogs (or text output) now.
-
-  where.X:=0;
-  where.Y:=0;
-
-  //Hide, mouse.
-//  SDL_ShowCursor(SDL_DISABLE);
-
-
-//set some sensible input specs
-  //SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-
-
-  //Check for joysticks 
-  if WantsJoyPad then begin
- 
-    if( SDL_NumJoysticks < 1 ) then begin
-        if IsConsoleInvoked then
-			writeln( 'Warning: No joysticks connected!' ); 
-  		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: No joysticks connected!','OK',NIL);
-        
-    end else begin //Load joystick 
-	    gGameController := SDL_JoystickOpen( 0 ); 
-    
-        if( gGameController = NiL ) then begin  
-	        if IsConsoleInvoked then 
-		    	writeln( 'Warning: Unable to open game controller! SDL Error: ', SDL_GetError); 
-            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: Unable to open game controller!','OK',NIL);
-            LogLn(SDL_GetError);
-            noJoy:=true;
-        end;
-        noJoy:=false;
-    end; 
-  end; //Joypad 
-end; //initgraph
-
-
-{ 
-
-//these two are completely untested and syntax unchecked.
-//they are not, by themselves "feature coplete dialogs", nor do they check input.
-
-//I said Id get to the line characters..here we go.
-procedure DrawSingleLinedWindowDialog(Rect:PSDL_Rect; colorToSet:DWord);
-
-var
-    UL,UR,LL,LR:Points; //see header file(polypts is ok here)
-    ShrunkenRect,NewRect:PSDL_Rect;
-
-begin
-    lockwNewTexture;
-    SDL_SetViewPort(Rect);
-
-    //corect me if Im off- this is guesstimate math here, not actual.
-    //the corner co ords
-    UL.x:=x+2;
-    UL.y:=y+2;
-    LL.x:=h-2;
-    LL.y:=x+2;
-    UR.x:=w-2;
-    UR.y:=y+2;
-    LR.x:=w-2;
-    LR.y:=h-2;
-    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetPenColor(ColorToSet);
-    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
-
-//go in some more- dont over ride the "window decoration"
-    UL.x:=x+4;
-    UL.y:=y+4;
-    LL.x:=h-4;
-    LL.y:=x+4;
-    UR.x:=w-4;
-    UR.y:=y+4;
-    LR.x:=w-4;
-    LR.y:=h-4;
-    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetViewPort(ShrunkenRect);
-
-    unlock;
-
-end;
-
-procedure DrawDoubleLinedWindowDialog(Rect:PSDL_Rect);
-
-var
-    UL,UR,LL,LR:Points; //see header file(polypts is ok here)
-    ShrunkenRect,NewRect:PSDL_Rect;
-
-begin
-    lockwNewTexture;
-    SDL_SetViewPort(Rect);
-
-    //corect me if Im off- this is guesstimate math here, not actual.
-    //the corner co ords
-    UL.x:=x+2;
-    UL.y:=y+2;
-    LL.x:=h-2;
-    LL.y:=x+2;
-    UR.x:=w-2;
-    UR.y:=y+2;
-    LR.x:=w-2;
-    LR.y:=h-2;
-    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetPenColor(ColorToSet);
-    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
-    
-    //do this again- further in
-    UL.x:=x+4;
-    UL.y:=y+4;
-    LL.x:=h-4;
-    LL.y:=x+4;
-    UR.x:=w-4;
-    UR.y:=y+4;
-    LR.x:=w-4;
-    LR.y:=h-4;
-    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetPenColor(ColorToSet);
-    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
-    
-//go in some more- dont over ride the "window decoration"
-    UL.x:=x+6;
-    UL.y:=y+6;
-    LL.x:=h-6;
-    LL.y:=x+6;
-    UR.x:=w-6;
-    UR.y:=y+6;
-    LR.x:=w-6;
-    LR.y:=h-6;
-    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetViewPort(ShrunkenRect);
-
-    unlock;
-
-end;
-}
-
-procedure closegraph;
-var
-	Killstatus,Die:cint;
-    waittimer:integer;
-
-//free only what is allocated, nothing more- then make sure pointers are empty.
-begin
-
-  LIBGRAPHICS_ACTIVE:=false;  //Unset the variable (and disable all of our other functions in the process)
-  
-
-  //if wantsInet then
-//  SDLNet_Quit;
-
-  if wantsJoyPad then
-    SDL_JoystickClose( gGameController ); 
-  gGameController := Nil;
-
-  if WantsAudioToo then begin
-    Mix_CloseAudio; //close- even if playing
-
-    if chunk<>Nil then
-        Mix_FreeChunk(chunk); 
-    if music<> Nil then 
-        Mix_FreeMusic(music);
-
-    Mix_Quit;
-  end;
-
-//let me check the syntax here
-
-//  video_timer_id := SDL_AddTimer(flip_timer_ms, videoCallback, nil);
-
-//   SDL_RemoveTimer(videocallback);
-//   eventTimer := nil;
-
-
-   SDL_DestroyMutex(eventLock);
-   eventLock := nil;
-
-   SDL_DestroyCond(eventWait);
-   eventWait := nil;
-
-  
-  if (TextFore <> Nil) then begin
-	TextFore:=Nil;
-	free(TextFore);
-  end;
-  if (TextBack <> Nil) then begin
-	TextBack:=Nil;
-	free(TextBack);
-  end;
-  TTF_CloseFont(ttfFont);
-  TTF_Quit;
-  //its possible that extended images are used also for font datas...
-  if wantsFullIMGSupport then 
-     IMG_Quit;
-
-
-  die:=9; //signal number 9=kill
-  //Kill child if it is alive. we know the pid since we assigned it(the OS really knows it better than us)
-
-  //were stuck in a loop
-  //we can however, trip the loop to exit...
-
-  exitloop:=true;
-  Killstatus:=FpKill(EventThread,Die); //send signal (DIE) to thread
-
-  EventThread:=0;
-
-  dispose( Event );
-  //free viewports
-
-  x:=8;
-  repeat
-	if (Textures[x]<>Nil) then
-		SDL_DestroyTexture(Textures[x]);
-		Textures[x]:=Nil;
-    dec(x);
-  until x=0;
-  
-
-//Dont free whats not allocated in initgraph(do not double free)
-//routines should free what they allocate on exit.
-
-  if (MainSurface<> Nil) then begin
-	SDL_FreeSurface( MainSurface );
-	MainSurface:= Nil;
-  end;	
-
-  if (Renderer<> Nil) then begin
-    Renderer:= Nil;
-	SDL_DestroyRenderer( Renderer );
-  end;	
-
-  if (Window<> Nil) then begin
-	Window:= Nil;
-  	SDL_DestroyWindow ( Window );
-  end;	
-
-  SDL_Quit; 
-
-
-  if IsConsoleInvoked then begin
-     
-         textcolor(7); //..reset standards...
-         clrscr; //text clearscreen
-         writeln;
-  end;
-  //unless you want to mimic the last doom screen here...usually were done....  
-  //Yes you can override this function- if you need a shareware screen on exit..Hackish, but it works.
-  //"@ExitProc rerouting routines" (and checks) go here
-  
-  halt(0); //nothing special, just bail gracefully.
-end;            	 
-
-function GetX:word;
-begin
-  x:=where.X;
-end;
-
-function GetY:word;
-begin
-  y:=where.Y;
-end;
-
-function GetXY:longint; 
-//This is the 1D location in the 2D graphics area(yes, its weird)
-
-begin
-  x:=where.X;
-  y:=where.Y;
-  GetXY := y * (MainSurface^.pitch mod (sizeof(byte))) + x; //byte or word-(lousy USint definition)
-end;
-
-{
- Draw an Texture to an Renderer at x, y. 
- preserve the texture's width and height- also taking a clip of the texture if desired
-
-- we can use just RenderCopy, but it doesnt take stretching or clipping into account.(its sloppy)
-
-I didnt write this (from stackExchange in C) but it makes sense and SDL is at least "GPL", so we are "safe in licensing".
-
-}
-
-procedure renderTexture( tex:PSDL_Texture;  ren:PSDL_Renderer;  x,y:integer;  clip:PSDL_Rect);
-
-var
-  dst:PSDL_Rect;
-
-begin
-	
-	dst^.x := x;
-	dst^.y := y;
-	if (clip <> Nil)then begin
-		dst^.w := clip^.w;
-		dst^.h := clip^.h;
-	end
-	else begin
-		SDL_QueryTexture(tex, NiL, NiL, @dst^.w, @dst^.h);
-	end;
-	SDL_RenderCopy(ren, tex, clip, dst); //clip is either Nil(whole surface) or assigned
-
-end;
-
-
-//this code is semi-viable as-is but Id like to tweak it some more.
-//there are a few variables missing....
-
-procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
-//initgraph should call us to prevent code duplication
-//exporting a record is safer..but may change "a chunk of code" in places.   
-var
-	flags:longint;
-    success,IsThere,RendedWindow:integer;
-    surface1:PSDL_Surface;
-    FSNotPossible:boolean;
-    thismode:string;
-    mode:PSDL_DisplayMode;
-
-begin
-//we can do fullscreen, but dont force it...
-//"upscale the small resolutions" is done with fullscreen.
-//(so dont worry if the video hardware doesnt support it)
-
   case(graphmode) of 
 	     mCGA:begin
 			MaxX:=320;
@@ -2587,7 +2109,489 @@ begin
 }	    
   end;{case}
 
-//once is enough with this list...
+//once is enough with this list...its more of a nightmare than you know.
+//(its assigned before entries are checked)
+
+
+   //"usermode" must match available resolutions etc etc etc
+   //this is why I removed all of that code..."define what exactly"??
+
+  //attempt to trigger SDL...on most sytems this takes a split second- and succeeds.
+  _initflag:= SDL_INIT_VIDEO or SDL_INIT_TIMER;
+
+  if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
+  if WantsJoyPad then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
+//if WantInet then SDLNet_Init;
+
+  if ( SDL_Init(_initflag) < 0 ) then begin
+     //we cant speak- write something down.
+
+     if ISConsoleInvoked then begin
+        writeln('Critical ERROR: Cant Init SDL for some reason.');
+        writeln(SDL_GetError);
+     end;
+       LogLn('Critical ERROR: Cant Init SDL for some reason.');    
+       LogLN(SDL_GetError);
+
+     //if we cant init- dont bother with dialogs.
+     _grResult:=GenError; //gen error
+     halt(0); //the other routines are now useless- since we didnt init- dont just exit the routine.
+
+  end;
+ 
+
+  if wantsFullIMGSupport then begin
+
+    _imgflags:= IMG_INIT_JPG or IMG_INIT_PNG or IMG_INIT_TIF;
+    imagesON:=IMG_Init(_imgflags);
+
+    //not critical, as we have bmp support but now are limping very very bad...
+    if((imagesON and _imgflags) <> _imgflags) then begin
+       if IsConsoleInvoked then begin
+		 writeln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
+		 LogLn(IMG_GetError);
+	   end;
+	   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'IMG_Init: Failed to init required JPG, PNG, and TIFF support','OK',NIL);	
+    end;
+  end;
+
+// im going to skip the RAM requirements code and instead haarp on proper rendering requirements.
+// note that a 12 yr old notebook-try as it may- might not have enough vRAM to pull things off.
+// can you squeeze the code to fit into a 486??---you are pushing it.
+//(You are better off using SDLv1 instead)
+
+
+  if (graphdriver = DETECT) then begin
+	//probe for it, dumbass...NEVER ASSUME.
+    Fetchgraphmode := DetectGraph; //need to kick back the higest supported mode...
+  end;
+
+  
+  LIBGRAPHICS_INIT:=true; 
+  LIBGRAPHICS_ACTIVE:=false; 
+
+//sets up mode- then clears it in standard "BGI" fashion.
+  SetGraphMode(Graphmode,wantFullScreen);
+
+//no atexit handler needed, just call CloseGraph
+//that was a nasty SDL surprise...
+
+
+//If we got here- YAY!
+
+//fpfork the event handler
+  IntHandler;
+
+//if we fpforked- we should come right back. 
+
+//events and callbacks seem to flow from interrupt code in C..
+//a BIG PITA- and VERY SPECIFIC CODE.
+
+//this data seems to hidden in all the lines of C and barely made reference to.
+//also needs to be checked for SDLv2 compliance.
+
+   eventLock:= nil;
+   eventWait:= nil;
+
+  eventLock := SDL_CreateMutex;
+   if eventLock = nil then
+   begin
+      if IsConsoleInvoked then
+          writeln('Error: cant create a mutex');
+          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Error: cant create a mutex','OK',NIL);
+      closegraph;
+   end;
+
+   eventWait := SDL_CreateCond;
+   if eventWait = nil then
+   begin
+      if IsConsoleInvoked then
+          writeln('Error: cant create a condition variable.');
+          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Error: cant create a condition variable.','OK',NIL);
+      closegraph;
+   end;
+
+
+//lets get the current refresh rate and set a screen timer to it.
+// we cant fetch this from X11? sure we can.
+
+  
+  mode^.format := SDL_PIXELFORMAT_UNKNOWN;
+  mode^.w:=0;
+  mode^.h:=0;
+  mode^.refresh_rate:=0;
+  mode^.driverdata:=Nil;
+  //for physical screen 0 do..
+  
+  //The SDl equivalent error of: attempting to probe VideoModeInfo block when (VESA) isnt initd results in issues....
+  
+  if(SDL_GetCurrentDisplayMode(0, mode) <> 0) then begin
+    if IsConsoleInvoked then
+			writeln('Cant get current video mode info. Non-critical error.');
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cant get the data for the current mode.','OK',NIL);
+  end;
+
+  //dont refresh faster than the screen.
+  if (mode^.refresh_rate > 0)  then 
+     flip_timer_ms := mode^.refresh_rate;
+  else
+     flip_timer_ms := 17; //has to be longint/longword, not real.
+
+  video_timer_id := SDL_AddTimer(flip_timer_ms, videoCallback, nil);
+  if video_timer_id=Nil then begin
+    if IsConsoleInvoked then begin
+		writeln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
+		writeln('you will have to manually update surfaces and the renderer.');
+    end;
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'WARNING: SDL cant set video callback timer.Manually update surface.','OK',NIL);
+  end;
+
+  
+  CantDoAudio:=false;
+    //prepare mixer
+  if WantsAudioToo then begin
+    //audioFlags:=??;
+    Mix_Init(AudioFlags);
+    AudioSystemCheck:=Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2, chunksize); //cd audio quality
+    if AudioSystemCheck = ?? then begin
+
+    end;
+
+  end;
+//set some sane default variables
+  _fgcolor := $FFFFFFFF;	//Default drawing color = white (15)
+  _bgcolor := $000000FF;	//default background = black(0)
+  someLineType:= NormalWidth; 
+
+
+  new(Event);
+
+  LIBGRAPHICS_ACTIVE:=true;  //We are fully operational now.
+  paused:=false;
+
+  _grResult:=OK; //we can just check the dialogs (or text output) now.
+
+  where.X:=0;
+  where.Y:=0;
+
+  //Hide, mouse.
+//  SDL_ShowCursor(SDL_DISABLE);
+
+
+//set some sensible input specs
+  //SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+
+
+  //Check for joysticks 
+  if WantsJoyPad then begin
+ 
+    if( SDL_NumJoysticks < 1 ) then begin
+        if IsConsoleInvoked then
+			writeln( 'Warning: No joysticks connected!' ); 
+  		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: No joysticks connected!','OK',NIL);
+        
+    end else begin //Load joystick 
+	    gGameController := SDL_JoystickOpen( 0 ); 
+    
+        if( gGameController = NiL ) then begin  
+	        if IsConsoleInvoked then 
+		    	writeln( 'Warning: Unable to open game controller! SDL Error: ', SDL_GetError); 
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: Unable to open game controller!','OK',NIL);
+            LogLn(SDL_GetError);
+            noJoy:=true;
+        end;
+        noJoy:=false;
+    end; 
+  end; //Joypad 
+end; //initgraph
+
+
+{ 
+
+//these two are completely untested and syntax unchecked.
+//they are not, by themselves "feature coplete dialogs", nor do they check input.
+//mimcs crt level windows in vga text modes
+
+//I said Id get to the line characters..here we go.
+procedure DrawSingleLinedWindowDialog(Rect:PSDL_Rect; colorToSet:DWord);
+
+var
+    UL,UR,LL,LR:Points; //see header file(polypts is ok here)
+    ShrunkenRect,NewRect:PSDL_Rect;
+
+begin
+    Tex:=NewTexture;
+    SDL_SetViewPort(Rect);
+
+    //corect me if Im off- this is guesstimate math here, not actual.
+    //the corner co ords
+    UL.x:=x+2;
+    UL.y:=y+2;
+    LL.x:=h-2;
+    LL.y:=x+2;
+    UR.x:=w-2;
+    UR.y:=y+2;
+    LR.x:=w-2;
+    LR.y:=h-2;
+    
+    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetPenColor(_fgcolor);
+    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
+
+//shink available space
+
+    //do this again- further in
+    UL.x:=x+6;
+    UL.y:=y+6;
+    LL.x:=h-6;
+    LL.y:=x+6;
+    UR.x:=w-6;
+    UR.y:=y+6;
+    LR.x:=w-6;
+    LR.y:=h-6;
+
+    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetViewPort(ShrunkenRect);
+
+end;
+
+procedure DrawDoubleLinedWindowDialog(Rect:PSDL_Rect);
+
+var
+    UL,UR,LL,LR:Points; //see header file(polypts is ok here)
+    ShrunkenRect,NewRect:PSDL_Rect;
+
+begin
+    Tex:=NewTexture;
+    SDL_SetViewPort(Rect);
+
+    //corect me if Im off- this is guesstimate math here, not actual.
+    //the corner co ords
+    UL.x:=x+2;
+    UL.y:=y+2;
+    LL.x:=h-2;
+    LL.y:=x+2;
+    UR.x:=w-2;
+    UR.y:=y+2;
+    LR.x:=w-2;
+    LR.y:=h-2;
+    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetPenColor(ColorToSet);
+    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
+    
+    //do this again- further in
+    UL.x:=x+4;
+    UL.y:=y+4;
+    LL.x:=h-4;
+    LL.y:=x+4;
+    UR.x:=w-4;
+    UR.y:=y+4;
+    LR.x:=w-4;
+    LR.y:=h-4;
+    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetPenColor(ColorToSet);
+    SDL_RenderDrawRect(NewRect); 
+
+//shink available space
+
+    //do this again- further in
+    UL.x:=x+6;
+    UL.y:=y+6;
+    LL.x:=h-6;
+    LL.y:=x+6;
+    UR.x:=w-6;
+    UR.y:=y+6;
+    LR.x:=w-6;
+    LR.y:=h-6;
+
+    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetViewPort(ShrunkenRect);
+
+end;
+}
+
+procedure closegraph;
+var
+	Killstatus,Die:cint;
+    waittimer:integer;
+
+//free only what is allocated, nothing more- then make sure pointers are empty.
+begin
+
+  LIBGRAPHICS_ACTIVE:=false;  //Unset the variable (and disable all of our other functions in the process)
+  
+
+  //if wantsInet then
+//  SDLNet_Quit;
+
+  if wantsJoyPad then
+    SDL_JoystickClose( gGameController ); 
+  gGameController := Nil;
+
+  if WantsAudioToo then begin
+    Mix_CloseAudio; //close- even if playing
+
+    if chunk<>Nil then
+        Mix_FreeChunk(chunk); 
+    if music<> Nil then 
+        Mix_FreeMusic(music);
+
+    Mix_Quit;
+  end;
+
+//let me check the syntax here
+
+//  video_timer_id := SDL_AddTimer(flip_timer_ms, videoCallback, nil);
+
+//   SDL_RemoveTimer(videocallback);
+//   eventTimer := nil;
+
+
+   SDL_DestroyMutex(eventLock);
+   eventLock := nil;
+
+   SDL_DestroyCond(eventWait);
+   eventWait := nil;
+
+  
+  if (TextFore <> Nil) then begin
+	TextFore:=Nil;
+	free(TextFore);
+  end;
+  if (TextBack <> Nil) then begin
+	TextBack:=Nil;
+	free(TextBack);
+  end;
+  TTF_CloseFont(ttfFont);
+  TTF_Quit;
+  //its possible that extended images are used also for font datas...
+  if wantsFullIMGSupport then 
+     IMG_Quit;
+
+
+  die:=9; //signal number 9=kill
+  //Kill child if it is alive. we know the pid since we assigned it(the OS really knows it better than us)
+
+  //were stuck in a loop
+  //we can however, trip the loop to exit...
+
+  exitloop:=true;
+  Killstatus:=FpKill(EventThread,Die); //send signal (DIE) to thread
+
+  EventThread:=0;
+
+  dispose( Event );
+  //free viewports
+
+  x:=8;
+  repeat
+	if (Textures[x]<>Nil) then
+		SDL_DestroyTexture(Textures[x]);
+		Textures[x]:=Nil;
+    dec(x);
+  until x=0;
+  
+
+//Dont free whats not allocated in initgraph(do not double free)
+//routines should free what they allocate on exit.
+
+  if (MainSurface<> Nil) then begin
+	SDL_FreeSurface( MainSurface );
+	MainSurface:= Nil;
+  end;	
+
+  if (Renderer<> Nil) then begin
+    Renderer:= Nil;
+	SDL_DestroyRenderer( Renderer );
+  end;	
+
+  if (Window<> Nil) then begin
+	Window:= Nil;
+  	SDL_DestroyWindow ( Window );
+  end;	
+
+  SDL_Quit; 
+
+
+  if IsConsoleInvoked then begin
+     
+         textcolor(7); //..reset standards...
+         clrscr; //text clearscreen
+         writeln;
+  end;
+  //unless you want to mimic the last doom screen here...usually were done....  
+  //Yes you can override this function- if you need a shareware screen on exit..Hackish, but it works.
+  //"@ExitProc rerouting routines" (and checks) go here
+  
+  halt(0); //nothing special, just bail gracefully.
+end;            	 
+
+function GetX:word;
+begin
+  x:=where.X;
+end;
+
+function GetY:word;
+begin
+  y:=where.Y;
+end;
+
+function GetXY:longint; 
+//This is the 1D location in the 2D graphics area(yes, its weird)
+
+begin
+  x:=where.X;
+  y:=where.Y;
+  GetXY := y * (MainSurface^.pitch mod (sizeof(byte))) + x; //byte or word-(lousy USint definition)
+end;
+
+{
+ Draw an Texture to an Renderer at x, y. 
+ preserve the texture's width and height- also taking a clip of the texture if desired
+
+- we can use just RenderCopy, but it doesnt take stretching or clipping into account.(its sloppy)
+
+I didnt write this (from stackExchange in C) but it makes sense and SDL is at least "GPL", so we are "safe in licensing".
+
+}
+
+procedure renderTexture( tex:PSDL_Texture;  ren:PSDL_Renderer;  x,y:integer;  clip:PSDL_Rect);
+
+var
+  dst:PSDL_Rect;
+
+begin
+	
+	dst^.x := x;
+	dst^.y := y;
+	if (clip <> Nil)then begin
+		dst^.w := clip^.w;
+		dst^.h := clip^.h;
+	end
+	else begin
+		SDL_QueryTexture(tex, NiL, NiL, @dst^.w, @dst^.h);
+	end;
+	SDL_RenderCopy(ren, tex, clip, dst); //clip is either Nil(whole surface) or assigned
+
+end;
+
+
+procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
+//initgraph should call us to prevent code duplication
+//exporting a record is safer..but may change "a chunk of code" in places.   
+var
+	flags:longint;
+    success,IsThere,RendedWindow:integer;
+    surface1:PSDL_Surface;
+    FSNotPossible:boolean;
+    thismode:string;
+    mode:PSDL_DisplayMode;
+
+begin
+//we can do fullscreen, but dont force it...
+//"upscale the small resolutions" is done with fullscreen.
+//(so dont worry if the video hardware doesnt support it)
+
 
 
 //if not active:
@@ -2598,7 +2602,7 @@ if (LIBGRAPHICS_INIT=false) then
 
 begin
 		
-		if IsConsoleInvoked then writeln('Call initgraph before calling setGraphMode.') 
+		if IsConsoleInvoked then Logln('Call initgraph before calling setGraphMode.') 
 		else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'setGraphMode called too early. Call InitGraph first.','OK',NIL);
 	    exit;
 end
@@ -2616,8 +2620,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
          window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
     	 if (window = Nil) then begin
  			if IsConsoleInvoked then begin
-	    	   	writeln('Something Fishy. No hardware render support and cant create a window.');
-	    	   	writeln('SDL reports: ',' ', SDL_GetError);      
+	    	   	Logln('Something Fishy. No hardware render support and cant create a window.');
+	    	   	Logln('SDL reports: ',' ', SDL_GetError);      
 	    	end;
 	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy. No hardware render support and cant create a window.','BYE..',NIL);
 			
@@ -2629,8 +2633,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
     	renderer := SDL_CreateSoftwareRenderer(Mainsurface);
 		if (renderer = Nil ) then begin
  			if IsConsoleInvoked then begin
-	    	   	writeln('Something Fishy. No hardware render support and cant setup a software one.');
-	    	   	writeln('SDL reports: ',' ', SDL_GetError);      
+	    	   	Logln('Something Fishy. No hardware render support and cant setup a software one.');
+	    	   	Logln('SDL reports: ',' ', SDL_GetError);      
 	    	end;
 	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy. No hardware render support and cant setup a software one.','BYE..',NIL);
 	    	_grResult:=GEnError;
@@ -2664,16 +2668,19 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
        thisMode:=getgraphmode;
   	   if ( IsThere < 0 ) then begin
     	      if IsConsoleInvoked then begin
-    	         writeln('Unable to set FS: ', thismode);
-    	         writeln('SDL reports: ',' ', SDL_GetError);      
+    	         Logln('Unable to set FS: ', thismode);
+    	         Logln('SDL reports: ',' ', SDL_GetError);      
      	      end;
 
               FSNotPossible:=true;      
        
-       //if we failed then just gimmie a yuge window..      
-       SDL_SetWindowSize(window, MaxX, MaxY);
-       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
-
+         //if we failed then just gimmie a yuge window..      
+         SDL_SetWindowSize(window, MaxX, MaxY);
+         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
+         if IsconsoleInvoked then begin
+            LogLn('ERROR: SDL cannot set FS.');
+            LogLn(SDL_GetError);
+         end;
        end;
 
     end; 
@@ -2689,8 +2696,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
    
     Mainsurface := SDL_CreateRGBSurface(0, MaxX, MaxY, bpp, 0, 0, 0, 0);
     if (Mainsurface = NiL) then begin //cant create a surface
-        //LogLn('SDL_CreateRGBSurface failed');
-        //LogLn(SDL_GetError);
+        LogLn('SDL_CreateRGBSurface failed');
+        LogLn(SDL_GetError);
         _grresult:=GenError; //probly out of vram
         //we can exit w failure codes, if we check for them
         closegraph;
@@ -2739,7 +2746,10 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
 		success:=SDL_SetWindowDisplayMode(window,mode);
         if (success <> 0) then begin 
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set DisplayMode.','OK',NIL);
-			//LogLn(SDL_GetError);
+	        if IsConsoleInvoked then begin
+                LogLn('ERROR: SDL cannot set DisplayMode.');		
+                LogLn(SDL_GetError);
+            end;
 			exit;
         end;
     //either way we should have a window and renderer by now...   
@@ -2762,15 +2772,18 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
   	   thisMode:=getgraphmode;
   	   if ( IsThere < 0 ) then begin
     	      if IsConsoleInvoked then begin
-    	         writeln('Unable to set FS: ', thismode);
-    	         writeln('SDL reports: ',' ', SDL_GetError);      
+    	         LogLn('Unable to set FS: ', thismode);
+    	         LogLn('SDL reports: ',' ', SDL_GetError);      
      	      end;
               FSNotPossible:=true;      
        
           //if we failed then just gimmie a yuge window..      
           SDL_SetWindowSize(window, MaxX, MaxY);
           SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
-          //LogLn(SDL_GetError);
+          if IsConsoleInvoked then begin            
+            LogLn('ERROR: SDL cannot set FS.');
+            LogLn(SDL_GetError);
+          end;
           exit;
        end;
 
@@ -2826,7 +2839,6 @@ begin
 		end;
         if IsConsoleInvoked then begin
             LogLN('Cant find current mode in modelist.');
-            writeln('Cant find current mode in modelist.');
         end;
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: Cant find current mode in modelist.','OK',NIL);        
    end;   
@@ -2837,7 +2849,7 @@ begin
   if (not LIBGRAPHICS_ACTIVE) then begin //if not in use, then dont call me...
 
 	if IsConsoleInvoked then 
-        writeln('you didnt call initGraph yet...try again?') 
+        LogLn('you didnt call initGraph yet...try again?') 
     else
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Restore WHAT exactly?','Clarify the Stupid',NIL);
   end;
@@ -2982,7 +2994,8 @@ begin
 			32: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 32, format); 
 			else begin
 				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Wrong bpp given to get a pixel. I dont how you did this.','OK',NIL);
-				
+				 if IsConsoleInvoked then
+                LogLn('Wrong bpp given to get a pixel. I dont how you did this.');
 			end;
 
 		end;
@@ -3109,7 +3122,8 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
    
       else
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get Pixel values...','OK',NIL);
-       
+         if IsConsoleInvoked then
+                LogLn('Cant Put Pixel values...');
     end; //case
 
     SDL_FreeSurface(Tempsurface);
@@ -3126,6 +3140,8 @@ begin
  
   begin
     		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Put Pixel values...','OK',NIL);
+            if IsConsoleInvoked then
+                LogLn('Cant Put Pixel values...');
 			exit;
   end;
   SDL_RenderDrawPoint( Renderer, X, Y );
@@ -3274,74 +3290,8 @@ begin
 end; //getModeRange
 
 
-procedure installUserFont(fontpath:string; font_size:integer; style:fontflags; outline:boolean);
 
-{
-MOD: SDL, not BGI .CHR files which is where most code comes from.
-SDL uses TTF Fonts
-
-font_size: some number in px =12,18, etc
-path: (varies by OS) to font we want....
-
-style is one of: 
-		TTF_STYLE_NORMAL
-		TTF_STYLE_UNDERLINE
-		TTF_STYLE_ITALIC 
-		TTF_STYLE_BOLD
-		TTF_STYLE_ITALIC
-		TTF_STYLE_UNDERLINE
-		TTF_STYLE_STRIKETHROUGH
-
-
-outline: make it an outline (instead of drawn "stroked", the font is drawn inverted-hollow)
-
-fontpath: MUST BE SPECIFIED - you will crash TTF routines(and possibly SDL and everything on top of it- if you dont)
--code is like a stack of cards in that way.
-}
-
-begin
-  
-  //initialization of TrueType font engine and loading of a font
-  if TTF_Init = -1 then begin
-    
-    if IsConsoleInvoked then begin
-        writeln('I cant engage the font engine, sirs.');
-    end;
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: I cant engage the font engine, sirs. ','OK',NIL);
-		
-    _graphResult:=-3; //the most likely cause, not enuf ram.
-    exit;
- 
-  end;
-  if FontPath:='' then begin
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: No Font Specified to Load. ','OK',NIL);
-		_graphResult:=-7; //error 7 or 8....FontNotFound(Nothing)
-		exit;
-  end;
-  ttfFont := TTF_OpenFont( fontpath, font_size ); //should import and make a surface, like bmp loading
-  //fg and bg color should be set for us(or changed by the user in some other procedure)
-  new(TextFore);
-  new(TextBack);
-  TextFore:=_fgcolor;
-  TextBack:=_bgcolor;
-
-  TTF_SetFontStyle( ttfFont, style ); 
-  TTF_SetFontOutline( ttfFont, outline );
-  TTF_SetFontHinting( ttfFont, TTF_HINTING_NORMAL );
-  SetTextColor(TextFore,TextBack);
-
-  //dont render yet...just set it up.
-
-end;
-
-{
-you could use this:
-
-  or just "NOT FREE" the pixels you need to clone, once you rendercopy and RenderPresent-then you have the pixels
-      instead of "losing them". 
-
-(Its an odd rare case,such as TnL not discussed here)
-}
+//(Its an odd rare case,such as TnL --not discussed here)
 
 function cloneSurface(surface1:PSDL_Surface):PSDL_Surface;
 //Lets take the surface to the copy machine...
@@ -3352,59 +3302,51 @@ begin
     Surface2 := SDL_ConvertSurface(Surface1, Surface1^.format, Surface1^.flags);
 end;
 
+{viewports-
+    the trick is that we are technically always in one(FPC).
+    the joke is:
+         what are the co ords?
 
+this might not be BGI spec- but it makes sense.
 
-	
-{
-these are BGI implementation, which is why its weird.
-A TON of functions actually depend on the SET data co-ords of the VIEWPORT-
-   how far on screen can we safely write to- in this case- we DO NOT wrap text or other objects or pixels. 
-
-(We only do that in text mode)
-
-Its like setting a "window" buondary without the "Window" interface.
-
- 
 }
 
-procedure SetViewPort(X1, Y1, X2, Y2: Word);
+procedure SetViewPort(Rect:PSDL_Rect);
 
 var
-    ThisRect,LastRect:PSDL_Rect;
+    LastRect:PSDL_Rect;
     ScreenData:Pointer;
     infosurface,savesurface:PSDL_Surface;
 
-
 begin
-   if WindowCount=0 then begin 
-      LastRect^.X:=0;
-      LastRect^.Y:=0;
-      LastRect^.W:=MaxX;
-      LastRect^.H:=MaxY;
-   end
-   else begin
-      SDL_RenderGetViewport(renderer,Lastrect);
+//freeze movement
+   if windowcount=8 then begin
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to create too many viewports.','OK',NIL);
+      if IsConsoleInvoked then
+        LogLn('Attempt to create too many viewports.');
+      exit;
    end;
+   //get viewport size and put into LastRect
+   SDL_RenderGetViewport(renderer,Lastrect); 
+   //current co ords = last, then add one.
    inc(windowcount);
-   ThisRect^.X:=X1;
-   ThisRect^.Y:=Y1;
-   ThisRect^.W:=X2;
-   ThisRect^.H:=Y2;
 
-   //we want to manually set the texture size yet go grab the viewport and copy whats there..
-   //the reason why is so we can 'undo it'
    //LINUX claims of xor,xnor "not being supported"- so let "work around it".
    
+  //store the current viewport data
   saveSurface = NiL;
   infosurface:=Nil;
   ScreenData:=Nil;
-  ScreenData:=GetPixels(ThisRect);
-  
+
+  //pixels and info abt the pixels. from the renderer-to a surface, then throw it back into a texture
+  ScreenData:=GetPixels(LastRect);
   infoSurface := SDL_GetWindowSurface(SDLWindow);
+
   saveSurface := SDL_CreateRGBSurfaceWithFormatFrom(ScreenData, infoSurface^.w, infoSurface^.h, infoSurface^.format^.BitsPerPixel, (infoSurface^.w * infoSurface^.format^.BytesPerPixel), infoSurface^.format);
 
   if (saveSurface = NiL) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt create SDL_Surface from renderer pixel data','OK',NIL);
+      LogLn('Couldnt create SDL_Surface from renderer pixel data. ');
       LogLn(SDL_GetError);
       exit;
                     
@@ -3412,63 +3354,77 @@ begin
    
    Texture[windowcount]:=CreateTextureFromSurface(saveSurface);
 
+   //free data
    SDL_FreeSurface(saveSurface);
+
    saveSurface = NiL;
    infosurface:=Nil;
    ScreenData:=Nil;
   
-   Textures[windowCount]^.X:=ThisRect^.X;
-   Textures[windowCount]^.Y:=ThisRect^.Y;
-   Textures[windowCount]^.W:=ThisRect^.W;
-   Textures[windowCount]^.H:=ThisRect^.H;
 
-   SDL_RenderSetViewport( Renderer, ThisRect );  
-   RenderCopy(Renderer,Texture[windowcount]);
-   RenderPresent(renderer);
-   
+   SDL_RenderSetViewport( Renderer, Rect );  
+   //clearviewport(_fgcoor);
+  
    //"Clipping" is a joke- we always clip.
    //The trick is: do we zoom out? In Most cases- NO. We zoom IN.
 
 end;
 
 
-function RemoveViewPort(windowcount:byte):SDL_Rect;
+procedure RemoveViewPort(windowcount:byte);
 //the opposite of above...
-//return with the last window coords..(we might be trying to write to them)
+//set the last window coords..(we might be trying to write to them)
 //and redraw the prior window as if the new one was not there(not an easy task).
 var
   ThisRect,LastRect:PSDL_Rect;
 
 begin
 
-   if windowCount=0 then exit else //you must be crazy...closegraph.
+   if windowCount=0 then begin
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to remove non-existant viewport.','UH oh.',NIL);
+  
+    if IsConsoleInvoked then
+        LogLn('Attempt to remove non-existant viewport.');
+    exit; 
+   end;
    if windowcount > 1 then begin
   		ThisRect^.X:=Textures[windowCount]^.X;
 		ThisRect^.Y:=Textures[windowCount]^.Y;
 	    ThisRect^.W:=Textures[windowCount]^.W;
 	    ThisRect^.H:=Textures[windowCount]^.H;
 
-  		dec(windowCount);
+        //get co ords of the previous
 
-        LastRect^.X:=Textures[windowCount]^.X;
- 	    LastRect^.Y:=Textures[windowCount]^.Y;
- 	    LastRect^.W:=Textures[windowCount]^.W;
-	    LastRect^.H:=Textures[windowCount]^.H;
+        LastRect^.X:=Textures[windowCount-1]^.X;
+ 	    LastRect^.Y:=Textures[windowCount-1]^.Y;
+ 	    LastRect^.W:=Textures[windowCount-1]^.W;
+	    LastRect^.H:=Textures[windowCount-1]^.H;
    
        //remove the viewport by removing the texture and redrawing the screen.
-        SDL_DestroyTexture(Textures[windowcount+1]);
-        RenderCopy(Textures[windowcount]);
+       //the problem with textures is that they are part of a one-way road. ARG!
+
+        Textures[windowcount]:=nil; //Destroy the current Texture
+        RenderCopy(Textures[windowcount-1]);
         RenderPresent(renderer);
+
 		SDL_RenderSetViewport( Renderer, LastRect ); 
-        RemoveViewPort:=LastRect;      
+        dec(windowcount);
+//unfreeze movement
+        exit;
    end; 
    //else: last window remaining
-   SDL_DestroyTexture(Textures[1]);
+   Textures[1]:=nil;
    SDL_RenderSetViewport( Renderer,nil);  //reset to full size "screen"
+
+   //this only works if we freeze input and dont update the screen- otherwise, we jitter
+   // and update with old data on the "overlayed area".
+
    RenderCopy(Renderer,Textures[0]);
-   RenderPresent; //and update back to the old screen before the viewports came here.
+   RenderPresent(renderer); //and update back to the old screen before the viewports came here.
+
    LastRect:=(0,0,MaxX,MaxY);
-   RemoveViewPort:=LastRect;
+   dec(windowscount);
+   //unfreeze movement
 end;
 
 
@@ -3478,12 +3434,14 @@ end;
 procedure InstallUserDriver(Name: string; AutoDetectPtr: Pointer);
 begin
    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Function No longer supported: InstallUserDriver','OK',NIL);
+   LogLn('Function No longer supported: InstallUserDriver');
 end;
 
 procedure RegisterBGIDriver(driver: pointer);
 
 begin
    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Function No longer supported: RegisterBGIDriver','OK',NIL);
+   LogLn('Function No longer supported: RegisterBGIDriver');
 end;
 
 
@@ -3527,19 +3485,22 @@ begin
     SDL_RenderCopy(renderer, tex, Nil, Nil); //scales image to output window size(size of undefined Rect)
 end;
 
+//linestyle is: (patten,thickness) "passed together" (QUE)
+//this uses thickness variable only
 
 procedure PlotPixelWNeighbors(x,y:integer);
 //this makes the bigger Pixels
  
 // (in other words "blocky bullet holes"...)  
 // EXPERT topic: smoothing reduces jagged edges
+
 begin                
    //more efficient to render a Rect.
 
    New(Rect);
    Rect.x:=x;
    Rect.y:=y;
-   case LineStyle of
+   case (LineStyle.thickness) of
        NormalWidth: begin
              Rect.w:=2;
 			 Rect.h:=2;   
@@ -3604,8 +3565,10 @@ begin
 
   if (saveSurface = NiL) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt create SDL_Surface from renderer pixel data','OK',NIL);
-      
-      LogLn(SDL_GetError);
+      if IsConsoleInvoked then begin
+          LogLn('Couldnt create SDL_Surface from renderer pixel data');      
+          LogLn(SDL_GetError);
+      end;
       exit;
                     
   end;
@@ -3638,17 +3601,21 @@ var
   This is an SDL_Color limitation. If it were me, Id just copy the array in 2D, not 1D.
   Yes, technically, even kernel write to screen are stored in VRAM(or buffers) as:
 		[X,Y,RGBColor] however...SDL treats it as a 1D array.
+
   I didnt design SDL, sorry. Maybe thats why its SLOW???
   src: VGA graphics 101 - address A000, 386+ VRAM (and LFB) access.
   NOTE: 
-     You probly CANNOT directly write there.. (blame X11 or Windows or Apple)
+     You probly CANNOT directly write here.. (blame X11 or Windows or Apple)
      (Because youre staring at the array right now, reading this.)
 }
 
   AttemptRead:integer;
 
 begin
-   if ((Rect^.w=1) or (Rect^.h=1)) then begin      
+   if ((Rect^.w=1) or (Rect^.h=1)) then begin    
+     if IsConsoleInvoked then begin       
+        LogLn('USE GetPixel. This routine FETCHES MORE THAN ONE');
+     end;  
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'USE GetPixel. This routine FETCHES MORE THAN ONE','OK',NIL);
      exit;
    end;
@@ -3683,8 +3650,10 @@ begin
    //pitch at this point could be 2,3,4,etc.. and must otherwise be taken into account.
    if (AttemptRead<0) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to read pixel data failed.','OK',NIL);
-      
-      LogLn(SDL_GetError);
+      if IsConsoleInvoked then begin
+          LogLn('Attempt to read pixel data failed.');
+          LogLn(SDL_GetError);
+      end;
      exit;
    end;
    GetPixels:=pixels;
@@ -3813,6 +3782,7 @@ IsConsoleApp:=true; //All Linux apps are console apps-SMH.
 
    screenshots:=00000000;
 
+   windownumber:=0;
    grError[0]:='No Error';
    grError[1]:='Not enough memory for graphics';
    grError[2]:='Not enough memory to load font';

@@ -5,8 +5,6 @@ unit gameThings;
 I bet you were wondering when this unit was coming.
 
 High Scores
-Save States
-MENUS
 Counters
 Objects
 
@@ -41,6 +39,7 @@ type
 //usually random dice involved and percentages of percentages and more random dice.....
 
 effects=(none,ice,fire,drainHealth,drainMagic,drainStamina,Sleep,zombie,fury,hate,Attractlover);
+Races=(dwarf,elf,human,furryThing);
 
 chest=record
 	name:string;
@@ -58,10 +57,6 @@ Crime=record
     Bribes:integer;
 end;
 
-CharInventory=record
-    ItemName:string;
-    //ItemIcon:^SDL_Texture; //bmp image
-end;
 
 roomType=(shipCompartment,HouseRoom,kitchen,gallery,dungeonRoom,GreatHall,arena,CitySection,forge,medicalBay); 
 //derived from AGT- yes AGT.(Adventure Game Toolkit)
@@ -82,15 +77,15 @@ KingME:boolean; //checkers
 CharLevel:integer; //affects everything
 currentCarryLimit:integer; //dynamic var, but set in game begining.
 CanCarryIT.IsDrunk,IsNaked:boolean;
-CurrentInventory:array [1..currentCarryLimit] of CharInventory;
+Inventory:array [1..currentCarryLimit] of Chest;
 CharacterEffects=(stamina,health,magic,hate,love);
 Hungry,IsVampire,IsWereWolf,IsTired:boolean;
 MonsterCount,HasntSleptIn:integer;
 CurrentCash,ValidMovesLeft,MovesLeft:integer; //may be a hole but is move valid
-DiceValue:integer; //random(6,20,etc)
+DiceValue:integer; //random(6),random(20),etc)
 
 implementation
-//these two might assume a black background(which is correct- (but an ASS out of EWE and ME)
+//these two might assume a black background(which is correct- 
 //never assume, SET it.
 
 
@@ -164,6 +159,12 @@ end;
 
 begin 
 
+//define character levels(or at least lvl 100 and divide accordingly.
+//presonally- Id present up an array instead of dividing things all the time..its faster , for one.
+
+
 //  CharLevel:=1; 
 //  CarryWeight:=110;
+
+
 end.
