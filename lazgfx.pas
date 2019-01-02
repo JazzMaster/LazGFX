@@ -39,8 +39,12 @@ I write CODE for a living.
 Everything is mutable."
 
 
-FIXME: Logging and dialogs w writeln are WIP. This shouldnt be.
-Its because the logger calls arent here yet. MY BAD.
+FIXME: Logging and dialogs are more for testing SDL than for when you want things to just work.
+So expect me to rem the code out- use these "if shit is inconsistently fucked and you dont know why".
+We will however, log anyways (where appropriate-at least)
+
+This become one of those- "Do I want to see the output window or not" things.
+
 
 Some notes before we begin:
 
@@ -886,6 +890,7 @@ var
     palette:PSDL_Palette;
     where:Twhere;
 	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop,LoadlibSVGA:boolean;
+    nogoautorefresh:boolean;
     X,Y:integer;
     _grResult:grErrortype;
     
@@ -1415,6 +1420,10 @@ Sorry.
 
 }
 
+//FIXME:
+//All SDL calls are unpredictable unless vars are Nil before checks are made.
+//(This is secure code way of doing things)
+
 procedure lock;
 begin
     if SDL_MustLock(MainSurface)=true then
@@ -1679,7 +1688,7 @@ begin
    SDL_RenderFillRect(Renderer, viewport);
 end;
 
-//needs testing- source is objfpc, this isnt.
+
 function videoCallback(interval: Uint32; param: pointer): Uint32; cdecl; 
 //this is a funky interrupt-ish callback in C. Its very specific code.
 //that said, IO is pushed, then popped -from CPU registers in weird ways- why this is so specific.
@@ -1688,14 +1697,15 @@ function videoCallback(interval: Uint32; param: pointer): Uint32; cdecl;
 //(but it has to be given to us)
 
 begin
+   param:=Nil; //not used
+
    if (not Paused) then begin //if paused then ignore screen updates
 
-//timer unit- not compile checked yet
 //      if (TimerTicks mod interval) then 
            SDL_RenderPresent;
    end;
    SDL_CondBroadcast(eventWait);
-   videoCallback := 0; //we have to return something-the what, we should be defining.
+   videoCallback := 0; //we have to return something-the what, WE should be defining.
 end;
 
 //NEW: do you want fullscreen or not?
@@ -1712,7 +1722,6 @@ begin
 
   if LIBGRAPHICS_ACTIVE then begin
     if ISConsoleInvoked then begin
-        writeln('Graphics already active.');
         LogLn('Graphics already active.');
     end;
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Initgraph: Graphics already active.','OK',NIL);	
@@ -1721,7 +1730,7 @@ begin
   pathToDriver:='';  //unused- code compatibility
   iconpath:='./sdlbgi.bmp'; //sdl2.0 doesnt use this.
 
-
+//this has to be done inline to the running code, unfortunately
   case(graphmode) of 
 	     mCGA:begin
 			MaxX:=320;
@@ -2127,15 +2136,13 @@ begin
      //we cant speak- write something down.
 
      if ISConsoleInvoked then begin
-        writeln('Critical ERROR: Cant Init SDL for some reason.');
-        writeln(SDL_GetError);
+        Logln('Critical ERROR: Cant Init SDL for some reason.');
+        Logln(SDL_GetError);
      end;
-       LogLn('Critical ERROR: Cant Init SDL for some reason.');    
-       LogLN(SDL_GetError);
-
      //if we cant init- dont bother with dialogs.
+
      _grResult:=GenError; //gen error
-     halt(0); //the other routines are now useless- since we didnt init- dont just exit the routine.
+     halt(0); //the other routines are now useless- since we didnt init- dont just exit the routine, DIE instead.
 
   end;
  
@@ -2148,27 +2155,36 @@ begin
     //not critical, as we have bmp support but now are limping very very bad...
     if((imagesON and _imgflags) <> _imgflags) then begin
        if IsConsoleInvoked then begin
-		 writeln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
+		 Logln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
 		 LogLn(IMG_GetError);
 	   end;
 	   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'IMG_Init: Failed to init required JPG, PNG, and TIFF support','OK',NIL);	
     end;
   end;
 
-// im going to skip the RAM requirements code and instead haarp on proper rendering requirements.
-// note that a 12 yr old notebook-try as it may- might not have enough vRAM to pull things off.
-// can you squeeze the code to fit into a 486??---you are pushing it.
-//(You are better off using SDLv1 instead)
+{
+ im going to skip the RAM requirements code and instead haarp on proper rendering requirements.
+ note that a 12 yr old notebook-try as it may- might not have enough vRAM to pull things off.
+ can you squeeze the code to fit into a 486??---you are pushing it.
+(You are better off using SDLv1 instead)
 
+now- how do we check if sdl2 is supported- and fall back, given uses clauses can only launch one or the other?
+}
 
   if (graphdriver = DETECT) then begin
 	//probe for it, dumbass...NEVER ASSUME.
-    Fetchgraphmode := DetectGraph; //need to kick back the higest supported mode...
+
+//temporarily not available
+	   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Graphics detrection not available at this time.','Sorry',NIL);	
+
+//    Fetchgraphmode := DetectGraph; //need to kick back the higest supported mode...
   end;
 
-  
+  NoGoAutoRefresh:=false;
   LIBGRAPHICS_INIT:=true; 
   LIBGRAPHICS_ACTIVE:=false; 
+
+//we do it this way because we might already be active- why duplicate code?
 
 //sets up mode- then clears it in standard "BGI" fashion.
   SetGraphMode(Graphmode,wantFullScreen);
@@ -2197,8 +2213,8 @@ begin
    if eventLock = nil then
    begin
       if IsConsoleInvoked then
-          writeln('Error: cant create a mutex');
-          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Error: cant create a mutex','OK',NIL);
+          Logln('Error: cant create a mutex');
+          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'cant create a mutex','OK',NIL);
       closegraph;
    end;
 
@@ -2206,8 +2222,8 @@ begin
    if eventWait = nil then
    begin
       if IsConsoleInvoked then
-          writeln('Error: cant create a condition variable.');
-          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Error: cant create a condition variable.','OK',NIL);
+          Logln('Error: cant create a condition variable.');
+          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'cant create a condition variable.','OK',NIL);
       closegraph;
    end;
 
@@ -2227,34 +2243,39 @@ begin
   
   if(SDL_GetCurrentDisplayMode(0, mode) <> 0) then begin
     if IsConsoleInvoked then
-			writeln('Cant get current video mode info. Non-critical error.');
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cant get the data for the current mode.','OK',NIL);
+			Logln('Cant get current video mode info. Non-critical error.');
+//    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL cant get the data for the current mode.','OK',NIL);
   end;
 
   //dont refresh faster than the screen.
   if (mode^.refresh_rate > 0)  then 
-     flip_timer_ms := mode^.refresh_rate;
+     //either force a longINT- or convert from REAL. Otherwise you have to pass it as a interrupt proc param--it hairy mess.
+     flip_timer_ms := longint(mode^.refresh_rate);
   else
-     flip_timer_ms := 17; //has to be longint/longword, not real.
+     flip_timer_ms := 17; 
 
   video_timer_id := SDL_AddTimer(flip_timer_ms, videoCallback, nil);
   if video_timer_id=Nil then begin
     if IsConsoleInvoked then begin
-		writeln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
-		writeln('you will have to manually update surfaces and the renderer.');
+		Logln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
+		Logln('you will have to manually update surfaces and the renderer.');
     end;
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'WARNING: SDL cant set video callback timer.Manually update surface.','OK',NIL);
+//    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL cant set video callback timer.Manually update surface.','OK',NIL);
+    NoGoAutoRefresh:=true; //Now we can call Initgraph and check, even if quietly(game) If we need to issue RenderPresent calls.
   end;
 
   
   CantDoAudio:=false;
     //prepare mixer
   if WantsAudioToo then begin
-    //audioFlags:=??;
+    audioFlags:=(MIX_INIT_FLAC or MIX_INIT_MP3 or MIX_INIT_OGG); //unless you need mikmod support, then or it in here.
     Mix_Init(AudioFlags);
-    AudioSystemCheck:=Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2, chunksize); //cd audio quality
-    if AudioSystemCheck = ?? then begin
-
+    AudioSystemCheck:=Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2, 200); //cd audio quality
+    //(slower systems use smaller chunks and degraded quality.)
+    if AudioSystemCheck =Nil then begin
+        if IsConsoleInvoked then
+                LogLn('There is no audio. Mixer did not init.');
+        else  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There is no audio. Mixer did not init.','OK',NIL);
     end;
 
   end;
@@ -2277,7 +2298,6 @@ begin
   //Hide, mouse.
 //  SDL_ShowCursor(SDL_DISABLE);
 
-
 //set some sensible input specs
   //SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 
@@ -2287,17 +2307,19 @@ begin
  
     if( SDL_NumJoysticks < 1 ) then begin
         if IsConsoleInvoked then
-			writeln( 'Warning: No joysticks connected!' ); 
+			Logln( 'Warning: No joysticks connected!' ); 
+        
   		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: No joysticks connected!','OK',NIL);
         
     end else begin //Load joystick 
 	    gGameController := SDL_JoystickOpen( 0 ); 
     
         if( gGameController = NiL ) then begin  
-	        if IsConsoleInvoked then 
-		    	writeln( 'Warning: Unable to open game controller! SDL Error: ', SDL_GetError); 
+	        if IsConsoleInvoked then begin
+		    	Logln( 'Warning: Unable to open game controller! SDL Error: ', SDL_GetError); 
+                LogLn(SDL_GetError);
+            end;
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: Unable to open game controller!','OK',NIL);
-            LogLn(SDL_GetError);
             noJoy:=true;
         end;
         noJoy:=false;
@@ -2439,12 +2461,8 @@ begin
     Mix_Quit;
   end;
 
-//let me check the syntax here
-
-//  video_timer_id := SDL_AddTimer(flip_timer_ms, videoCallback, nil);
-
-//   SDL_RemoveTimer(videocallback);
-//   eventTimer := nil;
+   SDL_RemoveTimer(video_timer_id);
+   video_timer_id := nil;
 
 
    SDL_DestroyMutex(eventLock);
@@ -2542,7 +2560,7 @@ function GetXY:longint;
 begin
   x:=where.X;
   y:=where.Y;
-  GetXY := y * (MainSurface^.pitch mod (sizeof(byte))) + x; //byte or word-(lousy USint definition)
+  GetXY := (y * (MainSurface^.pitch mod (sizeof(byte)) ) + x); //byte or word-(lousy USint definition)
 end;
 
 {
@@ -3160,6 +3178,8 @@ end;
 //FIXME:dont use Graphics_mode=detect for the moment.
 //(reqd fix for version 1.0)
 
+//we should limit detectGraph calls also and allow quick checks if libGfx is already active.
+
 Function detectGraph:byte; //should return max mode supported(enum value) -but cant be negative
 //called *once* per "graphics init"-which is only called if not active.
 
@@ -3250,7 +3270,7 @@ var
 begin
   if LIBGRAPHICS_ACTIVE then begin
       maxmodetest:=detectgraph;
-      getmaxmode:=GetEnumName(TypeInfo(graphics_modes, Ord(maxmodetest); //use the number and get the string of it.
+      getmaxmode:=GetEnumName(TypeInfo(graphics_modes, Ord(maxmodetest); //use the number and get the name of it.
   end;
 end;
 
@@ -3280,11 +3300,14 @@ begin
 	end else begin
         if (graphdriver=DETECT) then begin
             himode:=detectgraph;	 //unfortunate probe here...   	
+// FIXME: return value: (byte to enum value conversion?? - or use a bunch of consts)
+// default enum type reads: longword
+
 	    	lomode:= mCGA; //no less than this.
 		end else begin
 			if IsConsoleEnabled then
-				writeln('I cant get a valid GraphicsMode to report a range.');
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant get a valid mode list.','ok',NIL);
+				Logln('Unknown graphdriver setting.');
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Unknown graphdriver setting.','ok',NIL);
 		end;
 	end;
 end; //getModeRange
@@ -3295,11 +3318,9 @@ end; //getModeRange
 
 function cloneSurface(surface1:PSDL_Surface):PSDL_Surface;
 //Lets take the surface to the copy machine...
-var
-   surface2:PSDL_Surface;
 
 begin
-    Surface2 := SDL_ConvertSurface(Surface1, Surface1^.format, Surface1^.flags);
+    cloneSurface := SDL_ConvertSurface(Surface1, Surface1^.format, Surface1^.flags);
 end;
 
 {viewports-
@@ -3660,64 +3681,6 @@ begin
 end;
 
 
-
-
-{
-Blinking: 
-
-if you want to blink circles etc...I wil leave this to the reader.
-it can be done- but its very unused code. Ususally reserved for text warnings,notices, etc.
-so anyway- heres how to do it.
-
-blink used to be set at value 128;
-
- Color:=color+Blink; -is the old way.
- Blink('string'); -is the new way.
-
-update your code. 
-CANTFIX: and WONTFIX: this. 
-(This was a hardwired spec in the past and is not anymore.)
-
-}
-
-//blink is a crt function
-procedure Grblink(Text:string);
-
-//SDL can only SLOWLY redraw over something to "erase"
-//write..erase(redraw)..write..erase..
-//yes this is how my kernel console code works -just implemented differently.
-begin
-    
-    BlinkPID:=fpfork; //fpfork(): this has to occur wo stopping while other ops are going on usually
-	blink:=true; //this wont kill itself, naturally. 
-    //I AM INVINCIBLE!! (only external forces can kill me now.)
-
-        Curr^.X:=x;
-        Curr^.Y:=y;  
-		OutText(text);
-		invertcolors;
-		delay(500);
-        x:=Curr^.X;
-        y:=Curr^.Y;
-		GotoXY(x,y);
-    repeat		
-		OutText(text);
-		invertcolors;
-		delay(500);
-		GotoXY(x,y);
-	until blink:=false;
-end;
-
-procedure GrSTOPBlink;
-//often the simplest solution is the easiest and most sane.
-//we walk up to the blinking text, nudge it- and say STOP.
-   
-begin
-            blink:=false; //kill the loop
-			delay(1000); //wait for routine to safely exit.
-			killPID(BlinkPID); //BLAM! DIE.
-			BlinkPID:=Nil;
-end;
 
 
 begin  //main()

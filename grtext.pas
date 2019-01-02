@@ -106,20 +106,91 @@ begin
 end;
 
 
-procedure backspace( Font:PSDL_FontInfo, ch:char);
 
-  dstrect:PSDL_Rect ;
+
+{
+Blinking: 
+
+This isnt really used- but it is possible.
+
+if you want to blink circles etc...I wil leave this to the reader(blits and colorkeys, people).
+it can be done- but its very unused code. 
+
+Ususally reserved for text warnings,notices, etc.
+so anyway- heres how to do it.
+
+blink used to be set at value 128;
+
+ Color:=color+Blink; -is the old way.
+ Blink('string'); -is the new way.
+
+update your code. 
+CANTFIX: and WONTFIX: this. 
+(This was a hardwired spec in the past and is not anymore. 
+VGA direct register access is no longer used.
+Neither are int10 calls in assembled.)
+
+}
+
+//blink is a crt function
+procedure Grblink(Text:string);
+
+//SDL can only SLOWLY redraw over something to "erase"
+//write..erase(redraw)..write..erase..
+//yes this is how my kernel console code works -just implemented differently.
+begin
+    
+    BlinkPID:=fpfork; //fpfork(): this has to occur wo stopping while other ops are going on usually
+	blink:=true; //this wont kill itself, naturally. 
+    //I AM INVINCIBLE!! (only external forces can kill me now.)
+
+        Curr^.X:=x;
+        Curr^.Y:=y;  
+		OutText(text);
+		invertcolors;
+		delay(500);
+        x:=Curr^.X;
+        y:=Curr^.Y;
+		GotoXY(x,y);
+    repeat		
+		OutText(text);
+		invertcolors;
+		delay(500);
+		GotoXY(x,y);
+	until blink:=false;
+end;
+
+procedure GrSTOPBlink;
+//often the simplest solution is the easiest and most sane.
+//we walk up to the blinking text, nudge it- and say STOP.
+   
+begin
+            blink:=false; //kill the loop
+			delay(1000); //wait for routine to safely exit.
+			killPID(BlinkPID); //BLAM! DIE.
+			BlinkPID:=Nil;
+end;
+
+
+procedure backspace;
+//get size of char-
+//   go back that and a char space.
+//   rewrite by overwriting both
+//   go back and reset x,y
+// -- this is how crt unit does it, btw.
+
+var
+  Font:PSDL_FontInfo;  
+  dstrect:PSDL_Rect;
   bufp:string;
   x1,y1,ofs:integer;
+  Tex:PSDL_Texture;
 	
 begin
 //because we use the renderer- we need to convert back to a surface
 
-  x1:=0;
-  y1:=0;	
 
-  dstrect.w := ( ((Font^.CharPos[ofs+2]+Font^.CharPos[ofs+1]) mod 2) -((Font^.CharPos[ofs]+Font^.CharPos[ofs-1]) mod 2) );
-
+//do ops
   Where.x:=(Where.x -(Font^.CharPos[ofs+1]-Font^.CharPos[ofs]));
 
   if (Where.x<0) then Where.x := 0;
@@ -129,13 +200,20 @@ begin
         Where.y :=Where.y+ (Font^.Surface.h mod 4);
   end;      
 
-  dstrect^.x:=Where.x1;
-  dstrect^.y:=Where.y1;
-  dstrect^.w:=Font^.Surface.h;
-  dstrect^.h:=Font^.Surface.w;
+  dstrect^.x:=(Where.x-(Font^.Surface.w));
+  dstrect^.y:=Where.y; //on same line only!!
+  dstrect^.w := ( ((Font^.CharPos[ofs+2]+Font^.CharPos[ofs+1]) mod 2) -((Font^.CharPos[ofs]+Font^.CharPos[ofs-1]) mod 2) );
+  dstrect^.h:=Font^.Surface.h;
 
   setPenColor(_bgcolor); //(erase with background color by writing with it)
-  SDL_RenderFillrect(Renderer,dstrect);	  
+  SDL_Fillrect(MainSurface,dstrect,_bgcolor);
+	  
+  //go back the width of the erased rect
+  Where.x:=( ((Font^.CharPos[ofs+2]+Font^.CharPos[ofs+1]) mod 2) -((Font^.CharPos[ofs]+Font^.CharPos[ofs-1]) mod 2) );
+  
+  //go feed the renderer
+  Tex:= SDL_CreateTextureFromSurface( Renderer, MainSurface );
+  SDL_RenderCopy( Renderer, Tex, Nil,dstrect ); //"SDL_UpdateRect"
 
 end;
 
