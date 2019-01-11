@@ -1711,6 +1711,13 @@ end;
 //NEW: do you want fullscreen or not?
 procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
 
+{
+
+we are halfway there according to some Wolf3D and POSTAL devs:
+FS sets logical size but we want the window- a forced "physical" to be that size too.
+Logic size allows upscaling of smaller resolutions on our behalf.
+
+}
 var
 	bpp,i:integer;
 	_initflag,_imgflags:longword; //PSDL_Flags?? no such beast 
@@ -2627,7 +2634,7 @@ end
 else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //initgraph called us
 
     window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
-    renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED or SDL_RENDERER_PRESENTVSYNC);
+    renderer := SDL_CreateRenderer(window, -1, (SDL_RENDERER_ACCELERATED or SDL_RENDERER_PRESENTVSYNC));
 
 	RendedWindow := SDL_CreateWindowAndRenderer(MaxX, MaxY,0, @window,@renderer);
 
@@ -2645,7 +2652,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 			
 			_grResult:=GenError;
 	    	closegraph;
-        end;
+         end;
 
         //we have a window but are forced into SW rendering(why?)
     	renderer := SDL_CreateSoftwareRenderer(Mainsurface);
@@ -2658,8 +2665,9 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 	    	_grResult:=GEnError;
 	    	closegraph;
 		end;
+        // SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
 
-   end; 
+   end; //software renderer
 
    surface1:=SDL_LoadBMP(iconpath);
 
@@ -2669,18 +2677,19 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
    // ...and the surface containing the icon pixel data is no longer required.
    SDL_FreeSurface(surface1);
 
-
+ // SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
    if wantFullscreen then begin
        //I dont know about double buffers yet but this looks yuumy..
        //SDL_SetVideoMode(MaxX, MaxY, bpp, SDL_DOUBLEBUF|SDL_FULLSCREEN);
 
        flags:=(SDL_GetWindowFlags(window));
-       flags:=flags or SDL_WINDOW_FULLSCREEN_DESKTOP; //fake it till u make it..
+       flags:=(flags or SDL_WINDOW_FULLSCREEN_DESKTOP); //fake it till u make it..
        //we dont want to change HW videomodes because 4bpp isnt supported.
        
        //autoscale us to the monitors actual resolution
        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 'linear');
        SDL_RenderSetLogicalSize(renderer, MaxX, MaxY);
+//phones: SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"); 
 
 	   IsThere:=SDL_SetWindowFullscreen(window, flags);
        thisMode:=getgraphmode;
@@ -2722,20 +2731,20 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
     end;
 
 
-  if (bpp<=8) then begin
+    if (bpp<=8) then begin
       if MaxColors=16 then
             SDL_SetPaletteColors(palette,TPalette16.colors,0,16)
 	  else if MaxColors=256 then
             SDL_SetPaletteColors(palette,TPalette256.colors,0,256);
-  end;
+    end;
 
-  SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
-  SDL_RenderClear(Renderer);
+    SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
+    SDL_RenderClear(Renderer);
 
-   LIBGRAPHICS_ACTIVE:=true;
-   exit; //back to initgraph we go.
+     LIBGRAPHICS_ACTIVE:=true;
+     exit; //back to initgraph we go.
 
-end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
+  end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
 
                    
     case bpp of
@@ -2745,7 +2754,7 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
 		end;
 		15: format:=SDL_PIXELFORMAT_RGB555;
 
-//we assume on 16bit that we are in 565 not 5551, we should not assume
+        //we assume on 16bit that we are in 565 not 5551, we should not assume
 		16: begin
 			
 			format:=SDL_PIXELFORMAT_RGB565;
@@ -2783,6 +2792,7 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
        if ((flags and SDL_WINDOW_FULLSCREEN_DESKTOP) <> 0) then begin
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 'linear');
             SDL_RenderSetLogicalSize(renderer, MaxX, MaxY);
+//phones: SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"); 
        end;
 
 	   IsThere:=SDL_SetWindowFullscreen(window, flags);
@@ -2808,24 +2818,24 @@ end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
     end;
 
   //reset palette data
-  if bpp=4 then
-    InitPalette16;
-  if bpp=8 then 
-    InitPalette256; 
+    if bpp=4 then
+      InitPalette16;
+    if bpp=8 then 
+      InitPalette256; 
   //then set it back up
 
-  if (bpp<=8) then begin
+    if (bpp<=8) then begin
       if MaxColors=16 then
             SDL_SetPaletteColors(palette,TPalette16.colors,0,16)
 	  else if MaxColors=256 then
             SDL_SetPaletteColors(palette,TPalette256.colors,0,256);
-  end;
-  SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
-  SDL_RenderClear(Renderer);
+    end;
+    SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
+    SDL_RenderClear(Renderer);
 
-end;
+  end; 
 
-end;
+end; //setGraphMode
 
 function getgraphmode:string; 
 //it could also be that the monitor output is not in the modelist
