@@ -17,10 +17,14 @@ Can be ported to use the following languages:
 		
 ---		
 
-state:  **COMPILING** (minor rework in progress)
-**WHEN THIS SAYS LINKING, a RELEASE IS EMMINENT.**
+state:  RELEASE .80 
 
-(Travis CL doesnt work with Pascal sources)
+-Some primitives and detectGraph missing.
+-Fonts, SDLCore, put/getpixels tested working with sdl v1
+-lines/rects tested w sdl v1
+-event input and rendering mainloop tested working with sdl v1
+
+(Travis CL doesnt work with Pascal sources. You wont see the nice pretty graphbar.)
 
 ---
 
