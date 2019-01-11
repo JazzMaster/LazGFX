@@ -1,9 +1,11 @@
 unit logger;
 
+interface
+
 uses
     sysutils;
 
-interface
+
 const
   critical='CRITICAL ERROR: ';
   normal='HMM: ';

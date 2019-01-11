@@ -143,7 +143,7 @@ unit sdl2;
 {$ENDIF}
 
 //BP7 but assumes a 16bit OVL unit- there is a 32bit available.
-//-I have it.
+//-I have it. -Jazz
 
 {$IFDEF LINUX}
 {$DEFINE UNIX}
@@ -510,22 +510,22 @@ unit sdl2;
 	  
 {*************** define 16/32/64 Bit ********************}
 
+{$IFDEF MSWINDOWS}
 {$IFDEF WIN16}
   {$DEFINE 16BIT}
   {$DEFINE WINDOWS}
-{$ELSE}
-  {$IFDEF WIN32}
+{$ENDIF}
+
+{$IFDEF WIN32}
     {$DEFINE 32BIT}
     {$DEFINE WINDOWS}
-  {$ELSE}
-    {$IFDEF WIN64}
+{$ENDIF}
+
+{$IFDEF WIN64}
       {$DEFINE 64BIT}
       {$DEFINE WINDOWS}
-    {$ELSE}
-      //TODO!!
-      {$DEFINE 32BIT}
-    {$ENDIF}
-  {$ENDIF}
+{$ENDIF}
+
 {$ENDIF}
 
 {$IFDEF Delphi}

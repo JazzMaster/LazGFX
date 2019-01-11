@@ -14,16 +14,16 @@ m1920x1080x256,m1920x1080x32k,m1920x1080x64k,m1920x1080xMil);
 
 //data is in the main unit Init routines.
 
-Tmodes=record
+Tmode=record
 //non-negative and some values are yuuge
 	ModeNumber:byte;
-  	ModeName:array [Low(graphics_modes)..High(graphics_modes)] of string;
- 	MaxColors:array [Low(graphics_modes)..High(graphics_modes)] of DWord; //QWord??
-    bpp:array [Low(graphics_modes)..High(graphics_modes)] of byte;
-  	MaxX:array [Low(graphics_modes)..High(graphics_modes)] of Word;
-    MaxY:array [Low(graphics_modes)..High(graphics_modes)] of Word;
-	XAspect:array [Low(graphics_modes)..High(graphics_modes)] of byte;
-	YAspect:array [Low(graphics_modes)..High(graphics_modes)] of byte;
+  	ModeName:string;
+ 	MaxColors:DWord; //LongWord??
+    bpp:byte;
+  	MaxX:Word;
+    MaxY:Word;
+	XAspect:byte;
+	YAspect:byte;
 	AspectRatio:real; //things are computed from this somehow...
 end; //record
 

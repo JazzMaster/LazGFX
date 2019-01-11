@@ -4,6 +4,8 @@
    *  Get the number of milliseconds since the SDL library initialization.
    *
    *  This value wraps if the program runs for more than ~49 days.
+
+	  (GetTickCount suffers the same fate)
    *}
 function SDL_GetTicks: UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetTicks' {$ENDIF} {$ENDIF};
 
