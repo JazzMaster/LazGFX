@@ -48,11 +48,18 @@ type
     end;
 
 var
-//0 index
-    Rhombus:array [0..3] of polypts;
+//these are range checked.. minimum number of points are required.
+
+	Rect:PSDL_Rect;
+    Rhombus:PSDL_Rect; //tilted Rect
+
     Pentagon:array [0..4] of polypts;
     Hexagon:array [0..5] of polypts;
     Octogon:array [0..7] of polypts;
+	Polygon: array[0..MaxPoints] of PolyPts; //9+
+
+const
+  MaxPoints = 99; //arbitrary
 
 implementation
 

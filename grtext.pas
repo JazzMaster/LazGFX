@@ -1,17 +1,19 @@
-
 Unit grText;
-//graphics text functions-not fully implemented, just the basics.
+//graphics text functions.
 
-//vericle text- one char per "line" until end of screen or text- then pushes to the right.
+//**this unit has not been compile tested yet**
+// setFont and init and destroy functions work(at least with SDL by itself-pre abstraction)
 
 interface 
+uses
+	SDL2,SDL2_TTF,strings;
 				
-{$I bgisdl.inc}
+{$I lazgfx.inc}
 
 type
   str80=string(80);
   str256=string(256);
-  directions=(horizontal,verticle);
+  directions=(horizontal,verticle); //ord(horizontal)
   textinfo=record
         font      : PSDL_FontInfo;
         direction : directions;
@@ -44,12 +46,19 @@ procedure installUserFont(fontpath:string; font_size:integer; style:fontflags; o
 
 implementation
 
+//harp on default(built-in) or user if specified - since we dont know where the font files are.
+//ask for the info. if nil- reset to default font.
 
 procedure installUserFont(fontpath:string; font_size:integer; style:fontflags; outline:boolean);
 
 {
+BGI:
+  Fonts : array[0..4] of string[13] =
+  ('DefaultFont', 'TriplexFont', 'SmallFont', 'SansSerifFont', 'GothicFont');
+
+
 MOD: SDL, not BGI .CHR files which is where most code comes from.
-SDL uses TTF Fonts
+(SDL uses TTF Fonts)
 
 font_size: some number in px =12,18, etc
 path: (varies by OS) to font we want....
@@ -72,27 +81,17 @@ fontpath: MUST BE SPECIFIED - you will crash TTF routines(and possibly SDL and e
 
 begin
   
-  //initialization of TrueType font engine and loading of a font
-  if TTF_Init = -1 then begin
-    
-    if IsConsoleInvoked then begin
-        writeln('I cant engage the font engine, sirs.');
-    end;
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: I cant engage the font engine, sirs. ','OK',NIL);
-		
-    _graphResult:=-3; //the most likely cause, not enuf ram.
-    exit;
- 
   end;
   if FontPath:='' then begin
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: No Font Specified to Load. ','OK',NIL);
+		//use the internal one, LUKE.
+
+//....
+
 		_graphResult:=-7; //error 7 or 8....FontNotFound(Nothing)
 		exit;
   end;
   ttfFont := TTF_OpenFont( fontpath, font_size ); //should import and make a surface, like bmp loading
   //fg and bg color should be set for us(or changed by the user in some other procedure)
-  new(TextFore);
-  new(TextBack);
   TextFore:=_fgcolor;
   TextBack:=_bgcolor;
 
@@ -104,8 +103,6 @@ begin
   //dont render yet...just set it up.
 
 end;
-
-
 
 
 {
@@ -308,58 +305,6 @@ right now this pushes Y down- assuming theres room and assuming that the text do
 end;
 
 
-{
-function grReadLineWithLimits:string;
-
-
-begin
-
-      SDL_EnableKeyRepeat( SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_interval);
-      SDL_EnableUNICODE(1);
-      while not quit do begin
-
-   	   if (SDL_PollEvent( &event )) 
-	     case( event.type ) of
-	  
-         SDL_KEYDOWN:
-	       ch=event.key.keysym.unicode;
-	       if (isprint(ch) and i<len(SCAN_BUF)-1) // Check that buffer isn't full
-	       begin
-		     input[i]=ch;
-             inc(i);
-             if echo=true then
-				MPutString(ch);
-		     if input[i]=#10 then
-		        MPutString(current);	//draws the last entered char
-	      end
-	    else if (ch=SDLK_BACKSPACE and i>0) then begin
-		
-		  dec(i);
-		  dec(current);
-		
-          makespace(InternalFont, input[i]);//clears last entered char
-		  input[i]=#10;
-		end else if (ch=SDLK_RETURN) then begin
-			 
-			 TP.x = 0;		// Reset X position.
-		     TP.y :=TP.y+ internalFont.Surface.h;  //inc y position.
-		 
-        end;
-	  end;
-	  SDL_KEYUP:
-	    md := event.key.keysym.mod;
-	    if( (md and KMOD_RCTRL) or ( md and KMOD_LCTRL ) ) then begin
-	      if  (event.key.keysym.sym=SDLK_c)	then begin //Check for CTRL-C
-		     MPutString('Keyboard interrupt detected. Qutting...');
-		     SDL_Delay(200);
-		     exit(0);  
-		  end;
-       
-		end; 
-    end;
-end;
-}
-
 //write and writeln do not take chars by default.
 //that requires overloading..
 		
@@ -440,8 +385,15 @@ begin
   //give me the path to a font....
   //give me the size you want it
   //do we write it sideways or up and down like japanese?
+  if fontname= '' then begin //use internal font
+  
+  end;
+  //set some sane values- no writing off screen.
+  // and no too-tiny text.
 
-//  SDL_SetFont(fontname,direction,textsize); 
+  if textsize<1 then textsize=4;
+  if textsize >70 then textsize=70;
+  SDL_SetFont(fontname,ord(direction),textsize); 
 end;
 
 
