@@ -26,8 +26,7 @@ where terminals were ""miles away" from the server.
 
 I say if you dont need it- dont compile it in.
 
-Because its protocol based- I can throw a X11 session thru your web browser-or across the room- for example. 
-Same with PulseAudio.
+Because its protocol based- I can throw a X11 session thru your web browser-or across the room- for example. Same with PulseAudio.
 
 
 [X11 Basics](https://magcius.github.io/xplain/article/x-basics.html)

@@ -1,14 +1,15 @@
 Unit LazGFX; 
 
 {
-A "fully creative rewrite" of the "Borland Graphic Interface" in SDL(and maybe libSVGA) (c) 2017-18 (and beyond) Richard Jasmin
+A "fully creative rewrite" of the "Borland Graphic Interface" in SDL(and maybe libSVGA) 
+(c) 2017-18 (and beyond) Richard Jasmin
 -with the assistance of others.
 
 LPGL v2 ONLY. 
 You may NOT use a higher version.
 
 Commercial software is allowed- provided I get the backported changes and modifications.
-I dont care what you use the source code for- just give me credit.
+I dont care what you use the source code for.
 
 You must cite original authors and sub authors, as appropriate(standard attribution rules).
 DO NOT CLAIM THIS CODE AS YOUR OWN and you MAY NOT remove this notice.
@@ -18,10 +19,13 @@ I dont. YET.
 Thats the joke at the end of the README.
 
 Although designed "for games programming"..the integration involved by the USE, ABUSE, and REUSE-
-of SDL and X1Core/WinAPI highlights so many OS internals its not even funny.
+of SDL and X11Core/WinAPI/OpenGl/DirectX highlights so many OS internals its not even funny.
 
-Anyone serious enough to work with SDL on an ongoing basis- is doing some SERIOUS development,
+Anyone serious enough to work with SDL (or similar) on an ongoing basis- is doing some SERIOUS development,
 moreso if they are "expanding the reach" of SDL using a language "without much love" such as FreePascal/Lazarus.
+
+It is Linux that is the complex BEAST that needs taming.
+
 }
 
 interface
@@ -39,16 +43,48 @@ I write CODE for a living.
 Everything is mutable."
 
 
-FIXME: Logging and dialogs are more for testing SDL than for when you want things to just work.
-So expect me to rem the code out- use these "if shit is inconsistently fucked and you dont know why".
-We will however, log anyways (where appropriate-at least)
+SDL2_gfx routines are inadventently being added. 
+These are offered as an accessory to SDL- which I beleve is wrong.
+I am finding that most of SDL or SDL2 are being rewritten in this unit.
+Example is RGBA color routines- Ive already working on ports of most of those. 
+ 
+Get and (set) MAP RGB/RGBA can be done internally as long as we know the "set" color mode and depth.
+This is whats hard to "get" from the renderer.
+ 
+Threading and forking code is being transformed to FPC from SDL C routines.
+We dont need CThreads and CMem units if we use the Pascal ones.
+ 
+Callbacks can "hook timers" based on milisecond precision timer unit- 
+	and "process forking". We dont need "Kernel level interrupt code".
 
-This become one of those- "Do I want to see the output window or not" things.
+Input via XCallBack and/or Xlib is necessary for now. EVENT DRIVEN is the way to do this.
+ 
+We output to Surface(buffer/video buffer) via memcopy operations.
+
+Renderer code in SDL relies on vendor driver support (2D accel)
+OpenGL support depends on Xlib for input- but otherwise- is independant.
+
+Could one write a "straight OpenGL and Framebuffered Windows Desktop" clone?
+	Perhaps.
+	We would have to re write a ton of routines for window management and terminal access
+	
+For now settle for a Doom like experience. 
+	We start in text mode
+	We switch to graphics mode and do something
+	We drop back to text mode
+
+There isnt any way possible to minimize the needed libraries any further.
+	FrameBuffer/libSVGA/Xlib/WinAPI
+	Canvas/Mesa+Canvas/DirectX+Canvas
+
+Im still looking at Quartz seperately. OSX is funky in this regards.	
+90% of the routines in the CORE of this unit(not sub units) are setup/destroy of needed structures.
+
+Canvas ops are "mostly universal".
 
 
-Some notes before we begin:
 
-There are two ways to invoke this-
+There are two ways to invoke this unit-
 1- with GUI and Lazarus
 
 Project-> Application (kiss writeln() and readln() goodbye)
@@ -792,6 +828,24 @@ begin
   ViewPort.X2 := ViewWidth + StartXViewPort;
   ViewPort.Y2 := ViewHeight + StartYViewPort;
 end;
+ 
+
+  procedure SetAspectRatio(Xasp, Yasp : word);
+  begin
+    Xaspect:= XAsp;
+    YAspect:= YAsp;
+  end;
+
+
+  procedure SetWriteMode(WriteMode : smallint);
+  // TP sets the writemodes according to the following scheme (Jonas Maebe) 
+   begin
+     Case writemode of
+       xorput, andput: CurrentWriteMode := XorPut;
+       notput, orput, copyput: CurrentWriteMode := CopyPut;
+     End;
+   end;
+
 }
 
 //this was ported from (SDL) C- 
@@ -1351,6 +1405,48 @@ we are halfway there according to some Wolf3D and POSTAL devs:
 FS sets logical size but we want the window- a forced "physical" to be that size too.
 Logic size allows upscaling of smaller resolutions on our behalf.
 
+confirm this at the end:
+
+    lineinfo.linestyle:=solidln;
+     lineinfo.thickness:=normwidth;
+     // reset line style pattern 
+     for i:=0 to 15 do
+       LinePatterns[i] := TRUE;
+
+     // By default, according to the TP prog's reference 
+     // the default pattern is solid, and the default    
+     // color is the maximum color in the palette.       
+     fillsettings.color:=GetMaxColor;
+     fillsettings.pattern:=solidfill;
+     for i:=1 to 8 do
+       FillPatternTable[UserFill][i] := $ff;
+
+
+     _fgcolor:=white;
+
+
+     ClipPixels := TRUE;
+     // Reset the viewport 
+     StartXViewPort := 0;
+     StartYViewPort := 0;
+     ViewWidth := MaxX;
+     ViewHeight := MaxY;
+
+     // Reset CP 
+     CurrentX := 0;
+     CurrentY := 0;
+
+     SetBgColor(Black);
+
+     // normal write mode 
+     CurrentWriteMode := CopyPut;
+
+     // set font style 
+     CurrentTextInfo.font := DefaultFont;
+     CurrentTextInfo.direction:=HorizDir;
+     CurrentTextInfo.charsize:=1;
+     CurrentTextInfo.horiz:=LeftText;
+     CurrentTextInfo.vert:=TopText;
 }
 var
 	bpp,i:integer;
@@ -1831,12 +1927,9 @@ now- how do we check if sdl2 is supported- and fall back, given uses clauses can
 //sets up mode- then clears it in standard "BGI" fashion.
   SetGraphMode(Graphmode,wantFullScreen);
 
-//no atexit handler needed, just call CloseGraph
-//that was a nasty SDL surprise...
-
-{ here is how to set one up:
-basically it prevents random exits- all exits must call whatever is in the routine,
-in this case closegraph BEFORE leaving.
+{
+atexit handling:
+basically it prevents random exits- all exits must do whatever is in the routine.
 
 (You are a hung process if you dont leave at all)
 This ports -via the compiler- to some whacky assembler far calls.(hence the F)
@@ -1847,11 +1940,13 @@ This ports -via the compiler- to some whacky assembler far calls.(hence the F)
 $F+
 procedure MyExitProc;
 begin
+  //shut everything down
   ExitProc := OldExitProc;  Restore exit procedure address -cpu: pop exit()
   CloseGraph;               Shut down the graphics system 
 end; 
 $F-
 
+in reality SDL complains about this being setup- or at least how its done in C.
 }
 
 //If we got here- YAY!
@@ -2002,9 +2097,7 @@ $F-
 end; //initgraph
 
 
-{ 
-
-//these two are completely untested and syntax unchecked.
+//these two are completely untested 
 //they are not, by themselves "feature coplete dialogs", nor do they check input.
 //mimcs crt level windows in vga text modes
 
@@ -2104,7 +2197,7 @@ begin
     SDL_SetViewPort(ShrunkenRect);
 
 end;
-}
+
 
 procedure closegraph;
 var
@@ -2543,10 +2636,10 @@ procedure restorecrtmode; //wrapped closegraph function
 begin
   if (not LIBGRAPHICS_ACTIVE) then begin //if not in use, then dont call me...
 
-	if IsConsoleInvoked then 
-        LogLn('you didnt call initGraph yet...try again?') 
-    else
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Restore WHAT exactly?','Clarify the Stupid',NIL);
+	if IsConsoleInvoked then begin
+        LogLn('you didnt call initGraph yet...try again?');
+        exit;
+    end;    
   end;
   closegraph;
 end;
@@ -2783,7 +2876,7 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
 			//play fetch            
 
              gotcolor^.r:=(byte(^r) );
-		     gotcolor^.g:=(byte(^g) );;
+		     gotcolor^.g:=(byte(^g) );
 	         gotcolor^.b:=(byte(^b) );
 
             //shift adjust me
@@ -2818,18 +2911,17 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
       else
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get Pixel values...','OK',NIL);
          if IsConsoleInvoked then
-                LogLn('Cant Put Pixel values...');
+                LogLn('Cant Get Pixel values...');
     end; //case
 
     SDL_FreeSurface(Tempsurface);
     
 end;
 
-
 Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
-
+//use SDL_SetRenderDrawColor to set the _fgcolor
+//color is already set- just drop a pixel HERE
 begin
-//SDL_renderDrawPoint uses _fgcolor set with SDL_SetRenderDrawColor
 
   if (bpp<4) or (bpp >32) then
  
@@ -2839,9 +2931,55 @@ begin
                 LogLn('Cant Put Pixel values...');
 			exit;
   end;
+  
   SDL_RenderDrawPoint( Renderer, X, Y );
   
 end;
+
+//PUT a pixel HERE- with THIS color
+procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word; color:byte); overload;
+//indexed 
+var
+	someColor:PSDL_Color;
+	r,g,b:byte;
+
+begin
+//these are in an array already.
+
+//wrong routine called
+  if bpp>8 then exit;
+  
+  if (bpp=4) then
+	someColor:=Tpalette16.Colors[color]
+  else if (bpp=8) then
+	someColor:=Tpalette256.Colors[color];
+	
+	r:=somecolor^.r;
+	g:=somecolor^.g;
+	b:=somecolor^.b;
+
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+	SDL_SetRenderDrawColor(renderer, r, g, b, 255); 
+	SDL_RenderDrawPoint(renderer, x, y);
+end;
+
+//RGB colors above 256 paletted mode
+procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word; r,g,b:byte); overload;
+
+begin
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+	SDL_SetRenderDrawColor(renderer, r, g, b, 255); 
+	SDL_RenderDrawPoint(renderer, x, y);
+end;
+
+procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word; r,g,b,a:byte); overload;
+
+begin
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(renderer, r, g, b, a);
+	SDL_RenderDrawPoint(renderer, x, y);
+end;	
+	
 
 
 function getdrivername:string;
@@ -3362,6 +3500,18 @@ begin
    GetPixels:=pixels;
 end;
 
+//gotoxy
+   Procedure MoveTo(X,Y: smallint);
+  {********************************************************}
+  { Procedure MoveTo()                                     }
+  {--------------------------------------------------------}
+  { Moves the current pointer in VIEWPORT relative         }
+  { coordinates to the specified X,Y coordinate.           }
+  {********************************************************}
+    Begin
+     where.X := X;
+     where.Y := Y;
+    end;
 
 
 

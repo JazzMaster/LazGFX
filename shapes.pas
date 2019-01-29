@@ -149,6 +149,25 @@ filledPieRGBA(renderer, x, y, rad, start, finish, r, g, b, a);
 filledPolygonColor(renderer, vx, vy,numpts, color); 
 filledPolygonRGBA(renderer, vx, vy,numpts, r, g, b, a); 
 
+FPC code bug:
+   using FPC code but not using FPC? WHY?
+   if your going to rewrite the BGI- even with FPC units-then do it. 
+   -when you do it- distribute those units in a TPL file for TP/BP(5 or 7). 
+   (I dont see that happening)
+   
+   Problem is- you cant do this with BP or TP sources-its illegal.
+   (Borland forbids modified unit distribution)
+   
+   FreeDos supports FPC. 
+   So do come complaining to be about the code not working where its not supposed to.
+   If you want to run FreeDOS on modern hardware- or in a VM- be my guest.
+	  -Most people use X11, OSX, or Windows
+	   
+  Variables could be too small-8 or 16bit instead of 64.
+  Bear with the portage.	 
+   
+  procedures with "var inputs" that start with "GET" .hmmmmmm.....
+  (those are functions) 
 }
 
 type
@@ -193,6 +212,48 @@ implementation
 //dont assume- but it can be reasonably assumed that initgraph was called before
 //using anything here.
 
+procedure DrawPoly(numpoints : word;var polypoints);
+    type
+      ppointtype = ^pointtype;
+      pt = array[0..8190] of pointtype;
+    var
+      i, j, LastPolygonStart: longint;
+      Closing: boolean;
+    begin
+      if numpoints < 2 then
+        begin
+          
+          exit;
+        end;
+      Closing := false;
+      LastPolygonStart := 0;
+      for i:=0 to numpoints-2 do begin
+        { skip an edge after each 'closing' edge }
+        if not Closing then
+          line(pt(polypoints)[i].x, pt(polypoints)[i].y, pt(polypoints)[i+1].x, pt(polypoints)[i+1].y);
+
+        { check if the current edge is 'closing'. This means that it 'closes'
+          the polygon by going back to the first point of the polygon.
+          Also, 0-length edges are never considered 'closing'. }
+        if ((pt(polypoints)[i+1].x <> pt(polypoints)[i].x) or
+            (pt(polypoints)[i+1].y <> pt(polypoints)[i].y)) and
+            (LastPolygonStart < i) and
+           ((pt(polypoints)[i+1].x = pt(polypoints)[LastPolygonStart].x) and
+            (pt(polypoints)[i+1].y = pt(polypoints)[LastPolygonStart].y)) then
+        begin
+          Closing := true;
+          LastPolygonStart := i + 2;
+        end
+        else
+          Closing := false;
+      end;
+    end;
+
+
+  procedure PieSlice(X,Y,stangle,endAngle:smallint;Radius: Word);
+  begin
+    Sector(x,y,stangle,endangle,radius,(longint(Radius)*XAspect) div YAspect);
+  end;
 
 //is the line bounds within the current viewports rect?
 function LineClipped(x,y,w,h,startXViewport,startYViewport,ViewHeight,ViewWidth:DWord):boolean;
@@ -238,7 +299,7 @@ procedure SetLineStyle(LineStyle: word; Thickness: word);
    end;
 
 
-  procedure HLine(x,x2,y: smallint); {$ifndef fpc}far;{$endif fpc}
+  procedure HLine(x,x2,y: smallint); 
 
    var
     xtmp: smallint;
@@ -266,7 +327,7 @@ procedure SetLineStyle(LineStyle: word; Thickness: word);
    end;
 
 
-  procedure VLine(x,y,y2: smallint); {$ifndef fpc}far;{$endif fpc}
+  procedure VLine(x,y,y2: smallint); 
 
    var
     ytmp: smallint;
@@ -295,7 +356,7 @@ procedure DrawPoints(points:point; num:integer);
 
 begin
     if (sizeof(points) =0) or (num<2) then begin
-		Logln('DrawPoiints: empty points array passed to draw with or not enough points to draw.');     
+		Logln('DrawPoints: empty points array passed to draw with or not enough points to draw.');     
 		exit;
     end;
 	if num > 1 do begin
@@ -510,7 +571,7 @@ end;
 
 
 
-Function DefaultImageSize(X1,Y1,X2,Y2: smallint): longint; {$ifndef fpc}far;{$endif fpc}
+Function DefaultImageSize(X1,Y1,X2,Y2: smallint): longint; 
 Begin
   DefaultImageSize := (ViewportWidth*ViewportHeight);
 end;
