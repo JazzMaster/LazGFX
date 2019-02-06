@@ -1,4 +1,3 @@
-//from "sdl.h"
 
 const
 
@@ -28,6 +27,9 @@ const
  *  This function initializes  the subsystems specified by flags
  *  Unless the SDL_INIT_NOPARACHUTE flag is set, it will install cleanup
  *  signal handlers for some commonly ignored fatal signals (like SIGSEGV).
+ * 
+ *  -Problem is: SDL2 sets NO PARACHUTE flag by default now.
+ *  I have the needed code -but its not here yet.
  *}
 
 function SDL_Init(flags: UInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_Init' {$ENDIF} {$ENDIF};

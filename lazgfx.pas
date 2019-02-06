@@ -622,24 +622,34 @@ uses
 //if we need to use one or the other- 
 //  we will use CThreads. Currently the syntax is for "Pascal Threads".
 
+//ctypes: cint,uint,PTRUint,PTR-USINT,sint...etc.
 
-    cthreads,cmem,ctypes,sysUtils,{$IFDEF unix}baseunix,{$ENDIF}
+    cthreads,cmem,ctypes,sysUtils,{$IFDEF unix}baseunix, {$ENDIF}
 
-//cint,uint,PTRUint,PTR-USINT,sint...etc.
 
-	
-// A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust "console" logging...
-
+//theres a non-MS windows? os2warp?
+  
 {$IFDEF MSWINDOWS} //as if theres a non-MS WINDOWS?
-      MMsystem, //audio subsystem
+     Windows,MMsystem, //audio subsystem
 {$ENDIF}
 
+// A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust.
+//Most likely youre using one of these.
+
+//LCL(Lazarus) wont fire unless Windows or X11 or Darwin(Quartz) are active.
+//its such BS that framebuffer/XTerm routines were never written and everyone assumes X11
+//is fired remotely instead.
 
   {$IFDEF LCL}
     {$IFDEF MSWINDOWS}
       {$DEFINE NOCONSOLE }
     {$ENDIF}
-    //LCL is linked in but we are not in windows. Not critical. If you want output, set it up.
+    //UNIX
+    
+      X, XLib,
+      //LCL is linked in but we are not in windows.
+      //remember Lazarus by iteslf doesnt output debugging windows. 
+      //you have to enable this yourself.
       LazUtils,  
   {$ENDIF}
 
@@ -687,9 +697,6 @@ uses
 
 //GL, GLU - not used yet, but works.
 
-//SDL2_gfx is untested as of yet. functions start with GPU_ not SDL_. 
-//The entire SDL is NOT duplicated there. gfx is "specific optimized routines"
-
 {$IFDEF debug} ,heaptrc {$ENDIF} 
 
 //Carbon is OS 8 and 9 to OSX API
@@ -699,6 +706,8 @@ uses
 
 //Cocoa (OBJ-C) is the new API
 //OSX 10.5+
+
+//,CocoaAll
 {$IFDEF darwin}
 	{$linkframework Cocoa}
     {$linklib SDLimg}
@@ -943,9 +952,37 @@ The reason this is remmed out is bc I want YOu to do this.
 The code is however-reasonable- but untested.
 
 
+some of these are funky C ops unneccessarily. RW/RB ops can be done normally(except for contexts).
 
 }
 
+//  Load a set of mappings from a file, filtered by the current SDL_GetPlatform()
+function SDL_GameControllerAddMappingsFromFile(Const FilePath:PAnsiChar):SInt32;
+begin
+  Result := SDL_GameControllerAddMappingsFromRW(SDL_RWFromFile(FilePath, 'rb'), 1)
+end;
+
+function SDL_WindowPos_IsUndefined(X: Variant): Variant;
+begin
+  SDL_WindowPos_IsUndefined := (X and $FFFF0000) = SDL_WINDOWPOS_UNDEFINED_MASK;
+end;
+
+function SDL_WindowPos_IsCentered(X: Variant): Variant;
+begin
+  SDL_WindowPos_IsCentered := (X and $FFFF0000) = SDL_WINDOWPOS_CENTERED_MASK;
+end;
+
+function SDL_GetEventState(type_: UInt32): UInt8;
+begin
+  SDL_GetEventState := SDL_EventState(type_, SDL_QUERY);
+end;
+
+
+//accellerated rendering requires locked surfaces?
+function SDL_MUSTLOCK(Const S:PSDL_Surface):Boolean;
+begin
+  SDL_MUSTLOCK := ((S^.flags and SDL_RLEACCEL) <> 0)
+end;
 
 procedure IntHandler;
 //This is a dummy routine.
@@ -3384,6 +3421,15 @@ begin
    end;
 end;
 
+function SDL_LoadBMP(_file: PAnsiChar): PSDL_Surface;
+begin
+  SDL_LoadBMP:= SDL_LoadBMP_RW(SDL_RWFromFile(_file, 'rb'), 1);
+end;
+
+function SDL_SaveBMP(Const surface:PSDL_Surface; Const filename:AnsiString):sInt32;
+begin
+   SDL_SaveBMP:= SDL_SaveBMP_RW(surface, SDL_RWFromFile(PAnsiChar(filename), 'wb'), 1)
+end;
 
 procedure SaveBMPImage(filename:string);
 //hmmm stuck with this for time being

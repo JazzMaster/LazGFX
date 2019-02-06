@@ -82,75 +82,9 @@ Think of it this way:
 	If you make it 3d- you have sticky buns. (did someone steal your sweet roll?)
 
 
-
-sdl_GPU functions?
-
-// Circle 
-
-circleColor(renderer,x, y, rad,colour); 
-circleRGBA(renderer,x, y, rad, r, g, b, a); 
-
-//Filled Circle
-
-filledCircleColor(renderer,x, y, rad,colour); 
-filledCircleRGBA(renderer,x, y, rad,r, g, b, a); 
-
-// Ellipse (lopsided circle)
-
-ellipseColor(renderer,x, y, rx, ry,colour); 
-
-ellipseRGBA(renderer,x, y, rx, ry, r, g, b, a); 
-
-// Filled Ellipse 
-
-filledEllipseColor(renderer, x, y, rx, ry,colour); 
-filledEllipseRGBA(renderer,x, y, rx, ry, r, g, b, a); 
-
-// Trigon /Triangle 
-
-trigonColor(renderer, x1, y1, x2, y2, x3, y3,colour); 
-trigonRGBA(renderer, x1, y1, x2, y2, x3, y3,r, g, b, a); 
-
-// Filled Trigon 
-
-filledTrigonColor(renderer, x1, y1, x2, y2, x3, y3, colour); 
-filledTrigonRGBA(renderer, x1, y1, x2, y2, x3, y3,r, g, b, a); 
-
-
-// Rounded-Corner Rectangle (3DBAR)
-
-roundedRectangleColor(renderer, x1, y1, x2, y2, rad, colour); 
-roundedRectangleRGBA(renderer, x1, y1, x2, y2, rad, r, g, b, a); 
-
-// Rounded-Corner Filled rectangle (Box or button) 
-
-roundedBoxColor(renderer,x1, y1, x2, y2, rad,colour); 
-roundedBoxRGBA(renderer, x1, y1, x2, y2, rad,r, g, b, a); 
-
-
-// Arc 
-
-arcColor(renderer, x, y, rad, start, finish,colour); 
-arcRGBA(renderer,x, y, rad, start, finish, r, g, b, a); 
-
-
-// Pie 
-
-pieColor(renderer,x, y, rad, start, finish, colour); 
-pieRGBA(renderer,x, y, rad, start, finish, r, g, b, a); 
-
-// Filled Pie 
-
-filledPieColor(renderer,x, y, rad, start, finish, colour); 
-filledPieRGBA(renderer, x, y, rad, start, finish, r, g, b, a); 
-
-// Filled Polys 
-
-filledPolygonColor(renderer, vx, vy,numpts, color); 
-filledPolygonRGBA(renderer, vx, vy,numpts, r, g, b, a); 
-
 FPC code bug:
-   using FPC code but not using FPC? WHY?
+   FPC SDL code- checks for "Not Defined FPC" WHY?
+
    if your going to rewrite the BGI- even with FPC units-then do it. 
    -when you do it- distribute those units in a TPL file for TP/BP(5 or 7). 
    (I dont see that happening)
@@ -211,6 +145,25 @@ procedure DrawPoints(points:point; num:integer);
 implementation
 //dont assume- but it can be reasonably assumed that initgraph was called before
 //using anything here.
+
+
+function SDL_RectEmpty(const r: PSDL_Rect): Boolean;
+begin
+  SDL_RectEmpty := (r^.w <= 0) or (r^.h <= 0);
+end;
+
+function SDL_RectEquals(const a, b: PSDL_Rect): Boolean;
+begin
+  SDL_RectEqual := (a^.x = b^.x) and (a^.y = b^.y) and (a^.w = b^.w) and (a^.h = b^.h);
+end;
+
+function SDL_PointInRect(const p: PSDL_Point; const r: PSDL_Rect): Boolean;
+begin
+  SDL_PointInRect := 
+    (p^.x >= r^.x) and (p^.x < (r^.x + r^.w)) 
+    and 
+    (p^.y >= r^.y) and (p^.y < (r^.y + r^.h))
+end;
 
 procedure DrawPoly(numpoints : word;var polypoints);
     type

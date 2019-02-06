@@ -50,22 +50,6 @@ unit sdlticks;
 { Programming Notes                                                            }
 { -----------------                                                            }
 {                                                                              }
-{                                                                              }
-{                                                                              }
-{                                                                              }
-{ Revision History                                                             }
-{ ----------------                                                             }
-{                                                                              }
-{   September   23 2004 - DL : Initial Creation                                }
-{
-  $Log: sdlticks.pas,v $
-  Revision 1.2  2006/11/08 08:22:48  savage
-  updates tp sdlgameinterface and sdlticks functions.
-
-  Revision 1.1  2004/09/30 22:35:47  savage
-  Changes, enhancements and additions as required to get SoAoS working.
-
-}
 {******************************************************************************}
 
 interface
@@ -190,6 +174,11 @@ begin
 
   // reset the timer
   FLockFPSLastTime := currentTime;
+end;
+
+function SDL_TICKS_PASSED(Const A, B:UInt32):Boolean;
+begin
+   Result := ((Int64(B) - Int64(A)) <= 0)
 end;
 
 end.

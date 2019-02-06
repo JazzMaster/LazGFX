@@ -1,3 +1,40 @@
+//SDL functions
+function SDL_PIXELFLAG(X: Cardinal): Cardinal;
+begin
+  SDL_PIXELFLA := (X shr 28) and $0F;
+end;
+
+//most used.
+function SDL_PIXELTYPE(X: Cardinal): Cardinal;
+begin
+  SDL_PIXELTYPE:= (X shr 24) and $0F;
+end;
+
+function SDL_PIXELORDER(X: Cardinal): Cardinal;
+begin
+  SDL_PIXELORDER := (X shr 20) and $0F;
+end;
+
+function SDL_BITSPERPIXEL(X: Cardinal): Cardinal;
+begin
+  SDL_BITSPERPIXEL := (X shr 8) and $FF;
+end;
+
+//end most used
+
+function SDL_PIXELLAYOUT(X: Cardinal): Cardinal;
+begin
+  SDL_PIXELLAYOUT := (X shr 16) and $0F;
+end;
+
+
+function SDL_IsPixelFormat_FOURCC(format: Variant): Boolean;
+begin
+  {* The flag is set to 1 because 0x1? is not in the printable ASCII range *}
+  SDL_IsPixelFormat_FOURCC:= format and SDL_PIXELFLAG(format) <> 1;
+end;
+
+
 //semi-generic color functions
 
 

@@ -41,8 +41,27 @@ procedure GetTextSettings(TextInfo : TextSettingsType);
 procedure SetTextJustify(direction:directions);
 procedure SetTextStyle(font:string; direction : directions; font_size:integer;);
 
+//there is no INSTALLING.
+
 //style is italic,bold,normal,etc...
-procedure installUserFont(fontpath:string; font_size:integer; style:fontflags; outline:boolean);
+procedure SetFont(fontpath:string; font_size:integer; style:fontflags; outline:boolean);
+
+//from gfx unit-
+//advanced font section
+procedure gfxPrimitivesSetFont(Const fontdata: Pointer; cw, ch: uInt32); 
+
+//(verticle text is rotated 90 degrees)
+Procedure gfxPrimitivesSetFontRotation(rotation: uInt32); 
+
+//write font data to screen AND set color
+
+//writeChar
+Function characterColor(renderer: PSDL_Renderer; x, y: sInt16; c: Char; colour: uInt32):sInt32; 
+Function characterRGBA(renderer: PSDL_Renderer; x, y: sInt16; c: Char; r, g, b, a: uInt8):sInt32; 
+//writeLn
+Function stringColor(renderer: PSDL_Renderer; x, y: sInt16; Const str: PChar; colour: uInt32):sInt32; 
+Function stringRGBA(renderer: PSDL_Renderer; x, y: sInt16; Const syt: PChar; r, g, b, a: uInt8):sInt32; 
+
 
 implementation
 
