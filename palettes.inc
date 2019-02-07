@@ -421,11 +421,11 @@ procedure initPalette16;
 
 var
    num,i:integer;
-//80 in hex is beyond the halfway point at 128. 127 (7f) is more correct.
 
 begin  
 //Color Sequence:
 //K HiR HiG HiB HiC HiM HiY HiGR LoGr LoR LoG LoB LoC LoM LoY W
+//these are binary driven FULL ON /FULL OFF
 
 valuelist16[0]:=$00;
 valuelist16[1]:=$00;
@@ -451,19 +451,19 @@ valuelist16[15]:=$ff;
 valuelist16[16]:=$00;
 valuelist16[17]:=$ff;
 
-valuelist16[18]:=$ff;
+valuelist16[18]:=$00;
 valuelist16[19]:=$ff;
-valuelist16[20]:=$00;
+valuelist16[20]:=$ff;
 
+//2 greys
+valuelist16[21]:=$f0;
+valuelist16[22]:=$f0;
+valuelist16[23]:=$f0;
 
-valuelist16[21]:=$c0;
-valuelist16[22]:=$c0;
-valuelist16[23]:=$c0;
-
-valuelist16[24]:=$7f;
-valuelist16[25]:=$7f;
-valuelist16[26]:=$7f;
-
+valuelist16[24]:=$0f;
+valuelist16[25]:=$0f;
+valuelist16[26]:=$0f;
+//end greys
 
 valuelist16[27]:=$7f;
 valuelist16[28]:=$00;
@@ -489,10 +489,7 @@ valuelist16[42]:=$00;
 valuelist16[43]:=$7f;
 valuelist16[44]:=$7f;
 
-valuelist16[45]:=$ff;
-valuelist16[46]:=$ff;
-valuelist16[47]:=$ff;
-
+//white is specified later(wonky palette)
 
    i:=0;
    num:=0; 
@@ -500,53 +497,27 @@ valuelist16[47]:=$ff;
       Tpalette16.colors[num]^.r:=valuelist16[i];
       Tpalette16.colors[num]^.g:=valuelist16[i+1];
       Tpalette16.colors[num]^.b:=valuelist16[i+2];
-      Tpalette16.colors[num]^.a:=$ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
-      //see the remmed out notes below
+      Tpalette16.colors[num]^.a:=$ff;
       inc(i,3);
       inc(num); 
-  until num=14;;
+  until num=7;
 
-//This is the proper way to do it but we have transparencys, not just intensities now.
-//mucking w the alpha bit changes opacity levels- we dont want that.
-//so we assume we are not going to "muck with it". 
-//YOU can if you want.
-
-{
-//yes this is hackish- as were the days of (m)CGA...
-
-   i:=0;
-   num:=0; 
-   for num:=0 to 7 do begin 
-      Tpalette16.colors[num].r:=valuelist16[i];
-      Tpalette16.colors[num].g:=valuelist16[i+1];
-      Tpalette16.colors[num].b:=valuelist16[i+2];
-      Tpalette16.colors[num].a:=#ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
+   i:=25;
+   num:=8; 
+   repeat 
+      Tpalette16.colors[num]^.r:=valuelist16[i];
+      Tpalette16.colors[num]^.g:=valuelist16[i+1];
+      Tpalette16.colors[num]^.b:=valuelist16[i+2];
+      Tpalette16.colors[num]^.a:=$0f;
       inc(i,3);
       inc(num); 
-  end;
-
-
-  num:=8;//force it
-  i:=24;
-   for num:=8 to 14 do begin 
-      Tpalette16.colors[num].r:=valuelist16[i];
-      Tpalette16.colors[num].g:=valuelist16[i+1];
-      Tpalette16.colors[num].b:=valuelist16[i+2];
-      Tpalette16.colors[num].a:=#7f; 
-      inc(i,3);
-      inc(num); 
-  end;
-
-  Tpalette16.colors[15].r:=valuelist16[45];
-  Tpalette16.colors[15].g:=valuelist16[46];
-  Tpalette16.colors[15].b:=valuelist16[47];
-  Tpalette16.colors[15].a:=#ff; 
-
-Color Sequence:
-
-K HiR HiG HiB HiC HiM HiY HiGR LoGr LoR LoG LoB LoC LoM LoY W
-}
-
+  until num=14;
+  //white
+      Tpalette16.colors[15]^.r:=$ff;
+      Tpalette16.colors[15]^.g:=$ff;
+      Tpalette16.colors[15]^.b:=$ff;
+      Tpalette16.colors[15]^.a:=$ff;
+  
 
 TPalette16.DWords[0]:=$000000ff;
 
@@ -554,21 +525,22 @@ TPalette16.DWords[1]:=$ff0000ff;
 TPalette16.DWords[2]:=$00ff00ff;
 TPalette16.DWords[3]:=$ffff00ff;
 
+//cmy is inverted of rgb
 TPalette16.DWords[4]:=$0000ffff;
 TPalette16.DWords[5]:=$ff00ffff;
-TPalette16.DWords[6]:=$ffff55ff;
+TPalette16.DWords[6]:=$00ffffff;
 
+//greys
+TPalette16.DWords[7]:=$f0f0f0ff;
+TPalette16.DWords[8]:=$0f0f0f0f;
 
-TPalette16.DWords[7]:=$c0c0c0ff;
-TPalette16.DWords[8]:=$7f7f7fff;
+TPalette16.DWords[9]:=$ff00000f;
+TPalette16.DWords[10]:=$00ff000f;
+TPalette16.DWords[11]:=$ffff000f;
 
-TPalette16.DWords[9]:=$7f0000ff;
-TPalette16.DWords[10]:=$007f00ff;
-TPalette16.DWords[11]:=$7f7f00ff;
-
-TPalette16.DWords[12]:=$00007fff;
-TPalette16.DWords[13]:=$7f007fff;
-TPalette16.DWords[14]:=$007f7fff;
+TPalette16.DWords[12]:=$0000ff0f;
+TPalette16.DWords[13]:=$ff00ff0f;
+TPalette16.DWords[14]:=$00ffff0f;
 
 TPalette16.DWords[15]:=$ffffffff;
 

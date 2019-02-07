@@ -8,18 +8,22 @@ A "fully creative rewrite" of the "Borland Graphic Interface" in SDL(and maybe l
 LPGL v2 ONLY. 
 You may NOT use a higher version.
 
-Commercial software is allowed- provided I get the backported changes and modifications.
+Commercial software is allowed- 
+ 	provided I get the backported changes and modifications(in source format).
+
 I dont care what you use the source code for.
 
 You must cite original authors and sub authors, as appropriate(standard attribution rules).
 DO NOT CLAIM THIS CODE AS YOUR OWN and you MAY NOT remove this notice.
 
-GetText .po can handle translations- if you know how to use it. 
-I dont. YET.
-Thats the joke at the end of the README.
+---
 
 Although designed "for games programming"..the integration involved by the USE, ABUSE, and REUSE-
-of SDL and X11Core/WinAPI/OpenGl/DirectX highlights so many OS internals its not even funny.
+of SDL and X11Core/WinAPI(GDI)/Cairo(GTK/GDK)/OpenGL/DirectX highlights so many OS internals its not even funny.
+
+EGL semi-supports(RasPI) framebuffer without X11. Lets see if we can hack in FrameBuffer support.
+
+SDL can be used by non-game programmers to ease development of multimedia based applications.
 
 Anyone serious enough to work with SDL (or similar) on an ongoing basis- is doing some SERIOUS development,
 moreso if they are "expanding the reach" of SDL using a language "without much love" such as FreePascal/Lazarus.
@@ -34,7 +38,7 @@ interface
 -Anonymous C kernel dev (that runs a library)
 
 This is not -and never will be- your program. Sorry, Jim.
-RELEASES are stable builds and nothing else is guaranteed. See the DEMOs for details.
+RELEASES are stable builds and nothing else is guaranteed. 
 
 The quote that never was- 
 
@@ -42,14 +46,22 @@ The quote that never was-
 I write CODE for a living. 
 Everything is mutable."
 
-
 SDL2_gfx routines are inadventently being added. 
+
 These are offered as an accessory to SDL- which I beleve is wrong.
 I am finding that most of SDL or SDL2 are being rewritten in this unit.
+
 Example is RGBA color routines- Ive already working on ports of most of those. 
  
 Get and (set) MAP RGB/RGBA can be done internally as long as we know the "set" color mode and depth.
-This is whats hard to "get" from the renderer.
+This is whats hard to "get" from the renderer and requires indirect Surface recapturing. THIS IS SLOW.
+What needs to be done is store the info somewhere until it changes, then update the datastore.
+
+	Then we dont need "advanced operations" to probe "simple data".
+			This works like background color checks. (variable has to assigned at some point)
+			
+	This is merely ONE of SDLs flaws(and what slows down operations). 
+	
  
 Threading and forking code is being transformed to FPC from SDL C routines.
 We dont need CThreads and CMem units if we use the Pascal ones.
@@ -67,6 +79,8 @@ OpenGL support depends on Xlib for input- but otherwise- is independant.
 Could one write a "straight OpenGL and Framebuffered Windows Desktop" clone?
 	Perhaps.
 	We would have to re write a ton of routines for window management and terminal access
+
+For framebuffer:
 	
 For now settle for a Doom like experience. 
 	We start in text mode
@@ -81,8 +95,11 @@ Im still looking at Quartz seperately. OSX is funky in this regards.
 90% of the routines in the CORE of this unit(not sub units) are setup/destroy of needed structures.
 
 Canvas ops are "mostly universal".
+The differences in code are where the surface(Canvas) operations point to. (a surface is a surface is a surface)
+	-For that matter:
+			(A texture is a texture is a texture)
 
-
+INVOKATION:
 
 There are two ways to invoke this unit-
 1- with GUI and Lazarus
@@ -90,7 +107,11 @@ There are two ways to invoke this unit-
 Project-> Application (kiss writeln() and readln() goodbye)
 You can only log output.
 
-2- without GUI/Lazarus as a Console Application
+
+2- as a Console Application
+
+In Lazarus: 
+
 Project-> Console App or
 Project-> Program
 
@@ -98,38 +119,40 @@ Set Run Parameters:
 "Use Launcher" -to enable runwait.sh and console output (otherwise you might not see it)
 
 -This was the old school "compiler output window" in DOS Days.
--Yes, Im that old.
 
 
+Within FP application itself(FP IDE):
 
--One uses Classes and CThreads, the other doesnt.(This unit will suck in CThreads.)
-This method offers a Console output and Readln() writeln().
+	-Just dont "uses" anything LCL or related.
+	-Write the code normally
+	-Check the output window
+
+This method offers Readln() / writeln() - just not thru SDL.
+
 What you wont get is the LCL and components and nice UI- but we are using SDL for that.
 :-P
 
-
-While Id reccommend the 2nd method- Lord knows what you are using this for.
-Most Games (and Game consoles dont have a debugging output window)
 
 -THIS CODE WILL CHECK WHICH IS USED and log accordingly.
 
 ---
 
-we need to switch to Texture ops (where possible), not Surface ones and take full use of the GPU.
-The conversion is underway from SDL1.2 to 2.0
+Theres confusion in SDL:
+	SDL 1.2 uses Surface ops
+	SDL 2.x builds on Surfaces(you still need them in some cases) and adds Accellerated GPU rendering
+		Most ops will switch to Render calls, but not all.
+		Function calls were modified between SDL 1 and 2.
+		all uses clauses and include files must point to SDL2. You cannot mix 1.2 and 2.x.
+		
+	SDL_GPU isnt really an advanced unit- its optimized unit "utilizing the renderer".
+		I inadvertently "half-assed" half the color routines myself.
+			Fpc Dev team(more stable codebase based upon Borlands BGI) has the remaining routines.
+				These may not be the most optimal routines- they are the most tested.
 
 TODO:
 
 (createTextureFromSurface must use surface^.format -of chosen bpp- or it could be off)
-(The bpp limitation is intentional with this unit due to backward compatibility)
 
-Should leave just: 
-
-window
-renderer
-
-layers active- 
-freeing a lot of ram if surface ops arent needed, and limiting to one texture- if needed
 
 We will have some limits:
 
@@ -141,18 +164,16 @@ We will have some limits:
         The only way to work with these systems is to clear EVERYTHING REPEATEDLY or use CPU and RAM to your advantage.
         (There is a way..)
 
-This code was a mess because of SDL1.2 implementation all over the place.
-Many dont understand its use- then get thrown and force fed SDL2.x and GPU_ opcodes.
-I am working on cleaning this up. Lord knows I was confused.
 
 How to write good games:
 
 SDL1.2 (learn to page flip)
 SDL2.0 (renderer and "render to textures as surfaces")
-SDL_GPU
 OGL_SDL (assisted)
+
 OGL (straight)
-O-AL (audio)
+
+O-AL is one way to use audio. There are several.
 
 You need to know:
 
@@ -160,15 +181,12 @@ You need to know:
 
 ---
 
-There is a lot of plugins for SDL/SDLv2 and that initially confused the heck out of me.
-Most of those were ported to FPC by JEDI team. I have cleaned that mess up, except for depends.
-
         SDL Extensions:
 
                 SDL(2)_Image
-                SDL(2)_gfx
+                SDL(2)_Mixer
                 SDL(2)_net
-                SDL(2)_rtf
+                SDL(2)_rtf (reads rtf files)
                 SDL(2)_TTF
 
 mercurial repo(in case you cant find it):
@@ -177,33 +195,39 @@ mercurial repo(in case you cant find it):
 
 
 SDL_Image is JPEG, TIF, PNG support (BMP is in SDL(core) v1.2)
-SDL_GFX is supposed to utilize mmx and better use the GPU. 
-The rest of the routines ARE USED.
+
 
 If you are using non-unices you will need to install these packages or build the sources to get the compiled units.
 Im looking for the latter but sometimes I get the sources instead. Sorry.
 However, THE MAIN THING is that we can use them as soon as the "INTERFACE" code is written(HERE).
 
+If you need to see SDL in action:
 
-Nexiuz and Postal use SDL.
-Hedgewars uses SDL v1.2, iirc...
+	Nexiuz and Postal use SDL.
+	Hedgewars uses SDL v1.2.
+	SuperTux uses SDL 2( I think)
+
 
 The difference between an ellipse and a circle is that "an ellipse is corrected for the aspect ratio".
-
-
-TODO: 
-
-    split this unit out- everything is "here" and should be seperate units.
-    get tris and circles and elippses working
-    aspect stretching??? (SDL can handle some of this internally)
+	Circles are "squarely PIE"- or have equal slices of the pie.(Like a rectangle)
+	Ellipses do not necessarily- they could be tall, or wide- as well.
 
 FONTS:
 
     I have some base fonts- most likely your OS has some - but not standardized ones.
     We do NOT use bitmapped fonts- we use TTF.
-    In many ways this is better.
-    SDL_gfx has a 8x8 font embedded into the code headers. I will tap it for the missing pattern data.
+	8x8 internal routines were based on ANCIENT Video BIOS specs.
+		Why cant we use another TTF file- and make it required distribution- instead??
+		NOW:
+			8x8 is a Code styled font(that looks old school)
+		
+	Furthermore 8x8 fonts usually use BITPACKED code- very ancient methods.
+	(This is SLOW in SDL when having to write pixels and unneccessarily uses surface ops with the renderer)
+	Old CHR support(FPC) exists, however, also is ancient. TTF and OTF are the new standard.
+		Furtermore- CHR files do not scale well. Neither will 8x8 BITPACKED fonts.
 
+
+LazGFX:
 
 This code is Useful when you need VESA modes but cant have them because X11, etc. is running.
 This code **should** port or crossplatform build, but no guarantees.
@@ -211,7 +235,7 @@ This code **should** port or crossplatform build, but no guarantees.
 SEMI-"Borland compatible" w modifications.
 
 Lazarus graphics unit is severely lacking...use this instead.
-Most of these functions(Text, polygons) are actually implemented in FPC (LCL) TCanvas 
+
 
 The FPC devs assume you can understand OpenGL right away...
 I dont agree w "basic drawing primitives" being an objectified mess.
@@ -222,25 +246,27 @@ SDL and JEDI have been poorly documented.
 1- FPC code seems doggishly slow to update when bugs are discovered. Meanwhile SDL chugs along in C.
 (Then we have to BACKPORT the changes again.)
 
-2- I have no way to know if threads requirement is met(seems so) that SDL v1.2 libGraph units in C are encountering.
-
-3- The "pascal/lazarus graphics unit" changes as per the HOST OS. 
-Usually not a problem unless doing kernel development -but its an objective Pascal nightmare.
-(too many functions are wrapped). 
+2- I have no way to know if threads requirement is met(seems so) 
+	-SDL v1.2 libGraph units (in C) hit "threading required" bugs.
 
 SDL fixes this for us. 
 
-
 SDL support adds "wave, mp3, etc" sounds instead of PC speaker beeping
 (see the 'beep' command and enable the module -its blacklisted-on Linux) 
-and adds mouse and joystick, even haptic/VR feedback support.
 
-However, "licensing issues" (Fraunhoffer/MP3 is a cash cow) -as with qb64 which also uses SDL- wreak havoc on us. 
+	-and adds mouse and joystick, even haptic/VR feedback support.
+
+However, "licensing issues" (Fraunhoffer/MP3 is a cash cow) 
+ 	-as with qb64 which also uses SDL
+ 	-wreak havoc on us. 
+ 	
 Yes- I Have a merge tree of qb64 that builds, just ask...
+
 
 The workaround is to use VLC/FFMpeg or other libraries. 
 I may in fact choose this over SDL Audio functions.
 
+LFB:
 
 Linear Framebuffer is virtually required(OS Drivers) and bank switching has had some isues in DOS.
 A lot of code back in the day(20 years ago) was written to use "banks" due to color or VRAM limitations.
@@ -258,6 +284,7 @@ As such-also due to "ROM bugs", some "yellows" were actually "oranges".
 Full compatibilty CGA will require a lot of aspirin and "funky math" as well as code rewrites Im not ready for.
 The idea is that the code otherwise works.
 
+
 THIS CODE is written for 32 AND 64 bit systems.
 TP code has a 32bit Overlay-> VM patching unit. 
 (I suggest you use it. )
@@ -267,8 +294,6 @@ Memory addressing MMU/PMU, etc. allows such things that Borland Pascal does not 
 
 Apparently the SDL/JEDI never got the 64-bit bugfix(GitHub, people...).
 (A longword is not a longword when its a QWord...)
-
-USERFIXME: Error 216 usually indicates BOUNDS errors(memory alloc and not FREE--a "memory leak")
 
 ----
 
@@ -320,8 +345,11 @@ NewA:=$ff;
 
 16bit can also be 15bit color:
 
-(in mode 5551- we throw the A bit away. 
-shr 3 on all bits- "a one-bit alpha layer" is hard to write code for.)
+(in mode 5551- we usually throw the A bit away. 
+	How do we implement 1 bit ALPHA?
+	ON/off indicates 2 sets of available colors(mCGA mimicks this in text mode w 16 colors)
+		-10:10:10:0 is the correct color mode- 64K=(32K *2)
+	On/off/halfway is 2bit ALPHA-4 choices)
 
 
 RGB16->32:
@@ -333,31 +361,80 @@ NewA:=A;
 
 color math:
 
-        We are using SDL to do this hacking for us.
+        We are using SDL to do this hacking for us but its not overly difficult to do.
 
-//to get the longword
-myColor := (R or G or B or A);
 
-//to break down into components using RGBA mask(ARGB is backwards mask)
 
-Red := (myColor    and 0xFF000000);
-Green := ((myColor and 0x00FF0000) shr 8);
-Blue := ((myColor  and 0x0000FF00) shr 16);
-Alpha := ((myColor and 0x000000FF) shr 24);
+SDL wants the SurfaceFormat,first. However, its not critical to do the color conversion operations.
+It just helps us to know which routine to call based on bit depth(bpp).
 
+It can be assumed that:
+	The programmer knows what depth we are in
+	At the very least -the current set video mode- knows this information
+	So why does SDL want to modify the color depth on us? (We shouldnt be using OpenGL just yet.)
+
+
+//SDL internal MapRGB and GetRGB
+
+function GetDWordFromRGB(r,g,b,a:byte):DWord;
+var
+	mycolor:DWord;
+begin	
+	myColor := (R or G or B or A);
+end;
+
+function GetRGBFromDWord(someDWord:DWord):SDL_Color;
+//8bit depth only- as written
+var
+	Red,Green,Blue,Alpha:byte;
+
+//ARGB (big endian) is backwards mask, as shown here
+
+begin	
+	Red := (myColor    and 0xFF000000);
+	Green := ((myColor and 0x00FF0000) shr 8);
+	Blue := ((myColor  and 0x0000FF00) shr 16);
+	Alpha := $FF;
+end;
+
+
+function GetRGBFromDWord(someDWord:DWord):SDL_Color;
+//32bit depth only- as written
+var
+	Red,Green,Blue,Alpha:byte;
+
+//ARGB (big endian) is backwards mask, as shown here
+
+begin	
+	Red := (myColor    and 0xFF000000);
+	Green := ((myColor and 0x00FF0000) shr 8);
+	Blue := ((myColor  and 0x0000FF00) shr 16);
+	Alpha := ((myColor and 0x000000FF) shr 24);
+end;
+
+
+Colors:
 
 (try not to confuse BIT with BYTE here)
 
-8bit is paletted RGB 
-(for our use- so is anything less-we ignore alpha-bits here to ease programming hell)
-(AN odd mobile color map is 332 (8-bit) RGB)
+4bit(16 color) has to be mapped into RGB 8-bit colors(limited palette, not full)
+ByteMask of 0f/f0 is traditionally used in the past because RGBA color modes didnt exist yet.
+
+Alpha:(this is weird implementation but it works)
+ff means use full color output
+7f can be used as half-shading-giving us RGBI siulation
+00 is reserved for black and isnt otherwise used (alpha mask of 00 means dont write the color)
+
+
+8bit(one byte) is paletted RGB256 color mode (1:1:1) -full palette
 
 15 bit is "a 16bit hack" or "ignorance of the alpha-bit" (in 5551 mode)
 16 bit color mode is one of: 5551 or more commonly 565 "unpaletted" RGB (data needs to converted to/from this mode)
-24bit color data is often stored (when lesser or higher modes are desired).
 
-The only "TRUE COLOR mode" is 32bpp. 
+24bit color data (8:8:8) is often stored (even when lesser or higher modes are desired). 
 While 24bit is "effectual" and beyond most eyes to discern, its not TRUE Color mode. Its missing bits.
+
+The only "TRUE COLOR mode" is 32bpp. (8:8:8:8)
 
 
 What this means is that for non-equal modes that are not "byte aligned" or "full bytes" (above 256 colors) 

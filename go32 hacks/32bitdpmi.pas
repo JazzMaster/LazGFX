@@ -1,4 +1,5 @@
-program UpdateTo32Bit;
+
+program To32Bit;
 var f:file of char;
     n,ss,sr,as:string;
     dpos:longint;

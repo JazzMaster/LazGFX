@@ -1,11 +1,38 @@
-
-Unit Vesa; //(NEEDS HEAP for Record ALLOC, like PCI unit)
-
+Unit Vesa; 
+//NEEDS HEAP space
 interface
 
 {
-Most of spec is here. ANything not here is either undocumented and non-existant or really should be in another unit.
+Most of VBE3 spec is here. 
+This is only for setup of DOS-ish ERA old-school graphics modes in RAW hardware acces ONLY.
+The code will probaly work with DPMI(32bits DOS)- no guarantees.
 
+Anything not here is either undocumented and non-existant or really should be in another unit.
+
+FIXME: There seems to be 3 different implementations in places of certain functions.
+
+I dont tink I actually got around to using this unit with my FPC kernels.
+The reason why is because once in 32bits mode- int10 disappears.
+	Along with every other DOS ERA interrupt- by INTELs design.
+DPMI loading DOS/FreeDOS removes this limitation.
+
+Context= Buffer for Video Mode-
+	This allows PageFlipping(SDLv1 ERA) operations.
+	Some of that code is implemented.
+	
+VESA DOES allow for mode probing. Higest mode found (first?) is always set.
+THis unit- and the keyboard unit- should be working together as an API.
+ 
+This code was originally compiled into a kernel- so it was booted with a buggy version of GRUB.
+Due to brainfucked C developers- VBE 3 patched GRUB was never made available.
+(Basically the Modelist is probed, but never given to us.)
+
+GRUB does not offer 16bit or 8bit hardware access- so essentially the int10 code (most of the unit) is useless with GRUB.
+This is NOT the case with DOS based-OSes.
+
+LFB requires DPMI be setup.
+
+---
 
 The following VESA mode numbers have been defined:
 Note: for Linear Frame Buffer(AKA no bank switching needed) add $4000
@@ -58,9 +85,11 @@ number   number                        				 number   number
 116h     -        1024x768     32K   (1:5:5:5)
 117h     -        1024x768     64K   (5:6:5)
 118h     -        1024x768     16.8M (8:8:8)
+ 
 119h     -        1280x1024    32K   (1:5:5:5)
 11Ah     -        1280x1024    64K   (5:6:5)
 11Bh     -        1280x1024    16.8M (8:8:8)
+
 11Ch     -        1600x1200    256
 
 --the reason they stopped here in case you want to know is that you can probe what is available from the card, 
@@ -80,39 +109,30 @@ Mode:
 
 --with this, we dont need no stinking video drivers..... ---
 
-Really we don't but cards like the ATI series need tweaks. I will address those as they come up.
-IFDEFS come in really nice for this.
+Really we don't -but cards like the ATI series need tweaks. 
+(IFDEFS come in really nice for this.)
 
 256 is 1 palette(16*16) ==8 bit
 64K is 256 of them (256*256)== 16 bit
 
-
 24 bit mode+ DOES NOT USE PALLETES.
 32bit mode is not commonly used.
 
-1.3M is 64K[a memory chunk] of them (memptr squared)== 32 bit
-[not fully supported,use 24 bit instead.]. Just use direct r,g,b or r,g,b,a values here, where a is the luminance value.
-
-There are lots of resources to build a unit like this, and I took a lot of them and merged them together.There is a lot of repeated code.Most of this is for 16bit operation. Supposedly you cant call int 10h with 4F0x functions in PM.
+There are lots of resources to build a unit like this, and I took a lot of them and merged them together.
+There is a lot of repeated code.
+ 
+Most of this is for 16bit operation. 
 
 VBE 2.0 was supposedly a fix for having to drop to RM to do vesa functions.
-32-bit PM interface didn't come out until VBE 3.0, and only certain cards have VBE 3.0 fully implemented correcty
-(nVidia is ONE).Nonetheless, we have it, and I dont for one, feel like writing card specific drivers.
+Problem is that it uses RM interface.
 
-Drivers are a royal waste of time and Royal Pain to code.
+32-bit PM interface didn't come out until VBE 3.0, and only certain cards have VBE 3.0 fully implemented correctly.
+(nVidia)
+ 
+Modern Day ATI cards require Driver Firmware BLOB  (random probing) or NOW- "KMS tickling" to work.
+	- This is NOT a "STANDARD".
 
-
-
-var
-
-mbinfo: PMultiBootInfo;
-
-begin
-VESAEP_seg:=mbinfo^. vbe_interface_seg; //A000
-VESAEP_off:=mbinfo^. vbe_interface_off; //page offset
-VESAEP_len:=mbinfo^. vbe_interface_len; //length of page
-end;
-
+KMS is a kernel modification that X11 requires to avoid "firmware blob loading"- but really is "open proprietary code".
 
 --Jazz
 
@@ -177,6 +197,7 @@ const CurWriteBank:word;
       _1280x1024x15bpp  = $119; {1:5:5:5}
       _1280x1024x16bpp  = $11A; {5:6:5}
       _1280x1024x24bpp  = $11B; {8:8:8}
+      
       _1600x1200x8bpp   = $11c;
       _1600x1200x15bpp  = $11d; {Unverified}
       _1600x1200x16bpp  = $11e; {5:6:5}
@@ -411,6 +432,14 @@ var
 
 implementation
 
+//pulls data from GRUB- effectively DPMI should also work.
+{
+int10 assembler hacks probe the VESA areas and return the info. 
+ 
+ 
+ 
+ }
+
 uses
    multiboot,paging; // heap; GET table info data from grub. I dont think we can pull it here in PM.
 
@@ -539,7 +568,7 @@ begin
         getNumPages:=modeInfo.imagePages + 1;
 end;
 
-
+//nostack frame on all assembler calls.
 Procedure GetVESAStateSize:longint; 
 begin
    asm
@@ -1291,18 +1320,23 @@ end;
 
 
 
-procedure SetLFB; assembler;
-//there is a little bit more involved, but dont we need dpmi/fileopts working to enable that?
+procedure SetLFB;
 
+var
+	isValid:boolean;
+
+begin
 asm
    or    bx,4000h //mode = mode +4000 to be linear.
    mov   ax,4F02h
    int 10h
-   //get result and compare to $004F
+   MOV VESAStatus, AX
+END;
+	if _VESA_Valid then exit else halt(1);
 end;
 
 
-  function setVESAMode(mode:word):boolean;
+function setVESAMode(mode:word):boolean;
     var i:word;
         res: boolean;
   begin
@@ -1369,11 +1403,8 @@ end;
     pop edi
     pop esi
     pop ebp
-    sub ax,004Fh
-    cmp ax,1
-    sbb al,al
-    mov res,al
-   end ['EBX','EAX'];
+  end;
+  if _VESA_Valid then exit else halt(1);
    
   end;
  end;
@@ -2058,6 +2089,7 @@ asm
            or    bx,4000h { Yep - set LFB bit                         }
   @nolfb:  mov   ax,4F02h
            int   10h
+           
            xor   ax,004Fh { ah <> 0 if mode fail, al <> 4F if no vesa }
            jnz   @fail
            mov   ax,1     { true                                      }
@@ -2088,7 +2120,6 @@ asm
   je    @end
     mov   bx,0001h
     mov   ax,4F05h
-// dx ,4
     int   10h
   @end:
   pop   dx
@@ -2212,6 +2243,8 @@ end;
 
 
 //doesnt do anything but find the VBE interface.
+//note this fails on modern ATI video cards supposedly supporting VBEv3.
+//in actuality its because they dont, they support version 2.
 procedure init_vbe;
 
 var

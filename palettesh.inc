@@ -4,7 +4,7 @@
 256 and below "color" paletted modes-
 this gets harder as we go along but this is the "last indexed mode". 
 
-colors (indexes) above 255 should throw an error(undefined --and out of bounds). 
+colors (indexes) above 255 should throw an error if using palettes.
 
 (technically they are rgb(a) colors and have no index anymore)
 (so we are in true colors and straight rgb/rgba after this.....)
@@ -12,8 +12,8 @@ colors (indexes) above 255 should throw an error(undefined --and out of bounds).
 You need (full) DWords or RGB data for TRUE color modes.
  
 'A' bit affects transparency and completes the 'DWord'.
-The default setting is to ignore it(FF).
-This is what is set.
+The default setting is to ignore it(FF) in 256 color modes.
+(m)CGA is a touch whacky.
 
 Most bitmap or blitter or renderer or opengl based code uses some sort of shader(or composite image).
 This isnt covered here.
@@ -24,14 +24,15 @@ This is for drawing "primitives" on the "surface".....
 -One step at a time.
 
 each 256 SDL_color= r,g,b,a whereas in range of 0-255(FF FF) per color.
-for 16 color modes we use 0-16(FF)
+for 16 color modes we use 0-7(0F) and an alpha mask to simulate RGBI mode
  
-16 color mode is technically a wonky spec:
+16 color mode is technically a wonky spec(RGB+CMY+WB):
 	officially this is composed of:  RGB plus I(light/dark) modes.
-	in relaity thi is: RGB+CMY whereas W+K are seperate colors- its not quite CMYK nor RGB with two intensities(7 or F)
 
 CMYK isnt really a video color standard normally because pixels are RGB. 
-CMYK is for printing. The reason has to do with color gamut and other huffy-puff.
+CMYK is for printing. 
+	The reason has to do with color gamut and other huffy-puff.
+
 (Learn photography if you want the color headache)
  
 CGA modes threw us this curveball:
@@ -41,22 +42,20 @@ CGA modes threw us this curveball:
 this is the best I can implement this data given that specs are all over the place- 
 	and I want this standardized as much as pssible given that we have very high color setings available
 	
-VGA/SVGA (Video gate array / super video gate array) and VESA (video electronic standards association) modes are available now.
+VGA/SVGA (Video gate array / super video gate array) and 
+VESA (video electronic standards association) modes are available now.
 
 -of course SDL just simulates all of this (inside a window)
 
+
+we can use SetColor(SkyBlue3); in 256 modes with this- since we know which color index it is.
+
+this is only for the default palette of course- if you muck with it.....
+ and only up to 256 colors....sorry.
+
 }
 
-
-//we can use SetColor(SkyBlue3); in 256 modes with this- since we know which color index it is.
-
-//this is only for the default palette of course- if you muck with it.....
-// and only up to 256 colors....sorry.
-
-// you have no idea how hard to find and hard to put into code this shit is.
-
-
-//blink is a "text attribute" ..a feature...
+//blink is a "text attribute" ..a feature...not a color
 //write..wait.erase..wait..rewrite..just like the blinking cursor..
 
 {
@@ -71,6 +70,7 @@ colors:
 	         and restore the colors before rendering again
 			 then render something else
 }
+
 type
 
 
