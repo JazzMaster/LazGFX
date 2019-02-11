@@ -421,26 +421,34 @@ Colors:
 ByteMask of 0f/f0 is traditionally used in the past because RGBA color modes didnt exist yet.
 
 Alpha:(this is weird implementation but it works)
+
 ff means use full color output
 7f can be used as half-shading-giving us RGBI siulation
-00 is reserved for black and isnt otherwise used (alpha mask of 00 means dont write the color)
+00 means "dont write the color"
 
 
-8bit(one byte) is paletted RGB256 color mode (1:1:1) -full palette
+8bit-(256 color) is paletted RGB mode (1:1:1)
+	-this is the last paletted mode
 
-15 bit is "a 16bit hack" or "ignorance of the alpha-bit" (in 5551 mode)
-16 bit color mode is one of: 5551 or more commonly 565 "unpaletted" RGB (data needs to converted to/from this mode)
+JPEG format uses a 256 color palette(even a modified one).
+Jpeg2000 uses 12bit
 
-24bit color data (8:8:8) is often stored (even when lesser or higher modes are desired). 
-While 24bit is "effectual" and beyond most eyes to discern, its not TRUE Color mode. Its missing bits.
+(data in these modes doesnt support alignment nor bitpacking)
+commonly implementation:
+	15 bit- 555 (older systems)
+	16 bit- 565
 
+however 5551 could point to either 15 or 16 bits mode
+
+24bit color data (8:8:8)-
+While 24bit is "effectual" and beyond most eyes to discern, its not TRUE Color mode. 
 The only "TRUE COLOR mode" is 32bpp. (8:8:8:8)
 
+Things to keep in mind:
 
-What this means is that for non-equal modes that are not "byte aligned" or "full bytes" (above 256 colors) 
-you have to do color conversion or the colors will be "off".
+Data is often stored in 24bits mode, even though it needs to be displayed or manipulated in other modes.
 
-which means get and put pixel ops, file load and save ops have to take this into account.
+-which means get and put pixel ops, file load and save ops have to take this into account.
 Its another necessary nightmare if not using 32bit or paletted 256 modes.
 
 Post 1990s/2000s movies are shot with YUV (COMPOSITE RED,green,blue cable) and converted on the fly.
@@ -461,17 +469,17 @@ Note the HALF-LIFE/POSTAL implementation of SDL(steam):
 
 this IS the proper workflow.
 
-Something to be aware of:
 
 Most Games use transparency(PNG) for "invisible background" effects.
 -While this is true, however, BMPs can also be used w "colorkey values".
 
+Compressed textures use weird bitpacking methods to store data- both on disk, and in VRAM.
 
 -for example:
 
 SDL_BlitSurface (srcSurface,srcrect,dstSurface,dstrect);
 SDL_SetColorKey(Mainsurface,SDL_TRUE,DWord);
-
+-Where DWord is the color for the colorkey(greenscreen effect)
 
 PNG can be quantized-
 Quantization is not compression- its downgrading the color sheme used in storing the color
@@ -482,7 +490,8 @@ PNG itself may or may not work as intended with a black color as a "hole".This i
 PNG-Lite may come to the rescue- but I need the Pascal headers, not the C ones.
 
 
-Not all games use a full 256-color (64x64) palette
+Not all games use a full 256-color (64x64) palette, even today.
+
 This is even noted in SkyLander games lately with Activision.
 "Bright happy cheery" Games use colors that are often "limited palettes" in use.
 
@@ -502,23 +511,24 @@ However- its not impossible.
 
 Color Modes:
 
-BPP 	 COLORS
-4		(16)
-8		(256)
+BPP 	 COLORS						RGB value
+4		(16) 						NA (hacked in bit based RGBI)
+8		(256) 						111
 
-15		(32768) "thousands" - no alpha
-16		(65536) "thousands" -w or wo alpha 
+15		(32768) "thousands" 		- no alpha 555 /(16384 colors w alpha) 5551
+16		(65536) "thousands" 		-(w alpha and 32K colors -5551) or (wo alpha -565)
 
-24		(16,777,216) -TRUE COLOR mode "millions" - no alpha
-32		(4,294,967,296) --(TRUE COLOR(24) plus full alpha-bit)
+24		(16,777,216) 				-TRUE COLOR mode "millions" - no alpha 888
+32		(4,294,967,296) 			--(TRUE COLOR(24) plus full alpha-bit) 8888
 
 Not yet supported:
 
-30		(1,073,741,824) --DEEP color "billions"
-36		(68,719,476,736) --DEEP color
-48		(281,474,976,710,656) --VERY DEEP color "trillions" 
+30		(1,073,741,824) 			--DEEP color "billions" 10:10:10
+32		4 Bil						10:10:10:2
+36		(68,719,476,736) 			--DEEP color 12:12:12
+48		(281,474,976,710,656) 		--VERY DEEP color "trillions" 12:12:12:12??
 
-64      ????
+64      ????						16:16:16:16??
 
 Common Resolutions:
 
@@ -533,9 +543,9 @@ RES							BPP Supported
 FlatPanels(1366x768)		8/16/24bpp
 
 720p(1280x720)				8/16/24bpp
-1366x768  					8/16/24bpp
-1280x1024 					8/16/24bpp
-1080p(1920x1080) 			8/16/24bpp
+1366x768  					8/16/24bpp/32?
+1280x1024 					8/16/24bpp/32?
+1080p(1920x1080) 			8/16/24bpp/32?
 
 These are weird: (its 4K but not 4K...)
 2k (3840x2160)  			8/16/24bpp
@@ -563,18 +573,16 @@ rendering is a one-way street, however.
 Our ops are restricted, even yet to "pixels" and not groups of them.
 TandL is a "pixel-based operation".
 
-There may be bugs in my math. I havent checked yet.
-(I cant be as bad as -"multiplying (safely) your tokens on ETH/EXP by zero", though.)
-
 
 MessageBox:
 
 With Working messageBox(es) we dont need the console.
+You can choose the color scheme and input methods- YES/NO, OK...
+
+Lazarus Dialogs are only substituted IF LCL is loaded. (TVision routines wouldnt make sense)
 
 InGame_MsgBox() routines (OVERLAYS like what Skyrim uses) still needs to be implemented.
 FurtherMore, they need to match your given palette scheme.
-
-I will provide the extended asciii-ish character set to work with.
 
 GVision, routines can now be used where they could not before.
 GVision requires Graphics modes(provided here) and TVision routines be present(or similar ones written).
@@ -587,10 +595,12 @@ debugging(captains log):
         All SDL functions should be logged. 
 
 Some idiot wrote the logging  code wrong and it needs to be updated for FILE STREAM IO.
+I havent done this yet.
+
 Logging will be forced in the folowing conditions:
 
-    under windows LCL is checked for- this is a known Lazarus issue.
-    under linux with LCL compiled in-caller isnt a console or VT or Xerm (usually)
+    under windows or linux with LCL
+    user flips the logging bit
 
 
 Code upgraded from the following:
@@ -598,11 +608,12 @@ Code upgraded from the following:
 	original *VERY FLAWED* port (in C) coutesy: Faraz Shahbazker <faraz_ms@rediffmail.com>
 	unfinished port (from go32v2 in FPC) courtesy: Evgeniy Ivanov <lolkaantimat@gmail.com> 
 	some early and or unfinished FPK (FPC) and LCL graphics unit sources 
-	SDLUtils(Get nad PutPixel) SDL v1.2+ -in Pascal
+	SDLUtils(Get/PutPixel) SDL v1.2+ -in Pascal
     JEDI SDL headers(unfinished) and in some places- not needed.
+    StackExchange SDL examples in C/CPP 
+
     libSVGA Lazarus wiki found here: http://wiki.lazarus.freepascal.org/svgalib
     libSVGA in C: http://www.svgalib.org/jay/beginners_guide/beginners_guide.html
-    StackExchange in C/CPP (the where is documented)
 
 manuals:
     SDL1.2 pdf
@@ -613,10 +624,14 @@ manuals:
     JEDI chm file
 	TurboVision(TVision) references (where I can find them and understand them.)
 
+	mesa docs
+	GLU docs
+	OpenGL docs
+	GLUT docs
+	freeGLUT docs
 
 NOTE: All visual rendering routines are 'far calls' if you insist building for DOS.
-(I really cant help you if you do, but dont drop 32+ cpu support. I will merge the code if you fpfork it, however.)
-
+(I really cant help you if you do, but dont drop 32+ cpu support. I will merge the code if you fork it, however.)
 
 
 to animate- screen savers, etc...you need to (page)flip/rendercopy and slow down rendering timers.
@@ -630,12 +645,7 @@ bounds:
 
 
 on 2d games...you are effectively preloading the fore and aft areas on the 'level' like mario.
-there are ways to reduce flickering -control renderClear and RenderPresent. 
-
-the damn thing should be loaded in memory anyhoo..
-what.. 64K for a level? cmon....ITS ZOOMED IN....
-
-  Move (texture,memory,sizeof(texture));
+there are ways to reduce flickering -control the amount of calls to renderClear() and RenderPresent(). 
 
 
 Palettes:
@@ -644,9 +654,6 @@ Palettes:
    Max colors in a palette are always 256, unless in modified CGA modes- then 16. 
    Specify each value or leave it as a zero
   
-  See the included file from Super Mario in TP7.
-  It very similar method.
-
   Note "the holes" can be used for overlay areas onscreen when stacking layers.
   The holes are standardized to xterm specs. I think theres like 5.
 
@@ -654,16 +661,14 @@ Palettes:
 I wonder if DirectX .DDS files are SDL Surfaces in disguise??? HMMMM....
 (There is a C library to load ANY texture into RAM and work with all types of them.)
 Im betting they are "not off by much".
-Im seeing a Ton of correlation between OGL/SDL and DirectX (and people think there isnt any).
+Im seeing a Ton of correlation between OGL/SDL and DirectX/DirectDraw (and people think there isnt any).
 
 
 NOTE:
 
-OpenGL bug:
-"Rendering onto more than one windows renderer can cause issues"
-
-SDL bug:
-"You must render in the same routine that handles input(only in the main program-this is a library)"
+WONTFIX:
+"Rendering onto more than one window (or renderer) can cause issues"
+"You must render in the same window that handles input"
 
 SDL routines require more than just dropping a routine in here- 
     you have to know how the original routine wants the data-
@@ -671,40 +676,71 @@ SDL routines require more than just dropping a routine in here-
         call the routine
         and if needed-catch errors.
 
-The biggest problem with SDL is "the bloody syntax".
-This is why the code is taking so long.
-
-
 SDL is not SIMPLE. 
 The BGI was SIMPLE.
 
-SemiDirect MultiMedia OverLayer - should be the unit name.
-
  --Jazz (comments -and code- by me unless otherwise noted)
 
-}
+TODO:
+
+Surface ops are fine(in CPU/RAM)-
+	add in surface to GL Quads ops
+	GL Quads to surface ops
+
+input:
+	rely less on SDL and more on freeGLUT operations(simpler)
+	 
+callbacks/hooks:	
+	convert SDL_Timercallback(video refresh) into a "timer based solution" using microsecond precision(float)
+		(stop using dodgy interrupt based C functions)
+		
+finish implementation of "if Render3D":
+
+	OpenGL is a simple tweak to enable 3D support(done)
+	
+	all functions need OpenGL modifications
+	RenderCopy -> internal SDL glSwapBuffers?
+	
+	3d functions:
+		no surface, no texture, no renderer, no "direct renderer"
+		implement these in OGL/GLUT
+	
+	all color ops need mods for OpenGL(update from surface to texture ops)
+	need to implement "format agnostic" color conversion with all bpp depths
+		(depth in OGL is considered cubic depth, not bpp)
+		
+	OpenGL EXTENTIONS:
+		color bpp (initgraph) needs to set SDL depth accordingly on init (not done)
+				then surface^.format will have a sane value- at least (OGL textures need to match this in OGL syntax)
+	
+	GLUT methods-> freeGLUT?
+	
+	RECOMPILE!!!
+} 
 
 
 uses
+{
+there are parts of SDL that we can get rid of. 
+They are hard to read, seem to be wrapped "do nothing routines", etc.
 
-//there are parts of SDL that we can get rid of. 
-//They are hard to read, seem to be wrapped "do nothing routines", etc.
+aka Threads and EventCallback hooks-Pascal(C too as it were..) has its own faster internals.
 
-//aka Threads and EventCallback hooks-Pascal(C too as it were..) has its own faster itnernals.
-//we link into a lot of C- but still...
+Threads and fpfork(forking), requires baseunix unit
+cthreads has to be the first unit in this case-it so happens to support the C version.
 
-//Threads and fpfork(forking), requires baseunix unit
-//cthreads has to be the first unit in this case-it so happens to support the C version.
+if we need to use one or the other- 
+  we will use CThreads. Currently the syntax is for "Pascal Threads".
 
-//if we need to use one or the other- 
-//  we will use CThreads. Currently the syntax is for "Pascal Threads".
+ctypes: cint,uint,PTRUint,PTR-USINT,sint...etc.
 
-//ctypes: cint,uint,PTRUint,PTR-USINT,sint...etc.
+FPC Devs: "It might be wise to include cmem for speedups"
+"The uses clause definition of cthreads, enables theaded applications"
 
+There is a way to use SDL timers, signals and threads,however, "Compiler reserved words" forbid us using these.
+(screw you too,C devs....)
+}
     cthreads,cmem,ctypes,sysUtils,{$IFDEF unix}baseunix, {$ENDIF}
-
-
-//theres a non-MS windows? os2warp?
   
 {$IFDEF MSWINDOWS} //as if theres a non-MS WINDOWS?
      Windows,MMsystem, //audio subsystem
@@ -715,9 +751,31 @@ uses
 
 //LCL(Lazarus) wont fire unless Windows or X11 or Darwin(Quartz) are active.
 //its such BS that framebuffer/XTerm routines were never written and everyone assumes X11
-//is fired remotely instead.
+//is fired instead.
+
+{
+LCL Simple and deluxe dialogs:
+
+ifdef lcl
+	ShowMessage('This is a message from Lazarus');
+	
+//messageDlg requires a result (if x=y, then..) 	
+
+//MIM joke...
+function AskMessagewButtonAnswer(title,question:string):Longint;
+begin
+  AskMessagewButtonAnswer:=longint(MessageDlg(title, question, mtConfirmation, [mbYes, mbNo,mbMaybe, mbRepeatTheQuestion],0));
+end;
+
+//(asking for strings and passwords is also possible)
+
+endif
+}
 
   {$IFDEF LCL}
+	  //works on Linux+Qt but not windows??? I have WINE and a VM- lets figure it out.
+      LazUtils,  Interfaces, Dialogs, LCLType,Forms,Controls,
+
     {$IFDEF MSWINDOWS}
       {$DEFINE NOCONSOLE }
     {$ENDIF}
@@ -727,77 +785,91 @@ uses
       //LCL is linked in but we are not in windows.
       //remember Lazarus by iteslf doesnt output debugging windows. 
       //you have to enable this yourself.
-      LazUtils,  
+
+      //we still technically DO have a console- even a GUI app can be launched from the commandline.
+      //output then goes THERE-instead of the Lazarus equivalent.
+      //THIS TRICK DOES NOT WORK on Windows. Windows removes crt and related units when building a UI app.
   {$ENDIF}
 
-//cant use crtstuff if theres no crt units available.
-
 //its possible to have a Windows "console app" thru FPC,
-//just not thru Lazarus(I wish Linux was the same way, its not).
+//-just not thru Lazarus.
+
 //This may have to do with how the window rendering code(WinAPI) is initd.
+
+//cant use crtstuff if theres no crt units available.
 
 {$IFNDEF NOCONSOLE}
     crt,crtstuff,
 {$ENDIF}
 
-//if you build with the LCL (you get rid of the ugly ass SDL dialogs):
+{
+Linux NOTE:
+  Lazarus Menu:  "View" menu, under "Debug Windows" there is an entry for a "console output" 
 
-//Linux NOTE:
-//  Lazarus Menu:  "View" menu, under "Debug Windows" there is an entry for a "console output" 
-
-//however, if you are in a input loop or waiting for keypress- 
-// you will not get output until your program is complete (and has stopped execution)
-
-
-// In this case- Lazarus Menu:   Run -> Run Parameters, then check the box for "Use launching application".
-// (You may have to 'chmod +x' that script.)
-
-// you will have to setup and manage "windows" yourself, and handle dialogs accordingly.
-//HINT: (its the window with the dots on it inside Lazarus)
-
-//the backend is straight pascal w hooks for "Lazarus windowed objects".
-//(QtCreator(QT) uses similar for C/C++.)
+however, if you are in a input loop or waiting for keypress- 
+ you will not get output until your program is complete (and has stopped execution)
 
 
+ In this case- Lazarus Menu:   Run -> Run Parameters, then check the box for "Use launching application".
+ (You may have to 'chmod +x' that script.)
 
-//to build without the LCL:
+to build without the LCL(in Lazarus):
 
-// Just make a normal "most basic" program and call me or SDL directly in your "uses clause".
+ Just make a normal "most basic" program and call me or SDL directly in your "uses clause".
 
-// You will find that the LCL may be a burden or get in your way- 
-//we dont really use the fundamentals of OBJFPC, OBJPAS, or Lazarus beyond basic functions.
+ You will find that the LCL may be a burden or get in your way- 
+	we dont really use the fundamentals of OBJFPC, OBJPAS, or Lazarus beyond basic functions.
 
-
+}
 
 //FPC generic units(OS independent)
-  SDL2,SDL2_Image,SDL2_mixer,strings,typinfo,logger
+  SDL2,SDL2_Image,uoslib_h,strings,typinfo,logger
+  
+//uos/Examples/lib folder has the required libraries for you. 
+//adds as a side-effect: CDROM Audio playback(CDDA)
 
-//GL, GLU - not used yet, but works.
+//for 3D, not 2D.
+
+//we have dgl unit available also.
+
+//,Classes,GL,GLext, GLU
+
 
 {$IFDEF debug} ,heaptrc {$ENDIF} 
 
+{
+//OS 8 and 9 were kicked with sdl1.2 v14 and sdl 2.0
+
 //Carbon is OS 8 and 9 to OSX API
-{$IFDEF mac} 
+ $IFDEF mac
   ,MacOSAll
-{$ENDIF}
+ $ENDIF
+}
+
+//This leaves 10.1-10.4
+
+//Quartz 2D/QE Compositor (3d) on 10.2+ -forwards to OGL
+//cpu-> renderer
+//direct rendering onto the renderer uses QuartzGL(up to Mtn LN it wont stay active)
+
 
 //Cocoa (OBJ-C) is the new API
-//OSX 10.5+
 
-//,CocoaAll
 {$IFDEF darwin}
 	{$linkframework Cocoa}
     {$linklib SDLimg}
     {$linklib SDLttf}
     {$linklib SDLnet}
 	{$linklib SDLmain}
-	{$linklib gcc}
+
+//	{$linklib gcc} -pascal doesnt use C.  	:-P
 
 //also requires:
-//mode objpas
+//mode objpas (in every pascal unit)
 //modeswitch objectivec2
 
-//-This code is not objectified in these units- that is an internal fpfork that hasnt happened yet.
+//-This code is not objectified in these units- 
+//		The sub folders contain this fork
 
 
 //iFruits, iTVs, etc:
@@ -808,8 +880,6 @@ uses
 
 
 //Altogether- we are talking PCs running OSX, Windows(down to XP), and most unices.
-//OS 8 and 9 were kicked with sdl1.2 v14 and sdl 2.0
-
 //and Some android (as a unice sub-derivative)
 
 ;
@@ -823,17 +893,12 @@ crtstuff is MY enhanced dialog unit
 
 
 mac- is a hairy mess but "try to do something".
-most may support the following up and coming xlib fpfork.
+X11 is available for MacOSX. Maybe try to use it?
 
 droid isnt here(yet)
 sin has been done -(but no reason we CANT redo it)
 
 
-FPC Devs: "It might be wise to include cmem for speedups"
-"The uses clause definition of cthreads, enables theaded applications"
-
-There is a way to use SDL timers, signals and threads,however, "Compiler reserved words" forbid us using these.
-(screw you too,C devs....)
 
 
 mutex(es):
@@ -846,21 +911,19 @@ Ideally you would mutex events and process them like cpu interrupts- one at a ti
 
 
 sephamores are like using a loo in a castle- 
-only so many can do it at once, first come- first served
-- but theres more than one toilet
+only so many can do it at once. 
+	first come- first served
+		- but theres more than one toilet
 
 }
 
 //share the headers for the expanded units
 {$INCLUDE lazgfx.inc}
-
-
 {$INCLUDE palettesh.inc}
 {$INCLUDE modelisth.inc}
 
 //color conversion procs etc...taking up waay too much room in here...
 {$INCLUDE colormodsh.inc}
-
 
 
 implementation
@@ -875,17 +938,19 @@ DO NOT BLINDLY ALLOW any function to be called arbitrarily.(this was done in C- 
 
 two exceptions:
 
-making a 16 or 256 palette and/or modelist file
+	making a 16 or 256 palette and/or modelist file
 
 NET:
 
 	init and teardown need to be added here- I havent gotten to that.
-//if the code builds-dont break it with mods - if possible.
+
+CLipping:
+
+we always clip.  PERIOD.
+  I understand resetting x,y to 0 but
+  the problem is: 0,0 may be outside of the given viewport.
 
 
-//we always clip.  PERIOD.
-// I understand resetting x,y to 0 but
-//the problem is: 0,0 may be outside of the given viewport.
 
 Procedure SetViewPort(X1, Y1, X2, Y2: smallint);
 Begin
@@ -936,9 +1001,6 @@ end;
 
 //this was ported from (SDL) C- 
 //https://stackoverflow.com/questions/37978149/sdl1-sdl2-resolution-list-building-with-a-custom-screen-mode-class
-
-//(its a VESA/VGA equivalent for SDL)
-//checking supported is in another routine(DetectGraph)
 
 function FetchModeList:Tmodelist;
 var
@@ -1028,10 +1090,9 @@ Interrupt handling:
 The reason this is remmed out is bc I want YOu to do this.
 The code is however-reasonable- but untested.
 
-
-some of these are funky C ops unneccessarily. RW/RB ops can be done normally(except for contexts).
-
 }
+
+//moved from SDL Pascal headers
 
 //  Load a set of mappings from a file, filtered by the current SDL_GetPlatform()
 function SDL_GameControllerAddMappingsFromFile(Const FilePath:PAnsiChar):SInt32;
@@ -1039,6 +1100,7 @@ begin
   Result := SDL_GameControllerAddMappingsFromRW(SDL_RWFromFile(FilePath, 'rb'), 1)
 end;
 
+//may have to rewrite these
 function SDL_WindowPos_IsUndefined(X: Variant): Variant;
 begin
   SDL_WindowPos_IsUndefined := (X and $FFFF0000) = SDL_WINDOWPOS_UNDEFINED_MASK;
@@ -1185,11 +1247,12 @@ end;
 {
 
 Got weird fucked up c boolean evals? (JEEZ theyre a BITCH to understand....)
-  wonky "what ? (eh vs uh) : something" ===>if (evaluation) then (= to this) else (equal to that)
+  wonky "what ? (eh vs uh) : something" ===> if (evaluation) then (= to this) else (equal to that)
 (usually a boolean eval with a byte input- an overflow disaster waiting to happen)
 
-such oddly is the case with xlib for X11. The boolean gives a negative false, not zero and one.
-(Thats a disaster waiting to happen)
+for example: 
+	SDL_SetRenderDrawBlend(renderer, (a = 255) ? SDL_BLEND_NONE : SDL_BLEND_BLEND);
+
 }
 
 
@@ -1199,7 +1262,7 @@ Create a new texture for most ops-or DO NOT call RenderCopy(or unlock),meaning t
 RenderPresent is being called automatically at minimum (screen_refresh) as an interval.
 Refresh is fine if data is in the backbuffer. Until its copied into the main buffer- its never displayed.
 
-DO NOT call these functions/procs if using Render based ops- they may do this automagically.
+DO NOT use TextureLocking functions/procs if using Render based ops- they may do this automagically.
 (Texture is only a context if using "surface opertions on a Texture" such as GET/setRGB and sdl v1 surface ops such as:
 line,rect
 ...etc)
@@ -1212,10 +1275,6 @@ unfortunately- a texture -based SDL2 only solution "nukes the problem".
 -especially with color conversion.
 
 Therefore surface ops-need to be added back in(or still used)
-
-(Main/surface^.format can only be probed in renderer if SDL_QueryTexture is used)
-
-Sorry.
 
 }
 
@@ -1238,7 +1297,7 @@ begin
     //else exit: no UNlocking needed
 end;
 
-//depending on how you call or if "MainSurface" isnt what you want.
+//depending if "MainSurface" isnt what you want.
 procedure lock(someSurface:PSDL_Surface); overload;
 begin
     if SDL_MustLock(someSurface)=true then
@@ -1254,7 +1313,8 @@ begin
     //else exit: no UNlocking needed
 end;
 
-
+//Texture locking thru OGL on Unices is unpredictable.
+//Use "direct Render ops" or SDL 1.2 methods instead.
 procedure Texlock(Tex:PSDL_Texture);
 
 var
@@ -1364,7 +1424,8 @@ end;
 procedure clearDevice;
 
 begin
-    SDL_RenderClear(renderer);
+    if LIBGRAPHICS_ACTIVE=true then
+		SDL_RenderClear(renderer);		
 end;
 
 procedure clearscreen; 
@@ -1377,9 +1438,6 @@ begin
         clrscr;
 end;
 
-
-
-//all of these need to be rewritten-syn tax has been paid- calling convention is incorrect.
 procedure clearscreen(index:byte); overload;
 
 var
@@ -1414,6 +1472,7 @@ var
     i:integer;
 
 begin
+    if LIBGRAPHICS_ACTIVE=true then begin
 
 //the only easy way is thru paletted mode due "to the renderer"
 //we might just need the pixel format type....
@@ -1443,6 +1502,7 @@ begin
 	
 	case bpp of
         15,16,24,32: begin
+        //mainSurface will be set upon initGraph invocation
 	    	SDL_GetRGB(color,MainSurface^.format,r,g,b);
 	    	somecolor^.r:=byte(^r);
 	    	somecolor^.g:=byte(^g);
@@ -1451,9 +1511,10 @@ begin
     end;
     SDL_SetRenderDrawColor(Renderer,ord(somecolor^.r),ord(somecolor^.g),ord(somecolor^.b),255);
 	SDL_RenderClear(renderer);
+	end;
 end;
 
-//these two dont need conversion of the data
+//these two dont need conversion of the data(24 and 32 bpp)
 procedure clearscreen(r,g,b:byte); overload;
 
 
@@ -1470,11 +1531,10 @@ begin
 	SDL_RenderClear(renderer);
 end;
 
-//end hack
 
 //this is for dividing up the screen or dialogs (in game or in app)
 
-//spec says clear the last one assigned
+//TP spec says clear the last one assigned
 procedure clearviewport;
 
 //clears it, doesnt remove or add a "layered window".
@@ -1502,9 +1562,12 @@ begin
    param:=Nil; //not used
 
    if (not Paused) then begin //if paused then ignore screen updates
-
-//      if (TimerTicks mod interval) then 
+   //interval will be one of:
+   //	60,72,75,90(VR),120
+		if not Render3d then
            SDL_RenderPresent(Renderer);
+        else //OGL
+			glutSwapBuffers;
    end;
    SDL_CondBroadcast(eventWait);
    videoCallback := 0; //we have to return something-the what, WE should be defining.
@@ -1513,55 +1576,6 @@ end;
 //NEW: do you want fullscreen or not?
 procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
 
-{
-
-we are halfway there according to some Wolf3D and POSTAL devs:
-FS sets logical size but we want the window- a forced "physical" to be that size too.
-Logic size allows upscaling of smaller resolutions on our behalf.
-
-confirm this at the end:
-
-    lineinfo.linestyle:=solidln;
-     lineinfo.thickness:=normwidth;
-     // reset line style pattern 
-     for i:=0 to 15 do
-       LinePatterns[i] := TRUE;
-
-     // By default, according to the TP prog's reference 
-     // the default pattern is solid, and the default    
-     // color is the maximum color in the palette.       
-     fillsettings.color:=GetMaxColor;
-     fillsettings.pattern:=solidfill;
-     for i:=1 to 8 do
-       FillPatternTable[UserFill][i] := $ff;
-
-
-     _fgcolor:=white;
-
-
-     ClipPixels := TRUE;
-     // Reset the viewport 
-     StartXViewPort := 0;
-     StartYViewPort := 0;
-     ViewWidth := MaxX;
-     ViewHeight := MaxY;
-
-     // Reset CP 
-     CurrentX := 0;
-     CurrentY := 0;
-
-     SetBgColor(Black);
-
-     // normal write mode 
-     CurrentWriteMode := CopyPut;
-
-     // set font style 
-     CurrentTextInfo.font := DefaultFont;
-     CurrentTextInfo.direction:=HorizDir;
-     CurrentTextInfo.charsize:=1;
-     CurrentTextInfo.horiz:=LeftText;
-     CurrentTextInfo.vert:=TopText;
-}
 var
 	bpp,i:integer;
 	_initflag,_imgflags:longword; //PSDL_Flags?? no such beast 
@@ -1982,7 +1996,7 @@ begin
 
   if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
   if WantsJoyPad then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
-//if WantInet then SDL_Init_Net;
+//if WantInet then _initflag:= SDL_Init_Net;
 
   if ( SDL_Init(_initflag) < 0 ) then begin
      //we cant speak- write something down.
@@ -2065,13 +2079,13 @@ in reality SDL complains about this being setup- or at least how its done in C.
 
 //If we got here- YAY!
 
+  //Hide, mouse.
+  SDL_ShowCursor(SDL_DISABLE);
+
 //fpfork the event handler
   IntHandler;
 
 //if we fpforked- we should come right back. 
-
-//events and callbacks seem to flow from interrupt code in C..
-//a BIG PITA- and VERY SPECIFIC CODE.
 
 //this data seems to hidden in all the lines of C and barely made reference to.
 //also needs to be checked for SDLv2 compliance.
@@ -2121,6 +2135,7 @@ in reality SDL complains about this being setup- or at least how its done in C.
   if (mode^.refresh_rate > 0)  then 
      //either force a longINT- or convert from REAL. Otherwise you have to pass it as a interrupt proc param--it hairy mess.
      flip_timer_ms := longint(mode^.refresh_rate)
+
   else
      flip_timer_ms := 17; 
 
@@ -2134,14 +2149,11 @@ in reality SDL complains about this being setup- or at least how its done in C.
     NoGoAutoRefresh:=true; //Now we can call Initgraph and check, even if quietly(game) If we need to issue RenderPresent calls.
   end;
 
-  
+ { 
   CantDoAudio:=false;
     //prepare mixer
   if WantsAudioToo then begin
-//    audioFlags:=(MIX_INIT_FLAC or MIX_INIT_MP3 or MIX_INIT_OGG); //unless you need mikmod support, then or it in here.
-//    Mix_Init(AudioFlags);
-    AudioSystemCheck:=Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2, 4096); //cd audio quality
-    //(slower systems use smaller chunks and degraded quality.)
+    AudioSystemCheck:=InitAudio;    
     if AudioSystemCheck <> 0 then begin
         if IsConsoleInvoked then
                 LogLn('There is no audio. Mixer did not init.')
@@ -2149,6 +2161,7 @@ in reality SDL complains about this being setup- or at least how its done in C.
     end;
 
   end;
+}
 
   //initialization of TrueType font engine
   if TTF_Init = -1 then begin
@@ -2167,7 +2180,32 @@ in reality SDL complains about this being setup- or at least how its done in C.
   _bgcolor := $000000FF;	//default background = black(0)
   someLineType:= NormalWidth; 
 
+//  lineinfo.linestyle:=solidln;
 
+     // reset line style pattern 
+//     for i:=0 to 15 do
+//       LinePatterns[i] := TRUE;
+
+//     for i:=1 to 8 do
+//       FillPatternTable[UserFill][i] := $ff;
+
+//     fillsettings.pattern:=solidfill;
+
+  ClipPixels := TRUE;
+     // Reset the viewport 
+  StartXViewPort := 0;
+  StartYViewPort := 0;
+  ViewWidth := MaxX;
+  ViewHeight := MaxY;
+
+  // normal write mode 
+  //CurrentWriteMode := CopyPut;
+
+  // set default font (8x8)
+  installUserFont('./fonts/code.ttf', 10,TTF_STYLE_NORMAL,false);
+
+//     CurrentTextInfo.direction:=HorizDir;
+     
   new(Event);
 
   LIBGRAPHICS_ACTIVE:=true;  //We are fully operational now.
@@ -2178,12 +2216,7 @@ in reality SDL complains about this being setup- or at least how its done in C.
   where.X:=0;
   where.Y:=0;
 
-  //Hide, mouse.
-//  SDL_ShowCursor(SDL_DISABLE);
-
-//set some sensible input specs
-  //SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-
+  SDL_ShowCursor(SDL_ENABLE);
 
   //Check for joysticks 
   if WantsJoyPad then begin
@@ -2208,8 +2241,44 @@ in reality SDL complains about this being setup- or at least how its done in C.
         noJoy:=false;
     end; 
   end; //Joypad 
+
 end; //initgraph
 
+{--seems incomplete
+//stream is a chunk
+procedure MyAudioCallback(mixdata:PUint8; stream:PUint8; len:integer );
+
+begin
+    SDL_memset(stream, 0, len);  // make sure this is silence.
+    // mix our audio against the silence, at 50% volume.
+    SDL_MixAudio(stream, mixData, len, SDL_MIX_MAXVOLUME / 2);
+end;
+
+procedure InitAudio;
+var
+
+	want, have:PSDL_AudioSpec;
+	dev:SDL_AudioDeviceID;
+
+begin
+	SDL_memset(@want, 0, sizeof(want)); 
+	want^.freq = 48000;
+	want^.format = AUDIO_F32;
+	want^.channels = 2;
+	want^.samples = 4096;
+	want^.callback = MyAudioCallback; //@MyAudioCallBack??
+
+	dev := SDL_OpenAudioDevice(NiL, 0, @want, @have, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+	if (dev = 0) then 
+	    LogLn('Failed to open audio: ' + SDL_GetError);
+	else begin
+	    if (have^.format <> want^.format) then 
+    	    SDL_Log('We didnt get Float32 audio format.');
+    
+//    SDL_PauseAudioDevice(dev, 0); // start audio playing. 
+//    SDL_Delay(5000); // let the audio callback play some sound for 5 seconds. 
+end;
+}
 
 //these two are completely untested 
 //they are not, by themselves "feature coplete dialogs", nor do they check input.
@@ -2506,12 +2575,23 @@ begin
 	    exit;
 end
 else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //initgraph called us
-
-    window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
-    renderer := SDL_CreateRenderer(window, -1, (SDL_RENDERER_ACCELERATED or SDL_RENDERER_PRESENTVSYNC));
-
-	RendedWindow := SDL_CreateWindowAndRenderer(MaxX, MaxY,0, @window,@renderer);
-
+	if Render3d then //we use OGL context instead of 2D composite renderer
+		window := SDL_CreateWindow( PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, SDL_WINDOW_OPENGL );
+		GLContext := SDL_GL_CreateContext( Window );
+		if @GLContext = nil then begin //
+		
+			closeGraph;
+		end;
+		//r,g,b=0,a=1
+		glClearColor( 0.f, 0.f, 0.f, 1.f );
+		glClear( GL_COLOR_BUFFER_BIT ); //there is four buffers
+		
+	//GLContexts dont use surfaces	
+	else begin
+		window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
+		renderer := SDL_CreateRenderer(window, -1, (SDL_RENDERER_ACCELERATED or SDL_RENDERER_PRESENTVSYNC));    
+		RendedWindow := SDL_CreateWindowAndRenderer(MaxX, MaxY,0, @window,@renderer);
+	
 	if ( RendedWindow <>0 ) then begin
     //No hardware renderer....
     
@@ -2541,14 +2621,15 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 		end;
         // SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
 
-   end; //software renderer
-
+    end; //software renderer
+   
+    SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
+    SDL_RenderClear(Renderer);
+   
+     
+   end; //if 3D
    surface1:=SDL_LoadBMP(iconpath);
-
-   // The icon is attached to the window pointer
    SDL_SetWindowIcon(window, surface1);
-
-   // ...and the surface containing the icon pixel data is no longer required.
    SDL_FreeSurface(surface1);
 
  // SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
@@ -2586,7 +2667,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 
     end; 
 
-
+  
     //we can create a surface down to 1bpp, but we CANNOT SetVideoMode <8 bpp
     //I think this is a HW limitation in X11,etc.
 
@@ -2594,7 +2675,11 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 
     //syntax: flags, w,h,bpp,rmask,gmask,bmask,amask
 
-   
+
+ 
+    //convert surface to GLQuad if using 2D (SDL does this for us)
+    //3d surfaces are meshes, skins, or shaders
+    
     Mainsurface := SDL_CreateRGBSurface(0, MaxX, MaxY, bpp, 0, 0, 0, 0);
     if (Mainsurface = NiL) then begin //cant create a surface
         LogLn('SDL_CreateRGBSurface failed');
@@ -2603,8 +2688,17 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
         //we can exit w failure codes, if we check for them
         closegraph;
     end;
+   
 
-
+    if bpp=4 then
+      InitPalette16;
+    if bpp=8 then 
+      InitPalette256; 
+      
+    if Render3d then begin //openGL does this differently
+    
+    
+    end;  
     if (bpp<=8) then begin
       if MaxColors=16 then
             SDL_SetPaletteColors(palette,TPalette16.colors,0,16)
@@ -2612,33 +2706,32 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
             SDL_SetPaletteColors(palette,TPalette256.colors,0,256);
     end;
 
-    SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
-    SDL_RenderClear(Renderer);
 
-     LIBGRAPHICS_ACTIVE:=true;
-     exit; //back to initgraph we go.
+   LIBGRAPHICS_ACTIVE:=true;
+   exit; //back to initgraph we go.
 
   end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
-
+    if not Render3d then begin 
                    
     case bpp of
 		8: begin
-			    if maxColors=256 then format:=SDL_PIXELFORMAT_INDEX8
-				else if maxColors=16 then format:=SDL_PIXELFORMAT_INDEX4MSB; 
+			    if maxColors=256 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX8
+				else if maxColors=16 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX4MSB; 
 		end;
-		15: format:=SDL_PIXELFORMAT_RGB555;
+		15: MainSurface^.format:=SDL_PIXELFORMAT_RGB555;
 
         //we assume on 16bit that we are in 565 not 5551, we should not assume
 		16: begin
 			
-			format:=SDL_PIXELFORMAT_RGB565;
+			MainSurface^.format:=SDL_PIXELFORMAT_RGB565;
 
         end;
-		24: format:=SDL_PIXELFORMAT_RGB888;
-		32: format:=SDL_PIXELFORMAT_RGBA8888;
+		24: MainSurface^.format:=SDL_PIXELFORMAT_RGB888;
+		32: MainSurface^.format:=SDL_PIXELFORMAT_RGBA8888;
 
     end;
-
+   end; //not render3D
+   
         mode^.w:=MaxX;
 		mode^.h:=MaxY;
 		mode^.refresh_rate:=60; //assumed
@@ -2704,9 +2797,11 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 	  else if MaxColors=256 then
             SDL_SetPaletteColors(palette,TPalette256.colors,0,256);
     end;
-    SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
-    SDL_RenderClear(Renderer);
+    if not Render3d then begin //use GLClear,etc instead if using 3D.
 
+		SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
+		SDL_RenderClear(Renderer);
+	end; 
   end; 
 
 end; //setGraphMode
@@ -3136,12 +3231,6 @@ in this case-
 
 the trick is to prevent SDL from setting "whatever is closest"..we want this mode and only this...
 most people dont usually care but with the BGI -WE DO.
-
-SDL_VideoModeOK:
-    this is SDLv1.2 code
-    IT also assumes that you want to switch physical screen modes(we dont) 
-        (like telling X11 to drop to 320x240x256-we dont want this)
-        -we will stretch for higher resolutions, or use a window for lower resolutions
 
 SDL2:
 

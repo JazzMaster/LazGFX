@@ -431,63 +431,65 @@ valuelist16[0]:=$00;
 valuelist16[1]:=$00;
 valuelist16[2]:=$00;
 
-valuelist16[3]:=$ff;
+valuelist16[3]:=$7f;
 valuelist16[4]:=$00;
 valuelist16[5]:=$00;
 
 valuelist16[6]:=$00;
-valuelist16[7]:=$ff;
+valuelist16[7]:=$7f;
 valuelist16[8]:=$00;
 
-valuelist16[9]:=$ff;
-valuelist16[10]:=$ff;
-valuelist16[11]:=$00;
+valuelist16[9]:=$00;
+valuelist16[10]:=$00;
+valuelist16[11]:=$7f;
 
-valuelist16[12]:=$00;
-valuelist16[13]:=$00;
-valuelist16[14]:=$ff;
+//yellow
+valuelist16[12]:=$7f;
+valuelist16[13]:=$7f;
+valuelist16[14]:=$00;
 
-valuelist16[15]:=$ff;
+valuelist16[15]:=$7f;
 valuelist16[16]:=$00;
-valuelist16[17]:=$ff;
+valuelist16[17]:=$7f;
 
 valuelist16[18]:=$00;
-valuelist16[19]:=$ff;
-valuelist16[20]:=$ff;
+valuelist16[19]:=$7f;
+valuelist16[20]:=$7f;
 
 //2 greys
 valuelist16[21]:=$f0;
 valuelist16[22]:=$f0;
 valuelist16[23]:=$f0;
 
-valuelist16[24]:=$0f;
-valuelist16[25]:=$0f;
-valuelist16[26]:=$0f;
+valuelist16[24]:=$f0;
+valuelist16[25]:=$f0;
+valuelist16[26]:=$f0;
 //end greys
 
-valuelist16[27]:=$7f;
+valuelist16[27]:=$ff;
 valuelist16[28]:=$00;
 valuelist16[29]:=$00;
 
 valuelist16[30]:=$00;
-valuelist16[31]:=$7f;
+valuelist16[31]:=$ff;
 valuelist16[32]:=$00;
 
-valuelist16[33]:=$7f;
-valuelist16[34]:=$7f;
-valuelist16[35]:=$00;
+valuelist16[33]:=$00;
+valuelist16[34]:=$00;
+valuelist16[35]:=$ff;
 
 valuelist16[36]:=$00;
-valuelist16[37]:=$00;
-valuelist16[38]:=$7f;
+valuelist16[37]:=$ff;
+valuelist16[38]:=$ff;
 
-valuelist16[39]:=$7f;
+valuelist16[39]:=$ff;
 valuelist16[40]:=$00;
-valuelist16[41]:=$7f;
+valuelist16[41]:=$ff;
 
-valuelist16[42]:=$00;
+//14=Y
+valuelist16[42]:=$7f;
 valuelist16[43]:=$7f;
-valuelist16[44]:=$7f;
+valuelist16[44]:=$00;
 
 //white is specified later(wonky palette)
 
@@ -508,7 +510,7 @@ valuelist16[44]:=$7f;
       Tpalette16.colors[num]^.r:=valuelist16[i];
       Tpalette16.colors[num]^.g:=valuelist16[i+1];
       Tpalette16.colors[num]^.b:=valuelist16[i+2];
-      Tpalette16.colors[num]^.a:=$0f;
+      Tpalette16.colors[num]^.a:=$7f;
       inc(i,3);
       inc(num); 
   until num=14;
@@ -521,26 +523,28 @@ valuelist16[44]:=$7f;
 
 TPalette16.DWords[0]:=$000000ff;
 
-TPalette16.DWords[1]:=$ff0000ff;
-TPalette16.DWords[2]:=$00ff00ff;
-TPalette16.DWords[3]:=$ffff00ff;
+TPalette16.DWords[1]:=$7f0000ff; //red
+TPalette16.DWords[2]:=$007f00ff; //green
+TPalette16.DWords[3]:=$00007fff; //blue
 
-//cmy is inverted of rgb
-TPalette16.DWords[4]:=$0000ffff;
-TPalette16.DWords[5]:=$ff00ffff;
-TPalette16.DWords[6]:=$00ffffff;
+TPalette16.DWords[4]:=$7f7f00ff; //yellow
+TPalette16.DWords[5]:=$7f007fff; //mag
+TPalette16.DWords[6]:=$007f7fff; //cyan
 
-//greys
-TPalette16.DWords[7]:=$f0f0f0ff;
-TPalette16.DWords[8]:=$0f0f0f0f;
+TPalette16.DWords[7]:=$f0f0f0ff; //DGrey
 
-TPalette16.DWords[9]:=$ff00000f;
-TPalette16.DWords[10]:=$00ff000f;
-TPalette16.DWords[11]:=$ffff000f;
+//half intensity-same colors
+//127 is half of 255(full alpha bit)
 
-TPalette16.DWords[12]:=$0000ff0f;
-TPalette16.DWords[13]:=$ff00ff0f;
-TPalette16.DWords[14]:=$00ffff0f;
+TPalette16.DWords[8]:=$f0f0f07f; //LtGrey
+
+TPalette16.DWords[9]:=$ff00007f; //Lt Red
+TPalette16.DWords[10]:=$00ff007f; //Lt Green
+TPalette16.DWords[11]:=$0000ff7f; //Lt Blue
+
+TPalette16.DWords[12]:=$00ffff7f; //Lt cyan
+TPalette16.DWords[13]:=$ff00ff7f; //Lt mag
+TPalette16.DWords[14]:=$7f7f007f; //Lt yelllow-not brown
 
 TPalette16.DWords[15]:=$ffffffff;
 
@@ -609,55 +613,73 @@ var
 
 
 begin  
-
+//old cga palette
 valuelist256[0]:=$00;
 valuelist256[1]:=$00;
 valuelist256[2]:=$00;
-valuelist256[3]:=$ff;
+
+valuelist256[3]:=$7f;
 valuelist256[4]:=$00;
 valuelist256[5]:=$00;
+
 valuelist256[6]:=$00;
-valuelist256[7]:=$ff;
+valuelist256[7]:=$7f;
 valuelist256[8]:=$00;
-valuelist256[9]:=$ff;
-valuelist256[10]:=$ff;
-valuelist256[11]:=$00;
-valuelist256[12]:=$00;
-valuelist256[13]:=$00;
-valuelist256[14]:=$ff;
-valuelist256[15]:=$ff;
+
+valuelist256[9]:=$00;
+valuelist256[10]:=$00;
+valuelist256[11]:=$7f;
+
+valuelist256[12]:=$7f;
+valuelist256[13]:=$7f;
+valuelist256[14]:=$00;
+
+valuelist256[15]:=$7f;
 valuelist256[16]:=$00;
-valuelist256[17]:=$ff;
-valuelist256[18]:=$ff;
-valuelist256[19]:=$ff;
-valuelist256[20]:=$00;
-valuelist256[21]:=$c0;
-valuelist256[22]:=$c0;
-valuelist256[23]:=$c0;
-valuelist256[24]:=$7f;
-valuelist256[25]:=$7f;
-valuelist256[26]:=$7f;
-valuelist256[27]:=$7f;
+valuelist256[17]:=$7f;
+
+valuelist256[18]:=$00;
+valuelist256[19]:=$7f;
+valuelist256[20]:=$7f;
+
+valuelist256[21]:=$f0;
+valuelist256[22]:=$f0;
+valuelist256[23]:=$f0;
+
+valuelist256[24]:=$f0;
+valuelist256[25]:=$f0;
+valuelist256[26]:=$f0;
+
+valuelist256[27]:=$ff;
 valuelist256[28]:=$00;
 valuelist256[29]:=$00;
+
 valuelist256[30]:=$00;
-valuelist256[31]:=$7f;
+valuelist256[31]:=$ff;
 valuelist256[32]:=$00;
-valuelist256[33]:=$7f;
-valuelist256[34]:=$7f;
-valuelist256[35]:=$00;
+
+valuelist256[33]:=$00;
+valuelist256[34]:=$00;
+valuelist256[35]:=$ff;
+
 valuelist256[36]:=$00;
 valuelist256[37]:=$00;
-valuelist256[38]:=$7f;
-valuelist256[39]:=$7f;
+valuelist256[38]:=$ff;
+
+valuelist256[39]:=$ff;
 valuelist256[40]:=$00;
-valuelist256[41]:=$7f;
-valuelist256[42]:=$00;
+valuelist256[41]:=$ff;
+
+valuelist256[42]:=$7f;
 valuelist256[43]:=$7f;
-valuelist256[44]:=$7f;
+valuelist256[44]:=$00;
+
 valuelist256[45]:=$ff;
 valuelist256[46]:=$ff;
 valuelist256[47]:=$ff;
+
+//end old 16 color palette
+
 valuelist256[48]:=$00;
 valuelist256[49]:=$00;
 valuelist256[50]:=$00;
@@ -1417,41 +1439,83 @@ valuelist256[765]:=$ee;
 valuelist256[766]:=$ee;
 valuelist256[767]:=$ee;
 
-//zero increments are always one short
+//correct for the wonky cga palette
 
    i:=0;
    num:=0; 
+   repeat 
+      Tpalette16.colors[num]^.r:=valuelist256[i];
+      Tpalette16.colors[num]^.g:=valuelist256[i+1];
+      Tpalette16.colors[num]^.b:=valuelist256[i+2];
+      Tpalette16.colors[num]^.a:=$ff;
+      inc(i,3);
+      inc(num); 
+  until num=7;
+
+   i:=25;
+   num:=8; 
+   repeat 
+      Tpalette256.colors[num]^.r:=valuelist256[i];
+      Tpalette256.colors[num]^.g:=valuelist256[i+1];
+      Tpalette256.colors[num]^.b:=valuelist256[i+2];
+      Tpalette256.colors[num]^.a:=$7f;
+      inc(i,3);
+      inc(num); 
+  until num=14;
+
+  //white
+      Tpalette256.colors[15]^.r:=$ff;
+      Tpalette256.colors[15]^.g:=$ff;
+      Tpalette256.colors[15]^.b:=$ff;
+      Tpalette256.colors[15]^.a:=$ff;
+  
+//continue w rest of colors
+
+   i:=48;
+   num:=16; 
    repeat
       Tpalette256.colors[num]^.r:=valuelist256[i];
       Tpalette256.colors[num]^.g:=valuelist256[i+1];
       Tpalette256.colors[num]^.b:=valuelist256[i+2];
-      Tpalette256.colors[num]^.a:=$ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
+      Tpalette256.colors[num]^.a:=$ff; 
       inc(i,3);
       inc(num); 
   until num=767;
 
 	
 //256 color VGA palette based on XTerm colors(Unix)
-//first 16 colors now should be more accurate!
+//with modified initial cga palette
 
 TPalette256.DWords[0]:=$000000ff;
-TPalette256.DWords[1]:=$ff0000ff;
-TPalette256.DWords[2]:=$00ff00ff;
-TPalette256.DWords[3]:=$ffff00ff;
-TPalette256.DWords[4]:=$0000ffff;
-TPalette256.DWords[5]:=$ff00ffff;
-TPalette256.DWords[6]:=$ffff55ff;
-TPalette256.DWords[7]:=$c0c0c0ff;
-TPalette256.DWords[8]:=$7f7f7fff;
-TPalette256.DWords[9]:=$7f0000ff;
-TPalette256.DWords[10]:=$007f00ff;
-TPalette256.DWords[11]:=$7f7f00ff;
-TPalette256.DWords[12]:=$00007fff;
-TPalette256.DWords[13]:=$7f007fff;
-TPalette256.DWords[14]:=$007f7fff;
+
+TPalette256.DWords[1]:=$7f0000 ff;
+TPalette256.DWords[2]:=$007f00 ff;
+TPalette256.DWords[3]:=$00007f ff;
+
+TPalette256.DWords[4]:=$7f7f00 ff;
+TPalette256.DWords[5]:=$7f007f ff;
+TPalette256.DWords[6]:=$007f7f ff;
+
+TPalette256.DWords[7]:=$f0f0f0 ff;
+
+//half-intensity-same colors
+//127 is half of 255(full alpha bit)
+
+TPalette256.DWords[8]:=$f0f0f07f;
+
+TPalette256.DWords[9]:=$ff00007f;
+TPalette256.DWords[10]:=$00ff007f;
+TPalette256.DWords[11]:=$0000ff7f;
+
+TPalette256.DWords[12]:=$00ffff7f;
+TPalette256.DWords[13]:=$ff00ff7f;
+TPalette256.DWords[14]:=$7f7f007f;
+
 TPalette256.DWords[15]:=$ffffffff;
 
+//begin 256 palette
 TPalette256.DWords[16]:=$000000ff;
+
 TPalette256.DWords[17]:=$00005fff;
 TPalette256.DWords[18]:=$000087ff;
 TPalette256.DWords[19]:=$0000afff;

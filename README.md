@@ -8,6 +8,38 @@ You draw with it.
 
 We will try to use "TCanvas2 objects" as the code evolves.
 
+**Parts of SDL are being rewritten**.
+SDL/SDL2 no longer suits "our Pascalian needs".
+**This unit uses modified and/or patched JEDI sources** as a result.
+
+Furthermore- 
+		FreeGLUT (3D) does for 3D- what SDL does for 2D
+
+Most notable changes/rewrites:
+		SDL2 handles OpenGL2 Quads for us via "internal compositing"
+				as opposed to just "pageFlipping"
+
+		Game Precision Timers
+		Threads/Threading
+		Callbacks(where possible)
+		"Direct" Rendering OPS/ DRI calls
+		Font Code
+		Unpatched JEDI x64 code sections
+		Using PortAudio (uos) instead of "dodgy PulseAudio calls"
+
+This removes a TON of headache and low-level programming.
+(It helps to use the right tools.)
+
+
+While the "C Syntax" is correct when utilizing SDL, the PASCAL needed some adjustment.
+
+It makes more sense to use similar syntax, if possible.
+
+SDL2_GFX functions have been imported into the main units. 
+There was **never a need to remove these functions** from the renderer OPS in the main unit.
+(There are workarounds for heap limits-Ive used them before.)
+
+---
 
 2D:
 Windows can use:
@@ -49,14 +81,25 @@ The user has to choose what to install and use.)
 
 
 3D:
+
+Software-
+
+	This is dual-buffered data rendered from the CPU. Its very slow.
+
 OpenGL(OGL)-
 
-	is very picky about how data is manipulated.
+	Usually Hardware assisted rendering
 
 DirectX-
 
-	may not have this problem
+	Windows implementation of 3D rendering
 
+Vulkan-
+
+	Advanced 3D rendering methods using DX12+ capable hardware
+
+---
+## Ports
 
 This unit (LazGraphics) SHOULD be ported to use the following languages:
 
@@ -67,7 +110,8 @@ This unit (LazGraphics) SHOULD be ported to use the following languages:
 		C/VC/C sharp (backport at your own peril- NO C HERE.)
 		
 -DONT ASK about assembler.
-The reson behind this is such:
+
+The reason behind this is such:
 
 		Compiler options often out perform (even with more code) inline ASSEMBLER
 
@@ -103,19 +147,6 @@ Portions untested as an API:
 -event input and rendering mainloop tested (working with sdl v1)
 
 (Travis CL doesnt work with Pascal sources. You wont see the nice pretty graphbar.)
-
----
-
-This unit uses **modified** JEDI sources.
-
-While the "C Syntax" is correct when utilizing SDL, the PASCAL needed some adjustment.
-
-It makes more sense to use similar syntax, if possible.
-Why the sources werent corrected is beyond me- 
-
-SDL_GPU functions have been imported into the main units. 
-The split was unneccessary.
-There is no optimization to be gained by it.
 
 ---
 
@@ -190,27 +221,14 @@ I do not write OOP level garbage, I find object code and repeated instantiation 
 I have my own "methods" if I need object-related routines.
 They work.
 
-#### Some SDL routines disappear- 
-
-Changes from SDL1 to SDL 2 have removed some code.
-
-        knowing that /dev/cdrom is the active SDL_CDROM device
-        knowing that /dev/dsp (oss) /dev/snd/XYZ (alsa,pulse) are sound/MIDI devices
-        knowing that /dev/input/jsX is the joystick
-        /dev/input/ -the mouse, and even haptic device input
-
-Can these still be used- or do we have to rewrite half of SDL?
-Audio routines have been rewritten and the code is as much of a mess as KMS programming.
-
-If youre going to rewrite code- make it optimal- and DO IT RIGHT. 
-Dont drop useful routines and make others have to rewrite your code for you.
 
 #### DirectX
 
 Although primarily for windows(supported via WINE libs) this started in 2D rendering.
 
 3D support is present in D3D library DLLs.
-DLL is the windows equivalent of Linux Shared Object (so) compiler output. (Pre-Compiled OBJect code was the previous incarnation)
+DLL is the windows equivalent of Linux Shared Object (so) compiler output. 
+(Pre-Compiled OBJect code was the previous incarnation)
 
 
 #### OpenGL
@@ -281,7 +299,9 @@ SDL "Pointer issues" and mem-alloc/free issue, however, need to be worked out by
 (If the problem doesnt come from this main unit- YOU FIX IT)
 
 I know JEDI is broken in places and I appreciate the help in fixing it.
-"JEDI" is a C header port to FPC for using SDL graphics.
+"JEDI" is a "C header port" to FPC for using SDL graphics.
+
+		That means the core C routines ARE NOT PORTED.
 
 
 ### Why SDL and not...
@@ -294,20 +314,14 @@ Programmers are making it more difficult with mailing lists (spam) and "private 
 
 
 A lot of other code is half-assed or broken.
-Other just cant seem to figure things out.
+People suffer from information overload and cant figure things out
  
-This code may be WIP- 
-
-		but the "fundamental code" (pre-abstraction to library format) WORKS. 
-
-Ive even tested it.
-
-IE: For the code to be useful, it must be in library format.
+For the code to be useful, it must be in library format.
 
 
 #### SDL is CROSS PLATFORM and UNIVERSAL CODE
 
-You dont have to re-write routines when writing for windows vs unices.
+You dont have to re-write routines.
 If you call an SDL function- you call it the same way in other languages.
 
 However, SDL is still very incomplete. 
@@ -315,12 +329,17 @@ However, SDL is still very incomplete.
 The developers dont care to fix these problems.
 THIS IS BAD.
 
+Shoving people into SDL and saying "good luck"-
+		
+		When theres 50 ways to do things...IS WRONG.
+
 
 #### FreePascal "Graphics support" is missing (or broken)
 
 **Lazarus OGL demos DO NOT work correctly.**
 
 Code has been abandoned.
+This appears to be a shader sequence problem.
 
 
 #### can we add routines??
@@ -344,63 +363,60 @@ If the code needs to be reworked- do it right.
 #### Focus:
 
 		Unices (red hat, fedora, Suse, ubuntu,debian,etc.)
-
         MacOSX Quartz ( at minimal X11 )
         Android(eventually- theres more to this than just getting the routines working)
 
 
-Graphics libraries for DOS have been written by Borland, INC.
-There are some ports to Sin (windows) already using WinAPI (or Delphi). 
-However, as with X11CorePrimitives- 
+Graphics libraries for DOS??
 
-		we should be using GL Quads or DirectDraw for better "optimal" routines.
+		Try the original BGI written by Borland, INC.
+		The BGI has been 256 color extended - I have the patch.
 
-FPC in "mode DELPHI" for X11/Unix based systems is our only option. 
-(You cannot switch modes inside a source code file.)
+There are some ports to Sin (windows) already using WinAPI. 
+The WinAPI port was written to fix a SDL "speed issue".
+What is not mentioned is if SDLv2 was used or SDLv1.
 
-I prefer "FPC OBJ" or "TP compatible" modes.
+LibGraph(C) or otherwise-
 
+		HAS NOT BEEN EXTENDED TO 3D.
+
+Instead - developers want you to learn the MESS of OpenGL/DX/Quartz.
+
+		NO. YOU DONT HAVE TO.
 
 ### Dependencies (INSTALL ME FIRST!!):
 
-NOTE:
-    
-        CMake
-        CMake-Gui
-        libudev-dev
-		mesa-dev
+CMake
+CMake-Gui
+libudev-dev
+mesa-dev
+
+OSX:
+		XQuartz (puts X11 back on OSX)
+
+Unices:
 		xorg-dev
-		
-		
-are reccommended as some other libs depend on these. (udev is for USB devices support)
+		SDL2-x.x.x 		   			-- the main SDL library
+		SDL2-devel-x.x.x 			-- the developer package
+		SDL2_image-x.x.x 			-- image library for image support
+		SDL2_image-devel-x.x.x	 	-- image library developer 
+		SDL2_net-x.x.x 				-- image library for networking
+		SDL2_net-devel-x.x.x	 	-- image library developer 
 
-        libOpenMPT (Tracker/mikmod format "game" audio support)
-        libOpen_vr (VR helmet support)
+VR:
 
-are being considered (need pascal headers)- SDL looks like it supports the IO methods.
 **STEAM uses these**
 
+        libOpen_vr (VR helmet support)
 
-UNIX/Lin-ux:
-
-(preferably SDL2-)
-
-			SDL-x.x.x.rpm 		   	-- the main SDL library
-			SDL-devel-x.x.x.rpm 		-- the developer package
-			SDL_image-x.x.x.rpm 		-- image library for fonts
-			SDL_image-devel-x.x.x.rpm 	-- image library developer 
 	
-etc. There are lots of these units.
-
-Debians and ubunt-nuts need to find the .deb(s). They use similar names.
-
-
 These libaries are a standard part of most current distributions. 
 The libaries will *probably already* (cross fingers) be installed. 
 
 You may have to install the developer packages,however. 
 Ive noticed also that "preinstalled" might point to version 1, not version 2.
 Double check version 2 is installed.
+
 
 #### Can I have a IDE??
 

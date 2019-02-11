@@ -1,7 +1,7 @@
 Unit grText;
 //graphics text functions.
 
-//**this unit has not been compile tested yet**
+//**this unit has not been tested yet**
 // setFont and init and destroy functions work(at least with SDL by itself-pre abstraction)
 
 interface 
@@ -22,7 +22,7 @@ type
 
 var
     fontdata:PSDL_FontInfo;
-    IsJapanese:boolean;
+    IsJapanese:boolean; //text that goes down-matrix style- not sideways
 
 procedure backspace( Font:^SDL_FontInfo, ch:char);
 
@@ -41,23 +41,35 @@ procedure GetTextSettings(TextInfo : TextSettingsType);
 procedure SetTextJustify(direction:directions);
 procedure SetTextStyle(font:string; direction : directions; font_size:integer;);
 
-//there is no INSTALLING.
-
 //style is italic,bold,normal,etc...
 procedure SetFont(fontpath:string; font_size:integer; style:fontflags; outline:boolean);
 
-//from gfx unit-
-//advanced font section
-procedure gfxPrimitivesSetFont(Const fontdata: Pointer; cw, ch: uInt32); 
+//canvas rotation (roto) tricks
 
-//(verticle text is rotated 90 degrees)
-Procedure gfxPrimitivesSetFontRotation(rotation: uInt32); 
+//backwards is flipped(mirrored) - like "english arabic"
+//It would be upside -down otherwise
+procedure MirrorText;
+
+//rotate 90 right=read like Japanese posters
+//rotate 90 left=?? (read it up-ways)
+Procedure SetFontRotation(rotation: uInt32); 
 
 //write font data to screen AND set color
 
+procedure OutTextColor(color:DWord);
+procedure OutTextColor(r,g,b:byte);
+procedure OutTextColor(r,g,b,a:byte);
+
+
+//redo these
 //writeChar
-Function characterColor(renderer: PSDL_Renderer; x, y: sInt16; c: Char; colour: uInt32):sInt32; 
-Function characterRGBA(renderer: PSDL_Renderer; x, y: sInt16; c: Char; r, g, b, a: uInt8):sInt32; 
+Function OutTextColorXY(renderer: PSDL_Renderer; x, y: sInt16; c: Char; colour: uInt32):sInt32; 
+Function OutTextColorXY(renderer: PSDL_Renderer; x, y: sInt16; c: Char; r, g, b, a: uInt8):sInt32; 
+
+procedure OutTextColorLn(color:DWord);
+procedure OutTextColorLn(r,g,b:byte);
+procedure OutTextColorLn(r,g,b,a:byte);
+
 //writeLn
 Function stringColor(renderer: PSDL_Renderer; x, y: sInt16; Const str: PChar; colour: uInt32):sInt32; 
 Function stringRGBA(renderer: PSDL_Renderer; x, y: sInt16; Const syt: PChar; r, g, b, a: uInt8):sInt32; 

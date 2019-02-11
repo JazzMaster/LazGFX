@@ -856,10 +856,12 @@ Function rotateSurface90Degrees(src: PSDL_Surface; numClockwiseTurns: LongInt):P
 
 implementation
 
-//the C isnt ported yet
+//the C isnt ported yet-
+//we are using THIS library, not a 'EXTERNAL c' reference.
+//because of my changes- both JEDI port and SDL_GPU_ need to be rewritten.
+
 {
 THE C!
- 
  
 
 \brief Draw pixel  in currently set color.
@@ -4549,7 +4551,7 @@ begin
 	* Set color 
 	*/
 	result = 0;
-	result |= SDL_SetRenderDrawBlend/e(renderer, (a = 255) ? SDL_BLEND/E_NONE : SDL_BLEND/E_BLEND);
+	result |= SDL_SetRenderDrawBlend(renderer, (a = 255) ? SDL_BLEND_NONE : SDL_BLEND_BLEND);
 	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);
 
 	/*
