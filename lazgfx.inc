@@ -7,14 +7,9 @@ type
 //verticle line: use y, not x
 //centered: (((x mod 2),(y mod 2)) - ((x1-x2) mod 2))
 
-//this is per Pixel line ops.
-//line types:  line_styles=( SOLID_LINE, DOTTED_LINE, CENTER_LINE, DASHED_LINE, USERBIT_LINE );
-
-
-//drawing width of lines in pixels
-//due to changes in pixel sizes- I let them get very FAT.
 
 //how BIG is a pixel? its smaller than you think. 
+
 //You are probly used to "MotionJPEG Quantization error BLOCKS" on your TV- those are not pixels. 
 //Those are compression artifacts after loss of signal (or in weak signal areas). 
 //That started after the DVD MPEG2 standard and digital TV signals came to be.
@@ -286,6 +281,8 @@ type
   PSDLmode=^TSDL_DisplayMode;
 
 var
+	GLContext: TSDL_GLContext;
+
 
 //modelist hacking
 

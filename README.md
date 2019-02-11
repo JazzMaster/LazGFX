@@ -403,6 +403,16 @@ Unices:
 		SDL2_net-x.x.x 				-- image library for networking
 		SDL2_net-devel-x.x.x	 	-- image library developer 
 
+Sound libs(includes a copy- but install from your distro)
+
+libUOS is on GitHub- look for it.
+
+		libsndfile
+		libPortAudio
+		libMpg123
+		libMp4
+		libFaad
+
 VR:
 
 **STEAM uses these**

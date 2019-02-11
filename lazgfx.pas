@@ -857,10 +857,12 @@ to build without the LCL(in Lazarus):
 
 {$IFDEF darwin}
 	{$linkframework Cocoa}
+	{$linkframework OpenGL}
+	{$linkframework GLUT}
+	{$linklib SDLmain}
     {$linklib SDLimg}
     {$linklib SDLttf}
     {$linklib SDLnet}
-	{$linklib SDLmain}
 
 //	{$linklib gcc} -pascal doesnt use C.  	:-P
 
