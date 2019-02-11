@@ -531,6 +531,7 @@ and SDL was forgotten about and half-assed.
  
 Most recent computers circa ~20 years should be fine(~y2k).
 
+	
 
 Arc:
 
@@ -5127,6 +5128,108 @@ begin
 	SDL_RenderFillRect(renderer, rect1);
     free(Rect1);
 end;
+
+//these two are completely untested 
+//they are not, by themselves "feature coplete dialogs", nor do they check input.
+//mimcs crt level windows in vga text modes
+
+//I said Id get to the line characters..here we go.
+procedure DrawSingleLinedWindowDialog(Rect:PSDL_Rect; colorToSet:DWord);
+
+var
+    UL,UR,LL,LR:Points; //see header file(polypts is ok here)
+    ShrunkenRect,NewRect:PSDL_Rect;
+
+begin
+    Tex:=NewTexture;
+    SDL_SetViewPort(Rect);
+
+    //corect me if Im off- this is guesstimate math here, not actual.
+    //the corner co ords
+    UL.x:=x+2;
+    UL.y:=y+2;
+    LL.x:=h-2;
+    LL.y:=x+2;
+    UR.x:=w-2;
+    UR.y:=y+2;
+    LR.x:=w-2;
+    LR.y:=h-2;
+    
+    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetPenColor(_fgcolor);
+    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
+
+//shink available space
+
+    //do this again- further in
+    UL.x:=x+6;
+    UL.y:=y+6;
+    LL.x:=h-6;
+    LL.y:=x+6;
+    UR.x:=w-6;
+    UR.y:=y+6;
+    LR.x:=w-6;
+    LR.y:=h-6;
+
+    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetViewPort(ShrunkenRect);
+
+end;
+
+procedure DrawDoubleLinedWindowDialog(Rect:PSDL_Rect);
+
+var
+    UL,UR,LL,LR:Points; //see header file(polypts is ok here)
+    ShrunkenRect,NewRect:PSDL_Rect;
+
+begin
+    Tex:=NewTexture;
+    SDL_SetViewPort(Rect);
+
+    //corect me if Im off- this is guesstimate math here, not actual.
+    //the corner co ords
+    UL.x:=x+2;
+    UL.y:=y+2;
+    LL.x:=h-2;
+    LL.y:=x+2;
+    UR.x:=w-2;
+    UR.y:=y+2;
+    LR.x:=w-2;
+    LR.y:=h-2;
+    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetPenColor(ColorToSet);
+    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
+    
+    //do this again- further in
+    UL.x:=x+4;
+    UL.y:=y+4;
+    LL.x:=h-4;
+    LL.y:=x+4;
+    UR.x:=w-4;
+    UR.y:=y+4;
+    LR.x:=w-4;
+    LR.y:=h-4;
+    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetPenColor(ColorToSet);
+    SDL_RenderDrawRect(NewRect); 
+
+//shink available space
+
+    //do this again- further in
+    UL.x:=x+6;
+    UL.y:=y+6;
+    LL.x:=h-6;
+    LL.y:=x+6;
+    UR.x:=w-6;
+    UR.y:=y+6;
+    LR.x:=w-6;
+    LR.y:=h-6;
+
+    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetViewPort(ShrunkenRect);
+
+end;
+
 
 begin
   ArcCall.X := 0;

@@ -1989,6 +1989,24 @@ begin
 //once is enough with this list...its more of a nightmare than you know.
 //(its assigned before entries are checked)
 
+    //fire and forget- surface formats               
+    case bpp of
+		8: begin
+			    if maxColors=256 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX8
+				else if maxColors=16 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX4MSB; 
+		end;
+		15: MainSurface^.format:=SDL_PIXELFORMAT_RGB555;
+
+        //we assume on 16bit that we are in 565 not 5551, we should not assume
+		16: begin
+			
+			MainSurface^.format:=SDL_PIXELFORMAT_RGB565;
+
+        end;
+		24: MainSurface^.format:=SDL_PIXELFORMAT_RGB888;
+		32: MainSurface^.format:=SDL_PIXELFORMAT_RGBA8888;
+
+    end;
 
    //"usermode" must match available resolutions etc etc etc
    //this is why I removed all of that code..."define what exactly"??
@@ -1996,8 +2014,10 @@ begin
   //attempt to trigger SDL...on most sytems this takes a split second- and succeeds.
   _initflag:= SDL_INIT_VIDEO or SDL_INIT_TIMER;
 
+//need to iterate over as many of these as possible
+
   if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
-  if WantsJoyPad then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
+  if WantsJoyPadAudio then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
 //if WantInet then _initflag:= SDL_Init_Net;
 
   if ( SDL_Init(_initflag) < 0 ) then begin
@@ -2032,11 +2052,13 @@ begin
 
 {
  im going to skip the RAM requirements code and instead haarp on proper rendering requirements.
- note that a 12 yr old notebook-try as it may- might not have enough vRAM to pull things off.
+ note that a 22 yr old notebook-try as it may- might not have enough vRAM to pull things off.
  can you squeeze the code to fit into a 486??---you are pushing it.
+ 
 (You are better off using SDLv1 instead)
 
-now- how do we check if sdl2 is supported- and fall back, given uses clauses can only launch one or the other?
+now- how do we check if sdl2 is supported- and fall back, given that the uses clauses can only launch one or the other?
+HMMMMM
 }
 
   if (graphdriver = DETECT) then begin
@@ -2053,9 +2075,6 @@ now- how do we check if sdl2 is supported- and fall back, given uses clauses can
   LIBGRAPHICS_ACTIVE:=false; 
 
 //we do it this way because we might already be active- why duplicate code?
-
-//sets up mode- then clears it in standard "BGI" fashion.
-  SetGraphMode(Graphmode,wantFullScreen);
 
 {
 atexit handling:
@@ -2082,15 +2101,9 @@ in reality SDL complains about this being setup- or at least how its done in C.
 //If we got here- YAY!
 
   //Hide, mouse.
-  SDL_ShowCursor(SDL_DISABLE);
+  if not Render3d then
+	SDL_ShowCursor(SDL_DISABLE);
 
-//fpfork the event handler
-  IntHandler;
-
-//if we fpforked- we should come right back. 
-
-//this data seems to hidden in all the lines of C and barely made reference to.
-//also needs to be checked for SDLv2 compliance.
 
    eventLock:= nil;
    eventWait:= nil;
@@ -2136,10 +2149,13 @@ in reality SDL complains about this being setup- or at least how its done in C.
   //dont refresh faster than the screen.
   if (mode^.refresh_rate > 0)  then 
      //either force a longINT- or convert from REAL. Otherwise you have to pass it as a interrupt proc param--it hairy mess.
+     //if Now mod mode^.refresh_rate then
+     //page_flip/renderPresent/etc..
+     
      flip_timer_ms := longint(mode^.refresh_rate)
 
   else
-     flip_timer_ms := 17; 
+     flip_timer_ms := 17; //60Hz
 
   video_timer_id := SDL_AddTimer(flip_timer_ms, @videoCallback, nil);
   if video_timer_id=0 then begin
@@ -2150,6 +2166,23 @@ in reality SDL complains about this being setup- or at least how its done in C.
 //    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL cant set video callback timer.Manually update surface.','OK',NIL);
     NoGoAutoRefresh:=true; //Now we can call Initgraph and check, even if quietly(game) If we need to issue RenderPresent calls.
   end;
+
+  if flip_timer_ms=17 then flip_timer_ms=60;
+  FSMode:=MaxX,'x',MaxY,':',bpp,'@',flip_timer_ms; //build the string
+  
+
+//setup GraphMode late because GLUT needs some variables we dont have yet.
+
+
+//sets up mode- then clears it in standard "BGI" fashion.
+  SetGraphMode(Graphmode,wantFullScreen);
+  
+  //the event handler
+
+// if Render3d then GlutMainLoop;
+//else
+  IntHandler;
+
 
  { 
   CantDoAudio:=false;
@@ -2282,108 +2315,6 @@ begin
 end;
 }
 
-//these two are completely untested 
-//they are not, by themselves "feature coplete dialogs", nor do they check input.
-//mimcs crt level windows in vga text modes
-
-//I said Id get to the line characters..here we go.
-procedure DrawSingleLinedWindowDialog(Rect:PSDL_Rect; colorToSet:DWord);
-
-var
-    UL,UR,LL,LR:Points; //see header file(polypts is ok here)
-    ShrunkenRect,NewRect:PSDL_Rect;
-
-begin
-    Tex:=NewTexture;
-    SDL_SetViewPort(Rect);
-
-    //corect me if Im off- this is guesstimate math here, not actual.
-    //the corner co ords
-    UL.x:=x+2;
-    UL.y:=y+2;
-    LL.x:=h-2;
-    LL.y:=x+2;
-    UR.x:=w-2;
-    UR.y:=y+2;
-    LR.x:=w-2;
-    LR.y:=h-2;
-    
-    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetPenColor(_fgcolor);
-    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
-
-//shink available space
-
-    //do this again- further in
-    UL.x:=x+6;
-    UL.y:=y+6;
-    LL.x:=h-6;
-    LL.y:=x+6;
-    UR.x:=w-6;
-    UR.y:=y+6;
-    LR.x:=w-6;
-    LR.y:=h-6;
-
-    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetViewPort(ShrunkenRect);
-
-end;
-
-procedure DrawDoubleLinedWindowDialog(Rect:PSDL_Rect);
-
-var
-    UL,UR,LL,LR:Points; //see header file(polypts is ok here)
-    ShrunkenRect,NewRect:PSDL_Rect;
-
-begin
-    Tex:=NewTexture;
-    SDL_SetViewPort(Rect);
-
-    //corect me if Im off- this is guesstimate math here, not actual.
-    //the corner co ords
-    UL.x:=x+2;
-    UL.y:=y+2;
-    LL.x:=h-2;
-    LL.y:=x+2;
-    UR.x:=w-2;
-    UR.y:=y+2;
-    LR.x:=w-2;
-    LR.y:=h-2;
-    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetPenColor(ColorToSet);
-    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
-    
-    //do this again- further in
-    UL.x:=x+4;
-    UL.y:=y+4;
-    LL.x:=h-4;
-    LL.y:=x+4;
-    UR.x:=w-4;
-    UR.y:=y+4;
-    LR.x:=w-4;
-    LR.y:=h-4;
-    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetPenColor(ColorToSet);
-    SDL_RenderDrawRect(NewRect); 
-
-//shink available space
-
-    //do this again- further in
-    UL.x:=x+6;
-    UL.y:=y+6;
-    LL.x:=h-6;
-    LL.y:=x+6;
-    UR.x:=w-6;
-    UR.y:=y+6;
-    LR.x:=w-6;
-    LR.y:=h-6;
-
-    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetViewPort(ShrunkenRect);
-
-end;
-
-
 procedure closegraph;
 var
 	Killstatus,Die:cint;
@@ -2470,16 +2401,18 @@ begin
 	MainSurface:= Nil;
   end;	
 
-  if (Renderer<> Nil) then begin
-    Renderer:= Nil;
-	SDL_DestroyRenderer( Renderer );
-  end;	
+  if not Render3d then begin
+	if (Renderer<> Nil) then begin
+		Renderer:= Nil;
+		SDL_DestroyRenderer( Renderer );
+	end;	
 
-  if (Window<> Nil) then begin
-	Window:= Nil;
-  	SDL_DestroyWindow ( Window );
-  end;	
-
+	if (Window<> Nil) then begin
+		Window:= Nil;
+		SDL_DestroyWindow ( Window );
+	end;	
+  end;
+  
   SDL_Quit; 
 
 
@@ -2513,6 +2446,52 @@ begin
   x:=where.X;
   y:=where.Y;
   GetXY := (y * (MainSurface^.pitch mod (sizeof(byte)) ) + x); //byte or word-(lousy USint definition)
+end;
+
+
+//GLUT functions
+//is OGL easier- not for everything.
+
+procedure glutInitPascal(ParseCmdLine: Boolean); 
+var
+	myargc:integer;
+	myargv:array[0..1] of PChar;
+begin
+	//dummy rouinte- or is it here for a reason? seems to fire either way, according to C devs.
+	myargc:=1;
+	myargv [0]="LazGFX";
+	glutInit(@myargc, @myargv); 
+end;
+
+
+//renderPresent
+procedure DrawGLScene; cdecl;
+begin
+  glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT);
+  glutSwapBuffers;
+end;
+
+procedure ReSizeGLScene(Width, Height: Integer); cdecl;
+begin
+  if Height = 0 then
+    Height := 1;
+ 
+{  glViewport(0, 0, Width, Height);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity;
+  gluPerspective(45, Width mod Height, 0.1, 1000);
+ 
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity;
+}
+  
+end;
+
+//isnt this easy?
+procedure GLKeyboard(Key: Byte; X, Y: Longint); cdecl;
+begin
+//  if Key = 27 then
+//    Halt(0);
 end;
 
 {
@@ -2563,81 +2542,95 @@ begin
 //(so dont worry if the video hardware doesnt support it)
 
 
-
 //if not active:
 //are we coming up?
 //no? EXIT
 
-if (LIBGRAPHICS_INIT=false) then 
-
-begin
+	if (LIBGRAPHICS_INIT=false) then begin
 		
 		if IsConsoleInvoked then Logln('Call initgraph before calling setGraphMode.') 
 		else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'setGraphMode called too early. Call InitGraph first.','OK',NIL);
 	    exit;
-end
-else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //initgraph called us
-	if Render3d then //we use OGL context instead of 2D composite renderer
-		window := SDL_CreateWindow( PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, SDL_WINDOW_OPENGL );
-		GLContext := SDL_GL_CreateContext( Window );
-		if @GLContext = nil then begin //
+	end
+	else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //initgraph called us
+		if Render3d then begin//we use OGL context instead of 2D composite renderer
+
+			glutInitPascal(False);
+			glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH);
+			if WantsFullScreen then begin
+				glutGameModeString(FSMode);
+				glutEnterGameMode;
+				glutSetCursor(GLUT_CURSOR_NONE);
+			end else begin //windowed
+				glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH); 
+				glutInitWindowSize(MaxX, MaxY); 
+				ScreenWidth := glutGet(GLUT_SCREEN_WIDTH); 
+				ScreenHeight := glutGet(GLUT_SCREEN_HEIGHT); 
+				glutInitWindowPosition((ScreenWidth - AppWidth) div 2, (ScreenHeight - AppHeight) div 2); 
+				glutCreateWindow('Lazarus Graphics Application'); 	
+			end;
 		
-			closeGraph;
-		end;
-		//r,g,b=0,a=1
-		glClearColor( 0.f, 0.f, 0.f, 1.f );
-		glClear( GL_COLOR_BUFFER_BIT ); //there is four buffers
+			//r,g,b=0,a=1
+			glClearColor( 0.f, 0.f, 0.f, 1.f );
+			glClear( GL_COLOR_BUFFER_BIT );
 		
-	//GLContexts dont use surfaces	
-	else begin
-		window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
-		renderer := SDL_CreateRenderer(window, -1, (SDL_RENDERER_ACCELERATED or SDL_RENDERER_PRESENTVSYNC));    
-		RendedWindow := SDL_CreateWindowAndRenderer(MaxX, MaxY,0, @window,@renderer);
+			//set callbacks-you need to override- or define these
+			//right now- these "do nothing" except for resize.
+			glutDisplayFunc(@DrawGLScene);
+			glutReshapeFunc(@ReSizeGLScene);
+			glutKeyboardFunc(@GLKeyboard);
+			glutIdleFunc(@DrawGLScene);
+		end	
+
+		else begin
+			window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
+			renderer := SDL_CreateRenderer(window, -1, (SDL_RENDERER_ACCELERATED or SDL_RENDERER_PRESENTVSYNC));    
+			RendedWindow := SDL_CreateWindowAndRenderer(MaxX, MaxY,0, @window,@renderer);
 	
-	if ( RendedWindow <>0 ) then begin
-    //No hardware renderer....
+			if ( RendedWindow <>0 ) then begin
+			//No hardware renderer....
     
-         //posX,PosY,sizeX,sizeY,flags
-         window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
-    	 if (window = Nil) then begin
- 			if IsConsoleInvoked then begin
-	    	   	Logln('Something Fishy. No hardware render support and cant create a window.');
-	    	   	Logln('SDL reports: '+' '+ SDL_GetError);      
-	    	end;
-	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy. No hardware render support and cant create a window.','BYE..',NIL);
+			//posX,PosY,sizeX,sizeY,flags
+			window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
+			if (window = Nil) then begin
+				if IsConsoleInvoked then begin
+					Logln('Something Fishy. No hardware render support and cant create a window.');
+					Logln('SDL reports: '+' '+ SDL_GetError);      
+				end;
+				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy. No hardware render support and cant create a window.','BYE..',NIL);
 			
-			_grResult:=GenError;
-	    	closegraph;
-         end;
+				_grResult:=GenError;
+				closegraph;
+			end;
 
-        //we have a window but are forced into SW rendering(why?)
-    	renderer := SDL_CreateSoftwareRenderer(Mainsurface);
-		if (renderer = Nil ) then begin
- 			if IsConsoleInvoked then begin
-	    	   	Logln('Something Fishy. No hardware render support and cant setup a software one.');
-	    	   	Logln('SDL reports: '+' '+ SDL_GetError);      
-	    	end;
-	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy. No hardware render support and cant setup a software one.','BYE..',NIL);
-	    	_grResult:=GEnError;
-	    	closegraph;
-		end;
-        // SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
+			//we have a window but are forced into SW rendering(why?)
+			renderer := SDL_CreateSoftwareRenderer(Mainsurface);
+			if (renderer = Nil ) then begin
+				if IsConsoleInvoked then begin
+					Logln('Something Fishy. No hardware render support and cant setup a software one.');
+					Logln('SDL reports: '+' '+ SDL_GetError);      
+				end;
+				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy. No hardware render support and cant setup a software one.','BYE..',NIL);
+				_grResult:=GEnError;
+				closegraph;
+			end;
+			// SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
 
-    end; //software renderer
+		end; //software renderer
+		SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
+		SDL_RenderClear(Renderer);
+
+    end; //setup renderer
+
+	surface1:=SDL_LoadBMP(iconpath);
+	SDL_SetWindowIcon(window, surface1);
+	SDL_FreeSurface(surface1);
+	if not Render3d then begin
    
-    SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
-    SDL_RenderClear(Renderer);
-   
-     
-   end; //if 3D
-   surface1:=SDL_LoadBMP(iconpath);
-   SDL_SetWindowIcon(window, surface1);
-   SDL_FreeSurface(surface1);
-
- // SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
-   if wantFullscreen then begin
-       //I dont know about double buffers yet but this looks yuumy..
-       //SDL_SetVideoMode(MaxX, MaxY, bpp, SDL_DOUBLEBUF|SDL_FULLSCREEN);
+	// SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
+	if wantFullscreen then begin
+		//I dont know about double buffers yet but this looks yuumy..
+        //SDL_SetVideoMode(MaxX, MaxY, bpp, SDL_DOUBLEBUF|SDL_FULLSCREEN);
 
        flags:=(SDL_GetWindowFlags(window));
        flags:=(flags or SDL_WINDOW_FULLSCREEN_DESKTOP); //fake it till u make it..
@@ -2646,7 +2639,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
        //autoscale us to the monitors actual resolution
        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 'linear');
        SDL_RenderSetLogicalSize(renderer, MaxX, MaxY);
-//phones: SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"); 
+		//phones: SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"); 
 
 	   IsThere:=SDL_SetWindowFullscreen(window, flags);
        thisMode:=getgraphmode;
@@ -2669,19 +2662,13 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 
     end; 
 
+  end; //not OGL
   
     //we can create a surface down to 1bpp, but we CANNOT SetVideoMode <8 bpp
     //I think this is a HW limitation in X11,etc.
 
     //Renderer says nothing about DEPTH, plenty about SIZE of output...
 
-    //syntax: flags, w,h,bpp,rmask,gmask,bmask,amask
-
-
- 
-    //convert surface to GLQuad if using 2D (SDL does this for us)
-    //3d surfaces are meshes, skins, or shaders
-    
     Mainsurface := SDL_CreateRGBSurface(0, MaxX, MaxY, bpp, 0, 0, 0, 0);
     if (Mainsurface = NiL) then begin //cant create a surface
         LogLn('SDL_CreateRGBSurface failed');
@@ -2698,113 +2685,119 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
       InitPalette256; 
       
     if Render3d then begin //openGL does this differently
+    //setup the data for RGBColor, not SDL_Color
     
-    
-    end;  
-    if (bpp<=8) then begin
-      if MaxColors=16 then
-            SDL_SetPaletteColors(palette,TPalette16.colors,0,16)
-	  else if MaxColors=256 then
-            SDL_SetPaletteColors(palette,TPalette256.colors,0,256);
-    end;
-
-
-   LIBGRAPHICS_ACTIVE:=true;
-   exit; //back to initgraph we go.
-
-  end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
-    if not Render3d then begin 
-                   
-    case bpp of
-		8: begin
-			    if maxColors=256 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX8
-				else if maxColors=16 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX4MSB; 
+    end else begin
+		if (bpp<=8) then begin
+			if MaxColors=16 then
+				SDL_SetPaletteColors(palette,TPalette16.colors,0,16)
+			else if MaxColors=256 then
+				SDL_SetPaletteColors(palette,TPalette256.colors,0,256);
 		end;
-		15: MainSurface^.format:=SDL_PIXELFORMAT_RGB555;
+    end; //not OGL
 
-        //we assume on 16bit that we are in 565 not 5551, we should not assume
-		16: begin
-			
-			MainSurface^.format:=SDL_PIXELFORMAT_RGB565;
+	LIBGRAPHICS_ACTIVE:=true;
+	exit; //back to initgraph we go.
 
-        end;
-		24: MainSurface^.format:=SDL_PIXELFORMAT_RGB888;
-		32: MainSurface^.format:=SDL_PIXELFORMAT_RGBA8888;
+	end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
+    
+		if not Render3d then begin
+     
+			mode^.w:=MaxX;
+			mode^.h:=MaxY;
+			mode^.refresh_rate:=60; //assumed
+			mode^.driverdata:=Nil;
 
-    end;
-   end; //not render3D
-   
-        mode^.w:=MaxX;
-		mode^.h:=MaxY;
-		mode^.refresh_rate:=60; //assumed
-		mode^.driverdata:=Nil;
+			success:=SDL_SetWindowDisplayMode(window,mode);
+			if (success <> 0) then begin 
+				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set DisplayMode.','OK',NIL);
+				if IsConsoleInvoked then begin
+					LogLn('ERROR: SDL cannot set DisplayMode.');		
+					LogLn(SDL_GetError);
+				end;
+				exit;
+			end;
+			//either way we should have a window and renderer by now...   
+			if wantFullscreen then begin
+				//I dont know about double buffers yet but this looks yuumy..
+				//SDL_SetVideoMode(MaxX, MaxY, bpp, SDL_DOUBLEBUF|SDL_FULLSCREEN);
 
-		success:=SDL_SetWindowDisplayMode(window,mode);
-        if (success <> 0) then begin 
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set DisplayMode.','OK',NIL);
-	        if IsConsoleInvoked then begin
-                LogLn('ERROR: SDL cannot set DisplayMode.');		
-                LogLn(SDL_GetError);
-            end;
-			exit;
-        end;
-    //either way we should have a window and renderer by now...   
-   if wantFullscreen then begin
-       //I dont know about double buffers yet but this looks yuumy..
-       //SDL_SetVideoMode(MaxX, MaxY, bpp, SDL_DOUBLEBUF|SDL_FULLSCREEN);
-
-       flags:=(SDL_GetWindowFlags(window));
-       flags:=flags or SDL_WINDOW_FULLSCREEN_DESKTOP; //fake it till u make it..
-       //we dont want to change HW videomodes because 4bpp isnt supported.
+				flags:=(SDL_GetWindowFlags(window));
+				flags:=flags or SDL_WINDOW_FULLSCREEN_DESKTOP; //fake it till u make it..
+				//we dont want to change HW videomodes because 4bpp isnt supported.
        
+				if ((flags and SDL_WINDOW_FULLSCREEN_DESKTOP) <> 0) then begin
+					SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 'linear');
+					SDL_RenderSetLogicalSize(renderer, MaxX, MaxY);
+					//phones: SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"); 
+				end;
+
+				IsThere:=SDL_SetWindowFullscreen(window, flags);
+
+				thisMode:=getgraphmode;
+				if ( IsThere < 0 ) then begin
+					if IsConsoleInvoked then begin
+						LogLn('Unable to set FS: ');
+						LogLn('SDL reports: '+' '+ SDL_GetError);      
+					end;
+					FSNotPossible:=true;      
        
-       if ((flags and SDL_WINDOW_FULLSCREEN_DESKTOP) <> 0) then begin
-            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 'linear');
-            SDL_RenderSetLogicalSize(renderer, MaxX, MaxY);
-//phones: SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"); 
-       end;
+					//if we failed then just gimmie a yuge window..      
+					SDL_SetWindowSize(window, MaxX, MaxY);
+					SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
+					if IsConsoleInvoked then begin            
+						LogLn('ERROR: SDL cannot set FS.');
+						LogLn(SDL_GetError);
+					end;
+					exit;
+				end;
 
-	   IsThere:=SDL_SetWindowFullscreen(window, flags);
+			end; //want FS
+			SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
+			SDL_RenderClear(Renderer);
+			end else begin //we want the OGL setup
+					glutInitPascal(False);
+					glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH);
+					if WantsFullScreen then begin
+						glutGameModeString(FSMode);
+						glutEnterGameMode;
+						glutSetCursor(GLUT_CURSOR_NONE);
+					end else begin //windowed
+						glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH); 
+						glutInitWindowSize(MaxX, MaxY); 
+						ScreenWidth := glutGet(GLUT_SCREEN_WIDTH); 
+						ScreenHeight := glutGet(GLUT_SCREEN_HEIGHT); 
+						glutInitWindowPosition((ScreenWidth - AppWidth) div 2, (ScreenHeight - AppHeight) div 2); 
+						glutCreateWindow('Lazarus Graphics Application'); 	
+					end;
+		
+					//r,g,b=0,a=1
+					glClearColor( 0.f, 0.f, 0.f, 1.f );
+					glClear( GL_COLOR_BUFFER_BIT );
+		
+					//set callbacks-you need to override- or define these
+					//right now- these "do nothing" except for resize.
+					glutDisplayFunc(@DrawGLScene);
+					glutReshapeFunc(@ReSizeGLScene);
+					glutKeyboardFunc(@GLKeyboard);
+					glutIdleFunc(@DrawGLScene);    
+				end;
 
-  	   thisMode:=getgraphmode;
-  	   if ( IsThere < 0 ) then begin
-    	      if IsConsoleInvoked then begin
-    	         LogLn('Unable to set FS: ');
-    	         LogLn('SDL reports: '+' '+ SDL_GetError);      
-     	      end;
-              FSNotPossible:=true;      
-       
-          //if we failed then just gimmie a yuge window..      
-          SDL_SetWindowSize(window, MaxX, MaxY);
-          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
-          if IsConsoleInvoked then begin            
-            LogLn('ERROR: SDL cannot set FS.');
-            LogLn(SDL_GetError);
-          end;
-          exit;
-       end;
+				//reset palette data
+				if bpp=4 then
+					InitPalette16;
+				if bpp=8 then 
+					InitPalette256; 
+				//then set it back up
 
-    end;
+				if (bpp<=8) then begin
+					if MaxColors=16 then
+						SDL_SetPaletteColors(palette,TPalette16.colors,0,16)
+					else if MaxColors=256 then
+						SDL_SetPaletteColors(palette,TPalette256.colors,0,256);
+				end;
 
-  //reset palette data
-    if bpp=4 then
-      InitPalette16;
-    if bpp=8 then 
-      InitPalette256; 
-  //then set it back up
-
-    if (bpp<=8) then begin
-      if MaxColors=16 then
-            SDL_SetPaletteColors(palette,TPalette16.colors,0,16)
-	  else if MaxColors=256 then
-            SDL_SetPaletteColors(palette,TPalette256.colors,0,256);
-    end;
-    if not Render3d then begin //use GLClear,etc instead if using 3D.
-
-		SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
-		SDL_RenderClear(Renderer);
-	end; 
-  end; 
+		end; //already in gfx mode
 
 end; //setGraphMode
 
