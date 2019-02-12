@@ -9,15 +9,16 @@ You draw with it.
 We will try to use "TCanvas2 objects" as the code evolves.
 
 **Parts of SDL are being rewritten**.
+
 SDL/SDL2 no longer suits "our Pascalian needs".
+
 **This unit uses modified and/or patched JEDI sources** as a result.
+
 
 Furthermore- 
 		FreeGLUT (3D) does for 3D- what SDL does for 2D
 
 Most notable changes/rewrites:
-		SDL2 handles OpenGL2 Quads for us via "internal compositing"
-				as opposed to just "pageFlipping"
 
 		Game Precision Timers
 		Threads/Threading
@@ -25,7 +26,7 @@ Most notable changes/rewrites:
 		"Direct" Rendering OPS/ DRI calls
 		Font Code
 		Unpatched JEDI x64 code sections
-		Using PortAudio (uos) instead of "dodgy PulseAudio calls"
+		Using PortAudio (uos) instead of SDL2_Mixer routines
 
 This removes a TON of headache and low-level programming.
 (It helps to use the right tools.)
@@ -96,7 +97,7 @@ DirectX-
 
 Vulkan-
 
-	Advanced 3D rendering methods using DX12+ capable hardware
+	Advanced 3D rendering methods using DX11+ capable hardware
 
 ---
 ## Ports
@@ -430,46 +431,46 @@ Double check version 2 is installed.
 
 #### Can I have a IDE??
 
-Editors:
+IDE wich understand Pascal syntax:
 
-M$FT Visual Studio "Code" can be found here:
+		M$FT Visual Studio "Code":
 
-        https://code.visualstudio.com/docs/setup/
+	        https://code.visualstudio.com/docs/setup/
 
-Lazarus/"FP" application/Delphi IDE
-Geany
+		FPC "FP" application(just type 'fp' on the command line)
+
+
+Text Editors:
+
+		Delphi IDE
+		Geany
+		Code::BLocks application
 
 #### Crossing the line (cross-build):
 
-	For SIN there is a WinAPI port: http://math.ubbcluj.ro/~sberinde/wingraph/main.html	
-	(or you can browse the files here, which is the same thing. 
+Building for Windows from Linux:
+
+
+	Test with WINE API
+
+Buildig on windows(no linux either way involved):
+	You need Visual Studio (Classic) -not "code"- to build (MSVC) applications.
+	(The installation is over 15GB)
+	https://visualstudio.microsoft.com/vs/features/cplusplus/
+
+	(I dont know about the Linux-connect instead of using API thing just yet)
+
+	For SIN there is a WinAPI SDL (version?) port: http://math.ubbcluj.ro/~sberinde/wingraph/main.html	
+
 	WARNING: The colors DO NOT conform to XTerm standards, nor CGA standards-mine DO)
-
-	The guy seems to have a better WinAPI direct access than the FPC team, therefore his unit 
-	(as per 2010) AFAIK is far superior. I doubt much has changed in FPC, all of the docs still point to JEDI
-	residing on sourceforge (via PGD website). It isnt there. Its on Github (and dodgy at best.)
-
 	WinDos, WinMouse, and WinCrt units were re-written by this guy, it seems.
 
 
-Cross building to Sin(windows)- also via wine:
-
-Visual Studio "Code" Installer is enclosed, but its a "rolling release" sort of application.
-Microsoft Visual Studio(classic) is over 15GB installed (YIKES!!) and unknown compatibility or syntax.
-
-
-		install Visual Studio(15+GB) /VS Code editions (plus compilers) and VC depends
-		You will be using native WinAPI routines (forget the rest)
-		
-        -OR-
-		install Visual Studio(15+GB) /VS Code editions (plus compilers) and VC depends
-		Go install SDL (and the source code headers) from the main site and make SURE its "version 2".
-
-Building on Sin but using Unix/Linux(weird):
+Building on windows but using Unix/Linux subsystem:
 
 		Install Win10 Centenial edition
 		Install Unix subsystem option in control panel
-		install aeroTweak's link to bash
+		install aeroTweak's "link to bash here"
 		
 		right-click and "run bash here"
 		do what it says to do - youll wind up inside a bash shell
@@ -477,6 +478,9 @@ Building on Sin but using Unix/Linux(weird):
         "sudo apt-get install build essential fpc" 
 		now install the other packages mentioned above.
 
+		NOTE: X11 applications do not run this way.
+	
+		Visual studio(above) will work with this- but I dont see the documentaion on MSFT website.
 
 Mac:
 		
@@ -504,18 +508,19 @@ I have a Mac available but Im working from a Linux box.
 
 MOBILE:
 
-     ModeList support is experimental (or non-existant) right now.
+    ModeList support is experimental (or non-existant) right now.
 	(without this nothing works)
 
 
-    Android (Java and Pascal to Java Porting) I need help with anyways.
+    Android (Java/ "Pascal to Java Porting") I need help with anyways.
+
     iDevices are impossible due to Apple OBJ-C proprietary licensure 
 		
 		(unless you want to rewrite this unit back to OBJ-C)
 	
 	Once you get this down and have all your secret keys-- you should have a fine day. 
 	Eventually.
-		
+	ALL MOBILE CODE IS SIGNED.
 
 ALL ELSE FAILS: 
 		
@@ -546,19 +551,18 @@ ALL ELSE FAILS:
 
 		-This isnt a "class project", its my passion. Im not rushing my work.
 		-Nobody uses Int10 DOS assembler anyore. Even less use Int10 "graphics modes".
-			(Its about "context switching" between text and graphics modes)
+			-Its about "context switching" between text and graphics modes (Linux framebuffer)
 
 #### Project Attempts to use or uses
 
 	Simple DirectMedia Layer (www.libsdl.org).
-	X11 "Core Drawing primitives" (www.x.org)
+	X11 "Core Drawing primitives" (www.x.org) - also offered by XQuartz
 	WinAPI (where available and documented)
-    libEVAS (https://elinux.org/Evas)
     Quartz "JAVA-API" -via XCode (https://developer.apple.com/xcode/)
 		
 	Modified Unit hacks provided by me
 
-If not in use(is in use using X11 on unices):
+The following are not used (Kernal Mode Setting -KMS- prevents thier use):
 
 	SVGALib
 	Framebuffer "Graphics mode"
@@ -585,8 +589,12 @@ If not in use(is in use using X11 on unices):
 I hope it is useful..yada yada yada....YMMV. 
 **Read the Licence agreement provided**
 
+		LGPLv2 (due to being a library)
+
 
 #### Where is the application?
+
+**THERE WILL NEVER BE ONE**
 
 **This is a UNIT, not a program. See the demos provided.**
 
@@ -607,15 +615,16 @@ Provides(these parts should be working):
 		Text functions
 		Lines
 		Rectagles/Squares
-        "Direct OpenGL" primitives support(see demo)
-        SDL_Keypressed
+        "Direct OpenGL" Tetra-hedron(Pyramid) demo
+        SDL_Keypressed /GLUT ReadKey
 
 To exit the OGL demo:
 
         click on the terminal that called it and press a key.
 
 Although it calls SDL, it DOES NOT invoke event handling(which is wrong) so the output window wont accept input.
-(Improper use of ReadKey() and why you shouldnt use it)
+
+		Improper use of ReadKey() and why you shouldnt use it in an event driven program
 
 
 untested:
@@ -628,13 +637,10 @@ In Progress:
 
 		Polygons
 		Circles/Ellipses
-		Fills(incomplete as of yet)
-
-Non-existant:
-
-        2d OGL Routines(QUADS, etc)
-		3D OGL routines(spheres, tubes,pyramids,multi-faceted objects) -INCOMPLETE SDL testing
-
+		Fills
+		LineStyles (incomplete)
+		3D OGL routines(spheres, tubes,pyramids,multi-faceted objects,skins) 
+		
 
 #### BGI output
 
@@ -655,22 +661,17 @@ By default the makefile compiles for :
 		linux 32/64 
 
 All in one go.
-FPC does NOT use MINGW libraries, like GCC requires.
+FPC does NOT use MINGW libraries, like GCC requires. 
+It uses RTL folders (per OS implemented routines) instead.
 
-To do this:
+I usually DL the FPC FULL sources and compile everything
 
-		I usually DL the FPC FULL sources and compile everything
 
-If you have issues, ensure you are building **from a LINUX host**.
-
-The makefile is not designed for MAC, MOBILE, nor Windows. It cross builds TO windows.
+The LazGFX makefile is not designed for MAC, MOBILE, nor Windows(MS Studio). 
+(It cross-builds to windows.)
 
 I just run FPC over the main unit file right now. Nothing fancy.
-
-I dont know how to link this thru M$FT VS without using it- 
-		it uses project files like Lazarus and Delphi.
-
--I havent gotten that far yet.
+The makefile will be used in the future.
 
 
 ### DEMOS!!! LOADS OF DEMOS!!!
@@ -691,16 +692,16 @@ Board Games/Card Games:
 	
 SIDESCROLLER(collision based) 2d/3d games:
     
-    OpenSonic (allegro sources in C) /Mayro (SMC) remake ...
-    "Super Nintendo" or "SEGA MegaDrive/Genesis" level or slightly above it. 
+    
+    "Super Nintendo" or "SEGA MegaDrive/Genesis" level of detail (like OpenSonic) or slightly above it. 
         
-        RedBook CDROM/CDDA support is untested(as of SDLv2-unavailable).
+        RedBook CDROM/CDDA support is in uos units. SDL has removed the functionality.
 
         
-3D-        
-   
+3D-
+    
     OpenFreeSpace??
-    OpenMorrowwind??
+    OpenMorrowwind (uses SDL/Ogre or a combination thereof)
 	OpenSkyRim?? 
     Open (world of) WarCraft??
 
@@ -740,16 +741,10 @@ Seriously...the SDL syntax (in C) isnt that hard to master.
 
 #### Have a "Final Product"??
 
-Remember to remove debugging code and strip binaries when writing for real gaming hardware.
+Remember to "remove debugging code and strip binaries" IN ADDITION to OTHER BUILD 
+OPTIMIZATIONS like SSE[1-4]/AVX when writing for real gaming hardware.
+
 (Or if you are distributing your application) 
-
-FPC Option:
- 
-        -Xs
-
-option "-g" is used for debugging 
-
-IN ADDITION to OTHER BUILD OPTIMIZATIONS like SSE/AVX.
 
 ---		
 	
@@ -785,6 +780,8 @@ its otherwise "feature incomplete" and they are using straight OGL.
 TCanvas was half-assed.
 
 SDL provides a bridge (to get to) OGL.
+SDL2 uses OGL QUADS.
+
 Why do it directly(PITA) when you can use "easier to use" routines?
 
 
@@ -818,9 +815,10 @@ Q: can you port for game platform (X?)..
 
 A: Not unless its supported by BOTH FPC and SDL.
 
-iPhone , iPad, iWatch..have restricted OBJ-C licenses.
-FPC is blacklisted. Apps are signed- and checked-for compliance- by Apple.
-I cannot help you.
+		iPhone , iPad, iWatch..have restricted OBJ-C licenses.
+		FPC is blacklisted for these targets. 
+		Apps are signed- and checked-for compliance- by Apple.
+		I cannot help you.
 
 
 GO Grab a FPC RTL and get hoppin.
@@ -875,7 +873,7 @@ So YES, we can and we WILL extend our code.
 
 POSTAL uses SDL.
 POSTAL2 uses Unreal engine
-Skyrim uses Havok/DX9
+Skyrim uses Havok/DX9 (Special Edition uses DX11/DXVK)
 
 
 There are two types of physics:

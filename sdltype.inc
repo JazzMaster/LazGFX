@@ -1,4 +1,5 @@
 //types from SDLtype_s.h / SDL_stdinc.h
+//-but in ctypes pascal unit already
 type
 
   TSDL_Bool = (SDL_FALSE,SDL_TRUE);
@@ -67,5 +68,6 @@ type
   {$ENDIF}
   {$EXTERNALSYM SIZE_T}
 
+//dont you want double precision?
   Float = Single;
   {$EXTERNALSYM Float}
