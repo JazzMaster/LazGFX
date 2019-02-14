@@ -8,26 +8,23 @@ You draw with it.
 
 We will try to use "TCanvas2 objects" as the code evolves.
 
-**Parts of SDL are being rewritten**.
+### Modification Warning
 
+**Parts of SDL are being rewritten**.
 SDL/SDL2 no longer suits "our Pascalian needs".
 
-**This unit uses modified and/or patched JEDI sources** as a result.
-
-
-Furthermore- 
-		FreeGLUT (3D) does for 3D- what SDL does for 2D
+**This unit uses modified and/or patched JEDI sources**.
 
 Most notable changes/rewrites:
 
+		Use of FreeGLUT (3D) instead of heineous OGL calls
 		Game Precision Timers
 		Threads/Threading
 		Callbacks(where possible)
 		"Direct" Rendering OPS/ DRI calls
 		Font Code
-		Unpatched JEDI x64 code sections
 		Using PortAudio (uos) instead of SDL2_Mixer routines
-
+	
 This removes a TON of headache and low-level programming.
 (It helps to use the right tools.)
 
@@ -40,13 +37,13 @@ SDL2_GFX functions have been imported into the main units.
 There was **never a need to remove these functions** from the renderer OPS in the main unit.
 (There are workarounds for heap limits-Ive used them before.)
 
----
+### Backends
 
-2D:
+
 Windows can use:
 		GDI
 		GDI+
-		DirectX/OpenGL 
+		DirectX/OpenGL/DXVK(Vulcan)
 
 Mac uses: 
 		QuickDraw(Up to OSX 10.4 Tiger) 
@@ -59,47 +56,8 @@ Unices can use:
 		X11
 		GDK /GTK (uses Cairo accellerated rendering) on top of X11
 		OpenGL(hooks X11 for input)
+		
 
-Because X11 is protocol based- 
-
-	I can throw a X11 session thru your web browser
-	-or across the room- 
-
-for example. 
-
-	Same with PulseAudio.
-
-
-[X11 Basics](https://magcius.github.io/xplain/article/x-basics.html)
-
-X11 and WinAPI use similar core routines and methods
-but dont provide a "canvas" (drawable area) by themselves.
-
-Window managers(Unices) take over the rest of what you interact with. 
-
-(There is no assumed "core theme or X11 toolkit engine" on unices. 
-The user has to choose what to install and use.)
-
-
-3D:
-
-Software-
-
-	This is dual-buffered data rendered from the CPU. Its very slow.
-
-OpenGL(OGL)-
-
-	Usually Hardware assisted rendering
-
-DirectX-
-
-	Windows implementation of 3D rendering
-
-Vulkan-
-
-	Advanced 3D rendering methods using DX11+ capable hardware
-
----
 ## Ports
 
 This unit (LazGraphics) SHOULD be ported to use the following languages:
@@ -134,7 +92,7 @@ Ive tried to do the second for you- as best possible.
 Try to keep the ports HERE- DO NOT FORK unnecessarily.
 I will be happy to import code.
 
----		
+### Build status:
 
 state:  RELEASE freeze at .80 
 master branch: code is unstable WIP (sorry)
@@ -148,8 +106,6 @@ Portions untested as an API:
 -event input and rendering mainloop tested (working with sdl v1)
 
 (Travis CL doesnt work with Pascal sources. You wont see the nice pretty graphbar.)
-
----
 
 
 ### Why does it exist?
@@ -166,6 +122,7 @@ I intend to utilize an "everything bagel" here.
 **This code and demos are in a very early state.**
 I will try to provide further demos where possible.
 
+### Technobabble
 
 #### BGI 
 
@@ -263,8 +220,31 @@ You may also follow along here (not overly difficult once you understand SDL):
 
 QUADS refers to 2D opengl.
 
+#### X11 (protocol)
 
-#### So what about Raster graphics?
+
+Because X11 is protocol based- 
+
+	I can throw a X11 session thru your web browser
+	-or across the room- 
+
+for example. 
+
+	Same with PulseAudio.
+
+
+[X11 Basics](https://magcius.github.io/xplain/article/x-basics.html)
+
+X11 and WinAPI use similar core routines and methods
+but dont provide a "canvas" (drawable area) by themselves.
+
+Window managers(Unices) take over the rest of what you interact with. 
+
+(There is no assumed "core theme or X11 toolkit engine" on unices. 
+The user has to choose what to install and use.)
+
+
+### So what about Raster graphics?
 
 Size and speed are the reasons why you use Vector graphics.
 They also scale very well.
@@ -279,16 +259,13 @@ So far, SDLv1 and v2 and the BGI focus on this.
 So to answer you- we are working on RASTER, then working on VECTOR later(or a combination of the two).
 
 
-
 ### Pardon the mess
 
 Everything is in one folder for a reason.
 (Dont confuse *me* -or the compiler)
 
-
 The .inc are mostly for SDL2 internals.
 **You will need these, "DO NOT DELETE"**
-
 
 You should be able to compile this once you GIT (or Download) to your computer, so long as FPC and/or
 Lazarus is installed.
@@ -307,12 +284,10 @@ I know JEDI is broken in places and I appreciate the help in fixing it.
 
 ### Why SDL and not...
 
-
 There are loads of projects where people cannot post changes publicly.
 Programmers are making it more difficult with mailing lists (spam) and "private repos".
 
 (You want your code public- but team ops and comms private)
-
 
 A lot of other code is half-assed or broken.
 People suffer from information overload and cant figure things out
@@ -323,7 +298,10 @@ For the code to be useful, it must be in library format.
 #### SDL is CROSS PLATFORM and UNIVERSAL CODE
 
 You dont have to re-write routines.
-If you call an SDL function- you call it the same way in other languages.
+If you call an SDL function- you call it the same way 
+
+		in other languages
+		on other platforms or OSes
 
 However, SDL is still very incomplete. 
 
@@ -367,15 +345,18 @@ If the code needs to be reworked- do it right.
         MacOSX Quartz ( at minimal X11 )
         Android(eventually- theres more to this than just getting the routines working)
 
-
-Graphics libraries for DOS??
+Graphics libraries for DOS/FreeDOS??
 
 		Try the original BGI written by Borland, INC.
 		The BGI has been 256 color extended - I have the patch.
 
+#### Windows is not out in the cold
+
 There are some ports to Sin (windows) already using WinAPI. 
 The WinAPI port was written to fix a SDL "speed issue".
 What is not mentioned is if SDLv2 was used or SDLv1.
+
+#### LibGraph Failures
 
 LibGraph(C) or otherwise-
 
@@ -385,75 +366,79 @@ Instead - developers want you to learn the MESS of OpenGL/DX/Quartz.
 
 		NO. YOU DONT HAVE TO.
 
+
 ### Dependencies (INSTALL ME FIRST!!):
 
-CMake
-CMake-Gui
-libudev-dev
-mesa-dev
+No-
 
-OSX:
-		XQuartz (puts X11 back on OSX)
+		Im not going to make a slimmed down API using only internal routines.
+		If you want to- thats on you. Linux is not designed this way.
+
+		1- im not that much of a genious
+		2- linux programming has 50 ways of doing things -and none- are correct
+		3- I dont know that many Linux internals
+		4- I would be 350 years old before finishing
+
+You need development packages installed as well as the libraries themselves
+
+libUOS is on GitHub- look for it. WE WILL BE USING IT.
+
 
 Unices:
-		xorg-dev
-		SDL2-x.x.x 		   			-- the main SDL library
-		SDL2-devel-x.x.x 			-- the developer package
-		SDL2_image-x.x.x 			-- image library for image support
-		SDL2_image-devel-x.x.x	 	-- image library developer 
-		SDL2_net-x.x.x 				-- image library for networking
-		SDL2_net-devel-x.x.x	 	-- image library developer 
-
-Sound libs(includes a copy- but install from your distro)
-
-libUOS is on GitHub- look for it.
-
-		libsndfile
-		libPortAudio
-		libMpg123
-		libMp4
-		libFaad
-
-VR:
-
-**STEAM uses these**
-
+		libudev (USB device support)
+		mesa (OpenGL base)
+		libSOIL (DirectDrawSurface texture loading,etc)
+		xserver-xorg (X11 itself)
+		SDL2-x.x.x 		   			-- (SDL)
+		SDL2_image-x.x.x 			-- (SDL image support)
+		SDL2_net-x.x.x 				-- (SDL Networking)
+		libPortAudio	(required backend)
+		libsndfile (audio conversion)
+		libMpg123  (audio conversion -mp3)
+		libMp4  (audio conversion - mp4a)
+		libFaad  (audio conversion -faad)
         libOpen_vr (VR helmet support)
 
-	
-These libaries are a standard part of most current distributions. 
-The libaries will *probably already* (cross fingers) be installed. 
+OSX:
 
-You may have to install the developer packages,however. 
-Ive noticed also that "preinstalled" might point to version 1, not version 2.
-Double check version 2 is installed.
+Install XCode
+You need X11 from here
 
+			https://www.xquartz.org/
+
+Now install the support libraries
+For SDL in C, Try the directions here: 
+			
+			http://lazyfoo.net/tutorials/SDL/01_hello_SDL/mac/index.php
+			(You will need XCode 6.1, "Yo-sem-i-te" is assumed.)
+
+However- SDL has been installed alongsinde XCode in earlier OSX versions.
 
 #### Can I have a IDE??
 
 IDE wich understand Pascal syntax:
 
-		M$FT Visual Studio "Code":
+FPC "FP" application(just type 'fp' on the command line)
+M$FT Visual Studio "Code"
 
-	        https://code.visualstudio.com/docs/setup/
-
-		FPC "FP" application(just type 'fp' on the command line)
+		https://code.visualstudio.com/docs/setup/
 
 
 Text Editors:
 
 		Delphi IDE
 		Geany
-		Code::BLocks application
+		XCode (once fpc is installed into it)
 
 #### Crossing the line (cross-build):
 
 Building for Windows from Linux:
 
-
-	Test with WINE API
+This can be done with minimal fuss from the Makefile
+(Test with WINE API or a VM)
 
 Buildig on windows(no linux either way involved):
+
 	You need Visual Studio (Classic) -not "code"- to build (MSVC) applications.
 	(The installation is over 15GB)
 	https://visualstudio.microsoft.com/vs/features/cplusplus/
@@ -466,7 +451,7 @@ Buildig on windows(no linux either way involved):
 	WinDos, WinMouse, and WinCrt units were re-written by this guy, it seems.
 
 
-Building on windows but using Unix/Linux subsystem:
+Building on windows (cli) but using Unix/Linux subsystem:
 
 		Install Win10 Centenial edition
 		Install Unix subsystem option in control panel
@@ -485,23 +470,8 @@ Building on windows but using Unix/Linux subsystem:
 Mac:
 		
 		Mac should import the necessary units via IFDEFS. Let me know if Im off.
-		(Building for Linux x64 on Ubuntu at the moment.)
+		(Im Building for Linux x64 on Ubuntu at the moment.)
 
-
-	You need XCode installed
-		
-	Setup SDL First, then FPC. 
-
-	For SDL in C, Try the directions here: 
-			
-			http://lazyfoo.net/tutorials/SDL/01_hello_SDL/mac/index.php
-			(You will need XCode 6.1, "Yo-sem-i-te" is assumed.)
-
-OS9 was removed support years ago...not sure if it has a FPC use these days.
-I am looking. This is usually m68k code(arduino-ish based computers).
-
-The IFDEFS in the Pascal code 'should' pull in everything SDL.
-There is no "Lazarus" in MacOSX, you use XCode and link in the LCL routines instead.
 
 I have a Mac available but Im working from a Linux box.
         
@@ -551,27 +521,7 @@ ALL ELSE FAILS:
 
 		-This isnt a "class project", its my passion. Im not rushing my work.
 		-Nobody uses Int10 DOS assembler anyore. Even less use Int10 "graphics modes".
-			-Its about "context switching" between text and graphics modes (Linux framebuffer)
-
-#### Project Attempts to use or uses
-
-	Simple DirectMedia Layer (www.libsdl.org).
-	X11 "Core Drawing primitives" (www.x.org) - also offered by XQuartz
-	WinAPI (where available and documented)
-    Quartz "JAVA-API" -via XCode (https://developer.apple.com/xcode/)
-		
-	Modified Unit hacks provided by me
-
-The following are not used (Kernal Mode Setting -KMS- prevents thier use):
-
-	SVGALib
-	Framebuffer "Graphics mode"
-
-
-#### This project cannot use:
-
-	VESA/Direct Video Driver access (kernel is in ring3, not ring0)	
-	Assembler / INT10 or INT21 code (MS DOS specific)
+		-Its about "context switching" between text and graphics modes (Linux framebuffer)
 
 
 ### The objective of this package
@@ -749,6 +699,8 @@ OPTIMIZATIONS like SSE[1-4]/AVX when writing for real gaming hardware.
 ---		
 	
 ## Basic Q and A:
+
+(Please dont complain or file bugs on these basis)
 
 Q: I just dont get it....
 
