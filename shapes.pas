@@ -1,4 +1,5 @@
 Unit shapes;
+//to be clear: "shape objects" not "window shapes"
 
 {
  
@@ -498,7 +499,7 @@ FPC graphics original code copywright:
   Thomas Schatzl      - optimizations,routines and    
                            suggestions.                
   Jonas Maebe         - bugfixes and optimizations    
-  Richard Jasmin	  - SDL portage
+  Richard Jasmin	  - SDL /freeGLUT portage
 
  Credits (external):                                   
    - Original FloodFill code by                        
@@ -628,14 +629,12 @@ end;
 
 SDL2_gfxMurphyIterator=record
 	renderer:PSDL_Renderer;
-	u, v:integer;		/* delta x , delta y */
-	ku, kt, kv, kd:integer;	/* loop constants */
+	u, v:integer;		{ delta x , delta y }
+	ku, kt, kv, kd:integer;	{ loop constants }
 	oct2:integer;
 	quad4:integer;
 	last1x, last1y, last2x, last2y, first1x, first1y, first2x, first2y, tempx, tempy:SmallInt;
 end; 
-
-//LongWord= Longword
 
 Procedure SDL_initFramerate(manager: PFPSManager);
 Function SDL_setFramerate(manager: PFPSManager; rate: LongWord):LongInt;  
@@ -645,7 +644,6 @@ Function SDL_framerateDelay(manager: PFPSManager):LongWord;
 
 //FIXME: all Color routines expect the colour to be in format RRGGBBAA 
 //This SHOULD NOT be assumed.
-
 
 Function pixelColor(renderer: PSDL_Renderer; x, y: sInt16; colour: LongWord):LongInt; 
 Function pixelRGBA(renderer: PSDL_Renderer; x, y: sInt16; r, g, b, a: uInt8):LongInt; 
@@ -781,29 +779,6 @@ Function bezierRGBA(renderer: PSDL_Renderer; Const vx, vy: PsInt16; n, s: LongIn
 
 
 
-{ Comments:             
-on x86 and derivatives- optimized for MMX
-on Power arch- optimize for AltiVec 
-on ARM (v5+ is 32+bits)- ???
-                                                              
-   1.) MMX functions work best if all data blocks are aligned on a 32 bytes boundary. 
-
-   2.) Data that is not within an 8 byte boundary is processed using the C routine.   
-   3.) Convolution routines is not processed at this time.                      
-
-}
-
-// Detect MMX capability in CPU
-//This should be done HERE in FPC - then use of which determined if CPU function is available.
-
-{
-Function SDL_imageFilterMMXdetect():LongInt; 
-
-// Force use of MMX off (or turn possible use back on)
-Procedure SDL_imageFilterMMXoff(); cdecl;
-Procedure SDL_imageFilterMMXon(); cdecl;
-}
-
 //  SDL_imageFilterAdd: D = saturation255(S1 + S2)
 Function SDL_imageFilterAdd(Src1, Src2, Dest : PuInt8; Length : LongWord):LongInt; 
 
@@ -918,19 +893,19 @@ implementation
 
 //the C isnt ported yet-
 //we are using THIS library, not a 'EXTERNAL c' reference.
-//because of my changes- both JEDI port and SDL_GPU_ need to be rewritten.
+//because of my changes(good)- both JEDI port and SDL_GPU_ need to be rewritten.
 
 {
 THE C!
  
 
-\brief Draw pixel  in currently set color.
+//  Draw pixel  in currently set color.
 
   renderer The renderer to draw on.
   x X (horizontal) coordinate of the pixel.
   y Y (vertical) coordinate of the pixel.
 
-\returns Returns 0 on success, -1 on failure.
+//  Returns 0 on success, -1 on failure.
 
 
 int pixel(SDL_Renderer *renderer, Sint16 x, Sint16 y)
@@ -938,16 +913,16 @@ begin
 	return SDL_RenderDrawPoint(renderer, x, y);
 end;
 
-/*!
-\brief Draw pixel with blending enabled if a<255.
+{
+//  Draw pixel with blending enabled if a<255.
 
   renderer The renderer to draw on.
   x X (horizontal) coordinate of the pixel.
   y Y (vertical) coordinate of the pixel.
   color The color value of the pixel to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int pixelColor(SDL_Renderer * renderer, Sint16 x, Sint16 y, LongWord color)
 begin
@@ -955,8 +930,8 @@ begin
 	return pixelRGBA(renderer, x, y, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw pixel with blending enabled if a<255.
+{
+//  Draw pixel with blending enabled if a<255.
 
   renderer The renderer to draw on.
   x X (horizontal) coordinate of the pixel.
@@ -966,8 +941,8 @@ end;
   b The blue color value of the pixel to draw.
   a The alpha value of the pixel to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int pixelRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -978,8 +953,8 @@ begin
 	return result;
 end;
 
-/*!
-\brief Draw pixel with blending enabled and using alpha weight on color.
+{
+//  Draw pixel with blending enabled and using alpha weight on color.
 
   renderer The renderer to draw on.
   x The horizontal coordinate of the pixel.
@@ -990,14 +965,14 @@ end;
   a The alpha value of the pixel to draw.
   weight The weight multiplied into the alpha value of the pixel.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int pixelRGBAWeight(SDL_Renderer * renderer, Sint16 x, Sint16 y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, LongWord weight)
 begin
-	/*
+	{
 	* /ify Alpha by weight 
-	*/
+	}
 	
 	LongWord ax = a;
 	ax = ((ax * weight) >> 8);
@@ -1010,18 +985,18 @@ begin
 	return pixelRGBA(renderer, x, y, r, g, b, a);
 end;
 
-/* ---- Hline */
+{ ---- Hline }
 
-/*!
-\brief Draw horizontal line in currently set color
+{
+//  Draw horizontal line in currently set color
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point (i.e. left) of the line.
   x2 X coordinate of the second point (i.e. right) of the line.
   y Y coordinate of the points of the line.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int hline(SDL_Renderer * renderer, Sint16 x1, Sint16 x2, Sint16 y)
 begin
@@ -1029,8 +1004,8 @@ begin
 end;
 
 
-/*!
-\brief Draw horizontal line with blending.
+{
+//  Draw horizontal line with blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point (i.e. left) of the line.
@@ -1038,8 +1013,8 @@ end;
   y Y coordinate of the points of the line.
   color The color value of the line to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int hlineColor(SDL_Renderer * renderer, Sint16 x1, Sint16 x2, Sint16 y, LongWord color)
 begin
@@ -1047,8 +1022,8 @@ begin
 	return hlineRGBA(renderer, x1, x2, y, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw horizontal line with blending.
+{
+//  Draw horizontal line with blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point (i.e. left) of the line.
@@ -1059,8 +1034,8 @@ end;
   b The blue value of the line to draw. 
   a The alpha value of the line to draw. 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int hlineRGBA(SDL_Renderer * renderer, Sint16 x1, Sint16 x2, Sint16 y, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -1071,26 +1046,26 @@ begin
 	return result;
 end;
 
-/* ---- Vline */
+{ ---- Vline }
 
-/*!
-\brief Draw vertical line in currently set color
+{
+//  Draw vertical line in currently set color
 
   renderer The renderer to draw on.
   x X coordinate of points of the line.
   y1 Y coordinate of the first point (i.e. top) of the line.
   y2 Y coordinate of the second point (i.e. bottom) of the line.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int vline(SDL_Renderer * renderer, Sint16 x, Sint16 y1, Sint16 y2)
 begin
 	return SDL_RenderDrawLine(renderer, x, y1, x, y2);;
 end;
 
-/*!
-\brief Draw vertical line with blending.
+{
+//  Draw vertical line with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the points of the line.
@@ -1098,8 +1073,8 @@ end;
   y2 Y coordinate of the second point (i.e. bottom) of the line.
   color The color value of the line to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int vlineColor(SDL_Renderer * renderer, Sint16 x, Sint16 y1, Sint16 y2, LongWord color)
 begin
@@ -1107,8 +1082,8 @@ begin
 	return vlineRGBA(renderer, x, y1, y2, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw vertical line with blending.
+{
+//  Draw vertical line with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the points of the line.
@@ -1119,8 +1094,8 @@ end;
   b The blue value of the line to draw. 
   a The alpha value of the line to draw. 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int vlineRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y1, Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -1131,10 +1106,10 @@ begin
 	return result;
 end;
 
-/* ---- Rectangle */
+{ ---- Rectangle }
 
-/*!
-\brief Draw rectangle with blending.
+{
+//  Draw rectangle with blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point (i.e. top right) of the rectangle.
@@ -1143,8 +1118,8 @@ end;
   y2 Y coordinate of the second point (i.e. bottom left) of the rectangle.
   color The color value of the rectangle to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int rectangleColor(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, LongWord color)
 begin
@@ -1152,8 +1127,8 @@ begin
 	return rectangleRGBA(renderer, x1, y1, x2, y2, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw rectangle with blending.
+{
+//  Draw rectangle with blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point (i.e. top right) of the rectangle.
@@ -1165,8 +1140,8 @@ end;
   b The blue value of the rectangle to draw. 
   a The alpha value of the rectangle to draw. 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int rectangleRGBA(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -1174,9 +1149,9 @@ begin
 	Sint16 tmp;
 	SDL_Rect rect;
 
-	/*
+	{
 	* Test for special cases of straight lines or single point 
-	*/
+	}
 	if (x1 = x2) begin
 		if (y1 = y2) begin
 			return (pixelRGBA(renderer, x1, y1, r, g, b, a));
@@ -1189,35 +1164,35 @@ begin
 		end;
 	end;
 
-	/*
+	{
 	* Swap x1, x2 if required 
-	*/
+	}
 	if (x1 > x2) begin
 		tmp = x1;
 		x1 = x2;
 		x2 = tmp;
 	end;
 
-	/*
+	{
 	* Swap y1, y2 if required 
-	*/
+	}
 	if (y1 > y2) begin
 		tmp = y1;
 		y1 = y2;
 		y2 = tmp;
 	end;
 
-	/* 
+	{ 
 	* Create destination rect
-	*/	
+	}	
 	rect.x = x1;
 	rect.y = y1;
 	rect.w = x2 - x1;
 	rect.h = y2 - y1;
 	
-	/*
+	{
 	* Draw
-	*/
+	}
 	result = 0;
 	result |= SDL_SetRenderDrawBlend/e(renderer, (a = 255) ? SDL_BLEND/E_NONE : SDL_BLEND/E_BLEND);
 	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);	
@@ -1225,10 +1200,10 @@ begin
 	return result;
 end;
 
-/* ---- Rounded Rectangle */
+{ ---- Rounded Rectangle }
 
-/*!
-\brief Draw rounded-corner rectangle with blending.
+{
+//  Draw rounded-corner rectangle with blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point (i.e. top right) of the rectangle.
@@ -1238,8 +1213,8 @@ end;
   rad The radius of the corner arc.
   color The color value of the rectangle to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int roundedRectangleColor(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, LongWord color)
 begin
@@ -1247,8 +1222,8 @@ begin
 	return roundedRectangleRGBA(renderer, x1, y1, x2, y2, rad, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw rounded-corner rectangle with blending.
+{
+//  Draw rounded-corner rectangle with blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point (i.e. top right) of the rectangle.
@@ -1261,8 +1236,8 @@ end;
   b The blue value of the rectangle to draw. 
   a The alpha value of the rectangle to draw. 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int roundedRectangleRGBA(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -1272,31 +1247,31 @@ begin
 	Sint16 xx1, xx2;
 	Sint16 yy1, yy2;
 	
-	/*
+	{
 	* Check renderer
-	*/
+	}
 	if (renderer = NULL)
 	begin
 		return -1;
 	end;
 
-	/*
+	{
 	* Check radius vor valid range
-	*/
+	}
 	if (rad < 0) begin
 		return -1;
 	end;
 
-	/*
+	{
 	* Special case - no rounding
-	*/
+	}
 	if (rad <= 1) begin
 		return rectangleRGBA(renderer, x1, y1, x2, y2, r, g, b, a);
 	end;
 
-	/*
+	{
 	* Test for special cases of straight lines or single point 
-	*/
+	}
 	if (x1 = x2) begin
 		if (y1 = y2) begin
 			return (pixelRGBA(renderer, x1, y1, r, g, b, a));
@@ -1309,33 +1284,33 @@ begin
 		end;
 	end;
 
-	/*
+	{
 	* Swap x1, x2 if required 
-	*/
+	}
 	if (x1 > x2) begin
 		tmp = x1;
 		x1 = x2;
 		x2 = tmp;
 	end;
 
-	/*
+	{
 	* Swap y1, y2 if required 
-	*/
+	}
 	if (y1 > y2) begin
 		tmp = y1;
 		y1 = y2;
 		y2 = tmp;
 	end;
 
-	/*
+	{
 	* Calculate width&height 
-	*/
+	}
 	w = x2 - x1;
 	h = y2 - y1;
 
-	/*
+	{
 	* Maybe adjust radius
-	*/
+	}
 	if ((rad * 2) > w)  
 	begin
 		rad = w / 2;
@@ -1345,9 +1320,9 @@ begin
 		rad = h / 2;
 	end;
 
-	/*
+	{
 	* Draw corners
-	*/
+	}
 	xx1 = x1 + rad;
 	xx2 = x2 - rad;
 	yy1 = y1 + rad;
@@ -1357,9 +1332,9 @@ begin
 	result |= arcRGBA(renderer, xx1, yy2, rad,  90, 180, r, g, b, a);
 	result |= arcRGBA(renderer, xx2, yy2, rad,   0,  90, r, g, b, a);
 
-	/*
+	{
 	* Draw lines
-	*/
+	}
 	if (xx1 <= xx2) begin
 		result |= hlineRGBA(renderer, xx1, xx2, y1, r, g, b, a);
 		result |= hlineRGBA(renderer, xx1, xx2, y2, r, g, b, a);
@@ -1372,10 +1347,10 @@ begin
 	return result;
 end;
 
-/* ---- Rounded Box */
+{ ---- Rounded Box }
 
-/*!
-\brief Draw rounded-corner box (filled rectangle) with blending.
+{
+//  Draw rounded-corner box (filled rectangle) with blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point (i.e. top right) of the box.
@@ -1385,8 +1360,8 @@ end;
   rad The radius of the corner arcs of the box.
   color The color value of the box to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int roundedBoxColor(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, LongWord color)
 begin
@@ -1394,8 +1369,8 @@ begin
 	return roundedBoxRGBA(renderer, x1, y1, x2, y2, rad, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw rounded-corner box (filled rectangle) with blending.
+{
+//  Draw rounded-corner box (filled rectangle) with blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point (i.e. top right) of the box.
@@ -1408,8 +1383,8 @@ end;
   b The blue value of the box to draw. 
   a The alpha value of the box to draw. 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int roundedBoxRGBA(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -1426,31 +1401,31 @@ begin
 	Sint16 ypcy, ymcy, ypcx, ymcx;
 	Sint16 x, y, dx, dy;
 
-	/* 
+	{ 
 	* Check destination renderer 
-	*/
+	}
 	if (renderer = NULL)
 	begin
 		return -1;
 	end;
 
-	/*
+	{
 	* Check radius vor valid range
-	*/
+	}
 	if (rad < 0) begin
 		return -1;
 	end;
 
-	/*
+	{
 	* Special case - no rounding
-	*/
+	}
 	if (rad <= 1) begin
 		return boxRGBA(renderer, x1, y1, x2, y2, r, g, b, a);
 	end;
 
-	/*
+	{
 	* Test for special cases of straight lines or single point 
-	*/
+	}
 	if (x1 = x2) begin
 		if (y1 = y2) begin
 			return (pixelRGBA(renderer, x1, y1, r, g, b, a));
@@ -1463,18 +1438,18 @@ begin
 		end;
 	end;
 
-	/*
+	{
 	* Swap x1, x2 if required 
-	*/
+	}
 	if (x1 > x2) begin
 		tmp = x1;
 		x1 = x2;
 		x2 = tmp;
 	end;
 
-	/*
+	{
 	* Swap y1, y2 if required 
-	*/
+	}
 	
 	if (y1 > y2) begin
 		tmp = y1;
@@ -1482,15 +1457,15 @@ begin
 		y2 = tmp;
 	end;
 
-	/*
+	{
 	* Calculate width&height 
-	*/
+	}
 	w = x2 - x1 + 1;
 	h = y2 - y1 + 1;
 
-	/*
+	{
 	* Maybe adjust radius
-	*/
+	}
 	r2 = rad + rad;
 	if (r2 > w)  
 	begin
@@ -1502,22 +1477,22 @@ begin
 		rad = h / 2;
 	end;
 
-	/* Setup filled circle drawing for corners */
+	{ Setup filled circle drawing for corners }
 	x = x1 + rad;
 	y = y1 + rad;
 	dx = x2 - x1 - rad - rad;
 	dy = y2 - y1 - rad - rad;
 
-	/*
+	{
 	* Set color
-	*/
+	}
 	result = 0;
 	result |= SDL_SetRenderDrawBlend/e(renderer, (a = 255) ? SDL_BLEND/E_NONE : SDL_BLEND/E_BLEND);
 	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);
 
-	/*
+	{
 	* Draw corners
-	*/
+	}
 	
 	while (cx <= cy) do begin
 		xpcx = x + cx;
@@ -1549,9 +1524,9 @@ begin
 			ocx = cx;
 		end;
 
-		/*
+		{
 		* Update 
-		*/
+		}
 		if (df < 0) begin
 			df += d_e;
 			d_e += 2;
@@ -1566,7 +1541,7 @@ begin
 		
 	 end;
 
-	/* Inside */
+	{ Inside }
 	if (dx > 0 && dy > 0) begin
 		result |= boxRGBA(renderer, x1, y1 + rad + 1, x2, y2 - rad, r, g, b, a);
 	end;
@@ -1574,10 +1549,10 @@ begin
 	return (result);
 end;
 
-/* ---- Box */
+{ ---- Box }
 
-/*!
-\brief Draw box (filled rectangle) with blending.
+{
+//  Draw box (filled rectangle) with blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point (i.e. top right) of the box.
@@ -1586,8 +1561,8 @@ end;
   y2 Y coordinate of the second point (i.e. bottom left) of the box.
   color The color value of the box to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int boxColor(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, LongWord color)
 begin
@@ -1595,8 +1570,8 @@ begin
 	return boxRGBA(renderer, x1, y1, x2, y2, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw box (filled rectangle) with blending.
+{
+//  Draw box (filled rectangle) with blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point (i.e. top right) of the box.
@@ -1608,8 +1583,8 @@ end;
   b The blue value of the box to draw. 
   a The alpha value of the box to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int boxRGBA(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -1617,9 +1592,9 @@ begin
 	Sint16 tmp;
 	SDL_Rect rect;
 
-	/*
+	{
 	* Test for special cases of straight lines or single point 
-	*/
+	}
 	if (x1 = x2) begin
 		if (y1 = y2) begin
 			return (pixelRGBA(renderer, x1, y1, r, g, b, a));
@@ -1632,35 +1607,35 @@ begin
 		end;
 	end;
 
-	/*
+	{
 	* Swap x1, x2 if required 
-	*/
+	}
 	if (x1 > x2) begin
 		tmp = x1;
 		x1 = x2;
 		x2 = tmp;
 	end;
 
-	/*
+	{
 	* Swap y1, y2 if required 
-	*/
+	}
 	if (y1 > y2) begin
 		tmp = y1;
 		y1 = y2;
 		y2 = tmp;
 	end;
 
-	/* 
+	{ 
 	* Create destination rect
-	*/	
+	}	
 	rect.x = x1;
 	rect.y = y1;
 	rect.w = x2 - x1 + 1;
 	rect.h = y2 - y1 + 1;
 	
-	/*
+	{
 	* Draw
-	*/
+	}
 	result = 0;
 	result |= SDL_SetRenderDrawBlend/e(renderer, (a = 255) ? SDL_BLEND/E_NONE : SDL_BLEND/E_BLEND);
 	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);	
@@ -1668,10 +1643,10 @@ begin
 	return result;
 end;
 
-/* ----- Line */
+{ ----- Line }
 
-/*!
-\brief Draw line with alpha blending using the currently set color.
+{
+//  Draw line with alpha blending using the currently set color.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point of the line.
@@ -1679,19 +1654,19 @@ end;
   x2 X coordinate of the second point of the line.
   y2 Y coordinate of the second point of the line.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int line(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2)
 begin
-	/*
+	{
 	* Draw
-	*/
+	}
 	return SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
 end;
 
-/*!
-\brief Draw line with alpha blending.
+{
+//  Draw line with alpha blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point of the line.
@@ -1700,8 +1675,8 @@ end;
   y2 Y coordinate of the seond point of the line.
   color The color value of the line to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int lineColor(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, LongWord color)
 begin
@@ -1709,8 +1684,8 @@ begin
 	return lineRGBA(renderer, x1, y1, x2, y2, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw line with alpha blending.
+{
+//  Draw line with alpha blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point of the line.
@@ -1722,14 +1697,14 @@ end;
   b The blue value of the line to draw. 
   a The alpha value of the line to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int lineRGBA(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
-	/*
+	{
 	* Draw
-	*/
+	}
 	int result = 0;
 	result |= SDL_SetRenderDrawBlend/e(renderer, (a = 255) ? SDL_BLEND/E_NONE : SDL_BLEND/E_BLEND);
 	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);	
@@ -1737,14 +1712,14 @@ begin
 	return result;
 end;
 
-/* ---- AA Line */
+{ ---- AA Line }
 
 const
 	AAlevels=256;
 	AAbits=8;
 
-/*!
-\brief Internal function to draw anti-aliased line with alpha blending and endpoint control.
+{
+//  Internal function to draw anti-aliased line with alpha blending and endpoint control.
 
 This implementation of the Wu antialiasing code is based on Mike Abrash's
 DDJ article which was reprinted as Chapter 42 of his Graphics Programming
@@ -1764,8 +1739,8 @@ with alpha<255.
   a The alpha value of the aa-line to draw.
   draw_endpoint Flag indicating if the endpoint should be drawn; draw if non-zero.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int _aalineRGBA(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a, int draw_endpoint)
 begin
@@ -1775,17 +1750,17 @@ begin
 	LongWord erracctmp, wgt, wgtcompmask;
 	int dx, dy, tmp, xdir, y0p1, x0pxdir;
 
-	/*
+	{
 	* Keep on working with 32bit numbers 
-	*/
+	}
 	xx0 = x1;
 	yy0 = y1;
 	xx1 = x2;
 	yy1 = y2;
 
-	/*
+	{
 	* Reorder points to make dy positive 
-	*/
+	}
 	if (yy0 > yy1) begin
 		tmp = yy0;
 		yy0 = yy1;
@@ -1795,15 +1770,15 @@ begin
 		xx1 = tmp;
 	end;
 
-	/*
+	{
 	* Calculate distance 
-	*/
+	}
 	dx = xx1 - xx0;
 	dy = yy1 - yy0;
 
-	/*
+	{
 	* Adjust for negative dx and set xdir 
-	*/
+	}
 	if (dx >= 0) begin
 		xdir = 1;
 	end else begin
@@ -1811,13 +1786,13 @@ begin
 		dx = (-dx);
 	end;
 	
-	/*
+	{
 	* Check for special cases 
-	*/
+	}
 	if (dx = 0) begin
-		/*
+		{
 		* Vertical line 
-		*/
+		}
 		if (draw_endpoint)
 		begin
 			return (vlineRGBA(renderer, x1, y1, y2, r, g, b, a));
@@ -1829,9 +1804,9 @@ begin
 			end;
 		end;
 	end else if (dy = 0) begin
-		/*
+		{
 		* Horizontal line 
-		*/
+		}
 		if (draw_endpoint)
 		begin
 			return (hlineRGBA(renderer, x1, x2, y1, r, g, b, a));
@@ -1843,74 +1818,74 @@ begin
 			end;
 		end;
 	end else if ((dx = dy) and (draw_endpoint=true)) begin
-		/*
+		{
 		* Diagonal line (with endpoint)
-		*/
+		}
 		return (lineRGBA(renderer, x1, y1, x2, y2,  r, g, b, a));
 	end;
 
 
-	/*
+	{
 	* Line is not horizontal, vertical or diagonal (with endpoint)
-	*/
+	}
 	result = 0;
 
-	/*
+	{
 	* Zero accumulator 
-	*/
+	}
 	erracc = 0;
 
-	/*
+	{
 	* # of bits by which to shift erracc to get intensity level 
-	*/
+	}
 	intshift = 32 - AAbits;
 
-	/*
+	{
 	* Mask used to flip all bits in an intensity weighting 
-	*/
+	}
 	wgtcompmask = AAlevels - 1;
 
-	/*
+	{
 	* Draw the initial pixel in the foreground color 
-	*/
+	}
 	result |= pixelRGBA(renderer, x1, y1, r, g, b, a);
 
-	/*
+	{
 	* x-major or y-major? 
-	*/
+	}
 	if (dy > dx) begin
 
-		/*
+		{
 		* y-major.  Calculate 16-bit fixed point fractional part of a pixel that
 		* X advances every time Y advances 1 pixel, truncating the result so that
 		* we won't overrun the endpoint along the X axis 
-		*/
-		/*
+		}
+		{
 		* Not-so-portable version: erradj = ((Uint64)dx << 32) / (Uint64)dy; 
-		*/
+		}
 		erradj = ((dx shl 16) / dy) shl 16;
 
-		/*
+		{
 		* draw all pixels other than the first and last 
-		*/
+		}
 		x0pxdir = xx0 + xdir;
 		while (--dy) begin
 			erracctmp = erracc;
 			erracc += erradj;
 			if (erracc <= erracctmp) begin
-				/*
+				{
 				* rollover in error accumulator, x coord advances 
-				*/
+				}
 				xx0 = x0pxdir;
 				x0pxdir += xdir;
 			end;
-			yy0++;		/* y-major so always advance Y */
+			yy0++;		{ y-major so always advance Y }
 
-			/*
+			{
 			* the AAbits most significant bits of erracc give us the intensity
 			* weighting for this pixel, and the complement of the weighting for
 			* the paired pixel. 
-			*/
+			}
 			wgt = (erracc >> intshift) & 255;
 			result |= pixelRGBAWeight (renderer, xx0, yy0, r, g, b, a, 255 - wgt);
 			result |= pixelRGBAWeight (renderer, x0pxdir, yy0, r, g, b, a, wgt);
@@ -1918,59 +1893,59 @@ begin
 
 	end else begin
 
-		/*
+		{
 		* x-major line.  Calculate 16-bit fixed-point fractional part of a pixel
 		* that Y advances each time X advances 1 pixel, truncating the result so
 		* that we won't overrun the endpoint along the X axis. 
-		*/
-		/*
+		}
+		{
 		* Not-so-portable version: erradj = ((Uint64)dy << 32) / (Uint64)dx; 
-		*/
+		}
 		erradj = ((dy shl 16) / dx) shl 16;
 
-		/*
+		{
 		* draw all pixels other than the first and last 
-		*/
+		}
 		y0p1 = yy0 + 1;
 		while (--dx) begin
 
 			erracctmp = erracc;
 			erracc += erradj;
 			if (erracc <= erracctmp) begin
-				/*
+				{
 				* Accumulator turned over, advance y 
-				*/
+				}
 				yy0 = y0p1;
 				y0p1++;
 			end;
-			xx0 += xdir;	/* x-major so always advance X */
-			/*
+			xx0 += xdir;	{ x-major so always advance X }
+			{
 			* the AAbits most significant bits of erracc give us the intensity
 			* weighting for this pixel, and the complement of the weighting for
 			* the paired pixel. 
-			*/
+			}
 			wgt = (erracc >> intshift) & 255;
 			result |= pixelRGBAWeight (renderer, xx0, yy0, r, g, b, a, 255 - wgt);
 			result |= pixelRGBAWeight (renderer, xx0, y0p1, r, g, b, a, wgt);
 		end;
 	end;
 
-	/*
+	{
 	* Do we have to draw the endpoint 
-	*/
+	}
 	if (draw_endpoint=true) begin
-		/*
+		{
 		* Draw final pixel, always exactly intersected by the line and doesn't
 		* need to be weighted. 
-		*/
+		}
 		result |= pixelRGBA (renderer, x2, y2, r, g, b, a);
 	end;
 
 	return (result);
 end;
 
-/*!
-\brief Draw anti-aliased line with alpha blending.
+{
+//  Draw anti-aliased line with alpha blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point of the aa-line.
@@ -1979,8 +1954,8 @@ end;
   y2 Y coordinate of the second point of the aa-line.
   color The color value of the aa-line to draw (0xRRGGBBAA).
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int aalineColor(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, LongWord color)
 begin
@@ -1988,8 +1963,8 @@ begin
 	return _aalineRGBA(renderer, x1, y1, x2, y2, c[0], c[1], c[2], c[3], 1);
 end;
 
-/*!
-\brief Draw anti-aliased line with alpha blending.
+{
+//  Draw anti-aliased line with alpha blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point of the aa-line.
@@ -2001,18 +1976,18 @@ end;
   b The blue value of the aa-line to draw. 
   a The alpha value of the aa-line to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int aalineRGBA(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
 	return _aalineRGBA(renderer, x1, y1, x2, y2, r, g, b, a, 1);
 end;
 
-/* ----- Circle */
+{ ----- Circle }
 
-/*!
-\brief Draw circle with blending.
+{
+//  Draw circle with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the circle.
@@ -2020,8 +1995,8 @@ end;
   rad Radius in pixels of the circle.
   color The color value of the circle to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int circleColor(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, LongWord color)
 begin
@@ -2029,8 +2004,8 @@ begin
 	return ellipseRGBA(renderer, x, y, rad, rad, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw circle with blending.
+{
+//  Draw circle with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the circle.
@@ -2041,18 +2016,18 @@ end;
   b The blue value of the circle to draw. 
   a The alpha value of the circle to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int circleRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
 	return ellipseRGBA(renderer, x, y, rad, rad, r, g, b, a);
 end;
 
-/* ----- Arc */
+{ ----- Arc }
 
-/*!
-\brief Arc with blending.
+{
+//  Arc with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the arc.
@@ -2062,8 +2037,8 @@ end;
   end Ending radius in degrees of the arc. 0 degrees is down, increasing counterclockwise.
   color The color value of the arc to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int arcColor(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, Sint16 start, Sint16 end, LongWord color)
 begin
@@ -2071,8 +2046,8 @@ begin
 	return arcRGBA(renderer, x, y, rad, start, end, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Arc with blending.
+{
+//  Arc with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the arc.
@@ -2085,10 +2060,10 @@ end;
   b The blue value of the arc to draw. 
   a The alpha value of the arc to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
-/* TODO: rewrite algorithm; arc endpoints are not always drawn */
+{ TODO: rewrite algorithm; arc endpoints are not always drawn }
 
 int arcRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, Sint16 start, Sint16 end, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -2104,21 +2079,21 @@ begin
 	int startoct, endoct, oct, stopval_start = 0, stopval_end = 0;
 	double dstart, dend, temp = 0.;
 
-	/*
+	{
 	* Sanity check radius 
-	*/
+	}
 	if (rad < 0) begin
 		return (-1);
 	end;
 
-	/*
+	{
 	* Special case for rad=0 - draw a point 
-	*/
+	}
 	if (rad = 0) begin
 		return (pixelRGBA(renderer, x, y, r, g, b, a));
 	end;
 
-	/*
+	{
 	 Octant labeling
 	      
 	  \ 5 | 6 /
@@ -2135,34 +2110,34 @@ begin
 	 Initially reset bitmask to 0x00000000
 	 the set whether or not to keep drawing a given octant.
 	 For example: 0x00111100 means we're drawing in octants 2-5
-	*/
+	}
 	
 	drawoct = 0; 
 
-	/*
+	{
 	* Fixup angles
-	*/
+	}
 	start mod= 360;
 	end mod= 360;
 	
-	/* 0 <= start & end < 360; note that sometimes start > end - if so, arc goes back through 0. */
+	{ 0 <= start & end < 360; note that sometimes start > end - if so, arc goes back through 0. }
 	while (start < 0) start += 360;
 	while (end < 0) end += 360;
 	
 	start mod= 360;
 	end mod= 360;
 
-	/* now, we find which octants we're drawing in. */
+	{ now, we find which octants we're drawing in. }
 	startoct = start / 45;
 	endoct = end / 45;
 	oct = startoct - 1;
 
-	/* stopval_start, stopval_end; what values of cx to stop at. */
+	{ stopval_start, stopval_end; what values of cx to stop at. }
 	while (oct <> endoct) do begin
 		oct = (oct + 1) mod 8;
 
 		if (oct = startoct) begin
-			/* need to compute stopval_start for this octant.  Look at picture above if this is unclear */
+			{ need to compute stopval_start for this octant.  Look at picture above if this is unclear }
 			dstart = (double)start;
 			switch (oct) 
 			begin
@@ -2186,18 +2161,18 @@ begin
 			temp *= rad;
 			stopval_start = (int)temp;
 
-			/* 
+			{ 
 			This isnt arbitrary, but requires graph paper to explain well.
 			The basic idea is that were always changing drawoct after we draw, so we
 			stop immediately after we render the last sensible pixel at x = (temp).
 			and whether to draw in this octant initially
-			*/
+			}
 			
-			if (oct mod 2) drawoct |= (1 shl oct);			/* this is basically like saying drawoct[oct] = true, if drawoct were a bool array */
-			else		 drawoct &= 255 - (1 shl oct);	/* this is basically like saying drawoct[oct] = false */
+			if (oct mod 2) drawoct |= (1 shl oct);			{ this is basically like saying drawoct[oct] = true, if drawoct were a bool array }
+			else		 drawoct &= 255 - (1 shl oct);	{ this is basically like saying drawoct[oct] = false }
 		end;
 		if (oct = endoct) begin
-			/* need to compute stopval_end for this octant */
+			{ need to compute stopval_end for this octant }
 			dend = (double)end;
 			switch (oct)
 			begin
@@ -2221,13 +2196,13 @@ begin
 			temp *= rad;
 			stopval_end = (int)temp;
 
-			/* and whether to draw in this octant initially */
+			{ and whether to draw in this octant initially }
 			if (startoct = endoct)	begin
-				/* note:      we start drawing, stop, then start again in this case */
-				/* otherwise: we only draw in this octant, so initialize it to false, it will get set back to true */
+				{ note:      we start drawing, stop, then start again in this case }
+				{ otherwise: we only draw in this octant, so initialize it to false, it will get set back to true }
 				if (start > end) begin
-					/* unfortunately, if we're in the same octant and need to draw over the whole circle, */
-					/* we need to set the rest to true, because the while loop will end at the bottom. */
+					{ unfortunately, if we're in the same octant and need to draw over the whole circle, }
+					{ we need to set the rest to true, because the while loop will end at the bottom. }
 					drawoct = 255;
 				end else begin
 					drawoct &= 255 - (1 << oct);
@@ -2237,23 +2212,23 @@ begin
 			 	drawoct &= 255 - (1 shl oct));
 			else
 			 	drawoct |= (1 shl oct);
-		end else if (oct <> startoct) { /* already verified that it's != endoct */
-			drawoct |= (1 shl oct); /* draw this entire segment */
+		end else if (oct <> startoct) { { already verified that it's != endoct }
+			drawoct |= (1 shl oct); { draw this entire segment }
 		end;
 	end;
 
-	/* so now we have what octants to draw and when to draw them. all that's left is the actual raster code. */
+	{ so now we have what octants to draw and when to draw them. all that's left is the actual raster code. }
 
-	/*
+	{
 	* Set color 
-	*/
+	}
 	result = 0;
 	result |= SDL_SetRenderDrawBlend/e(renderer, (a = 255) ? SDL_BLEND/E_NONE : SDL_BLEND/E_BLEND);
 	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);
 
-	/*
+	{
 	* Draw arc 
-	*/
+	}
 	while (cx <= cy) do begin
 		ypcy = y + cy;
 		ymcy = y - cy;
@@ -2261,7 +2236,7 @@ begin
 			xpcx = x + cx;
 			xmcx = x - cx;
 
-			/* always check if we're drawing a certain octant before adding a pixel to that octant. */
+			{ always check if we're drawing a certain octant before adding a pixel to that octant. }
 			if (drawoct & 4)  result |= pixel(renderer, xmcx, ypcy);
 			if (drawoct & 2)  result |= pixel(renderer, xpcx, ypcy);
 			if (drawoct & 32) result |= pixel(renderer, xmcx, ymcy);
@@ -2285,12 +2260,12 @@ begin
 			if (drawoct & 129) result |= pixel(renderer, xpcy, y);
 		end;
 
-		/*
+		{
 		* Update whether were drawing an octant
-		*/
+		}
 		if (stopval_start = cx) begin
-			/* works like an on-off switch. */  
-			/* This is just in case start & end are in the same octant. */
+			{ works like an on-off switch. }  
+			{ This is just in case start & end are in the same octant. }
 			if (drawoct & (1 shl startoct)) 
 			 	drawoct &= 255 - (1 shl startoct);		
 			else
@@ -2303,9 +2278,9 @@ begin
 				drawoct |= (1 shl endoct);
 		end;
 
-		/*
+		{
 		* Update pixels
-		*/
+		}
 		if (df < 0) begin
 			df += d_e;
 			d_e += 2;
@@ -2322,10 +2297,10 @@ begin
 	return (result);
 end;
 
-/* ----- AA Circle */
+{ ----- AA Circle }
 
-/*!
-\brief Draw anti-aliased circle with blending.
+{
+//  Draw anti-aliased circle with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the aa-circle.
@@ -2333,8 +2308,8 @@ end;
   rad Radius in pixels of the aa-circle.
   color The color value of the aa-circle to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int aacircleColor(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, LongWord color)
 begin
@@ -2342,8 +2317,8 @@ begin
 	return aaellipseRGBA(renderer, x, y, rad, rad, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw anti-aliased circle with blending.
+{
+//  Draw anti-aliased circle with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the aa-circle.
@@ -2354,21 +2329,21 @@ end;
   b The blue value of the aa-circle to draw. 
   a The alpha value of the aa-circle to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int aacircleRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
-	/*
+	{
 	* Draw 
-	*/
+	}
 	return aaellipseRGBA(renderer, x, y, rad, rad, r, g, b, a);
 end;
 
-/* ----- Ellipse */
+{ ----- Ellipse }
 
-/*!
-\brief Internal function to draw pixels or lines in 4 quadrants.
+{
+//  Internal function to draw pixels or lines in 4 quadrants.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the quadrant.
@@ -2377,8 +2352,8 @@ end;
   dy Y offset in pixels of the corners of the quadrant.
   f Flag indicating if the quadrant should be filled (1) or not (0).
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int _drawQuadrants(SDL_Renderer * renderer,  Sint16 x, Sint16 y, Sint16 dx, Sint16 dy, LongInt f)
 begin
@@ -2418,8 +2393,8 @@ begin
 	return result;
 end;
 
-/*!
-\brief Internal function to draw ellipse or filled ellipse with blending.
+{
+//  Internal function to draw ellipse or filled ellipse with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the ellipse.
@@ -2432,8 +2407,8 @@ end;
   a The alpha value of the ellipse to draw.
   f Flag indicating if the ellipse should be filled (1) or not (0).
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 const 
 	DEFAULT_ELLIPSE_OVERSCAN=4;
@@ -2449,23 +2424,23 @@ begin
     LongInt deltaX, deltaY;
 	LongInt ellipseOverscan;
 
-	/*
+	{
 	* Sanity check radii 
-	*/
+	}
 	if ((rx < 0) or (ry < 0)) begin
 		return (-1);
 	end;
 
-	/*
+	{
 	* Set color
-	*/
+	}
 	result = 0;
 	result |= SDL_SetRenderDrawBlend/e(renderer, (a = 255) ? SDL_BLEND/E_NONE : SDL_BLEND/E_BLEND);
 	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);
 
-	/*
+	{
 	* Special cases for rx=0 and/or ry=0: draw a hline/vline/pixel 
-	*/
+	}
 	if (rx = 0) begin
 		if (ry = 0) begin
 			return (pixel(renderer, x, y));
@@ -2478,9 +2453,9 @@ begin
 		end;
 	end;
 	
-	/*
+	{
  	 * Adjust overscan 
-	 */
+	 }
 	rxi = rx;
 	ryi = ry;
 	if (rxi >= 512 or ryi >= 512)
@@ -2496,14 +2471,14 @@ begin
 		ellipseOverscan = DEFAULT_ELLIPSE_OVERSCAN / 1;
 	
 
-	/*
+	{
 	 * Top/bottom center points.
-	 */
+	 }
 	oldX = scrX = 0;
 	oldY = scrY = ryi;
 	result |= _drawQuadrants(renderer, x, y, 0, ry, f);
 
-	/* Midpoint ellipse algorithm with overdraw */
+	{ Midpoint ellipse algorithm with overdraw }
 	rxi *= ellipseOverscan;
 	ryi *= ellipseOverscan;
 	rx2 = rxi * rxi;
@@ -2515,7 +2490,7 @@ begin
     deltaX = 0;
     deltaY = rx22 * curY;
  
-	/* Points in segment 1 */ 
+	{ Points in segment 1 } 
     error = ry2 - rx2 * ryi + rx2 / 4;
     while (deltaX <= deltaY) do begin
     
@@ -2539,7 +2514,7 @@ begin
 		  end;
     end;
 
-	/* Points in segment 2 */
+	{ Points in segment 2 }
 	if (curY > 0) 
 	begin
 		curXp1 = curX + 1;
@@ -2566,7 +2541,7 @@ begin
 				oldY--;
 				for (;oldY >= scrY; oldY--) begin
 					result |= _drawQuadrants(renderer, x, y, scrX, oldY, f);
-					/* prevent overdraw */
+					{ prevent overdraw }
 					if (f) begin
 						oldY = scrY - 1;
 					end;
@@ -2576,7 +2551,7 @@ begin
 		    end;		
 		end;
 
-		/* Remaining points in vertical */
+		{ Remaining points in vertical }
 		if (<>f) begin
 			oldY--;
 			for (;oldY >= 0; oldY--) begin
@@ -2588,8 +2563,8 @@ begin
 	return (result);
 end;
 
-/*!
-\brief Draw ellipse with blending.
+{
+//  Draw ellipse with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the ellipse.
@@ -2598,8 +2573,8 @@ end;
   ry Vertical radius in pixels of the ellipse.
   color The color value of the ellipse to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int ellipseColor(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, LongWord color)
 begin
@@ -2607,8 +2582,8 @@ begin
 	return _ellipseRGBA(renderer, x, y, rx, ry, c[0], c[1], c[2], c[3], 0);
 end;
 
-/*!
-\brief Draw ellipse with blending.
+{
+//  Draw ellipse with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the ellipse.
@@ -2620,18 +2595,18 @@ end;
   b The blue value of the ellipse to draw. 
   a The alpha value of the ellipse to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int ellipseRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
 	return _ellipseRGBA(renderer, x, y, rx, ry, r, g, b, a, 0);
 end;
 
-/* ----- Filled Circle */
+{ ----- Filled Circle }
 
-/*!
-\brief Draw filled circle with blending.
+{
+//  Draw filled circle with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the filled circle.
@@ -2639,8 +2614,8 @@ end;
   rad Radius in pixels of the filled circle.
   color The color value of the filled circle to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int filledCircleColor(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, LongWord color)
 begin
@@ -2648,8 +2623,8 @@ begin
 	return filledEllipseRGBA(renderer, x, y, rad, rad, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw filled circle with blending.
+{
+//  Draw filled circle with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the filled circle.
@@ -2660,8 +2635,8 @@ end;
   b The blue value of the filled circle to draw. 
   a The alpha value of the filled circle to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int filledCircleRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -2682,11 +2657,11 @@ begin
 end;
 
 {
-/* ----- AA Ellipse */
+{ ----- AA Ellipse }
 
 
-/*!
-\brief Draw anti-aliased ellipse with blending.
+{
+//  Draw anti-aliased ellipse with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the aa-ellipse.
@@ -2695,8 +2670,8 @@ end;
   ry Vertical radius in pixels of the aa-ellipse.
   color The color value of the aa-ellipse to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int aaellipseColor(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, LongWord color)
 begin
@@ -2704,8 +2679,8 @@ begin
 	return aaellipseRGBA(renderer, x, y, rx, ry, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw anti-aliased ellipse with blending.
+{
+//  Draw anti-aliased ellipse with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the aa-ellipse.
@@ -2717,8 +2692,8 @@ end;
   b The blue value of the aa-ellipse to draw. 
   a The alpha value of the aa-ellipse to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int aaellipseRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -2730,16 +2705,16 @@ begin
 	double sab;
 	Uint8 weight, iweight;
 
-	/*
+	{
 	* Sanity check radii 
-	*/
+	}
 	if ((rx < 0) || (ry < 0)) begin
 		return (-1);
 	end;
 
-	/*
+	{
 	* Special cases for rx=0 and/or ry=0: draw a hline/vline/pixel 
-	*/
+	}
 	if (rx = 0) begin
 		if (ry = 0) begin
 			return (pixelRGBA(renderer, x, y, r, g, b, a));
@@ -2752,7 +2727,7 @@ begin
 		end;
 	end;
 
-	/* Variable setup */
+	{ Variable setup }
 	a2 = rx * rx;
 	b2 = ry * ry;
 
@@ -2773,11 +2748,11 @@ begin
 	xp = x;
 	yp = y - ry;
 
-	/* Draw */
+	{ Draw }
 	result = 0;
 	result |= SDL_SetRenderDrawBlend/e(renderer, (a = 255) ? SDL_BLEND/E_NONE : SDL_BLEND/E_BLEND);
 
-	/* "End points" */
+	{ "End points" }
 	result |= pixelRGBA(renderer, xp, yp, r, g, b, a);
 	result |= pixelRGBA(renderer, xc2 - xp, yp, r, g, b, a);
 	result |= pixelRGBA(renderer, xp, yc2 - yp, r, g, b, a);
@@ -2807,7 +2782,7 @@ begin
 
 		t -= dt;
 
-		/* Calculate alpha */
+		{ Calculate alpha }
 		if (s != 0) begin
 			cp = (float) abs(d) / (float) abs(s);
 			if (cp > 1.0) begin
@@ -2817,11 +2792,11 @@ begin
 			cp = 1.0;
 		end;
 
-		/* Calculate weights */
+		{ Calculate weights }
 		weight = (Uint8) (cp * 255);
 		iweight = 255 - weight;
 
-		/* Upper half */
+		{ Upper half }
 		xx = xc2 - xp;
 		result |= pixelRGBAWeight(renderer, xp, yp, r, g, b, a, iweight);
 		result |= pixelRGBAWeight(renderer, xx, yp, r, g, b, a, iweight);
@@ -2829,7 +2804,7 @@ begin
 		result |= pixelRGBAWeight(renderer, xp, ys, r, g, b, a, weight);
 		result |= pixelRGBAWeight(renderer, xx, ys, r, g, b, a, weight);
 
-		/* Lower half */
+		{ Lower half }
 		yy = yc2 - yp;
 		result |= pixelRGBAWeight(renderer, xp, yy, r, g, b, a, iweight);
 		result |= pixelRGBAWeight(renderer, xx, yy, r, g, b, a, iweight);
@@ -2866,7 +2841,7 @@ begin
 
 		s += ds;
 
-		/* Calculate alpha */
+		{ Calculate alpha }
 		if (t != 0) begin
 			cp = (float) abs(d) / (float) abs(t);
 			if (cp > 1.0) begin
@@ -2876,11 +2851,11 @@ begin
 			cp = 1.0;
 		end;
 
-		/* Calculate weight */
+		{ Calculate weight }
 		weight = (Uint8) (cp * 255);
 		iweight = 255 - weight;
 
-		/* Left half */
+		{ Left half }
 		xx = xc2 - xp;
 		yy = yc2 - yp;
 		result |= pixelRGBAWeight(renderer, xp, yp, r, g, b, a, iweight);
@@ -2889,7 +2864,7 @@ begin
 		result |= pixelRGBAWeight(renderer, xp, yy, r, g, b, a, iweight);
 		result |= pixelRGBAWeight(renderer, xx, yy, r, g, b, a, iweight);
 
-		/* Right half */
+		{ Right half }
 		xx = xc2 - xs;
 		result |= pixelRGBAWeight(renderer, xs, yp, r, g, b, a, weight);
 		result |= pixelRGBAWeight(renderer, xx, yp, r, g, b, a, weight);
@@ -2901,10 +2876,10 @@ begin
 	return (result);
 end;
 
-/* ---- Filled Ellipse */
+{ ---- Filled Ellipse }
 
-/*!
-\brief Draw filled ellipse with blending.
+{
+//  Draw filled ellipse with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the filled ellipse.
@@ -2913,8 +2888,8 @@ end;
   ry Vertical radius in pixels of the filled ellipse.
   color The color value of the filled ellipse to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int filledEllipseColor(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, LongWord color)
 begin
@@ -2922,8 +2897,8 @@ begin
 	return _ellipseRGBA(renderer, x, y, rx, ry, c[0], c[1], c[2], c[3], 1);
 end;
 
-/*!
-\brief Draw filled ellipse with blending.
+{
+//  Draw filled ellipse with blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the filled ellipse.
@@ -2935,18 +2910,18 @@ end;
   b The blue value of the filled ellipse to draw. 
   a The alpha value of the filled ellipse to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int filledEllipseRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
 	return _ellipseRGBA(renderer, x, y, rx, ry, r, g, b, a, 1);
 end;
 
-/* ----- Pie */
+{ ----- Pie }
 
-/*!
-\brief Internal float (low-speed) pie-calc implementation by drawing polygons.
+{
+//  Internal float (low-speed) pie-calc implementation by drawing polygons.
 
 Note: Determines vertex array and uses polygon or filledPolygon drawing routines to render.
 
@@ -2962,10 +2937,10 @@ Note: Determines vertex array and uses polygon or filledPolygon drawing routines
   a The alpha value of the pie to draw.
   filled Flag indicating if the pie should be filled (=1) or not (=0).
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
-/* TODO: rewrite algorithm; pie is not always accurate */
+{ TODO: rewrite algorithm; pie is not always accurate }
 
 int _pieRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, Sint16 start, Sint16 end,  Uint8 r, Uint8 g, Uint8 b, Uint8 a, Uint8 filled)
 begin
@@ -2976,29 +2951,29 @@ begin
 	int numpoints, i;
 	Sint16 *vx, *vy;
 
-	/*
+	{
 	* Sanity check radii 
-	*/
+	}
 	if (rad < 0) begin
 		return (-1);
 	end;
 
-	/*
+	{
 	* Fixup angles
-	*/
+	}
 	start = start mod 360;
 	end = end mod 360;
 
-	/*
+	{
 	* Special case for rad=0 - draw a point 
-	*/
+	}
 	if (rad = 0) begin
 		return (pixelRGBA(renderer, x, y, r, g, b, a));
 	end;
 
-	/*
+	{
 	* Variable setup 
-	*/
+	}
 	dr = (double) rad;
 	deltaAngle = 3.0 / dr;
 	start_angle = (double) start *(2.0 * M_PI / 360.0);
@@ -3007,30 +2982,30 @@ begin
 		end_angle += (2.0 * M_PI);
 	end;
 
-	/* We will always have at least 2 points */
+	{ We will always have at least 2 points }
 	numpoints = 2;
 
-	/* Count points (rather than calculating it) */
+	{ Count points (rather than calculating it) }
 	angle = start_angle;
 	while (angle < end_angle) begin
 		angle += deltaAngle;
 		numpoints++;
 	end;
 
-	/* Allocate combined vertex array */
+	{ Allocate combined vertex array }
 	vx = vy = (Sint16 *) malloc(2 * sizeof(Uint16) * numpoints);
 	if (vx = NULL) begin
 		return (-1);
 	end;
 
-	/* Update point to start of vy */
+	{ Update point to start of vy }
 	vy += numpoints;
 
-	/* Center */
+	{ Center }
 	vx[0] = x;
 	vy[0] = y;
 
-	/* First vertex */
+	{ First vertex }
 	angle = start_angle;
 	vx[1] = x + (int) (dr * cos(angle));
 	vy[1] = y + (int) (dr * sin(angle));
@@ -3041,7 +3016,7 @@ begin
 	end;
 	else begin
 	
-		/* Calculate other vertices */
+		{ Calculate other vertices }
 		i = 2;
 		angle = start_angle;
 		while (angle < end_angle) begin
@@ -3055,7 +3030,7 @@ begin
 			i++;
 		end;
 
-		/* Draw */
+		{ Draw }
 		if (filled) begin
 			result = filledPolygonRGBA(renderer, vx, vy, numpoints, r, g, b, a);
 		end else begin
@@ -3063,14 +3038,14 @@ begin
 		end;
 	end;
 
-	/* Free combined vertex array */
+	{ Free combined vertex array }
 	free(vx);
 
 	return (result);
 end;
 
-/*!
-\brief Draw pie (outline) with alpha blending.
+{
+//  Draw pie (outline) with alpha blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the pie.
@@ -3080,8 +3055,8 @@ end;
   end Ending radius in degrees of the pie.
   color The color value of the pie to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int pieColor(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, 
 	Sint16 start, Sint16 end, LongWord color) 
@@ -3090,8 +3065,8 @@ begin
 	return _pieRGBA(renderer, x, y, rad, start, end, c[0], c[1], c[2], c[3], 0);
 end;
 
-/*!
-\brief Draw pie (outline) with alpha blending.
+{
+//  Draw pie (outline) with alpha blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the pie.
@@ -3104,8 +3079,8 @@ end;
   b The blue value of the pie to draw. 
   a The alpha value of the pie to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int pieRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad,
 	Sint16 start, Sint16 end, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
@@ -3113,8 +3088,8 @@ begin
 	return _pieRGBA(renderer, x, y, rad, start, end, r, g, b, a, 0);
 end;
 
-/*!
-\brief Draw filled pie with alpha blending.
+{
+//  Draw filled pie with alpha blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the filled pie.
@@ -3124,8 +3099,8 @@ end;
   end Ending radius in degrees of the filled pie.
   color The color value of the filled pie to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int filledPieColor(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, Sint16 start, Sint16 end, LongWord color)
 begin
@@ -3133,8 +3108,8 @@ begin
 	return _pieRGBA(renderer, x, y, rad, start, end, c[0], c[1], c[2], c[3], 1);
 end;
 
-/*!
-\brief Draw filled pie with alpha blending.
+{
+//  Draw filled pie with alpha blending.
 
   renderer The renderer to draw on.
   x X coordinate of the center of the filled pie.
@@ -3147,8 +3122,8 @@ end;
   b The blue value of the filled pie to draw. 
   a The alpha value of the filled pie to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int filledPieRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad,
 	Sint16 start, Sint16 end, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
@@ -3156,10 +3131,10 @@ begin
 	return _pieRGBA(renderer, x, y, rad, start, end, r, g, b, a, 1);
 end;
 
-/* ------ Trigon */
+{ ------ Trigon }
 
-/*!
-\brief Draw trigon (triangle outline) with alpha blending.
+{
+//  Draw trigon (triangle outline) with alpha blending.
 
 Note: Creates vertex array and uses polygon routine to render.
 
@@ -3172,8 +3147,8 @@ Note: Creates vertex array and uses polygon routine to render.
   y3 Y coordinate of the third point of the trigon.
   color The color value of the trigon to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int trigonColor(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, LongWord color)
 begin
@@ -3190,8 +3165,8 @@ begin
 	return(polygonColor(renderer,vx,vy,3,color));
 end;
 
-/*!
-\brief Draw trigon (triangle outline) with alpha blending.
+{
+//  Draw trigon (triangle outline) with alpha blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point of the trigon.
@@ -3205,8 +3180,8 @@ end;
   b The blue value of the trigon to draw. 
   a The alpha value of the trigon to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int trigonRGBA(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3,
 	Uint8 r, Uint8 g, Uint8 b, Uint8 a)
@@ -3224,10 +3199,10 @@ begin
 	return(polygonRGBA(renderer,vx,vy,3,r,g,b,a));
 end;				 
 
-/* ------ AA-Trigon */
+{ ------ AA-Trigon }
 
-/*!
-\brief Draw anti-aliased trigon (triangle outline) with alpha blending.
+{
+//  Draw anti-aliased trigon (triangle outline) with alpha blending.
 
 Note: Creates vertex array and uses aapolygon routine to render.
 
@@ -3240,8 +3215,8 @@ Note: Creates vertex array and uses aapolygon routine to render.
   y3 Y coordinate of the third point of the aa-trigon.
   color The color value of the aa-trigon to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int aatrigonColor(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, LongWord color)
 begin
@@ -3258,8 +3233,8 @@ begin
 	return(aapolygonColor(renderer,vx,vy,3,color));
 end;
 
-/*!
-\brief Draw anti-aliased trigon (triangle outline) with alpha blending.
+{
+//  Draw anti-aliased trigon (triangle outline) with alpha blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point of the aa-trigon.
@@ -3273,8 +3248,8 @@ end;
   b The blue value of the aa-trigon to draw. 
   a The alpha value of the aa-trigon to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int aatrigonRGBA(SDL_Renderer * renderer,  Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3,
 	Uint8 r, Uint8 g, Uint8 b, Uint8 a)
@@ -3292,10 +3267,10 @@ begin
 	return(aapolygonRGBA(renderer,vx,vy,3,r,g,b,a));
 end;				   
 
-/* ------ Filled Trigon */
+{ ------ Filled Trigon }
 
-/*!
-\brief Draw filled trigon (triangle) with alpha blending.
+{
+//  Draw filled trigon (triangle) with alpha blending.
 
 Note: Creates vertex array and uses aapolygon routine to render.
 
@@ -3308,8 +3283,8 @@ Note: Creates vertex array and uses aapolygon routine to render.
   y3 Y coordinate of the third point of the filled trigon.
   color The color value of the filled trigon to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int filledTrigonColor(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, LongWord color)
 begin
@@ -3326,8 +3301,8 @@ begin
 	return(filledPolygonColor(renderer,vx,vy,3,color));
 end;
 
-/*!
-\brief Draw filled trigon (triangle) with alpha blending.
+{
+//  Draw filled trigon (triangle) with alpha blending.
 
 Note: Creates vertex array and uses aapolygon routine to render.
 
@@ -3343,8 +3318,8 @@ Note: Creates vertex array and uses aapolygon routine to render.
   b The blue value of the filled trigon to draw. 
   a The alpha value of the filled trigon to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int filledTrigonRGBA(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3,
 	Uint8 r, Uint8 g, Uint8 b, Uint8 a)
@@ -3364,10 +3339,10 @@ begin
 	return(filledPolygonRGBA(renderer,vx,vy,3,r,g,b,a));
 end;
 
-/* ---- Polygon */
+{ ---- Polygon }
 
-/*!
-\brief Draw polygon with alpha blending.
+{
+//  Draw polygon with alpha blending.
 
   renderer The renderer to draw on.
   vx Vertex array containing X coordinates of the points of the polygon.
@@ -3375,8 +3350,8 @@ end;
   n Number of points in the vertex array. Minimum number is 3.
   color The color value of the polygon to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int polygonColor(SDL_Renderer * renderer, const Sint16 * vx, const Sint16 * vy, int n, LongWord color)
 begin
@@ -3384,29 +3359,29 @@ begin
 	return polygonRGBA(renderer, vx, vy, n, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw polygon with the currently set color and blend /e.
+{
+//  Draw polygon with the currently set color and blend /e.
 
   renderer The renderer to draw on.
   vx Vertex array containing X coordinates of the points of the polygon.
   vy Vertex array containing Y coordinates of the points of the polygon.
   n Number of points in the vertex array. Minimum number is 3.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int polygon(SDL_Renderer * renderer, const Sint16 * vx, const Sint16 * vy, int n)
 begin
-	/*
+	{
 	* Draw 
-	*/
+	}
 	int result = 0;
 	int i, nn;
 	SDL_Point* points;
 
-	/*
+	{
 	* Vertex array NULL check 
-	*/
+	}
 	if (vx = NULL) begin
 		return (-1);
 	end;
@@ -3414,16 +3389,16 @@ begin
 		return (-1);
 	end;
 
-	/*
+	{
 	* Sanity check 
-	*/
+	}
 	if (n < 3) begin
 		return (-1);
 	end;
 
-	/*
+	{
 	* Create array of points
-	*/
+	}
 	nn = n + 1;
 	points = (SDL_Point*)malloc(sizeof(SDL_Point) * nn);
 	if (points = NULL)
@@ -3438,17 +3413,17 @@ begin
 	points[n].x = vx[0];
 	points[n].y = vy[0];
 
-	/*
+	{
 	* Draw 
-	*/
+	}
 	result |= SDL_RenderDrawLines(renderer, points, nn);
 	free(points);
 
 	return (result);
 end;
 
-/*!
-\brief Draw polygon with alpha blending.
+{
+//  Draw polygon with alpha blending.
 
   renderer The renderer to draw on.
   vx Vertex array containing X coordinates of the points of the polygon.
@@ -3459,20 +3434,20 @@ end;
   b The blue value of the polygon to draw. 
   a The alpha value of the polygon to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int polygonRGBA(SDL_Renderer * renderer, const Sint16 * vx, const Sint16 * vy, int n, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
-	/*
+	{
 	* Draw 
-	*/
+	}
 	int result;
 	const Sint16 *x1, *y1, *x2, *y2;
 
-	/*
+	{
 	* Vertex array NULL check 
-	*/
+	}
 	if (vx = NULL) begin
 		return (-1);
 	end;
@@ -3480,40 +3455,40 @@ begin
 		return (-1);
 	end;
 
-	/*
+	{
 	* Sanity check 
-	*/
+	}
 	if (n < 3) begin
 		return (-1);
 	end;
 
-	/*
+	{
 	* Pointer setup 
-	*/
+	}
 	x1 = x2 = vx;
 	y1 = y2 = vy;
 	x2++;
 	y2++;
 
-	/*
+	{
 	* Set color 
-	*/
+	}
 	result = 0;
 	result |= SDL_SetRenderDrawBlend/e(renderer, (a = 255) ? SDL_BLEND/E_NONE : SDL_BLEND/E_BLEND);
 	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);	
 
-	/*
+	{
 	* Draw 
-	*/
+	}
 	result |= polygon(renderer, vx, vy, n);
 
 	return (result);
 end;
 
-/* ---- AA-Polygon */
+{ ---- AA-Polygon }
 
-/*!
-\brief Draw anti-aliased polygon with alpha blending.
+{
+//  Draw anti-aliased polygon with alpha blending.
 
   renderer The renderer to draw on.
   vx Vertex array containing X coordinates of the points of the aa-polygon.
@@ -3521,8 +3496,8 @@ end;
   n Number of points in the vertex array. Minimum number is 3.
   color The color value of the aa-polygon to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int aapolygonColor(SDL_Renderer * renderer, const Sint16 * vx, const Sint16 * vy, int n, LongWord color)
 begin
@@ -3530,8 +3505,8 @@ begin
 	return aapolygonRGBA(renderer, vx, vy, n, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw anti-aliased polygon with alpha blending.
+{
+//  Draw anti-aliased polygon with alpha blending.
 
   renderer The renderer to draw on.
   vx Vertex array containing X coordinates of the points of the aa-polygon.
@@ -3542,8 +3517,8 @@ end;
   b The blue value of the aa-polygon to draw. 
   a The alpha value of the aa-polygon to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int aapolygonRGBA(SDL_Renderer * renderer, const Sint16 * vx, const Sint16 * vy, int n, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -3551,9 +3526,9 @@ begin
 	int i;
 	const Sint16 *x1, *y1, *x2, *y2;
 
-	/*
+	{
 	* Vertex array NULL check 
-	*/
+	}
 	if (vx = NULL) begin
 		return (-1);
 	end;
@@ -3561,24 +3536,24 @@ begin
 		return (-1);
 	end;
 
-	/*
+	{
 	* Sanity check 
-	*/
+	}
 	if (n < 3) begin
 		return (-1);
 	end;
 
-	/*
+	{
 	* Pointer setup 
-	*/
+	}
 	x1 = x2 = vx;
 	y1 = y2 = vy;
 	x2++;
 	y2++;
 
-	/*
+	{
 	* Draw 
-	*/
+	}
 	result = 0;
 	for (i = 1; i < n; i++) begin
 		result |= _aalineRGBA(renderer, *x1, *y1, *x2, *y2, r, g, b, a, 0);
@@ -3593,7 +3568,7 @@ begin
 	return (result);
 end;
 
-/* ---- Filled Polygon */
+{ ---- Filled Polygon }
 
 
 
@@ -3616,8 +3591,8 @@ static int gfxPrimitivesPolyAllocatedGlobal = 0;
 
 {
 
-/*!
-\brief Draw filled polygon with alpha blending (multi-threaded capable).
+{
+//  Draw filled polygon with alpha blending (multi-threaded capable).
 
 Note: The last two parameters are optional; but are required for multithreaded operation.  
 
@@ -3632,8 +3607,8 @@ Note: The last two parameters are optional; but are required for multithreaded o
   polyInts Preallocated, temporary vertex array used for sorting vertices. Required for multithreaded operation; set to NULL otherwise.
   polyAllocated Flag indicating if temporary vertex array was allocated. Required for multithreaded operation; set to NULL otherwise.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int filledPolygonRGBAMT(SDL_Renderer * renderer, const Sint16 * vx, const Sint16 * vy, int n, Uint8 r, Uint8 g, Uint8 b, Uint8 a, int **polyInts, int *polyAllocated)
 begin
@@ -3649,9 +3624,9 @@ begin
 	int *gfxPrimitivesPolyIntsNew = NULL;
 	int gfxPrimitivesPolyAllocated = 0;
 
-	/*
+	{
 	* Vertex array NULL check 
-	*/
+	}
 	if (vx = NULL) begin
 		return (-1);
 	end;
@@ -3659,29 +3634,29 @@ begin
 		return (-1);
 	end;
 
-	/*
+	{
 	* Sanity check number of edges
-	*/
+	}
 	if (n < 3) begin
 		return -1;
 	end;
 
-	/*
+	{
 	* Map polygon cache  
-	*/
+	}
 	if ((polyInts=NULL) || (polyAllocated=NULL)) begin
-		/* Use global cache */
+		{ Use global cache }
 		gfxPrimitivesPolyInts = gfxPrimitivesPolyIntsGlobal;
 		gfxPrimitivesPolyAllocated = gfxPrimitivesPolyAllocatedGlobal;
 	end else begin
-		/* Use local cache */
+		{ Use local cache }
 		gfxPrimitivesPolyInts = *polyInts;
 		gfxPrimitivesPolyAllocated = *polyAllocated;
 	end;
 
-	/*
+	{
 	* Allocate temp array, only grow array 
-	*/
+	}
 	if (!gfxPrimitivesPolyAllocated) begin
 		gfxPrimitivesPolyInts = (int *) malloc(sizeof(int) * n);
 		gfxPrimitivesPolyAllocated = n;
@@ -3701,16 +3676,16 @@ begin
 		end;
 	end;
 
-	/*
+	{
 	* Check temp array
-	*/
+	}
 	if (gfxPrimitivesPolyInts=NULL) begin
 		gfxPrimitivesPolyAllocated = 0;
 	end;
 
-	/*
+	{
 	* Update cache variables
-	*/
+	}
 	if ((polyInts=NULL) || (polyAllocated=NULL)) begin
 		gfxPrimitivesPolyIntsGlobal =  gfxPrimitivesPolyInts;
 		gfxPrimitivesPolyAllocatedGlobal = gfxPrimitivesPolyAllocated;
@@ -3719,16 +3694,16 @@ begin
 		*polyAllocated = gfxPrimitivesPolyAllocated;
 	end;
 
-	/*
+	{
 	* Check temp array again
-	*/
+	}
 	if (gfxPrimitivesPolyInts=NULL) begin
 		return(-1);
 	end;
 
-	/*
+	{
 	* Determine Y maxima 
-	*/
+	}
 	miny = vy[0];
 	maxy = vy[0];
 	for (i = 1; (i < n); i++) begin
@@ -3739,9 +3714,9 @@ begin
 		end;
 	end;
 
-	/*
+	{
 	* Draw, scanning y 
-	*/
+	}
 	
 	result = 0;
 	for (y = miny; (y <= maxy); y++) begin
@@ -3774,9 +3749,9 @@ begin
         //??
 		qsort(gfxPrimitivesPolyInts, ints, sizeof(int), _gfxPrimitivesCompareInt);
 
-		/*
+		{
 		* Set color 
-		*/
+		}
 		
 		result = 0;
 	    result |= SDL_SetRenderDrawBlend/e(renderer, (a = 255) ? SDL_BLEND/E_NONE : SDL_BLEND/E_BLEND);
@@ -3794,8 +3769,8 @@ begin
 	return (result);
 end;
 
-/*!
-\brief Draw filled polygon with alpha blending.
+{
+//  Draw filled polygon with alpha blending.
 
   renderer The renderer to draw on.
   vx Vertex array containing X coordinates of the points of the filled polygon.
@@ -3803,8 +3778,8 @@ end;
   n Number of points in the vertex array. Minimum number is 3.
   color The color value of the filled polygon to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int filledPolygonColor(SDL_Renderer * renderer, const Sint16 * vx, const Sint16 * vy, int n, LongWord color)
 begin
@@ -3812,8 +3787,8 @@ begin
 	return filledPolygonRGBAMT(renderer, vx, vy, n, c[0], c[1], c[2], c[3], NULL, NULL);
 end;
 
-/*!
-\brief Draw filled polygon with alpha blending.
+{
+//  Draw filled polygon with alpha blending.
 
   renderer The renderer to draw on.
   vx Vertex array containing X coordinates of the points of the filled polygon.
@@ -3824,8 +3799,8 @@ end;
   b The blue value of the filed polygon to draw. 
   a The alpha value of the filled polygon to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int filledPolygonRGBA(SDL_Renderer * renderer, const Sint16 * vx, const Sint16 * vy, int n, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -3833,8 +3808,8 @@ begin
 end;
 
 
-/*!
-\brief Internal function to draw a textured horizontal line.
+{
+//  Internal function to draw a textured horizontal line.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point (i.e. left) of the line.
@@ -3846,8 +3821,8 @@ end;
   texture_dx The X offset for the texture lookup.
   texture_dy The Y offset for the textured lookup.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int _HLineTextured(SDL_Renderer *renderer, Sint16 x1, Sint16 x2, Sint16 y, SDL_Texture *texture, int texture_w, int texture_h, int texture_dx, int texture_dy)
 begin
@@ -3859,9 +3834,9 @@ begin
 	SDL_Rect source_rect,dst_rect;
 	int pixels_written,write_width;
 
-	/*
+	{
 	* Swap x1, x2 if required to ensure x1<=x2
-	*/
+	}
 	
 	if (x1 > x2) begin
 		xtmp = x1;
@@ -3869,14 +3844,14 @@ begin
 		x2 = xtmp;
 	end;
 
-	/*
+	{
 	* Calculate width to draw
-	*/
+	}
 	w = x2 - x1 + 1;
 
-	/*
+	{
 	* Determine where in the texture we start drawing
-	*/
+	}
 	
 	texture_x_walker =   (x1 - texture_dx)  mod texture_w;
 	if (texture_x_walker < 0) begin
@@ -3888,17 +3863,17 @@ begin
 		texture_y_start = texture_h + texture_y_start;
 	end;
 
-	/* setup the source rectangle; we are only drawing one horizontal line */
+	{ setup the source rectangle; we are only drawing one horizontal line }
 	source_rect.y = texture_y_start;
 	source_rect.x = texture_x_walker;
 	source_rect.h = 1;
 
-	/* we will draw to the current y */
+	{ we will draw to the current y }
 	dst_rect.y = y;
 	dst_rect.h = 1;
 
-	/* if there are enough pixels left in the current row of the texture */
-	/* draw it all at once */
+	{ if there are enough pixels left in the current row of the texture }
+	{ draw it all at once }
 	
 	if (w <= texture_w -texture_x_walker) begin
 		source_rect.w = w;
@@ -3907,8 +3882,8 @@ begin
 		dst_rect.w = source_rect.w;
 		result = (SDL_RenderCopy(renderer, texture, &source_rect, &dst_rect) = 0);
 	end else begin
-		/* we need to draw multiple times */
-		/* draw the first segment */
+		{ we need to draw multiple times }
+		{ draw the first segment }
 		pixels_written = texture_w  - texture_x_walker;
 		source_rect.w = pixels_written;
 		source_rect.x = texture_x_walker;
@@ -3917,8 +3892,8 @@ begin
 		result |= (SDL_RenderCopy(renderer, texture, &source_rect, &dst_rect) = 0);
 		write_width = texture_w;
 
-		/* now draw the rest */
-		/* set the source x to 0 */
+		{ now draw the rest }
+		{ set the source x to 0 }
 		source_rect.x = 0;
 		while (pixels_written < w) begin
 			if (write_width >= w - pixels_written) begin
@@ -3935,8 +3910,8 @@ begin
 	return result;
 end;
 
-/*!
-\brief Draws a polygon filled with the given texture (Multi-Threading Capable). 
+{
+//  Draws a polygon filled with the given texture (Multi-Threading Capable). 
 
   renderer The renderer to draw on.
   vx array of x vector components
@@ -3949,8 +3924,8 @@ to the left and want the texture to apear the same you need to increase the text
   polyInts Preallocated temp array storage for vertex sorting (used for multi-threaded operation)
   polyAllocated Flag indicating oif the temp array was allocated (used for multi-threaded operation)
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int texturedPolygonMT(SDL_Renderer *renderer, const Sint16 * vx, const Sint16 * vy, int n, 
 	SDL_Surface * texture, int texture_dx, int texture_dy, int **polyInts, int *polyAllocated)
@@ -3968,29 +3943,29 @@ begin
 	int gfxPrimitivesPolyAllocated = 0;
 	SDL_Texture *textureAsTexture = NULL;
 
-	/*
+	{
 	* Sanity check number of edges
-	*/
+	}
 	if (n < 3) begin
 		return -1;
 	end;
 
-	/*
+	{
 	* Map polygon cache  
-	*/
+	}
 	if ((polyInts=NULL) || (polyAllocated=NULL)) begin
-		/* Use global cache */
+		{ Use global cache }
 		gfxPrimitivesPolyInts = gfxPrimitivesPolyIntsGlobal;
 		gfxPrimitivesPolyAllocated = gfxPrimitivesPolyAllocatedGlobal;
 	end else begin
-		/* Use local cache */
+		{ Use local cache }
 		gfxPrimitivesPolyInts = *polyInts;
 		gfxPrimitivesPolyAllocated = *polyAllocated;
 	end;
 
-	/*
+	{
 	* Allocate temp array, only grow array 
-	*/
+	}
 	if (!gfxPrimitivesPolyAllocated) begin
 		gfxPrimitivesPolyInts = (int *) malloc(sizeof(int) * n);
 		gfxPrimitivesPolyAllocated = n;
@@ -3998,7 +3973,7 @@ begin
 		if (gfxPrimitivesPolyAllocated < n) begin
 			gfxPrimitivesPolyIntsTemp = (int *) realloc(gfxPrimitivesPolyInts, sizeof(int) * n);
 			if (gfxPrimitivesPolyIntsTemp = NULL) begin
-				/* Realloc failed - keeps original memory block, but fails this operation */
+				{ Realloc failed - keeps original memory block, but fails this operation }
 				return(-1);
 			end;
 			gfxPrimitivesPolyInts = gfxPrimitivesPolyIntsTemp;
@@ -4006,16 +3981,16 @@ begin
 		end;
 	end;
 
-	/*
+	{
 	* Check temp array
-	*/
+	}
 	if (gfxPrimitivesPolyInts=NULL) begin
 		gfxPrimitivesPolyAllocated = 0;
 	end;
 
-	/*
+	{
 	* Update cache variables
-	*/
+	}
 	if ((polyInts=NULL) || (polyAllocated=NULL)) begin
 		gfxPrimitivesPolyIntsGlobal =  gfxPrimitivesPolyInts;
 		gfxPrimitivesPolyAllocatedGlobal = gfxPrimitivesPolyAllocated;
@@ -4024,16 +3999,16 @@ begin
 		*polyAllocated = gfxPrimitivesPolyAllocated;
 	end;
 
-	/*
+	{
 	* Check temp array again
-	*/
+	}
 	if (gfxPrimitivesPolyInts=NULL) begin
 		return(-1);
 	end;
 
-	/*
+	{
 	* Determine X,Y minima,maxima 
-	*/
+	}
 	miny = vy[0];
 	maxy = vy[0];
 	minx = vx[0];
@@ -4051,7 +4026,7 @@ begin
 		end;
 	end;
 
-    /* Create texture for drawing */
+    { Create texture for drawing }
 	textureAsTexture = SDL_CreateTextureFromSurface(renderer, texture);
 	if (textureAsTexture = NULL)
 	begin
@@ -4059,9 +4034,9 @@ begin
 	end;
 	SDL_SetTextureBlend/e(textureAsTexture, SDL_BLEND/E_BLEND);
 	
-	/*
+	{
 	* Draw, scanning y 
-	*/
+	}
 	
 	result = 0;
 	for (y = miny; (y <= maxy); y++) begin
@@ -4109,8 +4084,8 @@ begin
 	return (result);
 end;
 
-/*!
-\brief Draws a polygon filled with the given texture. 
+{
+//  Draws a polygon filled with the given texture. 
 
 This standard version is calling multithreaded versions with NULL cache parameters.
 
@@ -4123,14 +4098,14 @@ This standard version is calling multithreaded versions with NULL cache paramete
 to the left and want the texture to apear the same you need to increase the texture_dx value
   texture_dy see texture_dx
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int texturedPolygon(SDL_Renderer *renderer, const Sint16 * vx, const Sint16 * vy, int n, SDL_Surface *texture, int texture_dx, int texture_dy)
 begin
-	/*
+	{
 	* Draw
-	*/
+	}
 	return (texturedPolygonMT(renderer, vx, vy, n, texture, texture_dx, texture_dy, NULL, NULL));
 end;
 }
@@ -4200,7 +4175,7 @@ begin
 	charPitch = (charWidth+7)/8;
 	charSize = charPitch * charHeight;
 
-	/* Maybe flip width/height for rendering */
+	{ Maybe flip width/height for rendering }
 	if ((charRotation=1) || (charRotation=3))
 	begin
 		charWidthLocal = charHeight;
@@ -4212,7 +4187,7 @@ begin
 		charHeightLocal = charHeight;
 	end;
 
-	/* Clear character cache */
+	{ Clear character cache }
 	for (i = 0; i < 256; i++) begin
 		if (gfxPrimitivesFont[i]) begin
 			SDL_DestroyTexture(gfxPrimitivesFont[i]);
@@ -4221,7 +4196,7 @@ begin
 	end;
 end;
 
-/*!
+{
 
 Default is 0 (no rotation). 
 1 = 90deg clockwise. 
@@ -4231,7 +4206,7 @@ Default is 0 (no rotation).
 
 Changing the rotation, will reset the character cache.
 
-*/
+}
 
 void gfxPrimitivesSetFontRotation(LongWord rotation)
 begin
@@ -4240,10 +4215,10 @@ begin
 	rotation = rotation & 3;
 	if (charRotation != rotation)
 	begin
-		/* Store rotation */
+		{ Store rotation }
 		charRotation = rotation;
 
-		/* Maybe flip width/height for rendering */
+		{ Maybe flip width/height for rendering }
 		if ((charRotation=1) || (charRotation=3))
 		begin
 			charWidthLocal = charHeight;
@@ -4255,7 +4230,7 @@ begin
 			charHeightLocal = charHeight;
 		end;
 
-		/* Clear character cache */
+		{ Clear character cache }
 		for (i = 0; i < 256; i++) begin
 			if (gfxPrimitivesFont[i]) begin
 				SDL_DestroyTexture(gfxPrimitivesFont[i]);
@@ -4265,8 +4240,8 @@ begin
 	end;
 end;
 
-/*!
-\brief Draw a character of the currently set font.
+{
+//  Draw a character of the currently set font.
 
   renderer The Renderer to draw on.
   x X (horizontal) coordinate of the upper left corner of the character.
@@ -4277,8 +4252,8 @@ end;
   b The blue value of the character to draw. 
   a The alpha value of the character to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int characterRGBA(SDL_Renderer *renderer, Sint16 x, Sint16 y, char c, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -4295,33 +4270,33 @@ begin
 	SDL_Surface *rotatedCharacter;
 	LongWord ci;
 
-	/*
+	{
 	* Setup source rectangle
-	*/
+	}
 	srect.x = 0;
 	srect.y = 0;
 	srect.w = charWidthLocal;
 	srect.h = charHeightLocal;
 
-	/*
+	{
 	* Setup destination rectangle
-	*/
+	}
 	drect.x = x;
 	drect.y = y;
 	drect.w = charWidthLocal;
 	drect.h = charHeightLocal;
 
-	/* Character index in cache */
+	{ Character index in cache }
 	ci = (unsigned char) c;
 
-	/*
+	{
 	* Create new charWidth x charHeight bitmap surface if not already present.
 	* Might get rotated later.
-	*/
+	}
 	if (gfxPrimitivesFont[ci] = NULL) begin
-		/*
+		{
 		* Redraw character into surface
-		*/
+		}
 		character =	SDL_CreateRGBSurface(SDL_SWSURFACE,
 			charWidth, charHeight, 32,
 			0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
@@ -4333,9 +4308,9 @@ begin
 				linepos = (Uint8 *)character->pixels;
 		pitch = character->pitch;
 
-		/*
+		{
 		* Drawing loop 
-		*/
+		}
 		patt = 0;
 		for (iy = 0; iy < charHeight; iy++) begin
 			mask = 0x00;
@@ -4355,7 +4330,7 @@ begin
 			linepos += pitch;
 		end;
 
-		/* Maybe rotate and replace cached image */
+		{ Maybe rotate and replace cached image }
 		if (charRotation>0)
 		begin
 			rotatedCharacter = rotateSurface90Degrees(character, charRotation);
@@ -4363,36 +4338,36 @@ begin
 			character = rotatedCharacter;
 		end;
 
-		/* Convert temp surface into texture */
+		{ Convert temp surface into texture }
 		gfxPrimitivesFont[ci] = SDL_CreateTextureFromSurface(renderer, character);
 		SDL_FreeSurface(character);
 
-		/*
+		{
 		* Check pointer 
-		*/
+		}
 		if (gfxPrimitivesFont[ci] = NULL) begin
 			return (-1);
 		end;
 	end;
 
-	/*
+	{
 	* Set color 
-	*/
+	}
 	result = 0;
 	result |= SDL_SetTextureColor/(gfxPrimitivesFont[ci], r, g, b);
 	result |= SDL_SetTextureAlpha/(gfxPrimitivesFont[ci], a);
 
-	/*
+	{
 	* Draw texture onto destination 
-	*/
+	}
 	result |= SDL_RenderCopy(renderer, gfxPrimitivesFont[ci], &srect, &drect);
 
 	return (result);
 end;
 
 
-/*!
-\brief Draw a character of the currently set font.
+{
+//  Draw a character of the currently set font.
 
   renderer The renderer to draw on.
   x X (horizontal) coordinate of the upper left corner of the character.
@@ -4400,8 +4375,8 @@ end;
   c The character to draw.
   color The color value of the character to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int characterColor(SDL_Renderer * renderer, Sint16 x, Sint16 y, char c, LongWord color)
 begin
@@ -4410,8 +4385,8 @@ begin
 end;
 
 
-/*!
-\brief Draw a string in the currently set font.
+{
+//  Draw a string in the currently set font.
 
 The spacing between consequtive characters in the string is the fixed number of pixels 
 of the character width of the current global font.
@@ -4422,8 +4397,8 @@ of the character width of the current global font.
   s The string to draw.
   color The color value of the string to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int stringColor(SDL_Renderer * renderer, Sint16 x, Sint16 y, const char *s, LongWord color)
 begin
@@ -4431,8 +4406,8 @@ begin
 	return stringRGBA(renderer, x, y, s, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw a string in the currently set font.
+{
+//  Draw a string in the currently set font.
 
   renderer The renderer to draw on.
   x X (horizontal) coordinate of the upper left corner of the string.
@@ -4443,8 +4418,8 @@ end;
   b The blue value of the string to draw. 
   a The alpha value of the string to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int stringRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, const char *s, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -4476,17 +4451,17 @@ begin
 	return (result);
 end;
 
-/* ---- Bezier curve */
+{ ---- Bezier curve }
 
-/*!
-\brief Internal function to calculate bezier interpolator of data array with ndata values at position 't'.
+{
+//  Internal function to calculate bezier interpolator of data array with ndata values at position 't'.
 
   data Array of values.
   ndata Size of array.
   t Position for which to calculate interpolated value. t should be between [0, ndata].
 
-\returns Interpolated value at position t, value[0] when t<0, value[n-1] when t>n.
-*/
+//  Interpolated value at position t, value[0] when t<0, value[n-1] when t>n.
+}
 
 double _evaluateBezier (double *data, int ndata, double t) 
 begin
@@ -4494,7 +4469,7 @@ begin
 	int n,k,kn,nn,nkn;
 	double blend,muk,munk;
 
-	/* Sanity check bounds */
+	{ Sanity check bounds }
 	if (t<0.0) begin
 		return(data[0]);
 	end;
@@ -4502,10 +4477,10 @@ begin
 		return(data[ndata-1]);
 	end;
 
-	/* Adjust t to the range 0.0 to 1.0 */ 
+	{ Adjust t to the range 0.0 to 1.0 } 
 	mu=t/(double)ndata;
 
-	/* Calculate interpolate */
+	{ Calculate interpolate }
 	n=ndata-1;
 	result=0.0;
 	muk = 1;
@@ -4535,8 +4510,8 @@ begin
 	return (result);
 end;
 
-/*!
-\brief Draw a bezier curve with alpha blending.
+{
+//  Draw a bezier curve with alpha blending.
 
   renderer The renderer to draw on.
   vx Vertex array containing X coordinates of the points of the bezier curve.
@@ -4545,8 +4520,8 @@ end;
   s Number of steps for the interpolation. Minimum number is 2.
   color The color value of the bezier curve to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int bezierColor(SDL_Renderer * renderer, const Sint16 * vx, const Sint16 * vy, int n, int s, LongWord color)
 begin
@@ -4554,8 +4529,8 @@ begin
 	return bezierRGBA(renderer, vx, vy, n, s, c[0], c[1], c[2], c[3]);
 end;
 
-/*!
-\brief Draw a bezier curve with alpha blending.
+{
+//  Draw a bezier curve with alpha blending.
 
   renderer The renderer to draw on.
   vx Vertex array containing X coordinates of the points of the bezier curve.
@@ -4567,8 +4542,8 @@ end;
   b The blue value of the bezier curve to draw. 
   a The alpha value of the bezier curve to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
 int bezierRGBA(SDL_Renderer * renderer, const Sint16 * vx, const Sint16 * vy, int n, int s, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -4577,9 +4552,9 @@ begin
 	double *x, *y, t, stepsize;
 	Sint16 x1, y1, x2, y2;
 
-	/*
+	{
 	* Sanity check 
-	*/
+	}
 	if (n < 3) begin
 		return (-1);
 	end;
@@ -4587,12 +4562,12 @@ begin
 		return (-1);
 	end;
 
-	/*
+	{
 	* Variable setup 
-	*/
+	}
 	stepsize=(double)1.0/(double)s;
 
-	/* Transfer vertices into float arrays */
+	{ Transfer vertices into float arrays }
 	if ((x=(double *)malloc(sizeof(double)*(n+1)))=NULL) begin
 		return(-1);
 	end;
@@ -4607,16 +4582,16 @@ begin
 	x[n]=(double)vx[0];
 	y[n]=(double)vy[0];
 
-	/*
+	{
 	* Set color 
-	*/
+	}
 	result = 0;
 	result |= SDL_SetRenderDrawBlend(renderer, (a = 255) ? SDL_BLEND_NONE : SDL_BLEND_BLEND);
 	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);
 
-	/*
+	{
 	* Draw 
-	*/
+	}
 	
 	t=0.0;
 	x1=(Sint16)lrint(_evaluateBezier(x,n+1,t));
@@ -4630,7 +4605,7 @@ begin
 		y1 = y2;
 	end;
 
-	/* Clean up temporary array */
+	{ Clean up temporary array }
 	free(x);
 	free(y);
 
@@ -4638,28 +4613,33 @@ begin
 end;
 
 
-/*!
-\brief Draw a thick line with alpha blending.
+{
+//  Draw a thick line with alpha blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point of the line.
   y1 Y coordinate of the first point of the line.
   x2 X coordinate of the second point of the line.
   y2 Y coordinate of the second point of the line.
-  width Width of the line in pixels. Must be >0.
+  width Width of the line in pixels. Must be >1.
   color The color value of the line to draw (0xRRGGBBAA). 
 
-\returns Returns 0 on success, -1 on failure.
-*/
+//  Returns 0 on success, -1 on failure.
+}
 
-int thickLineColor(SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 width, LongWord color)
+procedure thickLineColor(renderer:PSDL_Renderer;  x1,y1,x2, y2:Sint16;  width:Uint8; color:DWord);
+
+//hackish but it works
+var
+	Pcolor:Pointer;
+
 begin	
-	Uint8 *c = (Uint8 *)&color; 
-	return thickLineRGBA(renderer, x1, y1, x2, y2, width, c[0], c[1], c[2], c[3]);
+    Pcolor:^color;
+	thickLineRGBA(renderer, x1, y1, x2, y2, width, Pcolor^,Pcolor^[1],Pcolor^[2],Pcolor^[3]);
 end;
 
-/*!
-\brief Draw a thick line with alpha blending.
+{
+//  Draw a thick line with alpha blending.
 
   renderer The renderer to draw on.
   x1 X coordinate of the first point of the line.
@@ -4672,8 +4652,8 @@ end;
   b The blue value of the character to draw. 
   a The alpha value of the character to draw.
 
-\returns Returns 0 on success, -1 on failure.
-*/	
+//  Returns 0 on success, -1 on failure.
+}	
 
 int thickLineRGBA(SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 width, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 begin
@@ -4690,18 +4670,18 @@ begin
 		return -1;
 	end;
 
-	/* Special case: thick "point" */
+	{ Special case: thick "point" }
 	if ((x1 = x2) && (y1 = y2)) begin
 		wh = width / 2;
 		return boxRGBA(renderer, x1 - wh, y1 - wh, x2 + width, y2 + width, r, g, b, a);		
 	end;
 
-	/* Special case: width = 1 */
+	{ Special case: width = 1 }
 	if (width = 1) begin
 		return lineRGBA(renderer, x1, y1, x2, y2, r, g, b, a);		
 	end;
 
-	/* Calculate offsets for sides */
+	{ Calculate offsets for sides }
 	dx = (double)(x2 - x1);
 	dy = (double)(y2 - y1);
 	l = SDL_sqrt(dx*dx + dy*dy);
@@ -4711,7 +4691,7 @@ begin
 	nx = dx * wl2;
 	ny = dy * wl2;
 
-	/* Build polygon */
+	{ Build polygon }
 	dx1 = (double)x1;
 	dy1 = (double)y1;
 	dx2 = (double)x2;
@@ -4725,7 +4705,7 @@ begin
 	py[2] = (Sint16)(dy2 + nx);
 	py[3] = (Sint16)(dy2 - nx);
 
-	/* Draw polygon */
+	{ Draw polygon }
 	return filledPolygonRGBA(renderer, px, py, 4, r, g, b, a);
 end;
  

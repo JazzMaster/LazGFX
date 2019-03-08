@@ -40,6 +40,41 @@ type
      x,y:word;
   end;
 
+//all the types to be had 
+//originally bugged as "off by one"
+
+//yes you can represent via pointer but the conversion gets hairy, fast.
+
+LongString=array [0..1] of string;
+StringTuple,Striplet=array [0..2] of string;
+QuadString=array [0..3] of string;
+//You could go up to screen height-sizeOfStringOnScreen(24-48) depending on font size (10-12)
+
+//0..7=8 = byte(stored in hex)
+Bibble, Biplet=array [0..1] of boolean;
+Tribble, Triblet=array [0..2] of boolean;
+Quibble, Quiblet=array [0..3] of boolean;
+Pibble, Piblet=array [0..4] of boolean;
+Xibble, Hexlet=array [0..5] of boolean;
+Hibble, Heptlet=array [0..6] of boolean;
+
+
+//Word = 2bytes
+//24bits storage hack(r,g,b) -in binary form
+ByteTuple,Biplet=array [0..2] of Byte;
+//DWord=4 bytes
+
+//DWord=2words
+//TriWord technically..
+WordTuple,Wiplet=array [0..2] of Word;
+//Quad=4words
+
+//2 quads
+Biqu=array [0..1] of QWord; //128bits
+TriQuad=array [0..2] of QWord; //192bits
+LongQuad=array [0..3] of QWord; //256bits
+
+
 //A Ton of code enforces a viewport mandate- that even sans viewports- the screen is one.
 //This is better used with screen shrinking effects such as status bars, etc.
 

@@ -1,4 +1,12 @@
 Unit LazGFX; 
+//Range and overflow checks =ON
+{$Q+} 
+{$R+}
+
+{$IFDEF debug}
+//memory tracing only.
+	{$S+}
+{$ENDIF}
 
 {
 A "fully creative rewrite" of the "Borland Graphic Interface" in SDL(and maybe libSVGA) 
@@ -21,7 +29,15 @@ DO NOT CLAIM THIS CODE AS YOUR OWN and you MAY NOT remove this notice.
 Although designed "for games programming"..the integration involved by the USE, ABUSE, and REUSE-
 of SDL and X11Core/WinAPI(GDI)/Cairo(GTK/GDK)/OpenGL/DirectX highlights so many OS internals its not even funny.
 
-EGL semi-supports(RasPI) framebuffer without X11. Lets see if we can hack in FrameBuffer support.
+I think this will go in this direction henceforth:
+
+(equivalent SDL2+ support)
+
+	freeGLUT/GLfor 2D (QUADS) (reverts to WinAPI and X11CorePrim if OGL not avail)
+	freeGLUT for 3D (unless there is strong reason to use more detailed routines)
+
+
+GL by itself doesnt require X11- but it does require some X11 code for "input processing".
 
 SDL can be used by non-game programmers to ease development of multimedia based applications.
 
@@ -218,16 +234,9 @@ FONTS:
     We do NOT use bitmapped fonts- we use TTF.
 	8x8 internal routines were based on ANCIENT Video BIOS specs.
 		Why cant we use another TTF file- and make it required distribution- instead??
-		NOW:
-			8x8 is a Code styled font(that looks old school)
 		
-	Furthermore 8x8 fonts usually use BITPACKED code- very ancient methods.
-	(This is SLOW in SDL when having to write pixels and unneccessarily uses surface ops with the renderer)
-	Old CHR support(FPC) exists, however, also is ancient. TTF and OTF are the new standard.
-		Furtermore- CHR files do not scale well. Neither will 8x8 BITPACKED fonts.
+	TTF and OTF are the new standard.
 
-
-LazGFX:
 
 This code is Useful when you need VESA modes but cant have them because X11, etc. is running.
 This code **should** port or crossplatform build, but no guarantees.
@@ -235,11 +244,6 @@ This code **should** port or crossplatform build, but no guarantees.
 SEMI-"Borland compatible" w modifications.
 
 Lazarus graphics unit is severely lacking...use this instead.
-
-
-The FPC devs assume you can understand OpenGL right away...
-I dont agree w "basic drawing primitives" being an objectified mess.
-
 
 SDL and JEDI have been poorly documented.
 
@@ -251,9 +255,6 @@ SDL and JEDI have been poorly documented.
 
 SDL fixes this for us. 
 
-SDL support adds "wave, mp3, etc" sounds instead of PC speaker beeping
-(see the 'beep' command and enable the module -its blacklisted-on Linux) 
-
 	-and adds mouse and joystick, even haptic/VR feedback support.
 
 However, "licensing issues" (Fraunhoffer/MP3 is a cash cow) 
@@ -262,9 +263,6 @@ However, "licensing issues" (Fraunhoffer/MP3 is a cash cow)
  	
 Yes- I Have a merge tree of qb64 that builds, just ask...
 
-
-The workaround is to use VLC/FFMpeg or other libraries. 
-I may in fact choose this over SDL Audio functions.
 
 LFB:
 
@@ -371,8 +369,6 @@ It just helps us to know which routine to call based on bit depth(bpp).
 It can be assumed that:
 	The programmer knows what depth we are in
 	At the very least -the current set video mode- knows this information
-	So why does SDL want to modify the color depth on us? (We shouldnt be using OpenGL just yet.)
-
 
 //SDL internal MapRGB and GetRGB
 
@@ -590,9 +586,6 @@ FPC team is refusing to fix TVision bugs.
 
         This is wrong.
 
-debugging(captains log):
-        
-        All SDL functions should be logged. 
 
 Some idiot wrote the logging  code wrong and it needs to be updated for FILE STREAM IO.
 I havent done this yet.
@@ -652,24 +645,19 @@ Palettes:
 
    These are mostly standardized now.
    Max colors in a palette are always 256, unless in modified CGA modes- then 16. 
-   Specify each value or leave it as a zero
+   Specify each DWORD value or leave it as a zero
   
   Note "the holes" can be used for overlay areas onscreen when stacking layers.
   The holes are standardized to xterm specs. I think theres like 5.
 
-
-I wonder if DirectX .DDS files are SDL Surfaces in disguise??? HMMMM....
-(There is a C library to load ANY texture into RAM and work with all types of them.)
-Im betting they are "not off by much".
 Im seeing a Ton of correlation between OGL/SDL and DirectX/DirectDraw (and people think there isnt any).
 
-
-NOTE:
 
 WONTFIX:
 "Rendering onto more than one window (or renderer) can cause issues"
 "You must render in the same window that handles input"
 
+Converstion note:
 SDL routines require more than just dropping a routine in here- 
     you have to know how the original routine wants the data-
         get it in the right format
@@ -683,12 +671,8 @@ The BGI was SIMPLE.
 
 TODO:
 
-Surface ops are fine(in CPU/RAM)-
-	add in surface to GL Quads ops
-	GL Quads to surface ops
-
 input:
-	rely less on SDL and more on freeGLUT operations(simpler)
+	rely less on SDL and more on GL/freeGLUT operations(simpler)
 	 
 callbacks/hooks:	
 	convert SDL_Timercallback(video refresh) into a "timer based solution" using microsecond precision(float)
@@ -696,26 +680,18 @@ callbacks/hooks:
 		
 finish implementation of "if Render3D":
 
-	OpenGL is a simple tweak to enable 3D support(done)
-	
 	all functions need OpenGL modifications
-	RenderCopy -> internal SDL glSwapBuffers?
+	RenderCopy ->  glSwapBuffers
 	
 	3d functions:
-		no surface, no texture, no renderer, no "direct renderer"
-		implement these in OGL/GLUT
+		no surface, no texture, no renderer, no "direct renderer" code
+		(implement these in GL/GLUT)
 	
 	all color ops need mods for OpenGL(update from surface to texture ops)
 	need to implement "format agnostic" color conversion with all bpp depths
-		(depth in OGL is considered cubic depth, not bpp)
+		("depth" in OGL is considered cubic depth, not bpp)
 		
-	OpenGL EXTENTIONS:
-		color bpp (initgraph) needs to set SDL depth accordingly on init (not done)
-				then surface^.format will have a sane value- at least (OGL textures need to match this in OGL syntax)
-	
-	GLUT methods-> freeGLUT?
-	
-	RECOMPILE!!!
+	RECOMPILE(2.0)!!!
 } 
 
 
@@ -737,13 +713,34 @@ ctypes: cint,uint,PTRUint,PTR-USINT,sint...etc.
 FPC Devs: "It might be wise to include cmem for speedups"
 "The uses clause definition of cthreads, enables theaded applications"
 
-There is a way to use SDL timers, signals and threads,however, "Compiler reserved words" forbid us using these.
-(screw you too,C devs....)
+There is a way to use SDL timers, signals and threads. 
+  _type is used instead of the reserved word 'type'
+
 }
-    cthreads,cmem,ctypes,sysUtils,{$IFDEF unix}baseunix, {$ENDIF}
-  
+
+//the Logic is weirdly (prove a negative) here. 
+//while you cant prove a negative- you can "not prove" a positive
+
+//cthreads and cmem have to be first.
+{$IFDEF unix} 
+	cthreads,cmem,baseunix, X, XLib,
+	 {$IFNDEF fallback} //fallback uses XCorePrim only, otherwise keep loading libs
+		Classes,GL,GLext, GLU,
+		//probly cairo and pango too at this point.
+	 {$ENDIF}
+{$ENDIF}
+ 
+    ctypes,sysUtils,
+        
 {$IFDEF MSWINDOWS} //as if theres a non-MS WINDOWS?
-     Windows,MMsystem, //audio subsystem
+	 {$IFDEF fallback}
+		WinAPI,
+	 {$endif}
+     Windows,
+     //MMsystem, --audio subsystem does uos need this?
+     {$IFNDEF LCL} //conio apps only
+		crt,crtstuff,
+     {$ENDIF}
 {$ENDIF}
 
 // A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust.
@@ -758,8 +755,10 @@ LCL Simple and deluxe dialogs:
 
 ifdef lcl
 	ShowMessage('This is a message from Lazarus');
+endif
 	
 //messageDlg requires a result (if x=y, then..) 	
+
 
 //MIM joke...
 function AskMessagewButtonAnswer(title,question:string):Longint;
@@ -774,33 +773,26 @@ endif
 
   {$IFDEF LCL}
 	  //works on Linux+Qt but not windows??? I have WINE and a VM- lets figure it out.
-      LazUtils,  Interfaces, Dialogs, LCLType,Forms,Controls,
-
+      LazUtils,  Interfaces, Dialogs, LCLType,Forms,Controls, 
     {$IFDEF MSWINDOWS}
+       //we will check if this is set later.
       {$DEFINE NOCONSOLE }
-    {$ENDIF}
+      logger,
+	{$ELSE }  
+    {$IFDEF unix}
     //UNIX
     
-      X, XLib,
       //LCL is linked in but we are not in windows.
-      //remember Lazarus by iteslf doesnt output debugging windows. 
+      //remember Lazarus by itself doesnt output debugging windows. 
       //you have to enable this yourself.
 
       //we still technically DO have a console- even a GUI app can be launched from the commandline.
       //output then goes THERE-instead of the Lazarus equivalent.
       //THIS TRICK DOES NOT WORK on Windows. Windows removes crt and related units when building a UI app.
+      crt,crtstuff,logger,
+    {$ENDIF}
   {$ENDIF}
 
-//its possible to have a Windows "console app" thru FPC,
-//-just not thru Lazarus.
-
-//This may have to do with how the window rendering code(WinAPI) is initd.
-
-//cant use crtstuff if theres no crt units available.
-
-{$IFNDEF NOCONSOLE}
-    crt,crtstuff,
-{$ENDIF}
 
 {
 Linux NOTE:
@@ -823,56 +815,43 @@ to build without the LCL(in Lazarus):
 }
 
 //FPC generic units(OS independent)
-  SDL2,SDL2_Image,uoslib_h,strings,typinfo,logger
+//SDL hooks will be removed in the future
+
+  SDL2,SDL2_Image,uoslib_h,strings,typinfo,
   
 //uos/Examples/lib folder has the required libraries for you. 
-//adds as a side-effect: CDROM Audio playback(CDDA)
-
-//for 3D, not 2D.
-
-//we have dgl unit available also.
-
-//,Classes,GL,GLext, GLU
+//as a side-effect: CDROM Audio playback(CDDA) is added back
 
 
 {$IFDEF debug} ,heaptrc {$ENDIF} 
 
 {
-//OS 8 and 9 were kicked with sdl1.2 v14 and sdl 2.0
+OpenGL requires Quartz, which prevents building below OSX 10.2.
+Use DirectDraw functions(add your code here for that) to accomplish SDLv1 equivalent actions instead.
+(or DirectX <5 -Below XP)
 
-//Carbon is OS 8 and 9 to OSX API
- $IFDEF mac
-  ,MacOSAll
- $ENDIF
-}
-
-//This leaves 10.1-10.4
-
-//Quartz 2D/QE Compositor (3d) on 10.2+ -forwards to OGL
-//cpu-> renderer
-//direct rendering onto the renderer uses QuartzGL(up to Mtn LN it wont stay active)
-
+//direct rendering onto the renderer uses QuartzGL(on OSX up to Mtn LN- it wont stay active once set)
 
 //Cocoa (OBJ-C) is the new API
+}
+
 
 {$IFDEF darwin}
 	{$linkframework Cocoa}
 	{$linkframework OpenGL}
 	{$linkframework GLUT}
+
 	{$linklib SDLmain}
     {$linklib SDLimg}
     {$linklib SDLttf}
     {$linklib SDLnet}
 
+//you have to install fpc thru XCode and build a demo to patch this line.
 //	{$linklib gcc} -pascal doesnt use C.  	:-P
 
 //also requires:
-//mode objpas (in every pascal unit)
+//mode objpas + classes uses clause (in every pascal unit)
 //modeswitch objectivec2
-
-//-This code is not objectified in these units- 
-//		The sub folders contain this fork
-
 
 //iFruits, iTVs, etc:
 // {linkframework CocoaTouch} -- but go kick apple in the ass for not letting us link to it.
@@ -882,9 +861,11 @@ to build without the LCL(in Lazarus):
 
 
 //Altogether- we are talking PCs running OSX, Windows(down to XP), and most unices.
-//and Some android (as a unice sub-derivative)
+//and Some android and RasPi ( thru GL-ES)
 
+//do not remove the semi-colon
 ;
+
 
 {
 NOTES on units used:
@@ -892,15 +873,6 @@ NOTES on units used:
 crt is a failsafe "ncurses-ish"....output...
 crtstuff is MY enhanced dialog unit 
     I will be porting this and maybe more to the graphics routines in this unit.
-
-
-mac- is a hairy mess but "try to do something".
-X11 is available for MacOSX. Maybe try to use it?
-
-droid isnt here(yet)
-sin has been done -(but no reason we CANT redo it)
-
-
 
 
 mutex(es):
@@ -919,12 +891,18 @@ only so many can do it at once.
 
 }
 
-//share the headers for the expanded units
+//share the main unit headers for the expanded units
+
 {$INCLUDE lazgfx.inc}
+
+//break up sub units
 {$INCLUDE palettesh.inc}
 {$INCLUDE modelisth.inc}
 
 //color conversion procs etc...taking up waay too much room in here...
+//this will need modification since we should know the surface bpp set- or at least the output bpp
+//(we dont need SDLv1 surface bpp checks)
+
 {$INCLUDE colormodsh.inc}
 
 
@@ -934,13 +912,68 @@ implementation
 {$INCLUDE modelist.inc}
 {$INCLUDE colormods.inc}
 
-{
 
-DO NOT BLINDLY ALLOW any function to be called arbitrarily.(this was done in C- I removed the checks for a short while)
+//Convert an array of four bytes into a 32-bit DWord/LongWord.
+
+function  getDwordFromTrueColor(someColor:PSDL_Color):DWord;
+
+begin
+//LE
+    getDwordFromBytes:= (somecolor.^r) or (somecolor.^g shl 8) or (somecolor.^b shl 16) or (somecolor.^a shl 24);
+//BE
+  // getDwordFromBytes:= (somecolor.^a) or (somecolor.^b shl 8) or (somecolor.^g shl 16) or (somecolor.^r shl 24);
+end;
+
+//in case we didnt use the SDL Color array--WHY?
+function  getDwordFromBytes(r,g,b,a:Byte):DWord;
+
+begin
+//LE
+    getDwordFromBytes:= (r) or (g shl 8) or (b shl 16) or (a shl 24);
+//BE
+  // getDwordFromBytes:= (a) or (b shl 8) or (g shl 16) or (r shl 24);
+end;
+
+//where do the bytes go? into a record. (the data goes out-to where--we dont care...)
+function GetByesfromDWord(someD:DWord):SDL_Color;
+
+var
+	someDPtr:Pointer;
+    someColor:PSDL_Color;
+    
+begin
+    someDPtr:^someD;
+//LE
+	r:=someDPtr^;
+	g:=someDPtr^[1];
+	b:=someDPtr^[2];
+	a:=someDPtr^[3];
+
+{
+//BE
+	a:=someDPtr^;
+	r:=someDPtr^[1];
+	g:=someDPtr^[2];
+	b:=someDPtr^[3];
+}
+   somecolor^.r:=byte(^r);
+   somecolor^.g:=byte(^g);
+   somecolor^.b:=byte(^b);
+   somecolor^.a:=byte(^a);
+
+end;
+
+
+{
+SERIOUS FIXME: any pointer used must be =NIL before assignment
+
+**DO NOT BLINDLY ALLOW any function to be called arbitrarily.**
+(this was done in C- I removed the checks for a short while)
 
 two exceptions:
 
 	making a 16 or 256 palette and/or modelist file
+
 
 NET:
 
@@ -972,6 +1005,9 @@ Begin
   StartYViewPort := Y1;
   ViewWidth :=  X2-X1;
   ViewHeight:=  Y2-Y1;
+   
+  //add viewport array code so we can remove screen 'contents' later on
+  
 end;
 
 procedure GetViewSettings(var viewport : ViewPortType);
@@ -987,6 +1023,9 @@ end;
   begin
     Xaspect:= XAsp;
     YAspect:= YAsp;
+    //fix the SDL/freeglut variables for display output,then...
+
+    //redraw the screen(or wait)
   end;
 
 
@@ -994,9 +1033,17 @@ end;
   // TP sets the writemodes according to the following scheme (Jonas Maebe) 
    begin
      Case writemode of
+       //for each pixel in surface.^pixels do:
+       //put pixel according to mode, update surface
+       
        xorput, andput: CurrentWriteMode := XorPut;
-       notput, orput, copyput: CurrentWriteMode := CopyPut;
+       orput, copyput: CurrentWriteMode := CopyPut;
+       //'Not' is atypical for unixes. (not properly implemented)
+       //1- inverted color ((MaxColors mod 2) -1) 
+       //2- background color instead of fore color(erase mode)
+       notput: CurrentWriteMode := NotPut;
      End;
+     //until reset- use the mode given.
    end;
 
 }
@@ -1388,9 +1435,9 @@ begin
   tex:= SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_TARGET, MaxX, MaxY);
   if (tex = Nil) then begin
      if IsConsoleInvoked then
-		writeln('Cannot Alloc Texture.');
-        LogLn('Cant Alloc Texture');
-     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Alloc Texture.','OK',NIL);
+		writeln('Cannot AllocMem Texture.');
+        LogLn('Cant AllocMem Texture');
+     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot AllocMem Texture.','OK',NIL);
      exit;
   end;
 //  SDL_QueryTexture(tex, format, Nil, w, h);
@@ -1585,6 +1632,7 @@ var
     imagesON,FetchGraphMode:integer;
 	mode:PSDL_DisplayMode;
     AudioSystemCheck:integer;
+	rate:integer;
 
 begin
 
@@ -1997,7 +2045,7 @@ begin
 		end;
 		15: MainSurface^.format:=SDL_PIXELFORMAT_RGB555;
 
-        //we assume on 16bit that we are in 565 not 5551, we should not assume
+        //we assume on 16bit that we are in 565 not 5551.
 		16: begin
 			
 			MainSurface^.format:=SDL_PIXELFORMAT_RGB565;
@@ -2011,10 +2059,11 @@ begin
    //"usermode" must match available resolutions etc etc etc
    //this is why I removed all of that code..."define what exactly"??
 
+
+//FIXME: remove SDL and put OGL init code here
+
   //attempt to trigger SDL...on most sytems this takes a split second- and succeeds.
   _initflag:= SDL_INIT_VIDEO or SDL_INIT_TIMER;
-
-//need to iterate over as many of these as possible
 
   if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
   if WantsJoyPadAudio then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
@@ -2053,18 +2102,14 @@ begin
 {
  im going to skip the RAM requirements code and instead haarp on proper rendering requirements.
  note that a 22 yr old notebook-try as it may- might not have enough vRAM to pull things off.
- can you squeeze the code to fit into a 486??---you are pushing it.
- 
-(You are better off using SDLv1 instead)
-
-now- how do we check if sdl2 is supported- and fall back, given that the uses clauses can only launch one or the other?
-HMMMMM
 }
+
+//endFIXME
 
   if (graphdriver = DETECT) then begin
 	//probe for it, dumbass...NEVER ASSUME.
 
-//temporarily not available
+       //temporarily not available
 	   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Graphics detrection not available at this time.','Sorry',NIL);	
 
 //    Fetchgraphmode := DetectGraph; //need to kick back the higest supported mode...
@@ -2076,15 +2121,22 @@ HMMMMM
 
 //we do it this way because we might already be active- why duplicate code?
 
+//force a safe shutdown.
+//not doing this causes problems with FrameBuffer modes if the app crashes
+ AddExitProc(CloseGraph);
+ 
 {
 atexit handling:
 basically it prevents random exits- all exits must do whatever is in the routine.
 
-(You are a hung process if you dont leave at all)
-This ports -via the compiler- to some whacky assembler far calls.(hence the F)
+--if not called explicitly: AddExitProc(SDL_Quit);
 
+FPC:  AddExitProc(CloseGraph);
+
+TP: use the olschool method:
+ 
  OldExitProc := ExitProc;                - save previous exit proc -cpu: push exit()
-  ExitProc := @MyExitProc;               - insert our exit proc in chain 
+ ExitProc := @MyExitProc;               - insert our exit proc in chain 
 
 $F+
 procedure MyExitProc;
@@ -2095,7 +2147,6 @@ begin
 end; 
 $F-
 
-in reality SDL complains about this being setup- or at least how its done in C.
 }
 
 //If we got here- YAY!
@@ -2167,8 +2218,8 @@ in reality SDL complains about this being setup- or at least how its done in C.
     NoGoAutoRefresh:=true; //Now we can call Initgraph and check, even if quietly(game) If we need to issue RenderPresent calls.
   end;
 
-  if flip_timer_ms=17 then flip_timer_ms=60;
-  FSMode:=MaxX,'x',MaxY,':',bpp,'@',flip_timer_ms; //build the string
+  if flip_timer_ms=17 then rate=60;
+  FSMode:=MaxX,'x',MaxY,':',bpp,'@',rate; //build the string
   
 
 //setup GraphMode late because GLUT needs some variables we dont have yet.
@@ -2320,7 +2371,7 @@ var
 	Killstatus,Die:cint;
     waittimer:integer;
 
-//free only what is allocated, nothing more- then make sure pointers are empty.
+//free only what is Allocated, nothing more- then make sure pointers are empty.
 begin
 
   LIBGRAPHICS_ACTIVE:=false;  //Unset the variable (and disable all of our other functions in the process)
@@ -2357,11 +2408,11 @@ begin
   
   if (TextFore <> Nil) then begin
 	TextFore:=Nil;
-	free(TextFore);
+	dispose(TextFore);
   end;
   if (TextBack <> Nil) then begin
 	TextBack:=Nil;
-	free(TextBack);
+	dispose(TextBack);
   end;
   TTF_CloseFont(ttfFont);
   TTF_Quit;
@@ -2393,8 +2444,8 @@ begin
   until x=0;
   
 
-//Dont free whats not allocated in initgraph(do not double free)
-//routines should free what they allocate on exit.
+//Dont free whats not Allocated in initgraph(do not double free)
+//routines should free what they AllocMemate on exit.
 
   if (MainSurface<> Nil) then begin
 	SDL_FreeSurface( MainSurface );
@@ -2412,6 +2463,8 @@ begin
 		SDL_DestroyWindow ( Window );
 	end;	
   end;
+  if Render3D then
+	glutLeaveMainLoop;
   
   SDL_Quit; 
 
@@ -2424,7 +2477,6 @@ begin
   end;
   //unless you want to mimic the last doom screen here...usually were done....  
   //Yes you can override this function- if you need a shareware screen on exit..Hackish, but it works.
-  //"@ExitProc rerouting routines" (and checks) go here
   
   halt(0); //nothing special, just bail gracefully.
 end;            	 
@@ -3494,7 +3546,7 @@ end;
 
 
 
-//alloc a new texture and flap data onto screen (or scrape data off of it) into a file.
+//AllocMem a new texture and flap data onto screen (or scrape data off of it) into a file.
 
 
 //yes we can do other than BMP.
@@ -3560,7 +3612,7 @@ begin
    SDL_RenderFillRect(renderer, rect);
 // limit calls to "render present"
 //   SDL_RenderPresent(renderer);
-   Free(Rect);
+   dispose(Rect);
    //now restore x and y
    case Thick of
 		NormalWidth:begin

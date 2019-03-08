@@ -391,13 +391,14 @@ Unices:
 		xserver-xorg (X11 itself)
 		SDL2-x.x.x 		   			-- (SDL)
 		SDL2_image-x.x.x 			-- (SDL image support)
-		SDL2_net-x.x.x 				-- (SDL Networking)
+
 		libPortAudio	(required backend)
 		libsndfile (audio conversion)
 		libMpg123  (audio conversion -mp3)
 		libMp4  (audio conversion - mp4a)
 		libFaad  (audio conversion -faad)
         libOpen_vr (VR helmet support)
+        Pascal INet and/or Indy libs(Net support)
 
 OSX:
 
