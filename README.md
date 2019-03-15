@@ -4,79 +4,67 @@ A UNIVERSAL replacement of the "Borland Graphics Interface" (BGI)
 (For Lazarus/FPC/Pascal)
 
 Its a GRAPHICS MODE "Canvas", not unlike TCanvas. 
-You draw with it.
+-You draw with it.
 
 We will try to use "TCanvas2 objects" as the code evolves.
 
 ### Modification Warning
 
-**Parts of SDL are being rewritten**.
-SDL/SDL2 no longer suits "our Pascalian needs".
+The code is merging to OpenGL/freeGLUT calls instead of "Obscure half-assed" SDL ones.
+Ultimately- you arent going to notice this(much).
 
-**This unit uses modified and/or patched JEDI sources**.
+With SDL v1 we put the pixels in ourselves with blits,etc 
+- with OpenGl- the GPU fills them in(for us).
 
-Most notable changes/rewrites:
+(Its a lot less headache)
 
-		Use of FreeGLUT (3D) instead of heineous OGL calls
+
+
+This leaves audio and networking up to other libraries.
+
+Changes still pending:
+
 		Game Precision Timers
 		Threads/Threading
-		Callbacks(where possible)
-		"Direct" Rendering OPS/ DRI calls
-		Font Code
 		Using PortAudio (uos) instead of SDL2_Mixer routines
-		Open Networking library hooks(Pascal sources)
+		Open Networking library hooks(to Pascal sources)
 	
-This removes a TON of headache and low-level programming.
-(It helps to use the right tools.)
-
-
-While the "C Syntax" is correct when utilizing SDL, the PASCAL needed some adjustment.
-
-It makes more sense to use similar syntax, if possible.
-
-SDL2_GFX functions have been imported into the main units. 
-There was **never a need to remove these functions** from the renderer OPS in the main unit.
-(There are workarounds for heap limits-Ive used them before.)
 
 "50 ways- none of which work in reality" is the biggest problem right now.
 Maybe you want a Lazarus app- maybe you dont. 
-I dont like having a RTL, compiler, LCL, and etc. shoved down my throat.
 
-Theres a few libraries like that with the LCL- you take everything...or nothing.
+If not- we log as much as possible.
+
+I dont like having a RTL, compiler, LCL, and etc. shoved down my throat.
+All of the code I see presumes you want "an objectified mess".
 
 	This is wrong.
 
+Pascal was never about "doing whats popular" (via dictatorship).
+
+
 ### Backends
 
-
-Windows can use:
-		GDI
-		GDI+
-		DirectX/OpenGL/DXVK(Vulcan)
-
 Mac uses: 
-		QuickDraw(Up to OSX 10.4 Tiger) 
-		Quartz(2D) 
+		Quartz /Quartz Extreme
 
-Unices can use: 
-
-		Console Framebuffer/KMS
-
-		X11
-		GDK /GTK (uses Cairo accellerated rendering) on top of X11
-		OpenGL(hooks X11 for input)
-		
-(you see my headache)
+Windows/ Unices can use: 
+		OpenGL/freeGLUT
 
 ## Ports
 
 This unit (LazGraphics) SHOULD be ported to use the following languages:
 
-		Ada (NASA,etc)
 		Basic(FreeBasic/QB64)
 		VB(gambas/MS-VB)
-		python(PySDL)
 		C/VC/C sharp (backport at your own peril- NO C HERE.)
+
+-Hooks are present w freeGLUT/GL- 
+
+		Ada 
+		FORTRAN 
+		python (pyGL)
+
 		
 -DONT ASK about assembler. The compiler does this for you.
 Assembler -in flight- does not guarantee optimized code.
