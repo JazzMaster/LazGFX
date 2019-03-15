@@ -39,7 +39,6 @@ AUTHORS:
 
 
 //more advanced debugging requires everything be converted to a string
-//SDL_GetError for example may spit out other crud...
 
 //byte, word 2string, real2string,int2string
 
@@ -57,6 +56,27 @@ end;
 
 //use me unless you need other variables added to the output.
 //remember- files WRAP at odd points, depending on the width of the viewing application and output monitor.
+
+procedure LogGLFloat(data:single);
+begin
+	if IsConsoleInvoked then
+		write(data:4:2)
+	else
+		stringdata:=FloatToStr(data);
+  	    Write(output,stringdata);
+end;
+
+
+procedure LogGLFloatLn(data:single);
+begin
+	if IsConsoleInvoked then
+		writeln(data:4:2)
+	else
+		stringdata:=FloatToStr(data);
+  	    Writeln(output,stringdata);
+end;
+
+
 Procedure LogLn(s: string);
 
 Begin

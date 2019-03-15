@@ -1865,11 +1865,8 @@ begin
 
     //fire and forget- surface formats               
     case bpp of
-//half right for GL/GLUT...
 
 		8: begin
-
-
 			    if maxColors=256 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX8
 				else if maxColors=16 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX4MSB; 
 		end;
@@ -1890,31 +1887,17 @@ begin
    //this is why I removed all of that code..."define what exactly"??
 
 
-//FIXME: remove SDL and put OGL init code here
-
-  //attempt to trigger SDL...on most sytems this takes a split second- and succeeds.
-//  _initflag:= SDL_INIT_VIDEO or SDL_INIT_TIMER;
-
 //  if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
 //  if WantsJoyPadAudio then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
 //if WantInet then _initflag:= SDL_Init_Net;
 
+//if GLINIT error:
 
-  if ( SDL_Init(_initflag) < 0 ) then begin
-     //we cant speak- write something down.
+//     _grResult:=GenError; //gen error
+//     halt(0); //the other routines are now useless- since we didnt init- dont just exit the routine, DIE instead.
 
-     if ISConsoleInvoked then begin
-        Logln('Critical ERROR: Cant Init SDL for some reason.');
-        Logln(SDL_GetError);
-     end;
-     //if we cant init- dont bother with dialogs.
 
-     _grResult:=GenError; //gen error
-     halt(0); //the other routines are now useless- since we didnt init- dont just exit the routine, DIE instead.
-
-  end;
- 
-
+{
   if wantsFullIMGSupport then begin
 
     _imgflags:= IMG_INIT_JPG or IMG_INIT_PNG or IMG_INIT_TIF;
@@ -1926,18 +1909,13 @@ begin
 		 Logln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
 		 LogLn(IMG_GetError);
 	   end;
-	   {$ifdef lcl}
+	   $ifdef lcl
 			ShowMessage('IMG_Init: Failed to init required JPG, PNG, and TIFF support');
-   	   {$endif}   
+   	   $endif
     end;
   end;
-
-{
- im going to skip the RAM requirements code and instead haarp on proper rendering requirements.
- note that a 22 yr old notebook-try as it may- might not have enough vRAM to pull things off.
 }
 
-//endFIXME
 
   if (graphdriver = DETECT) then begin
 	//probe for it, dumbass...NEVER ASSUME.
@@ -1954,17 +1932,17 @@ begin
   LIBGRAPHICS_INIT:=true; 
   LIBGRAPHICS_ACTIVE:=false; 
 
-//we do it this way because we might already be active- why duplicate code?
 
 //force a safe shutdown.
-//not doing this causes problems with FrameBuffer modes if the app crashes
+//(NO NEED to call closegraph this way)
+
+//if the app crashes we could be in an unknown state-which is bad.
  AddExitProc(CloseGraph);
  
 {
 atexit handling:
 basically it prevents random exits- all exits must do whatever is in the routine.
 
---if not called explicitly: AddExitProc(SDL_Quit);
 
 FPC:  AddExitProc(CloseGraph);
 
@@ -1984,39 +1962,12 @@ $F-
 
 }
 
-//If we got here- YAY!
 
-  //Hide, mouse.
+
+{  //Hide, mouse.
   if not Render3d then
 	SDL_ShowCursor(SDL_DISABLE);
-
-
-   eventLock:= nil;
-   eventWait:= nil;
-
-  eventLock := SDL_CreateMutex;
-   if eventLock = nil then
-   begin
-      if IsConsoleInvoked then
-          Logln('Error: cant create a mutex');
-	   {$ifdef lcl}
-			ShowMessage('cant create a mutex');
-   	   {$endif}   
-      closegraph;
-   end;
-
-   eventWait := SDL_CreateCond;
-   if eventWait = nil then
-   begin
-      if IsConsoleInvoked then
-          Logln('Error: cant create a condition variable.');
-	   {$ifdef lcl}
-			ShowMessage('cant create a condition variable');
-   	   {$endif}   
-
-      closegraph;
-   end;
-
+   
 
 //lets get the current refresh rate and set a screen timer to it.
 // we cant fetch this from X11? sure we can.
@@ -2034,9 +1985,9 @@ $F-
   if(SDL_GetCurrentDisplayMode(0, mode) <> 0) then begin
     if IsConsoleInvoked then
 			Logln('Cant get current video mode info. Non-critical error.');
-		{$ifdef lcl}
+		$ifdef lcl
 			ShowMessage('SDL cant get the data for the current mode.');
-   	   {$endif}   
+   	   $endif   
 	end;
 
   //dont refresh faster than the screen.
@@ -2054,27 +2005,23 @@ $F-
 		Logln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
 		Logln('you will have to manually update surfaces and the renderer.');
     end;
-    {$ifdef lcl}
+    $ifdef lcl
 			ShowMessage('SDL cant set video callback timer.Manually update surface.');
-    {$endif}   
+    $endif
 
     NoGoAutoRefresh:=true; //Now we can call Initgraph and check, even if quietly(game) If we need to issue RenderPresent calls.
   end;
+}
 
-  if flip_timer_ms=17 then rate=60;
+//  if flip_timer_ms=17 then rate=60;
+
+  rate:=60; //temp code
   FSMode:=MaxX,'x',MaxY,':',bpp,'@',rate; //build the string
   
-
-//setup GraphMode late because GLUT needs some variables we dont have yet.
-
-//sets up mode- then clears it in standard "BGI" fashion.
   SetGraphMode(Graphmode,wantFullScreen);
   
-  //the event handler
-
-// if Render3d then GlutMainLoop;
-//else
-  IntHandler;
+	//the event handler
+	GlutMainLoop;
 
 
  { 
@@ -2089,7 +2036,6 @@ $F-
     end;
 
   end;
-}
 
   //initialization of TrueType font engine
   if TTF_Init = -1 then begin
@@ -2097,47 +2043,58 @@ $F-
     if IsConsoleInvoked then begin
         Logln('I cant engage the font engine, sirs.');
     end;
-    {$ifdef lcl}
+    $ifdef lcl
 			ShowMessage('ERROR: I cant engage the font engine, sirs.');
-    {$endif}   
+    $endif  
 		
     _graphResult:=-3; //the most likely cause, not enuf ram.
     closegraph;
   end;
+}
 
 //set some sane default variables
   _fgcolor := $FFFFFFFF;	//Default drawing color = white (15)
   _bgcolor := $000000FF;	//default background = black(0)
+  
+{
+  GL_fgcolor:=1.0;
+  GL_bgcolor:=0;
+}
+
   someLineType:= NormalWidth; 
 
 //  lineinfo.linestyle:=solidln;
 //     fillsettings.pattern:=solidfill;
 
   ClipPixels := TRUE;
-     // Reset the viewport 
+  
+  // Set initial viewport 
   StartXViewPort := 0;
   StartYViewPort := 0;
   ViewWidth := MaxX;
   ViewHeight := MaxY;
 
   // normal write mode 
-  //CurrentWriteMode := CopyPut;
+  CurrentWriteMode := CopyPut;
 
   // set default font (8x8)
-  installUserFont('./fonts/code.ttf', 10,TTF_STYLE_NORMAL,false);
+//  installUserFont('./fonts/code.ttf', 10,TTF_STYLE_NORMAL,false);
 
 //     CurrentTextInfo.direction:=HorizDir;
-     
-  new(Event);
+
 
   LIBGRAPHICS_ACTIVE:=true;  //We are fully operational now.
   paused:=false;
 
   _grResult:=OK; //we can just check the dialogs (or text output) now.
 
+  //give us standard LH corner coordinate system and reset to 0,0.
+  
+  glOrtho( 0, MaxX, MaxY, 0, 0, 1.0 );
   where.X:=0;
   where.Y:=0;
 
+{
   SDL_ShowCursor(SDL_ENABLE);
 
   //Check for joysticks 
@@ -2146,9 +2103,9 @@ $F-
     if( SDL_NumJoysticks < 1 ) then begin
         if IsConsoleInvoked then
 			Logln( 'Warning: No joysticks connected!' ); 
-    {$ifdef lcl}
+    $ifdef lcl
 			ShowMessage('Warning: No joysticks connected!');
-    {$endif}   
+    $endif   
         
     end else begin //Load joystick 
 	    gGameController := SDL_JoystickOpen( 0 ); 
@@ -2158,27 +2115,24 @@ $F-
 		    	Logln( 'Warning: Unable to open game controller! SDL Error: '+ SDL_GetError); 
                 LogLn(SDL_GetError);
             end;
-    {$ifdef lcl}
+    $ifdef lcl
 			ShowMessage('Warning: Unable to open game controller!');
-    {$endif}   
+    $endif   
 
             noJoy:=true;
         end;
         noJoy:=false;
     end; 
   end; //Joypad 
+}
 
 end; //initgraph
 
-{--seems incomplete
-//stream is a chunk
-procedure MyAudioCallback(mixdata:PUint8; stream:PUint8; len:integer );
 
-begin
-    SDL_memset(stream, 0, len);  // make sure this is silence.
-    // mix our audio against the silence, at 50% volume.
-    SDL_MixAudio(stream, mixData, len, SDL_MIX_MAXVOLUME / 2);
-end;
+{--seems incomplete
+//stream is a chunk of audio
+
+//uos (portaudio) is significantly easier
 
 procedure InitAudio;
 var

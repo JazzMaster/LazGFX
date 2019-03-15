@@ -24,6 +24,55 @@ then we should be able to pull it back as a unknown DWord(in theory).
 (SDL_Map and SDL_Get RGB/RGBA are here for this purpose)
 
 }
+
+//SDL to GL value conversion-and back- (I dont see this anywhere)
+
+
+//for generic floats above value of 1.0	
+function FloatToByte(someFloat:single):byte
+begin
+   if someFloat < 2.55 then
+	  FloatToByte:=byte(round(someFloat));
+   else 
+      exit;	  
+end;
+
+//For GLFloats with max value of 1.0
+function GLFloatToByte(someFloat:single):byte
+begin
+   if (someFloat > 1.0) then 
+		exit;
+   FloatToByte:=byte(round(someFloat));
+end;
+
+//DWord,etc needs to be a byte first (hi(DWord),(lo(DWORD))
+//OpenGl doesnt use DWords- it uses RGB(A) Clusters instead
+
+
+//simply put: a float of 3.0 wont work if GLFloat maxes out at 1.0
+//output gives "whole numbers" as bytes cant have partials.
+
+function ByteToGLFloat(someByte:byte):single;
+var
+	BInt:single;
+
+begin
+   //first make the value sane (<100)
+   //this means that for each byte value- there are >2.5x values for each float/integer derived
+   if (ord(someByte) > 64) then
+	  BInt:=(ord(someByte) / 2.55); //base convert: 255(hex) = 1.0(float)
+   
+   ByteToGLFloat:= single(BInt mod 100); //convert 100 to 1.0
+end;
+
+//gimmie a float- I dont care if its GL compatible.
+function ByteToFloat(someByte:byte):single;
+
+begin
+   ByteToGLFloat:= (single(ord(someByte)) mod 100);
+end;
+
+
 procedure initPaletteGrey16;
 
 var

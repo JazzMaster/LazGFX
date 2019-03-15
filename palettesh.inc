@@ -697,19 +697,21 @@ tfsGWhite
 
 );
 
+//Code on borrowed time:
+
+SDL_Color=record
+	r,g,b,a:byte;
+end;
+
+//the other include file (palette) has the conversion code
+GL_Color=record
+	r,g,b,a:single;
+end;
+
 //I dunno what I was thinkin here w "TSDLColors"-3-14-2019
 TRec16=record
   
 	colors:array [0..15] of PSDL_COLOR; 
-
-{SDL defines this is as:
-
-SDL_Color=record
-	r,g,b,a:byte;
-	...some other stuff we dont need to use.
-end;
-
-}
 
 	DWords:array [0..15] of DWord;
 

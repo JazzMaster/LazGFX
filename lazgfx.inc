@@ -318,7 +318,7 @@ type
 var
 	GLContext: TSDL_GLContext;
 	GLFloat:single;
-
+	FloatInt:single;
 
 //modelist hacking
 
