@@ -4628,14 +4628,12 @@ end;
 }
 
 procedure thickLineColor(renderer:PSDL_Renderer;  x1,y1,x2, y2:Sint16;  width:Uint8; color:DWord);
-
-//hackish but it works
 var
-	Pcolor:Pointer;
+	colorData:PSDL_Color;
 
 begin	
-    Pcolor:^color;
-	thickLineRGBA(renderer, x1, y1, x2, y2, width, Pcolor^,Pcolor^[1],Pcolor^[2],Pcolor^[3]);
+    colorData:=GetBytesFromDWord(color);
+	thickLineRGBA(renderer, x1, y1, x2, y2, width, colorData.^r,colorData.^g,colorData.^b,colorData.^a);
 end;
 
 {

@@ -317,6 +317,7 @@ type
 
 var
 	GLContext: TSDL_GLContext;
+	GLFloat:single;
 
 
 //modelist hacking
@@ -422,6 +423,9 @@ function GetMaxColor: word;
 procedure LoadImage(filename:PChar; Rect:PSDL_Rect);
 procedure LoadImageStretched(filename:PChar);
 
+function  getDwordFromSDLColor(someColor:PSDL_Color):DWord;
+function  getDwordFromBytes(r,g,b,a:Byte):DWord;
+function GetByesfromDWord(someD:DWord):SDL_Color;
 
 procedure PlotPixelWNeighbors(x,y:integer);
 

@@ -697,9 +697,10 @@ tfsGWhite
 
 );
 
+//I dunno what I was thinkin here w "TSDLColors"-3-14-2019
 TRec16=record
   
-	colors:TSDL_COLORS; 
+	colors:array [0..15] of PSDL_COLOR; 
 
 {SDL defines this is as:
 
@@ -728,7 +729,7 @@ end;
 
 TRec256=record
 
-  colors:TSDL_COLORS; //this is setup later on. 
+  colors:array [0..255] of PSDL_COLOR; ; //this is setup later on. 
   DWords:array [0..255] of DWord;
 
 end;

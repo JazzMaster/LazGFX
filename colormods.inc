@@ -1,3 +1,94 @@
+{
+
+Colors are bit banged to hell and back.
+
+SDL_Color=record (internal definition)
+
+	r:byte; //UInt8 in C
+	g:byte;
+	b:byte;
+	a:byte; 
+
+end;
+
+^SDL_Color/PSDL_Color =array [0..3] of PUInt8; (BytePtr)
+
+where- as long as the pointer points to SDL_Color record:
+r:=PSDL_Color^
+g:=PSDL_Color^[1]
+b:=PSDL_Color^[2]
+a:=PSDL_Color^[3]
+
+(its a c-like hack that works)
+
+
+24 bit and awkward modes:
+Tuples (just RGB values) dont exist in Pascal(or C).Its a Python Thing.
+*FIXED : 3/8/19  
+
+
+Colors:
+
+(try not to confuse BIT with BYTE here)
+
+4bit(16 color) has to be mapped into RGB 8-bit colors(limited palette, not full)
+ByteMask of 0f/f0 is traditionally used in the past because RGBA color modes didnt exist yet.
+
+Alpha:(this is weird implementation but it works)
+
+ff means use full color output
+7f can be used as half-shading-giving us RGBI siulation
+00 means "dont write the color"
+
+
+8bit-(256 color) is paletted RGB mode (1:1:1)
+	-this is the last paletted mode
+
+JPEG format uses a 256 color palette(even a modified one).
+Jpeg2000 uses 12bit
+
+---
+4bit(16)->8bit(256):
+
+NO CHANGE, just switch palettes.
+
+
+	just use the first 16 colors of the palette and add more colors to it
+	its easier to not do 4bit conversion, but use 8bit color and convert that.
+
+	- is it possible the original 16 colors can point elsewhere- yes, 
+	but that would de-standardize "upscaling the colors"
+
+Downsizing bits:
+
+-you cant put whats not there- you can only "dither down" or "fake it" by using "odd patterns".
+what this is -is tricking your eyes with "almost similar pixel data".
+
+This will be put into functions, etc..soon.
+
+32bit to 16bit RGB 565:
+//drop the LSB
+
+NewR: = R shr 3;
+NewG: = G shr 2;
+NewB: = B shr 3;
+NewA:=$ff;
+
+16bit(565) can also be 15bit color(5551):
+
+mode 5551: 
+ 	ff or 7f for the last byte(not bit)
+	we still have 32K colors, just two sets -light and dark-like 16 color mode but with more colors
+
+RGB16->32:
+
+NewR: =shl 3
+NewG: =shl 2
+NewB: =shl 3 
+NewA:=A;
+
+}
+
 //SDL functions
 function SDL_PIXELFLAG(X: Cardinal): Cardinal;
 begin
