@@ -1,4 +1,7 @@
 
+//thers a SHITTON of SDL refernces where we need OpenGl ones.
+//Im working on it.
+
 
 type  
 
@@ -74,9 +77,18 @@ Biqu=array [0..1] of QWord; //128bits
 TriQuad=array [0..2] of QWord; //192bits
 LongQuad=array [0..3] of QWord; //256bits
 
+//sort of -SDL_Rect implementation
+
+PRect=^Rect;
+Rect=record
+	x1:byte;
+	y1:byte;
+	x2:byte;
+	y2:byte;
+end;
 
 //A Ton of code enforces a viewport mandate- that even sans viewports- the screen is one.
-//This is better used with screen shrinking effects such as status bars, etc.
+//This is better used with screen shrinking effects
 
 
 //graphdriver is not really used half the time anyways..most people probe.
@@ -86,7 +98,7 @@ LongQuad=array [0..3] of QWord; //256bits
 
 
 //This is a 8x8 (or 8x12) Font pattern (in HEX) according to the BGI sources
-//(A BLITTER BITMAP in SDL)
+//( A blit)
 
    FillSettingsType = (clear,lines,slashes,THslashes,THBackSlashes,BackSlashes,SMBoxes,rhombus,wall,widePTs,DensePTS);
 //Borland VGA256 sources (expansion pack) has the deatils-which are temporarily outside of this repo ATM
@@ -125,26 +137,8 @@ var
 
 //think minimaps in games like Warcraft and Skyrim
 
-
-{ I think Im going to leave this as an excercise to the user rather than dictate archane methods.
-
-SDL Events fire after EVENT variable is assigned a pointer and either polling or event checking is enabled.
-NOT UTIL- so we should be "safe" to not check input until the user program calling us needs it.
-
-THAT SAID:
-
-    initgraph enables the event handler.
-
-So you need some sort of input (and window event) detection in your code SETUP --BEFORE calling initgraph.
-SDL will work-you just wont be able to process input correctly, or do anything.
-
-SDL will close the app and at the window managers request(I hope) without direct code intervention.
-But- its unsafe to assume things.
-
-This is like "interrupt based kernel programming"- DO NOT code as if "waiting on input"- 
-    pray it happens, continue on- if it doesnt.
-
-(events may still yet fire)
+{
+User needs to implement these into GLUT event routines in the main unit.
 
 	KeyDownEventDefault:KeyDownEvent; //dont process here
 	PauseRoutineDefault:PauseRoutine;  
@@ -183,18 +177,16 @@ var
     X,Y:integer;
     _grResult:grErrortype;
     
-    //SDL2 broken game controller support nono-suid and root-only.
+    //SDL2 broken game controller support non-suid and root-only.
     //again, this is wrong.
 
     //you want event driven, not input driven-the code seems to be here.
     gGameController:PSDL_Joystick;
 
     Renderer:PSDL_Renderer;
-    MainSurface,FontSurface : PSDL_Surface; //TnL mostly at this point, and for hacks
-    window:PSDL_Window; //A window... heh..."windows" he he...
+    //GLStencils=TnL
 
-    // no such thing as a MainTexture. Texture, period.
-    //its "on a path to the renderer" or "its made new"
+    MainSurface,FontSurface : PSDL_Surface; //TnL mostly at this point, and for hacks
 
     srcR,destR,TextRect:PSDL_Rect;
     //rmask,gmask,bmask,amask:longword;
@@ -275,7 +267,6 @@ Atari modes, etc. were removed. (double the res and we will talk)
   EventThread:Longint; //fpc uses Longint
   EventThreadReturnValue:LongInt; //forked processes are supposed to return a error code
 	
-  Rect : PSDL_Rect;
 
   LIBGRAPHICS_ACTIVE:boolean;
   LIBGRAPHICS_INIT:boolean;
@@ -284,21 +275,13 @@ Atari modes, etc. were removed. (double the res and we will talk)
   IsConsoleInvoked,CantDoAudio:boolean; //will audio init? and the other is tripped NOT if in X11.
   //can we modeset in a framebuffer graphics mode? YES. 
 
-
-//This should help converting some of the SDL C:
-//^SDL_Surface (PSDL_Surface) => ^TSDL_Surface
-
-  Event:PSDL_Event; //^SDL_Event
-   
+  
   himode,lomode:integer;
-
   CurrentMode:PSDL_DisplayMode; //^SDL_DisplayMode
-  r,g,b,a:PUInt8; //^Byte
 
   //TextureFormat
   format:LongInt;
 
-//this pre-definition shit is a ~PITA~
 
 //our data may differ from SDLs.
 type 
@@ -466,11 +449,10 @@ etc
 etc
 
 If we track where were at based upon where we want to go be should be ok but...by default
-we have no data.(SDL has no clue- and doesnt care either)
+we have no data.
 
 
 }
 
 const
    maxMode=Ord(High(Graphics_Modes));
-

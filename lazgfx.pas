@@ -33,16 +33,11 @@ I think this will go in this direction henceforth:
 
 (equivalent SDL2+ support)
 
-	freeGLUT/GLfor 2D (QUADS) (reverts to WinAPI and X11CorePrim if OGL not avail)
+	freeGLUT/GL for 2D (QUADS) 
 	freeGLUT for 3D (unless there is strong reason to use more detailed routines)
 
 
 GL by itself doesnt require X11- but it does require some X11 code for "input processing".
-
-SDL can be used by non-game programmers to ease development of multimedia based applications.
-
-Anyone serious enough to work with SDL (or similar) on an ongoing basis- is doing some SERIOUS development,
-moreso if they are "expanding the reach" of SDL using a language "without much love" such as FreePascal/Lazarus.
 
 It is Linux that is the complex BEAST that needs taming.
 
@@ -62,16 +57,8 @@ The quote that never was-
 I write CODE for a living. 
 Everything is mutable."
 
-I am finding that most of SDL or SDL2 are being rewritten in this unit.
-
- 
-Callbacks can "hook timers" based on milisecond precision timer unit- 
-	and "process forking". We dont need "Kernel level interrupt code".
 
 We output to Surface(buffer/video buffer) via memcopy operations.
-Renderer code in SDL relies on vendor driver support (2D accellerated OpenGL)
-
-OpenGL support depends on Xlib for input- but otherwise- is independant.
 
 
 For framebuffer:
@@ -136,12 +123,17 @@ Theres confusion in SDL:
 		Function calls were modified between SDL 1 and 2.
 		all uses clauses and include files must point to SDL2. You cannot mix 1.2 and 2.x.
 		
+	SDL2 uses ortho 2D quads and 3D openGl calls.
+		
 	SDL_GPU isnt really an advanced unit- its optimized unit "utilizing the renderer".
 		I inadvertently "half-assed" half the color routines myself.
 			Fpc Dev team(more stable codebase based upon Borlands BGI) has the remaining routines.
 				These may not be the most optimal routines- they are the most tested.
 
+	So why all of the huff and puff "exquisite C" bullshit?
+
 NOTE:
+	Im getting "Lazarus bullshit" as of late....you dont need the LCL!
 
 (createTextureFromSurface must use surface^.format -of chosen bpp- or it could be off)
 
@@ -151,7 +143,7 @@ How to write good games:
 SDL1.2 (learn to page flip or animate)
 SDL2.0 (renderer and "render to textures as surfaces")
 Learn OpenGL or freeGLUT(natively)
-
+CODE!
 
 You need to know:
 
@@ -159,15 +151,11 @@ You need to know:
 
 ---
 
-If you are using non-unices you will need to install these packages or build the sources to get the compiled units.
-Im looking for the latter but sometimes I get the sources instead. Sorry.
-However, THE MAIN THING is that we can use them as soon as the "INTERFACE" code is written(HERE).
-
 If you need to see SDL in action:
 
-	Nexiuz and Postal use SDL.
+	Postal(1) uses SDL.
 	Hedgewars uses SDL v1.2.
-	SuperTux uses SDL 2( I think)
+	Nexiuz and SuperTux uses SDL 2
 
 
 The difference between an ellipse and a circle is that "an ellipse is corrected for the aspect ratio".
@@ -189,29 +177,25 @@ This code **should** port or crossplatform build, but no guarantees.
 
 SEMI-"Borland compatible" w modifications.
 
+
 Lazarus graphics unit is severely lacking...use this instead.
-
-SDL and JEDI have been poorly documented.
-
-1- FPC code seems doggishly slow to update when bugs are discovered. Meanwhile SDL chugs along in C.
-(Then we have to BACKPORT the changes again.)
 
 
 SDL adds mouse and joystick, even haptic/VR feedback support.
+This wil be added in if I can find the hooks for it. It is a OpenGL issue as of now.
 
-However, "licensing issues" (Fraunhoffer/MP3 is a cash cow) 
- 	-as with qb64 which also uses SDL
- 	-wreak havoc on us. 
+
+However, "licensing issues" (Fraunhoffer/MP3 is a cash cow) wreak havoc on us. 
+ 	-as with qb64 (which also uses SDL)
  	
 Yes- I Have a merge tree of qb64 that builds, just ask...
 
 
 LFB:
 
-Linear Framebuffer is virtually required(OS Drivers) and bank switching has had some isues in DOS.
+Linear Framebuffer is virtually required(OS Drivers). Bank switching has had some isues in DOS.
 A lot of code back in the day(20 years ago) was written to use "banks" due to color or VRAM limitations.
 The dos mouse was broken due to bank switching (at some point). 
-
 The way around it was to not need bank switching-by using a LFB. 
 
 
@@ -379,6 +363,7 @@ FPC team is refusing to fix TVision bugs.
 
         This is wrong.
 
+LOGS:
 
 Some idiot wrote the logging  code wrong and it needs to be updated for FILE STREAM IO.
 I havent done this yet.
@@ -447,6 +432,7 @@ Im seeing a Ton of correlation between OGL/SDL and DirectX/DirectDraw (and peopl
 
 
 WONTFIX:
+
 "Rendering onto more than one window (or renderer) can cause issues"
 "You must render in the same window that handles input"
 
@@ -467,15 +453,15 @@ TODO:
 input:
 	rely less on SDL and more on GL/freeGLUT operations(simpler)
 	 
-callbacks/hooks:	
-	convert SDL_Timercallback(video refresh) into a "timer based solution" using microsecond precision(float)
-		(stop using dodgy interrupt based C functions)
-		
+	
 finish implementation of "if Render3D":
 
 	all functions need OpenGL modifications
 	RenderCopy ->  glSwapBuffers
 	
+	2d functions:
+		surface ops with OUR INTERNAL screen buffer.(SDL_Surface doesnt exist)
+
 	3d functions:
 		no surface, no texture, no renderer, no "direct renderer" code
 		(implement these in GL/GLUT)
@@ -491,7 +477,7 @@ finish implementation of "if Render3D":
 uses
 {
 Threads and fpfork(forking), requires baseunix unit
-cthreads has to be the first unit in this case-we so happen to support the C version.
+cthreads has to be the first unit -in this case-we so happen to support the C version.
 
 ctypes: cint,uint,PTRUint,PTR-USINT,sint...etc.
 unless you want to rewrite someone elses C, use this.
@@ -507,15 +493,16 @@ There is a way to use SDL timers, signals and threads.
 
 //cthreads and cmem have to be first.
 {$IFDEF unix} 
-	cthreads,cmem,baseunix, X, XLib,
+	cthreads,cmem,baseunix, X, XLib,sysUtils,
 	 {$IFNDEF fallback} //fallback uses XCorePrim only, otherwise keep loading libs
 		Classes,GL,GLext, GLU,
 		//probly cairo and pango too at this point.
 	 {$ENDIF}
 {$ENDIF}
  
-    ctypes,sysUtils,
+    ctypes,
         
+//This logic is normal
 {$IFDEF MSWINDOWS} //as if theres a non-MS WINDOWS?
 	 {$IFDEF fallback}
 		WinAPI,
@@ -582,17 +569,19 @@ endif
 
 
 {
-Linux NOTE:
-  Lazarus Menu:  "View" menu, under "Debug Windows" there is an entry for a "console output" 
+Lazarus Menu:  
+	"View" menu, under "Debug Windows" there is an entry for a "console output" 
 
 however, if you are in a input loop or waiting for keypress- 
  you will not get output until your program is complete (and has stopped execution)
 
 
- In this case- Lazarus Menu:   Run -> Run Parameters, then check the box for "Use launching application".
- (You may have to 'chmod +x' that script.)
+In this case- Lazarus Menu:   
+Run -> Run Parameters, then check the box for "Use launching application".
+(You may have to 'chmod +x' that script.)
 
-to build without the LCL(in Lazarus):
+
+To build without the LCL(in Lazarus):
 
  Just make a normal "most basic" program and call me or SDL directly in your "uses clause".
 
@@ -602,24 +591,20 @@ to build without the LCL(in Lazarus):
 }
 
 //FPC generic units(OS independent)
-//SDL hooks will be removed in the future
 
-  SDL2,SDL2_Image,uoslib_h,strings,typinfo,
+  uoslib_h,strings,typinfo,
   
-//uos/Examples/lib folder has the required libraries for you. 
-//as a side-effect: CDROM Audio playback(CDDA) is added back
+// uos/Examples/lib folder has the required libraries for you. 
+// as a side-effect: CDROM Audio playback(CDDA) is added back
 
 
 {$IFDEF debug} ,heaptrc {$ENDIF} 
 
 {
 OpenGL requires Quartz, which prevents building below OSX 10.2.
-Use DirectDraw functions(add your code here for that) to accomplish SDLv1 equivalent actions instead.
-(or DirectX <5 -Below XP)
 
-//direct rendering onto the renderer uses QuartzGL(on OSX up to Mtn LN- it wont stay active once set)
-
-//Cocoa (OBJ-C) is the new API
+direct rendering onto the renderer uses QuartzGL(on OSX up to Mtn LN- it wont stay active once set)
+Cocoa (OBJ-C) is the new API
 }
 
 
@@ -628,12 +613,9 @@ Use DirectDraw functions(add your code here for that) to accomplish SDLv1 equiva
 	{$linkframework OpenGL}
 	{$linkframework GLUT}
 
-	{$linklib SDLmain}
-    {$linklib SDLimg}
-    {$linklib SDLttf}
-    {$linklib SDLnet}
 
 //you have to install fpc thru XCode and build a demo to patch this line.
+
 //	{$linklib gcc} -REAL pascal doesnt use C. There is a dialect that does.
 // apparently some programmers see C as a religion...they want to convert everyone to it.
 
@@ -651,7 +633,7 @@ Use DirectDraw functions(add your code here for that) to accomplish SDLv1 equiva
 //Altogether- we are talking PCs running OSX, Windows(down to XP), and most unices.
 //and Some android and RasPi ( thru GL-ES)
 
-//do not remove the semi-colon
+//do not remove the following semi-colon
 ;
 
 
@@ -715,6 +697,23 @@ WE have to establish the params- not guess at them.
 
 }
 
+{$IFDEF mswindows}
+//Win only routines
+
+function IsVistaOrGreater: Boolean;
+begin
+   IsWindows7:= (Win32MajorVersion => 6) or ((Win32MajorVersion = 6) and (Win32MinorVersion => 1));
+end;
+
+//if NOT- DONT USE ANYTHING HERE- OpenGL isnt supported at min version needed.
+function IsWindowsXP: Boolean;
+begin
+ IsWindowsXP:=((Win32MajorVersion = 5) and (Win32MinorVersion >= 1));
+end;
+
+{$endif}
+
+
 //Convert an array of four bytes into a 32-bit DWord/LongWord.
 
 function  getDwordFromSDLColor(someColor:PSDL_Color):DWord;
@@ -739,7 +738,7 @@ begin
   // getDwordFromBytes:= (a) or (b shl 8) or (g shl 16) or (r shl 24);
 end;
 
-//where do the bytes go? into a record. (the data goes out-to where--we dont care...)
+//where do the bytes go? into a record. (the data goes out-to where?--we dont care...)
 function GetByesfromDWord(someD:DWord):SDL_Color;
 
 var
@@ -2326,14 +2325,14 @@ begin
   if Height = 0 then
     Height := 1;
  
-{  glViewport(0, 0, Width, Height);
+  glViewport(0, 0, MaxX, MaxY);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity;
   gluPerspective(45, Width mod Height, 0.1, 1000);
  
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity;
-}
+
   
 end;
 
@@ -3291,15 +3290,7 @@ begin
    end;
 end;
 
-function SDL_LoadBMP(_file: PAnsiChar): PSDL_Surface;
-begin
-  SDL_LoadBMP:= SDL_LoadBMP_RW(SDL_RWFromFile(_file, 'rb'), 1);
-end;
 
-function SDL_SaveBMP(Const surface:PSDL_Surface; Const filename:AnsiString):sInt32;
-begin
-   SDL_SaveBMP:= SDL_SaveBMP_RW(surface, SDL_RWFromFile(PAnsiChar(filename), 'wb'), 1)
-end;
 
 procedure SaveBMPImage(filename:string);
 //hmmm stuck with this for time being
@@ -3455,22 +3446,29 @@ begin  //main()
 
 //while I dont like the assumption that all linux apps are console apps- technically its true.
 
-//I dont see the need for the LCL with SDL/OGL but anyways...
 {$IFDEF LCL}
         Log:=true; //we have output window in DEBUG mode (in windows too!)
 		IsConsoleInvoked:=false; //ui app- NO CONSOLE AVAILABLE
 {$ENDIF}
 
+{$IFDEF mswindows}
+	if (not IsWindowsXP) or (not IsVistaOrGreater) then
+		LogLn('OpenGL 2.0+ not detected on Windows or not running in Win32 environment.');
+		LogLn('Try SDL v.1 routines on these platforms.');
+		LogLN('Laz Gfx refusing to run.');
+		halt(0);
+{$endif}
 
 {$IFDEF unix}
-  IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
+  IsConsoleInvoked:=true; //All Linux apps are console apps
 
-  if (GetEnvironmentVariable('DISPLAY') = '') then begin
-    {$ifdef lcl}
-			ShowMessage('X11 has not fired. Bailing.');
-    {$endif}   
+  if (GetEnvironmentVariable('DISPLAY') = '') then begin //init frameBuffer code here
+
+
+//old behaviour 
     LogLN('X11 has not fired. Bailing.');	
     halt(0);
+
   end;   
 {$ENDIF}
 

@@ -14,6 +14,8 @@ end;
 ^SDL_Color/PSDL_Color =array [0..3] of PUInt8; (BytePtr)
 
 where- as long as the pointer points to SDL_Color record:
+(byte- not float) 
+
 r:=PSDL_Color^
 g:=PSDL_Color^[1]
 b:=PSDL_Color^[2]
@@ -88,42 +90,6 @@ NewB: =shl 3
 NewA:=A;
 
 }
-
-//SDL functions
-function SDL_PIXELFLAG(X: Cardinal): Cardinal;
-begin
-  SDL_PIXELFLA := (X shr 28) and $0F;
-end;
-
-//most used.
-function SDL_PIXELTYPE(X: Cardinal): Cardinal;
-begin
-  SDL_PIXELTYPE:= (X shr 24) and $0F;
-end;
-
-function SDL_PIXELORDER(X: Cardinal): Cardinal;
-begin
-  SDL_PIXELORDER := (X shr 20) and $0F;
-end;
-
-function SDL_BITSPERPIXEL(X: Cardinal): Cardinal;
-begin
-  SDL_BITSPERPIXEL := (X shr 8) and $FF;
-end;
-
-//end most used
-
-function SDL_PIXELLAYOUT(X: Cardinal): Cardinal;
-begin
-  SDL_PIXELLAYOUT := (X shr 16) and $0F;
-end;
-
-
-function SDL_IsPixelFormat_FOURCC(format: Variant): Boolean;
-begin
-  {* The flag is set to 1 because 0x1? is not in the printable ASCII range *}
-  SDL_IsPixelFormat_FOURCC:= format and SDL_PIXELFLAG(format) <> 1;
-end;
 
 
 //semi-generic color functions
@@ -642,14 +608,13 @@ begin
    
 end;
 
-//"words" are not Pointers to "Unsigned 8-bit ints".. some type conversion is needed here
-procedure setFGColor(r,g,b:word); overload;
+procedure setFGColor(r,g,b:byte); overload;
 
 begin
    SDL_SetRenderDrawColor( Renderer, ord(r), ord(g), ord(b), 255 ); 
 end;
 
-procedure setFGColor(r,g,b,a:word); overload;
+procedure setFGColor(r,g,b,a:byte); overload;
 
 begin
    SDL_SetRenderDrawColor( Renderer, ord(r), ord(g), ord(b), ord(a)); 

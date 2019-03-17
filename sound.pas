@@ -22,7 +22,7 @@ Dont be fooled, you can play audio with any of these...^^
 }
 
 uses 
-    SDL2_mixer;
+    uos;
     
 type
 
@@ -238,46 +238,6 @@ begin
 
 end;
 
-
-function SDL_LoadWAV(_file: PAnsiChar; spec: PSDL_AudioSpec; audio_buf: PPUInt8; audio_len: PUInt32): PSDL_AudioSpec;
-begin
-  SDL_LoadWAV := SDL_LoadWAV_RW(SDL_RWFromFile(_file, 'rb'), 1, spec, audio_buf, audio_len);
-end;
-  
-function SDL_AUDIO_BITSIZE(x: Cardinal): Cardinal;
-begin
-  SDL_AUDIO_BITSIZE := x and SDL_AUDIO_MASK_BITSIZE;
-end;
-
-function SDL_AUDIO_ISFLOAT(x: Cardinal): Cardinal;
-begin
-  SDL_AUDIO_ISFLOAT := x and SDL_AUDIO_MASK_DATATYPE;
-end;
-
-function SDL_AUDIO_ISBIGENDIAN(x: Cardinal): Cardinal;
-begin
-  SDL_AUDIO_ISBIGENDIAN := x and SDL_AUDIO_MASK_ENDIAN;
-end;
-
-function SDL_AUDIO_ISSIGNED(x: Cardinal): Cardinal;
-begin
-  SDL_AUDIO_ISSIGNED := x and SDL_AUDIO_MASK_SIGNED;
-end;
-
-function SDL_AUDIO_ISINT(x: Cardinal): Cardinal;
-begin
-  SDL_AUDIO_ISINT := not SDL_AUDIO_ISFLOAT(x);
-end;
-
-function SDL_AUDIO_ISLITTLEENDIAN(x: Cardinal): Cardinal;
-begin
-  SDL_AUDIO_ISLITTLEENDIAN := not SDL_AUDIO_ISLITTLEENDIAN(x);
-end;
-
-function SDL_AUDIO_ISUNSIGNED(x: Cardinal): Cardinal;
-begin
-  SDL_AUDIO_ISUNSIGNED := not SDL_AUDIO_ISSIGNED(x);
-end;
 
 
 //double check w the spec...
