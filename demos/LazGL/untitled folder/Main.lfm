@@ -1,0 +1,44 @@
+object MainForm: TMainForm
+  Left = 840
+  Height = 489
+  Top = 222
+  Width = 889
+  Caption = 'Modern OpenGL'
+  ClientHeight = 489
+  ClientWidth = 889
+  OnCreate = FormCreate
+  Position = poScreenCenter
+  LCLVersion = '1.7'
+  object OpenGLControl: TOpenGLControl
+    Left = 0
+    Height = 489
+    Top = 0
+    Width = 889
+    Align = alClient
+    OpenGLMajorVersion = 2
+    OnMouseDown = OpenGLControlMouseDown
+    OnMouseMove = OpenGLControlMouseMove
+    OnPaint = OpenGLControlPaint
+    OnResize = OpenGLControlResize
+  end
+  object ActionList: TActionList
+    left = 40
+    top = 24
+    object InformationAction: TAction
+      Caption = 'InformationAction'
+      OnExecute = InformationActionExecute
+      ShortCut = 115
+    end
+    object RefreshAction: TAction
+      Caption = 'RefreshAction'
+      OnExecute = RefreshActionExecute
+      ShortCut = 116
+    end
+    object FullscreenAction: TAction
+      AutoCheck = True
+      Caption = 'FullscreenAction'
+      OnExecute = FullscreenActionExecute
+      ShortCut = 122
+    end
+  end
+end

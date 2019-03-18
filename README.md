@@ -19,7 +19,6 @@ With SDL v1 we put the pixels in ourselves with blits,etc
 (Its a lot less headache)
 
 
-
 This leaves audio and networking up to other libraries.
 
 Changes still pending:
@@ -29,19 +28,35 @@ Changes still pending:
 		Using PortAudio (uos) instead of SDL2_Mixer routines
 		Open Networking library hooks(to Pascal sources)
 	
-
-"50 ways- none of which work in reality" is the biggest problem right now.
-Maybe you want a Lazarus app- maybe you dont. 
-
-If not- we log as much as possible.
-
 I dont like having a RTL, compiler, LCL, and etc. shoved down my throat.
 All of the code I see presumes you want "an objectified mess".
 
 	This is wrong.
 
 Pascal was never about "doing whats popular" (via dictatorship).
+Nor about forcing certain revisions on you because someone borked previous (or newer) forks.
 
+(Ubuntu has a serious FPC/Lazarus distribution flaw. I had to "reformat root" and fight the OS to fix it.)
+
+SDL 1 and 2  "unified sources" included- for your pleasure programming.
+(Its time to move on to 3D and OpenGL/GLUT.)
+
+Do NOTE that Lazarus Demos suffer from a redraw bug-where the "surface" never gets redrawn.
+Dev team also states a "hackish hack" with the TCanvas supplied via OpenGL.
+
+	This is wrong.
+
+WHY ARE WE NOT DEPENDING on INTERNAL or PASCAL routines (where possible)?	
+- AND WHEN WE DO:
+
+		WHY IS THE CODE BROKEN?
+
+I will get to portage (win32 building) when I can get some sleep (and cross tools for 3.0.4 setup).		
+SDL AUDIO is encountering a random Pointer bug after failing somewhere (assuming to find the soundcard device).
+
+Neither fpc nor fp want to help me in this regard with debugging. 
+I am used to error line nums being provided.
+GDB is not helping whatsoever. Neither is SDL.
 
 ### Backends
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
-  <Compiler Value="/usr/bin/fpc" Date="1454174389"/>
-  <Params Value=" -MObjFPC -Scghi -Cg -O1 -g -gl -l -vewnhibq &quot;-Fi/media/me/ocean/my other shit-HOME/Desktop/code/pasGLDemo/lib/x86_64-linux&quot; -Fl/opt/gnome/lib -Fu/home/me/.lazarus/lib/LazOpenGLContext/lib/x86_64-linux/gtk2 -Fu/usr/lib/lazarus/1.6/lcl/units/x86_64-linux/gtk2 -Fu/usr/lib/lazarus/1.6/lcl/units/x86_64-linux -Fu/usr/lib/lazarus/1.6/components/lazutils/lib/x86_64-linux -Fu/usr/lib/lazarus/1.6/packager/units/x86_64-linux &quot;-Fu/media/me/ocean/my other shit-HOME/Desktop/code/pasGLDemo/&quot; &quot;-FU/media/me/ocean/my other shit-HOME/Desktop/code/pasGLDemo/lib/x86_64-linux/&quot; -dLCL -dLCLgtk2 gldemo1.pas"/>
+  <Compiler Value="/usr/bin/fpc" Date="1540814642"/>
+  <Params Value=" -MObjFPC -Scghi -Cg -O1 -g -gl -l -vewnhibq -Fi/home/me/Desktop/code/sdlBGI/lazgfx/demos/LazGL/lib/x86_64-linux -Fu/home/me/.lazarus/lib/LazOpenGLContext/lib/x86_64-linux/gtk2 -Fu/usr/share/lazarus/2.0.0/lcl/units/x86_64-linux/gtk2 -Fu/usr/share/lazarus/2.0.0/lcl/units/x86_64-linux -Fu/usr/share/lazarus/2.0.0/components/lazutils/lib/x86_64-linux -Fu/usr/share/lazarus/2.0.0/packager/units/x86_64-linux -Fu/home/me/Desktop/code/sdlBGI/lazgfx/demos/LazGL/ -FU/home/me/Desktop/code/sdlBGI/lazgfx/demos/LazGL/lib/x86_64-linux/ -FE/home/me/Desktop/code/sdlBGI/lazgfx/demos/LazGL/ -o/home/me/Desktop/code/sdlBGI/lazgfx/demos/LazGL/gldemo1 -dLCL -dLCLgtk2 gldemo1.pas"/>
 </CONFIG>

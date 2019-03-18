@@ -5,7 +5,7 @@ unit gldemo;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, OpenGLContext, gl;
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, OpenGLContext, gl,glu;
 
 type
   { TForm1 }
@@ -30,19 +30,29 @@ implementation
 
 procedure TForm1.GLboxPaint(Sender: TObject);
 begin
-//  glClearColor(0.27, 0.53, 0.71, 1.0); //Set blue background
-//  glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT);
+  glMATRIXMODE(GL_PROJECTION);
+  glLOADIDENTITY;
 
-  glLoadIdentity;
+  gluPERSPECTIVE(45.0, 640.0/480.0, 1.0, 3.0);
+  glMATRIXMODE(GL_MODELVIEW);
+  glLOADIDENTITY;
+
+  glClearColor(0.27, 0.53, 0.71, 1.0); //Set blue background
+  glClear(GL_COLOR_BUFFER_BIT);
+
+
   glBegin(GL_TRIANGLES);
     glColor3f(1, 0, 0);
     glVertex3f( 0.0, 1.0, 0.0);
+
     glColor3f(0, 1, 0);
     glVertex3f(-1.0,-1.0, 0.0);
+
     glColor3f(0, 0, 1);
     glVertex3f( 1.0,-1.0, 0.0);
   glEnd;
-  GLbox.SwapBuffers;
+
+  //GlBox.Swapbuffers;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -52,8 +62,8 @@ begin
   GLBox.Parent := self;
   GLBox.MultiSampling:= 4;
   GLBox.Align := alClient;
-  GLBox.OnPaint := @GLboxPaint; //for "mode delphi" this would be "GLBox.OnPaint := GLboxPaint"
- // GLBox.invalidate;
+  GLBox.OnPaint := @GLboxPaint; 
+  GLBox.invalidate;
 end;
 
 end.

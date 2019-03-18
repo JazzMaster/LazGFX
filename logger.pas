@@ -15,7 +15,7 @@ var
    output: Text; //untyped text
    logging,donelogging:boolean;
    MyTime: TDateTime;
-
+   IsConsoleInvoked:boolean; external;
 
 function Long2String(l: longint): string;
 Procedure LogLn(s: string);
@@ -58,6 +58,9 @@ end;
 //remember- files WRAP at odd points, depending on the width of the viewing application and output monitor.
 
 procedure LogGLFloat(data:single);
+var
+	stringdata:string;
+
 begin
 	if IsConsoleInvoked then
 		write(data:4:2)
@@ -68,6 +71,9 @@ end;
 
 
 procedure LogGLFloatLn(data:single);
+var
+	stringdata:string;
+
 begin
 	if IsConsoleInvoked then
 		writeln(data:4:2)
