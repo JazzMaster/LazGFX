@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CONFIG>
-  <Compiler Value="/usr/bin/fpc" Date="1540814642"/>
-  <Params Value=" -MObjFPC -Scghi -Cg -O1 -g -gl -l -vewnhibq -Fu/home/me/.lazarus/lib/LazOpenGLContext/lib/x86_64-linux/gtk2 -Fu/usr/share/lazarus/2.0.0/lcl/units/x86_64-linux/gtk2 -Fu/usr/share/lazarus/2.0.0/lcl/units/x86_64-linux -Fu/usr/share/lazarus/2.0.0/components/lazutils/lib/x86_64-linux -Fu/usr/share/lazarus/2.0.0/packager/units/x86_64-linux -Fu/home/me/Desktop/code/sdlBGI/lazgfx/demos/LazGL/test/ -o/home/me/Desktop/code/sdlBGI/lazgfx/demos/LazGL/test/openglcontrol_demo -dLCL -dLCLgtk2 openglcontrol_demo.pas"/>
-</CONFIG>
