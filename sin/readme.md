@@ -9,7 +9,7 @@ Keep everything in one folder for now.
 VS studio 08 is here:
 
 http://download.microsoft.com/download/E/8/E/E8EEB394-7F42-4963-A2D8-29559B738298/VS2008ExpressWithSP1ENUX1504728.iso
-http://download.microsoft.com/download/8/B/5/8B5804AD-4990-40D0-A6AA-CE894CBBB3DC/VS2008ExpressENUX1397868.iso
+
 
 DirectX SDK:
 
@@ -19,6 +19,6 @@ Portaudio(uos support):
 
 http://www.portaudio.com/download.html
 
-SDL2 libs are included here.
+Use the binary SDL2 files(hosted online) or compile the SDL2 sources.
 GL is provided by your video card vendor.
 freeGLUT is included here.

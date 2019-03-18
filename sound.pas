@@ -1,5 +1,5 @@
 Unit sound;
-//in otherwords...music and background FX..for your GAMES!!!!
+//in otherwords...music and background FX!
 //This includes 'music' by para-virtual forms of MIDI equivalent sound effects.
 
 {
@@ -15,13 +15,10 @@ You need external libs to play the following:
     MP3 (.mp3) requiring SMPEG or MAD library
     FLAC (.flac) requiring the FLAC library
 
-ExitCode 309 is due to missing libs...dont come crying to me..
-
-We should just hook FFMpeg or Mplayer but Im not the one writing SDL...
-Dont be fooled, you can play audio with any of these...^^
 }
 
 uses 
+//portAudio
     uos;
     
 type
@@ -41,13 +38,13 @@ type
     
 //so you should be able or OR these together    
 const
-    FXNone=1
-    FXEcho=2
-    FXWahWah=3
-    FXReverb=4
-    FXFlange=5
-    FXDistort=6
-    FXFuzz=7
+    FXNone=1;
+    FXEcho=2;
+    FXWahWah=3;
+    FXReverb=4;
+    FXFlange=5;
+    FXDistort=6;
+    FXFuzz=7;
     
     //Loop- just reset the playing pointer location.
 
@@ -85,15 +82,12 @@ implementation
 
 //basic notes:
 
-//FIXME: I dont know if FPC forces use of PC Speaker or uses soundcard for that.
-
-//	old method:enable pcspkr module(dont blacklist it)
-//	new: try Pulse, then ALSA
+//FIXME: FPC forces use of PC Speaker(then bails due to "not knowing how").
 
 
 {
 frequencies have to come from a table somewhere- wikipedia??
-using real or floats because on certain instruments things can sound canned- or FLAT.
+using real or floats because on certain instruments, things can sound canned- or FLAT.
 
 for each instrument (banjo,flutes,drums) do begin
     x:=0;
@@ -203,7 +197,7 @@ begin
 end;
 
 //The old FPC way of doing things
-//default instrument is a Grand Piano esque output.
+//default instrument is a Grand Piano-esque output.
 procedure PlayNote(freq,HowLong:integer);
 begin
   Sound(freq);
@@ -240,7 +234,7 @@ end;
 
 
 
-//double check w the spec...
+//SDL v1:
 procedure Load_Music(WhatVolume:integer; musicFile:string);
 
 var
@@ -268,11 +262,13 @@ begin
 //    showmessage('I cant play for some reason...Hmph..');
 end;
 
-//main
-begin
+
+begin  //main()
 
 //suppose we should do so OS level checks here, like checking if OSS device exists,ALSA device exists, PA device exists
 //and appropriate kernel modules are loaded.
 //also: whats the OSX (and PRE OSX) method??
   
+
+
 end.
