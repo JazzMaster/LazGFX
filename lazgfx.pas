@@ -714,6 +714,235 @@ end;
 {$endif}
 
 
+{
+//FIXME:
+	finish the OPENGL gaps before replacing this code
+    (some of this code is extremely difficult to implement- and spans over 20 years missing)
+
+
+//16 (candles) colors:
+
+//background color(and clear):
+glClearColor(0.0, 0.0, 0.0, 0.0); 
+glClear(GL_COLOR_BUFFER_BIT);
+
+//foreground color
+glColor4b(color^.r,color^.b,color^.g,255);
+
+//three-quarter tone
+glColor4b(color^.r,color^.b,color^.g,192);
+
+//half-tone
+glColor4b(color^.r,color^.b,color^.g,127);
+
+//quarter-tone
+glColor4b(color^.r,color^.b,color^.g,63);
+
+
+//set size of the pixel(draw w neighbors)
+glPointSize(1);
+
+//FAT lines, anyone?
+glLineWidth(4);
+
+//Dashed(stippled lines!!!!
+
+glLineStipple(1, 0x3F07);
+glEnable(GL_LINE_STIPPLE);
+
+//FAT and stippled can be combined
+
+
+---
+
+//GLUT input:
+
+procedure MouseButton(button, state, x, y:integer);
+begin
+//REM OUT
+  // Respond to mouse button presses.
+  // If button1 pressed, mark this state so we know in motion function.
+
+  if (button = GLUT_LEFT_BUTTON) then
+    begin
+      g_bButton1Down := TRUE then
+		state := GLUT_DOWN;
+      else 
+		state:=GLUT_UP;
+      g_yClick := y - (3 * g_fViewDistance);
+    end;
+
+end;
+
+procedure MouseMotion(x,y:integer);
+begin
+//REM OUT
+  // If button1 pressed, zoom in/out if mouse is moved up/down.
+
+  if (g_bButton1Down) then
+    begin
+      g_fViewDistance := (y - g_yClick) / 3.0;
+      if (g_fViewDistance < VIEWING_DISTANCE_MIN) then
+         g_fViewDistance := VIEWING_DISTANCE_MIN;
+      glutPostRedisplay();
+    end;
+
+end;
+
+--
+//GLOpts:
+
+var
+  PixelData,mypixels:array [MaxX,MaxY] of SDL_Color; //4byte array (pixel) for sizeof(screen)
+  pixels15,pixels16:array [MaxX,MaxY] of word; //Word=2bytes(16 bits) of data
+  maxTextureSize:integer;
+
+
+//bytes are too small for screen co-ords
+procedure DrawGLRect(x1,y1,x2,y2:Word);
+	glRecti(x1, y1, x2,y2);
+end;
+
+procedure DrawGLRect(Rect:PSDL_Rect); overload;
+	glRecti(Rect^.x1, Rect^.y1, Rect^.x2,Rect^.y2);
+end;
+
+
+//gen and renderTex:
+glGenTextures (1, texID);
+glBindTextures (GL_TEXTURE_RECTANGLE, texID);
+
+
+if bpp =32 then
+	glTexImage2D (GL_TEXTURE_RECTANGLE, 0, GL_RGBA, MaxX, MaxY, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, frame);
+
+//make a QUAD
+glBegin (GL_QUADS);
+	glTexCoord2f (0, 0);
+	glVertex2f (0, 0);
+
+	glTexCoord2f (640, 0);
+	glVertex2f (windowWidth, 0);
+
+	glTexCoord2f (640, 480);
+	glVertex2f (windowWidth, windowHeight);
+
+	glTexCoord2f (0, 480);
+	glVertex2f (0, windowHeight);
+glEnd();
+
+//draw(slow)
+GLDrawPixels(1,1,GL_RGBA,GL_UNSIGNED_INT_8_8_8_8_REV,PSDL_Color);
+
+//similar to SDL_GetPixels
+
+function readpixels:(x,y,width,height:integer; Texture:textureID):somePixelData;
+//fucked C output- so lets un-fuck it.
+begin
+  case (bpp) of: 
+
+    //palettized (faked) 24bit
+	4: glReadPixels(0, 0, width, height, GL_RGB, GL_BYTE, mypixels);  
+	8: glReadPixels(0, 0, width, height, GL_RGB, GL_BYTE, mypixels);  
+
+	15:glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1, pixels15);
+	16: glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, pixels16);
+
+	//No upconversion.Settle for 32bit data(24+pad data).
+	24: begin
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, mypixels);  
+
+		end;
+    32: glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, mypixels);
+  end;
+  readpixels:=??
+end;
+
+//co-ordinates: update texture, update rect, or update screen?
+
+procedure UpdateRect(x,y,width,height:integer; Texture:textureID; pixels:PixelData);
+//remember SDlv1 updateRect? This is it - in OpenGL.
+//only update modified pixels
+
+
+begin
+    //check for rubbish
+    if (height <=0) or (width <=0) then begin
+		LogLn('Invalid HxW data given for Texture update');
+		exit;
+    end;
+    if (x <0) or (y <0) then begin
+		LogLn('Invalid XxY data given for Texture update');
+		exit;
+    end;
+
+  glBindTexture(GL_TEXTURE_2D, texture);    //A texture you have already created storage for
+
+  case (bpp) of:
+    //faked RGB modes(24bits colors) w palettes
+	4: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_BYTE, pixels);
+	8: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_BYTE, pixels);
+
+//hacked 16bit support wo alpha 
+
+	15: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1, pixels15);
+	16: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB565,  GL_UNSIGNED_SHORT_5_6_5, pixels16);
+
+//the tuple...
+	24:	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+	32: begin
+			{$ifdef mswindows}
+				glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+			{$else}
+				glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_ARGB, GL_UNSIGNED_BYTE, pixels);
+			{$endif}
+		end;
+   end; //case
+end;
+---
+
+//color ops:
+//theres no need to query what depth/bpp we are in- we should know.
+
+//the tricky part may be in reading pixels back from OGL/SDL 
+//-and converting the output to the format we want.
+
+//"textures may not contain the color mode set"....(SDL)
+
+//15bit is 5551 but the alpha bit is ignored/dropped. (OGL sanity fix)
+
+type
+
+	PRGB=^TRGB;
+	TRGB=record
+		r,g,b:Byte;
+	end;
+
+//4bit=8bit but less colors.
+//4 and 8bit routines(palette) -and look up tables- have been written already.
+
+// for 32-> 15/16 routines, drop the A bit completely. Then run one of these. 
+
+//(24bit RGB->15bits hex):
+procedure RGB24To15bit(in:TRGB; out:PRGB);
+begin
+        out^.r := in.r * (2 shl 5) / (2 shl 8);
+        out^.g := in.g * (2 shl 5) / (2 shl 8);
+        out^.b := in.b * (2 shl 5) / (2 shl 8);
+end;
+
+procedure RGB24To16bit(in:TRGB; out:PRGB);
+begin
+        out^.r := in.r * (2 shl 5) / (2 shl 8);
+        out^.g := in.g * (2 shl 6) / (2 shl 8);
+        out^.b := in.b * (2 shl 5) / (2 shl 8);
+end;
+
+
+}
+
 //Convert an array of four bytes into a 32-bit DWord/LongWord.
 
 function  getDwordFromSDLColor(someColor:PSDL_Color):DWord;
@@ -2463,9 +2692,9 @@ begin
 	if (bpp<=8) then begin
 		for x:=0 to MaxColors do begin
 			if MaxColors =16 then
-				glutSetColor(x,DWordToSingle(Tpalette16.colors[x]^.r),DWordToSingle(Tpalette16.colors[x]^.g),DWordToSingle(Tpalette16.colors[x]^.b))
+				glutSetColor(x,ByteToFloat(Tpalette16.colors[x]^.r),ByteToFloat(Tpalette16.colors[x]^.g),ByteToFloat(Tpalette16.colors[x]^.b))
 			else if MaxColors =256 then
-				glutSetColor(x,DWordToSingle(Tpalette256.colors[x]^.r),DWordToSingle(Tpalette256.colors[x]^.g),DWordToSingle(Tpalette256.colors[x]^.b))
+				glutSetColor(x,ByteToFloat(Tpalette256.colors[x]^.r),ByteToFloat(Tpalette256.colors[x]^.g),ByteToFloat(Tpalette256.colors[x]^.b))
 			inc(x);
 		end;
 	end;
@@ -2474,7 +2703,8 @@ begin
 	exit; //back to initgraph we go.
 
 	end else if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
-    
+    //modeChange
+
 		if Render3d then //we use DEPTH(3D) instead of 2D QUADS
 			glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH);
 		
@@ -2484,45 +2714,69 @@ begin
 				glutEnterGameMode;
 				glutSetCursor(GLUT_CURSOR_NONE);
 		end else begin //windowed
-			if Render3D then
-				glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH); 
-		    
-		    glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB);	
+			
 			glutInitWindowSize(MaxX, MaxY); 
+		case(bpp) of: //with chosen resolutions bpp do
+		//always use double buffering(pageFLipping)
+		//force a compatible 555 15bit depth		
+		//force a compatible 565 16bit depth
+        //4bit is a limited paletted 8 bit mode (mode hack)
+
+			4:GLMode:='index double';
+			8:GLMode:='index double'; 
+			15:GLMode:='rgb depth=15 double'; 
+			16:GLMode:='red=5 green=6 blue=5 depth=16 double'; 
+			24:GLMode:='rgb double'; 
+			32:	GLMode:='rgba double'; 
+		end; //case
+		glutInitDisplayString(GLMode); 
+		if WantsFullScreen then begin
+				glutGameModeString(FSMode);
+				glutEnterGameMode;
+				glutSetCursor(GLUT_CURSOR_NONE);
+		end else begin //windowed
+			
 			ScreenWidth := glutGet(GLUT_SCREEN_WIDTH); 
 			ScreenHeight := glutGet(GLUT_SCREEN_HEIGHT); 
 			glutInitWindowPosition((ScreenWidth - AppWidth) div 2, (ScreenHeight - AppHeight) div 2); 
-			glutCreateWindow('Lazarus Graphics Application'); 	
+			glutCreateWindow('Lazarus Graphics Application'); 
+			
 		end
-	
+	    prepareOpenGL;	
+
 	   	//r,g,b=0,a=1
 		glClearColor( 0.f, 0.f, 0.f, 1.f );
 		glClear( GL_COLOR_BUFFER_BIT );
 		
 		//set callbacks-you need to override- or define these
-		//right now- these "do nothing" except for resize.
+		//external declarations.
 		glutDisplayFunc(@DrawGLScene);
 		glutReshapeFunc(@ReSizeGLScene);
 		glutKeyboardFunc(@GLKeyboard);
+		glutMouseFunc(@GLMouse);
 		glutIdleFunc(@DrawGLScene);
 
-   	    //reset palette data
-		if bpp=4 then
-			InitPalette16
-		else if bpp=8 then 
-			InitPalette256; 
-      
-		if (bpp<=8) then begin
-			for x:=0 to MaxColors do begin
-				if MaxColors =16 then
-					glutSetColor(x,DWordToSingle(Tpalette16.colors[x]^.r),DWordToSingle(Tpalette16.colors[x]^.g),DWordToSingle(Tpalette16.colors[x]^.b))
-				else if MaxColors =256 then
-					glutSetColor(x,DWordToSingle(Tpalette256.colors[x]^.r),DWordToSingle(Tpalette256.colors[x]^.g),DWordToSingle(Tpalette256.colors[x]^.b))
-				inc(x);
-			end;
-		end;
+    end; //setup renderer
 
-	end; //already in gfx mode
+	glutSetIconTitle(iconpath);
+
+
+    if bpp=4 then
+      InitPalette16
+    else if bpp=8 then 
+      InitPalette256; 
+      
+	if (bpp<=8) then begin
+		for x:=0 to MaxColors do begin
+			if MaxColors =16 then
+				glutSetColor(x,ByteToFloat(Tpalette16.colors[x]^.r),ByteToFloat(Tpalette16.colors[x]^.g),ByteToFloat(Tpalette16.colors[x]^.b))
+			else if MaxColors =256 then
+				glutSetColor(x,ByteToFloat(Tpalette256.colors[x]^.r),ByteToFloat(Tpalette256.colors[x]^.g),ByteToFloat(Tpalette256.colors[x]^.b))
+			inc(x);
+		end;
+	end;
+
+  end; //already in gfx mode
 end; //setGraphMode
 
 

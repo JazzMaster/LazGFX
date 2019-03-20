@@ -697,23 +697,32 @@ tfsGWhite
 
 );
 
-//Code on borrowed time:
+//faked "SDL"
 
 SDL_Color=record
 	r,g,b,a:byte;
 end;
 
 //the other include file (palette) has the conversion code
+
+//if LE:
+GL_RGBColor=record
+	r,g,b:single;
+end;
+
 GL_Color=record
 	r,g,b,a:single;
 end;
+
+//else: flip the storage
+
 
 //I dunno what I was thinkin here w "TSDLColors"-3-14-2019
 TRec16=record
   
 	colors:array [0..15] of PSDL_COLOR; 
 
-	DWords:array [0..15] of DWord;
+//	DWords:array [0..15] of DWord;
 
 end;
 
@@ -732,7 +741,7 @@ end;
 TRec256=record
 
   colors:array [0..255] of PSDL_COLOR; ; //this is setup later on. 
-  DWords:array [0..255] of DWord;
+ // DWords:array [0..255] of DWord;
 
 end;
 
