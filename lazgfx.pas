@@ -2383,7 +2383,7 @@ var
     surface1:PSDL_Surface;
     FSNotPossible:boolean;
     thismode:string;
-    mode:PSDL_DisplayMode;
+    GLmode:PChar;
 
 begin
 //we can do fullscreen, but dont force it...
@@ -2409,35 +2409,45 @@ begin
 	else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //initgraph called us
 			glutInitPascal(False);
 
-		if Render3d then //we use DEPTH(3D) instead of 2D QUADS
-			glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH);
-		
-		glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB);	
+			glutInitWindowSize(MaxX, MaxY); 
+		case(bpp) of: //with chosen resolutions bpp do
+		//always use double buffering(pageFLipping)
+		//force a compatible 555 15bit depth		
+		//force a compatible 565 16bit depth
+        //4bit is a limited paletted 8 bit mode (mode hack)
+
+			4:GLMode:='index double';
+			8:GLMode:='index double'; 
+			15:GLMode:='rgb depth=15 double'; 
+			16:GLMode:='red=5 green=6 blue=5 depth=16 double'; 
+			24:GLMode:='rgb double'; 
+			32:	GLMode:='rgba double'; 
+		end; //case
+		glutInitDisplayString(GLMode); 
 		if WantsFullScreen then begin
 				glutGameModeString(FSMode);
 				glutEnterGameMode;
 				glutSetCursor(GLUT_CURSOR_NONE);
 		end else begin //windowed
-			if Render3D then
-				glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH); 
-		    
-		    glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB);	
-			glutInitWindowSize(MaxX, MaxY); 
+			
 			ScreenWidth := glutGet(GLUT_SCREEN_WIDTH); 
 			ScreenHeight := glutGet(GLUT_SCREEN_HEIGHT); 
 			glutInitWindowPosition((ScreenWidth - AppWidth) div 2, (ScreenHeight - AppHeight) div 2); 
-			glutCreateWindow('Lazarus Graphics Application'); 	
+			glutCreateWindow('Lazarus Graphics Application'); 
+			
 		end
-	
+	    prepareOpenGL;	
+
 	   	//r,g,b=0,a=1
 		glClearColor( 0.f, 0.f, 0.f, 1.f );
 		glClear( GL_COLOR_BUFFER_BIT );
 		
 		//set callbacks-you need to override- or define these
-		//right now- these "do nothing" except for resize.
+		//external declarations.
 		glutDisplayFunc(@DrawGLScene);
 		glutReshapeFunc(@ReSizeGLScene);
 		glutKeyboardFunc(@GLKeyboard);
+		glutMouseFunc(@GLMouse);
 		glutIdleFunc(@DrawGLScene);
 
     end; //setup renderer
