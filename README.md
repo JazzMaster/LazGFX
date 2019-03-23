@@ -8,55 +8,63 @@ Its a GRAPHICS MODE "Canvas", not unlike TCanvas.
 
 We will try to use "TCanvas2 objects" as the code evolves.
 
-### Modification Warning
+### EXTERNAL LIBS warning:
 
-The code is merging to OpenGL/freeGLUT calls instead of "Obscure half-assed" SDL ones.
-Ultimately- you arent going to notice this(much).
+This UNIT API uses several external libs-
 
-With SDL v1 we put the pixels in ourselves with blits,etc 
-- with OpenGl- the GPU fills them in(for us).
-
-(Its a lot less headache)
+		THIS IS HOW LINUX IS DESIGNED
+		
+The location of which on Windows is completely unknown(they could be anywhere).		
 
 
-This leaves audio and networking up to other libraries.
+Several new libraries are filling in the gaps that SDL left, fast.
 
-Changes still pending:
+Glitter BoilerPlate area(GitHub) adds the following:
 
-		Game Precision Timers
-		Threads/Threading
-		Using PortAudio (uos) instead of SDL2_Mixer routines
-		Open Networking library hooks(to Pascal sources)
+		libSOIL (advanced image loading -beyond BMP and TGA)
+				dropping vampyre/PasJPEG for ease of use
+		
+		assimp (3D meshes)
+		bullet (physics)
+		
+		some personal libraries:
+			glm
+			stb
+
+Port Audio/uos implements "AUDIO"
+Pascal libNet and similar provide "NET"
+
 	
-I dont like having a RTL, compiler, LCL, and etc. shoved down my throat.
-All of the code I see presumes you want "an objectified mess".
-
-	This is wrong.
-
-Pascal was never about "doing whats popular" (via dictatorship).
-Nor about forcing certain revisions on you because someone borked previous (or newer) forks.
-
-(Ubuntu has a serious FPC/Lazarus distribution flaw. I had to "reformat root" and fight the OS to fix it.)
+### SDL??	
 
 SDL 1 and 2  "unified sources" included- for your pleasure programming.
-(Its time to move on to 3D and OpenGL/GLUT.)
+SDL AUDIO is encountering a random Pointer bug after failing somewhere 
+(Im assuming it cant find the soundcard device).
 
-Do NOTE that Lazarus Demos suffer from a redraw bug-where the "surface" never gets redrawn.
-Dev team also states a "hackish hack" with the TCanvas supplied via OpenGL.
 
-	This is wrong.
+### Port status
 
-WHY ARE WE NOT DEPENDING on INTERNAL or PASCAL routines (where possible)?	
-- AND WHEN WE DO:
+WIN32:
 
-		WHY IS THE CODE BROKEN?
+		Win32 port is coming. I have VS2017 setup under Win7. 
+		M$FT is trying to kill off 7 and 8 again- this time by failing to implement SHA2 in Win7
 
-I will get to portage (win32 building) when I can get some sleep (and cross tools for 3.0.4 setup).		
-SDL AUDIO is encountering a random Pointer bug after failing somewhere (assuming to find the soundcard device).
+MAC:
 
-Neither fpc nor fp want to help me in this regard with debugging. 
-I am used to error line nums being provided.
-GDB is not helping whatsoever. Neither is SDL.
+		My Mac mini is in pieces. NO DICE right now with XCode.
+
+Ubuntu:
+
+		has a serious FPC/Lazarus distribution flaw. 
+		I had to "reformat root" and fight the OS to fix it.
+
+PULL SUBVERSION LATEST and install those packages- 
+do NOT insall system fp-* (nor Lazarus packages) from the system repo.
+
+		If you do - youll have to find the teeth pullers.
+
+You can get it working(fixed)- but its a R-PITA.
+
 
 ### Backends
 
@@ -65,6 +73,9 @@ Mac uses:
 
 Windows/ Unices can use: 
 		OpenGL/freeGLUT
+
+Mobile/RasPi:
+		OpenGL ES (slight code tweaks needed)
 
 ## Ports
 
@@ -110,7 +121,7 @@ I will be happy to import code.
 state:  RELEASE freeze at .80 (SUCCESS)
 master branch: code is unstable WIP. May or may not build.
 
--detectGraph is missing.
+-detectGraph() is missing.
 
 ---
 
@@ -215,35 +226,21 @@ The API is typically used to interact with a graphics processing unit (GPU), to 
 
 "
 
-
-You may also follow along here (not overly difficult once you understand SDL):
-
-		http://wiki.lazarus.freepascal.org/OpenGL_Tutorial
-
-QUADS refers to "2D opengl". Squares have four points(QUADS).
+QUADS refers to "2D opengl". Squares have four points.
+The co ordinate system- by default is FUBAR, IMHO. Ive patched it "back to sanity".
 
 
-#### X11
+There is a ASS-TON of OGL snippets coming in from all angles-pun intended.
+Not all of it is in the main unit--some is directly on my desktop. 
+Code needs to be mega sorted again- as I did before.
 
-Because X11 is protocol based- 
+Refernece Materiels coming (OGL Red/Blue books)
 
-	I can throw a X11 session thru your web browser
-	-or across the room- 
+SDL GFX unit is no longer needed(at all). 
+Dont freak out- we have similar implementation.
 
-for example. 
+Major missing chunks of the BGI are coming together, quickly.
 
-	Same with PulseAudio.
-
-
-[X11 Basics](https://magcius.github.io/xplain/article/x-basics.html)
-
-X11 and WinAPI use similar core routines and methods
-but dont provide a "canvas" (drawable area) by themselves.
-
-Window managers(Unices) take over the rest of what you interact with. 
-
-(There is no assumed "core theme or X11 toolkit engine" on unices. 
-The user has to choose what to install and use.)
 
 
 ### So what about Raster graphics?
@@ -266,8 +263,6 @@ So to answer you- we are working on RASTER, then working on VECTOR later(or a co
 Everything is in one folder for a reason.
 (Dont confuse *me* -or the compiler)
 
-The .inc are mostly for SDL2 internals.
-**You will need these, "DO NOT DELETE"**
 
 You should be able to compile this once you GIT (or Download) sources to your computer, so long as FPC and/or
 Lazarus is installed.
@@ -276,11 +271,8 @@ This code doesnt call the LCL- but yours might.
 LCL errors are up to you to fix.
 
 SDL "Pointer issues" and mem-alloc/free issues- need to be worked out by you.
+Im having a hard time debugging them myself- and SDL doesnt want to co operate.
 
-I know JEDI is broken in places and I appreciate the help in fixing it.
-"JEDI" is a "C header port" to FPC for using SDL graphics.
-
-		That means the core C routines ARE NOT PORTED or re-wroked. UNTIL NOW.
 
 
 ### Why WHYE ..WHEY..
@@ -288,7 +280,10 @@ I know JEDI is broken in places and I appreciate the help in fixing it.
 There are loads of projects where people cannot revise changes publicly.
 Programmers are making it more difficult with mailing lists (spam) and "private repos".
 
-This isnt the 1990s. USE GITHUB. USE TRAC(or similar). COLABORATE.
+This isnt the 1990s. 
+USE GITHUB. 
+USE TRAC(or similar). 
+COLABORATE.
 
 A lot of other code is half-assed or broken.
 People suffer from information overload and cant figure things out.
@@ -314,52 +309,20 @@ Shoving people into SDL and saying "good luck"-
 **Lazarus OGL demos DO NOT work (correctly).**
 
 Code has been abandoned.
-This appears to be a "shader sequence" problem.
+This appears to be a "shader sequence" or "3D depth" (Z axis) problem.
 
 
-#### can we add routines??
-
-SURE! 
-
-But Id advise looking into the C projects already active.
-
-This being said- DO NOT link into C versions of libgraph. 
-
-(You will probably confuse the existing code if you do.
-Further- this is why I CANT (wont) call this unit "libGraph")
-
-You need to translate the headers(properly) to use the C.
-I didnt do this because of threading problems when I used it.
-
-These problems can be avoided if the code is written correctly.
-If the code needs to be reworked- do it right.
-
-
-#### Focus:
+### Focus:
 
 		Unices (red hat, fedora, Suse, ubuntu,debian,etc.)
         MacOSX 10.2+ Quartz ( at minimal X11 )
         Windows (7+)
         Android(eventually- theres more to this than just getting the routines working)
 
-Graphics libraries for DOS/FreeDOS??
+Need Graphics libraries for DOS/FreeDOS??
 
 		Try the original BGI written by Borland, INC.
 		The BGI has been 256 color extended - I have the patch.
-
-#### Windows is not out in the cold
-
-There are some ports to Sin (windows) already using WinAPI. 
-The WinAPI port was written to fix a SDL "speed issue".
-What is not mentioned is if SDLv2 was used or SDLv1. Much code still uses the older v1 interface.
-
-#### LibGraph Failures
-
-LibGraph(C) or otherwise-
-
-		HAS NOT BEEN EXTENDED TO 3D.
-
-This was planned from DAY ONE. I came into the game- knowing nothing about OGL.
 
 
 ### Dependencies (INSTALL ME FIRST!!):
@@ -410,8 +373,6 @@ For SDL in C, Try the directions here:
 			
 			http://lazyfoo.net/tutorials/SDL/01_hello_SDL/mac/index.php
 			(You will need XCode 6.1, "Yo-sem-i-te" is assumed.)
-
-However- SDL has installed alongsinde XCode in earlier OSX versions.
 
 We need to setup FPC and the LCL now. This is a process.
 
@@ -506,7 +467,7 @@ ALL ELSE FAILS:
 ## Why --Pascal-- and why now and why THIS WAY?
 
 		-Its FUN and EASY to write code for	(I like puzzles)	
-		-Full 16, 256, RGB, and RGBA support (32BIT) up to 1080p.
+		-Full 16, 256, RGB, and RGBA support (256BIT??) up thru 1080p.
 
 		-TCanvas for Laz doesnt quite do the job.
 		-Linux has never had a graphics engine or BGI. EVER. Only TCanvas has come close(incomplete).
@@ -514,18 +475,26 @@ ALL ELSE FAILS:
 		-GVision for Linux (Pascal version of Win311) never took off. 
 		-JEDI doesnt stand for what you think it does- its incomplete, missing, and now depreciated.
 		
-		-Castle engine is good, potentially "missing in places" things we should have and requires OpenGL knowhow.
+		-Castle engine is good, BUT requires OpenGL (and Lazarus) knowhow.
+		Begging programmers are baffled.
 
-		-Most projects are non-portable. Unix uses X11/OpenGL,Mac uses Quartz and Sin uses DirectX/WinAPI.
+		-Most projects are non-portable. 
+		
+			Unix uses X11/OpenGL
+			Mac uses Quartz
+			Sin uses DirectX/WinAPI.
+			Lazarus is turning into OOP OBJ customized UnFreePascal, much like VC did.
 
 		-This isnt a "class project", its my passion. Im not rushing my work.
 		-Nobody uses Int10 DOS assembler anyore. Even less use Int10 "graphics modes".
-
+		-This is 32/64 bits code
 
 ### The objective of this package
 
 	 1) to enable people to run programs written using BGI or "libGraph" functions 
-         directly in "Linux"(Linus Torvaldis Unix). 
+        directly in "Linux"(Linus Torvaldis Unix). 
+        
+        a)	To simplify GAME DEVELOPMENT and OS MULTIMEDIA programming
          
 	 2) To take old code, help you execute it, learn form it, and move forward.
 
@@ -537,7 +506,7 @@ ALL ELSE FAILS:
 I hope it is useful..yada yada yada....YMMV. 
 **Read the Licence agreement provided**
 
-		GPL-> LGPLv2 (due to being a library)
+		LGPLv2 (due to being a library)
 
 
 #### Where is the application?
@@ -550,45 +519,9 @@ Be mindful of the initgraph (and other) header change.
 Even "nil pointing" "PathToDriver" still leaves us in a window.
 (If you want fullscreen--I have to ask.)
 
-Provides(these parts should be working):
+The pyramid(tetrahedron) demo has been SDL v2 patched and now utilizes event based input alongside OGL.
+		There is no text (OutText) functions in OGL right now.
 
-		Initgraph
-		CloseGraph
-		Logging
-		Put/GetPixel ops
-		Get/set Color ops on pixels or "screen as a whole"
-		Get/Set image file to "screen"
-		Alert Boxes(butt ugly SDL, not Lazarus ones which Id prefer)
-		Text functions
-		Lines
-		Rectagles/Squares
-        "Direct OpenGL" Tetra-hedron(Pyramid) demo
-        SDL_Keypressed /GLUT ReadKey
-
-To exit the OGL demo:
-
-        click on the terminal that called it and press a key.
-
-Although it calls SDL, it DOES NOT invoke event handling(which is wrong) so the output window wont accept input.
-(I will fix this at some point)
-
-		ERROR: Improper use of ReadKey() and why you shouldnt use it in an event driven program
-
-
-untested:
-
-		Input handling from keyboard,mouse,joystick,haptic  (in renderloop within a unit)                
-        SDL_Readkey
-        SDL_Readline (should be used with dialog input, normally)
-
-In Progress:
-
-		Polygons
-		Circles/Ellipses
-		Fills
-		LineStyles (incomplete)
-		3D OGL routines(spheres, tubes,pyramids,multi-faceted objects,skins) 
-		
 
 #### BGI output
 
@@ -603,25 +536,12 @@ Hold your enthusiasm. "Its pretty primitive".
 
 ### Lets run "make"....
 
-By default the makefile compiles for :
-
-		Win32/64
-		linux 32/64 
-
-All in one go.
-FPC does NOT use MINGW libraries, like GCC requires. 
-It uses RTL folders (per OS implemented routines) instead.
-
-I usually DL the FPC FULL sources and compile everything
-
-
-The LazGFX makefile is not designed for MAC, MOBILE, nor Windows(MS Studio). 
-(It cross-builds to windows.)
-
-(MSVS requires a .sln file, like Lazarus uses .lpk, and XCode .project)
+	MSVS requires a .sln file
+	Lazarus uses .lpk.lpi file
+	XCode wants a .project file
 
 I just run FPC over the main unit file right now. Nothing fancy.
-The makefile will be used in the future.
+The makefile will be used in the future. (Bash doesnt like it.)
 
 
 ### DEMOS!!! LOADS OF DEMOS!!!
@@ -670,6 +590,8 @@ Re-ported (from C) via FreePascal (FPK) dev team, myself and a few others.
 I have left reference where its due in the code. 
 I only accept credit where its due me.
 
+Embrecardo has taken over Delphi after about 3 corporate buyouts.
+
 
 ## Final NOTE:
 
@@ -684,16 +606,13 @@ This is a BGI interface port.
 
         Write for the BGI, and the code should 'just work'. (for the most part)
 
-Seriously...the SDL syntax (in C) isnt that hard to master. 
+Seriously...the SDL (and sometime openGL) syntax (in C) isnt that hard to master. 
 (I can piss better C and PYTHON in my sleep-- and I refuse to write C.)
 
 
 #### Have a "Final Product"??
 
-Remember to "remove debugging code and strip binaries" IN ADDITION to OTHER BUILD 
-OPTIMIZATIONS like SSE[1-4]/AVX when writing for real gaming hardware.
-
-(Or if you are distributing your application) 
+Remember to "remove debugging code and strip binaries".
 
 ---		
 	
@@ -708,32 +627,6 @@ A: Scan thru the headers or a PASCAL REFERENCE manual for "UNIT HEADER INVOCATIO
 You should only need headers to understand Pascal syntax. 
 The rest is minor details unless you want to sweat those.
 Same for SDL in C. (C is backwards with variables, mind you)
-
-
-Q: It seems incomplete...
-
-
-A: Not quite. 
-Most basic functions should work- for example: initgraph.
-Keep in mind the original code was very primitive.
-
-Im not "emulating" every function. 
-Im rewriting the "most useable".
-
-Due to SDL quirks, some functions arent (and will never be) rewritten.
-Other take some "off the shelf thinking" to implement.
-
-I will get to the more advanced functions as time allows. 
-
-I havent really looked at the castle engine yet but one can assume that since it uses FPC,
-its otherwise "feature incomplete" and they are using straight OGL.
-
-TCanvas was half-assed.
-
-SDL provides a bridge (to get to) OGL.
-SDL2 uses OGL QUADS.
-
-Why do it directly(PITA) when you can use "easier to use" routines?
 
 
 Q: I think I found a bug!
@@ -764,10 +657,11 @@ Try to learn Lazarus. If not, try Delphi.
 
 Q: can you port for game platform (X?)..
 
-A: Not unless its supported by BOTH FPC and SDL.
+A: Not unless its supported by BOTH FPC and OpenGL.
 
 		iPhone , iPad, iWatch..have restricted OBJ-C licenses.
 		FPC is blacklisted for these targets. 
+		
 		Apps are signed- and checked-for compliance- by Apple.
 		I cannot help you.
 
@@ -792,51 +686,25 @@ A: No warrantees of...... yada yada yada...you didnt read the Licence.
 Ive your not going to read, then you probably shouldnt be writing code.
 Im not going to beat it into you- I have better things to do.
 
+		LIKE WRITE CODE!
+
 
 Q: Is this all this can accomplish?
-
 A: Hell No.
 
-These are baseline examples of what the BGI does and SDL certainly is far more advanced.
-Ive previously written more advanced examples, potential screensavers in 256+ color modes..
-etc etc.
-
-I have to redo the BGI to get the extended support that I need- to run that code.
-
-(The FPC code hasnt been ported in over 10 years...)
-Those programs and routines were patching the BGI- as it was- already existing- for DOS.
-I didnt write assembler, so the code *is* portable.
-
-You need the baseline to establish "graphics mode" before you can add more functionality.
-This is Mostly "backwards compatible" but Im not Borland and Im doing it my way.
-
-You will probably be using alpha blending,blittering and rendering or mixed of those
-and Anti-Aliased stuff I havent written for yet. 
-
-Not a problem -but Im not there yet. 
-
+I leave most excersies up to the reader- as THIS IS A LIBRARY.
 
 
 Q: Whut? 3D? Physics? huh? The files says 'physics'...
 
-A: Unlike the BGI, SDL uses both 2d AND 3D/OpenGL functions. 
-So YES, we can and we WILL extend our code.
+A: 
 
-POSTAL uses SDL.
-POSTAL2 uses Unreal engine
-Skyrim uses Havok/DX9 (Special Edition uses DX11/DXVK)
+BULLET physics- at the least have beenimplemented. 
+Lets see how to hook them.
 
+Collision physics come mostly from SDL and public Game design experience.
 
-There are two types of physics:
-
-		Render Target (SDL engine and sprite collision)
-		Physics (Math based w 3d objects)
-
-Render Target comes first(2d). 
-For the latter "think nVidia".
-
-If you can get **HERE**  advanced game design should be a cakewalk for you.
-And **THAT** is the point.
+---
 
 Q: Runtime errors..I get these STUPID ERRORS!
 
@@ -853,13 +721,6 @@ Furthermore-
 Check SDL depends for multimedia. 
 (I cant control those..SDL links into them as seperate projects.)
 
-Error 2 is File not Found
-Error 216 is usually an "out of bounds" caused by "Alloc and not Free" POINTER errors
-
-AKA:
-
-		You are doing something in a loop that continuously allocates (surface) ram but doesnt free it.
-		-or some pointer was dereferenced (emptied) twice.
 
 Could be also that you need to recompile Lazarus(point variance I call it-version mismatch) or build some
 or all of the LCL subcomponents. THAT- I CANT help you with.
