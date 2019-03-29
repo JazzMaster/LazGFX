@@ -302,13 +302,9 @@ Begin
 		Read(palette16File, TPalette16GRey); 
 	    
 	Close(palette16File);
-	
-     SDL_AllocPalette(16);    
-    if ReadColorFile =true then
-          
-          SDL_SetPaletteColors(palette,Tpalette16.colors,0,16)
-    else
-          SDL_SetPaletteColors(palette,Tpalette16GRey.colors,0,16);
+
+//TODO: now fill the palette (GL)
+
 
 end;
 
@@ -1238,11 +1234,8 @@ Begin
 
 	Read(palette256File, TPalette256); 
 	Close(palette256File);	
-    SDL_AllocPalette(256);    
-    if ReadColorFile =true then
-          SDL_SetPaletteColors(palette,Tpalette256.colors,0,256)
-    else
-          SDL_SetPaletteColors(palette,Tpalette256GRey.colors,0,256);
+	
+//TODO: set palette (GL)	
 
 end;
 

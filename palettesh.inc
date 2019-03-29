@@ -9,11 +9,12 @@ colors (indexes) above 255 should throw an error if using palettes.
 (technically they are rgb(a) colors and have no index anymore)
 (so we are in true colors and straight rgb/rgba after this.....)
 
-You need (full) DWords or RGB data for TRUE color modes.
+You need RGB data for TRUE color modes.
  
-'A' bit affects transparency and completes the 'DWord'.
+'A' bit affects transparency 
+
 The default setting is to ignore it(FF) in 256 color modes.
-(m)CGA is a touch whacky.
+	(m)CGA is a touch whacky.
 
 Most bitmap or blitter or renderer or opengl based code uses some sort of shader(or composite image).
 This isnt covered here.
@@ -56,6 +57,8 @@ this is only for the default palette of course- if you muck with it.....
 }
 
 //blink is a "text attribute" ..a feature...not a color
+// -it was implemented in hardware in early 80s
+
 //write..wait.erase..wait..rewrite..just like the blinking cursor..
 
 {
@@ -63,12 +66,6 @@ this is only for the default palette of course- if you muck with it.....
 colors: 
 
 	MUST be hard defined to set the pallete prior to drawing.
-	No 16 color bitshifting hacks allowed. They dont work anymore.
-	    However: you can-
-	         adjust the colors by some math
-	         render something
-	         and restore the colors before rendering again
-			 then render something else
 }
 
 type
@@ -80,7 +77,8 @@ type
 
 //iirc - its ...RED,BLUE,GREEN... on the ol 8088s...
 // K-R-B-G-C-M-Br Gy-Gyd R-B-G-C-M-Y-W (CGA)
-// vs K-B-G-C-R-M-Br Gy-Gyd- B-G-C-R-M-Y-W (wikipedia) 
+// vs 
+// K-B-G-C-R-M-Br Gy-Gyd- B-G-C-R-M-Y-W (wikipedia) 
 //the xterm 256 spec reflects this- oddly.
 
 
@@ -91,6 +89,7 @@ TPalette16Names=(BLACK,RED,BLUE,GREEN,CYAN,MAGENTA,BROWN,LTGRAY,GRAY,LTRED,LTBLU
 TPalette16NamesGrey=(gBLACK,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11,g12,g13,g14,gWHITE);
 
 //tfs=two fifty six
+
 //original xterm must have these stored somewhere as string data because parts of "unused holes" and "duplicate data" exist
 
 // I can guarantee you a shade of slateBlue etc.. but not the exact shade.
@@ -714,15 +713,13 @@ GL_Color=record
 	r,g,b,a:single;
 end;
 
-//else: flip the storage
+//else: flip the data value the other way around
 
 
 //I dunno what I was thinkin here w "TSDLColors"-3-14-2019
 TRec16=record
   
 	colors:array [0..15] of PSDL_COLOR; 
-
-//	DWords:array [0..15] of DWord;
 
 end;
 
@@ -741,7 +738,6 @@ end;
 TRec256=record
 
   colors:array [0..255] of PSDL_COLOR; ; //this is setup later on. 
- // DWords:array [0..255] of DWord;
 
 end;
 
@@ -759,5 +755,4 @@ var
 
   TPalette256:TRec256;
   TPalette256Grey:TRec256;
-
 
