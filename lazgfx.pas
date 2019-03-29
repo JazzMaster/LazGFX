@@ -1,4 +1,7 @@
 Unit LazGFX; 
+
+//now officially "a MESS v4...."
+
 //Range and overflow checks =ON
 {$Q+} 
 {$R+}
@@ -9,37 +12,42 @@ Unit LazGFX;
 {$ENDIF}
 
 {
-A "fully creative rewrite" of the "Borland Graphic Interface" in SDL(and maybe libSVGA) 
-(c) 2017-18 (and beyond) Richard Jasmin
+A "fully creative rewrite" of the "Borland Graphic Interface" (c) 2017 (and beyond) by Richard Jasmin
 -with the assistance of others.
 
-LPGL v2 ONLY. 
+This code **should** port or crossplatform build, but no guarantees.
+SEMI-"Borland compatible" w modifications.
+
+Lazarus graphics unit is severely lacking...use this instead.
+
+
+LGPL v2 ONLY. 
 You may NOT use a higher version.
 
-Commercial software is allowed- 
+Only OPEN/free units and code will ever be used or linked to here.
+Only cross-platform methods will be used.
+
+IN NO WAY SHAPE OR FORM are proprietary functions to be added here.
+	You may use them if you wish- but the result is non-portable. (more headache for ewe)
+
+Commercial software linking/building is allowed- 
  	provided I get the backported changes and modifications(in source format).
 
 I dont care what you use the source code for.
+	I would prefer- however-
+		THAT YOU STICK TO FPC/LAZARUS.
 
 You must cite original authors and sub authors, as appropriate(standard attribution rules).
 DO NOT CLAIM THIS CODE AS YOUR OWN and you MAY NOT remove this notice.
 
----
 
 Although designed "for games programming"..the integration involved by the USE, ABUSE, and REUSE-
 of SDL and X11Core/WinAPI(GDI)/Cairo(GTK/GDK)/OpenGL/DirectX highlights so many OS internals its not even funny.
 
-I think this will go in this direction henceforth:
-
-(equivalent SDL2+ support)
-
-	freeGLUT/GL for 2D (QUADS) 
-	freeGLUT for 3D (unless there is strong reason to use more detailed routines)
-
-
 GL by itself doesnt require X11- but it does require some X11 code for "input processing".
 
-It is Linux that is the complex BEAST that needs taming.
+-It is Linux that is the complex BEAST that needs taming.
+	Everyone seem to be writing in proprietary windowsGL, DirectX,etc.
 
 }
 
@@ -58,18 +66,21 @@ I write CODE for a living.
 Everything is mutable."
 
 
-We output to Surface(buffer/video buffer) via memcopy operations.
+We output to Surface/Texture (buffer/video buffer) usually via memcopy operations.
 
 
 For framebuffer:
 	
 For now- we settle for a Doom like experience. 
 	We start in text mode
-	We switch to graphics mode and do something (catch all crashes)
+		We switch to graphics mode and do something (catch all crashes)
 	We drop back to text mode
 
 Im still looking at Quartz seperately. OSX is funky in this regards.	
 90% of the routines in the CORE of this unit(not sub units) are setup/destroy of needed structures.
+
+The main unit is aux routines and init/closegraph mostly.
+Most of the meat and po-tae-toes are in the aux units.
 
 Canvas ops are "mostly universal".
 The differences in code are where the surface(Canvas) operations point to and color operations supported.
@@ -78,26 +89,24 @@ The differences in code are where the surface(Canvas) operations point to and co
 	-For that matter:
 			(A texture is a texture is a texture)
 
+---
 INVOKATION:
 
 There are two ways to invoke this unit-
 1- with GUI and Lazarus
 
-Project-> Application (kiss writeln() and readln() goodbye)
-You can only log output.
+	Project-> Application (kiss writeln() and readln() goodbye)
 
-
-2- as a Console Application
+2- as a Console Application(NO GUI)
 
 In Lazarus: 
 
-Project-> Console App or
-Project-> Program
+	Project-> Console App or
+	Project-> Program
 
 Set Run Parameters:
-"Use Launcher" -to enable runwait.sh and console output (otherwise you might not see it)
-
--This was the old school "compiler output window" in DOS Days.
+	"Use Launcher" -to enable runwait.sh and console output (otherwise you might not see it)
+	-This was the old school "compiler output window" in DOS Days.
 
 
 Within FP application itself(FP IDE):
@@ -106,44 +115,37 @@ Within FP application itself(FP IDE):
 	-Write the code normally
 	-Check the output window
 
-This method offers Readln() / writeln() 
+**This method offers Readln() / writeln() 
 
-What you wont get is the LCL and components and nice UI- but we are using SDL/freeGLUT for that.
-:-P
-
-
--THIS CODE WILL CHECK WHICH IS USED and log accordingly.
+**THIS CODE WILL CHECK WHICH COMPILE METHOD IS USED and log accordingly.**
 
 ---
 
 Theres confusion in SDL:
 	SDL 1.2 uses Surface ops
-	SDL 2.x builds on Surfaces(you still need them in some cases) and adds Accellerated GPU rendering
+	SDL 2.x builds on Surfaces(you still need them in some cases) and adds 2D compositing support(GL)
 		Most ops will switch to Render calls, but not all.
-		Function calls were modified between SDL 1 and 2.
 		all uses clauses and include files must point to SDL2. You cannot mix 1.2 and 2.x.
 		
-	SDL2 uses ortho 2D quads and 3D openGl calls.
+	SDL2 uses ortho 2D quads but adds support(hackish) for 3D OGL.
 		
 	SDL_GPU isnt really an advanced unit- its optimized unit "utilizing the renderer".
 		I inadvertently "half-assed" half the color routines myself.
+
 			Fpc Dev team(more stable codebase based upon Borlands BGI) has the remaining routines.
 				These may not be the most optimal routines- they are the most tested.
 
-	So why all of the huff and puff "exquisite C" bullshit?
-
-NOTE:
-	Im getting "Lazarus bullshit" as of late....you dont need the LCL!
-
-(createTextureFromSurface must use surface^.format -of chosen bpp- or it could be off)
-
+	SDL by itself- does NOT do 3D. I dont think it ever will.
 
 How to write good games:
 
-SDL1.2 (learn to page flip or animate)
-SDL2.0 (renderer and "render to textures as surfaces")
-Learn OpenGL or freeGLUT(natively)
-CODE!
+	SDL1.2 (learn to page flip or animate)
+		YES- animation like mickey mouse 1950s flip-books
+
+	SDL2.0 (learn how to use the renderer and "render to textures as surfaces")
+
+	Learn OpenGL or freeGLUT
+	WRITE CODE(DUH)!
 
 You need to know:
 
@@ -155,93 +157,37 @@ If you need to see SDL in action:
 
 	Postal(1) uses SDL.
 	Hedgewars uses SDL v1.2.
-	Nexiuz and SuperTux uses SDL 2
+	Nexiuz and SuperTux uses SDL 2(w OGL?)
 
+CIRCLES vs ELLIPSE:
 
 The difference between an ellipse and a circle is that "an ellipse is corrected for the aspect ratio".
 	Circles are "squarely PIE"- or have equal slices of the pie.(Like a rectangle)
 	Ellipses do not necessarily- they could be tall, or wide- as well.
 
 FONTS:
+	Theres two ways to do this
 
-    I have some base fonts- most likely your OS has some - but not standardized ones.
-    We do NOT use bitmapped fonts- we use TTF.
-	8x8 internal routines were based on ANCIENT Video BIOS specs.
-		Why cant we use another TTF file- and make it required distribution- instead??
-		
-	TTF and OTF are the new standard.
+	Old school butmap (glyph based- mipmap)
+	New school OpenTTF (lacking support)
 
+	There is limited Font support thru freeGLUT/GLUT.
+	I am looking into a solution thru some Lazrus code.
 
-This code is Useful when you need VESA modes but cant have them because X11, etc. is running.
-This code **should** port or crossplatform build, but no guarantees.
-
-SEMI-"Borland compatible" w modifications.
-
-
-Lazarus graphics unit is severely lacking...use this instead.
-
-
-SDL adds mouse and joystick, even haptic/VR feedback support.
-This wil be added in if I can find the hooks for it. It is a OpenGL issue as of now.
-
-
-However, "licensing issues" (Fraunhoffer/MP3 is a cash cow) wreak havoc on us. 
- 	-as with qb64 (which also uses SDL)
- 	
-Yes- I Have a merge tree of qb64 that builds, just ask...
-
-
-LFB:
-
-Linear Framebuffer is virtually required(OS Drivers). Bank switching has had some isues in DOS.
-A lot of code back in the day(20 years ago) was written to use "banks" due to color or VRAM limitations.
-The dos mouse was broken due to bank switching (at some point). 
-The way around it was to not need bank switching-by using a LFB. 
-
-
-CGA as implemented here is actually mCGA(pre-VGA 16 color mode).
-True CGA is 4plane-4color mode (and its butt ugly).
- 
-It was designed for early GREEN and ORANGE monitors and 4 color monitors that had some limits.
-As such-also due to "ROM bugs", some "yellows" were actually "oranges".
-
-Full compatibilty CGA will require a lot of aspirin and "funky math" as well as code rewrites Im not ready for.
-The idea is that the code otherwise works.
-
-
-THIS CODE is written for 32 AND 64 bit systems.
-TP code has a 32bit Overlay-> VM patching unit. 
-(I suggest you use it. )
-
-16 Bit systems will have to use code hacks and function relocation definitions as like the original hackish Borland unit used. 
-Memory addressing MMU/PMU, etc. allows such things that Borland Pascal does not anymore.
-
-
-----
-
+BPP/depth:
 It can be assumed that:
 	The programmer knows what depth we are in
 	At the very least -the current set video mode- has a depth
 	
-
-Things to keep in mind:
-
-Data is often stored in 24bits mode, even though it needs to be displayed or manipulated in other modes.
-
--which means get and put pixel ops, file load and save ops have to take this into account.
-Its another necessary nightmare if not using 32bit or paletted 256 modes.
-
----
-
 
 Note the HALF-LIFE/POSTAL implementation of SDL(steam):
 
     start with a window
     set window to FS (hide the window)
     draw to sdl buffer offscreen and/or blit(invisible rendering)
-    renderPresent  (making content visible)
+    pageFlip/renderPresent  (making content visible)
 
-this IS the proper workflow.
+-this IS the proper workflow.
 
 
 Most Games use transparency(PNG) for "invisible background" effects.
@@ -257,22 +203,20 @@ SDL_SetColorKey(Mainsurface,SDL_TRUE,DWord);
 -Where DWord is the color for the colorkey(greenscreen effect)
 
 PNG can be quantized-
-Quantization is not compression- its downgrading the color sheme used in storing the color
-and then compensating for it by dithering.(Some 3D math algorithms are used.)
-(Beyond the scope of this code)
+	Quantization is not compression- 
+		its downgrading the color sheme used in storing the color
+		and then compensating for it by dithering.(Some 3D math algorithms are used.)
+	(Beyond the scope of this code)
 
 PNG itself may or may not work as intended with a black color as a "hole".This is a known SDL issue.
-PNG-Lite may come to the rescue- but I need the Pascal headers, not the C ones.
 
-
+PALETTES:
 Not all games use a full 256-color (64x64) palette, even today.
 
 This is even noted in SkyLander games lately with Activision.
 "Bright happy cheery" Games use colors that are often "limited palettes" in use.
 
 Most older games clear either VRAM or RAM while running (cheat) to accomplish most effects.
-        RenderClear() -accomplishes this
-
 Most FADE TO BLACK arent just visuals, they clear VRAM in the process.
 
 Fading is easy- taking away and adding color---not so much.
@@ -296,7 +240,7 @@ BPP 	 COLORS						RGB value
 24		(16,777,216) 				-TRUE COLOR mode "millions" - no alpha 888
 32		(4,294,967,296) 			--(TRUE COLOR(24) plus full alpha-bit) 8888
 
-Not yet supported:
+Not yet supported with SDL (but perhaps with OGL):
 
 30		(1,073,741,824) 			--DEEP color "billions" 10:10:10
 32		4 Bil						10:10:10:2
@@ -307,7 +251,7 @@ Not yet supported:
 
 Common Resolutions:
 
-RES							BPP Supported
+Resolution					BPP Supported
 320x200 					4/8bpp
 320x240 					4/8bpp
 
@@ -332,22 +276,10 @@ Not Supported(SDL Limit):
 
 
 I havent added in Android or MacOS modes yet.
-You cant support portable Apple devices. Apple forbids it w FPC.
+You cant support portable Apple devices. 
+		Apple forbids it w FPC.
 
 ---
-
-**CORE EFFICIENCY FAILURE**:
-
-Pixel rendering (the old school methods)
-
-We have to "lock pixels" to work with them, then "unlock pixels" and "pageFlip". 
-Texture rendering(SDL2) uses the VRAM for ops -whereby SDL1 uses RAM and CPU(Surfaces).
-
-rendering is a one-way street, however.
-
-Our ops are restricted, even yet to "pixels" and not groups of them.
-TandL is a "pixel-based operation".
-
 
 MessageBox:
 
@@ -355,10 +287,10 @@ With Working messageBox(es) we dont need the console.
 You can choose the color scheme and input methods- YES/NO, OK...
 
 Lazarus Dialogs are only substituted IF LCL is loaded. 
-(TVision routines wouldnt make sense, use GVision instead if you like)
+(TVision routines wouldnt make sense in graphics modes-
+	you may use GVision routines instead)
 
-GVision, routines can now be used where they could not before.
-GVision requires Graphics modes(provided here) and TVision routines be present(or similar ones written).
+GVision requires Graphics modes(provided here) and TVision code "be left around".
 FPC team is refusing to fix TVision bugs. 
 
         This is wrong.
@@ -367,56 +299,58 @@ LOGS:
 
 Some idiot wrote the logging  code wrong and it needs to be updated for FILE STREAM IO.
 I havent done this yet.
+(Call me lazy or just not up "streaming Lazarus")
 
-Logging will be forced in the folowing conditions:
+	You should log something.
 
-    under windows or linux with LCL
-    user flips the logging bit
-
+THANK YOU:
 
 Code upgraded from the following:
 
-	original *VERY FLAWED* port (in C) coutesy: Faraz Shahbazker <faraz_ms@rediffmail.com>
-	unfinished port (from go32v2 in FPC) courtesy: Evgeniy Ivanov <lolkaantimat@gmail.com> 
-	some early and or unfinished FPK (FPC) and LCL graphics unit sources 
-	SDLUtils(Get/PutPixel) SDL v1.2+ -in Pascal
-    JEDI SDL headers(unfinished) and in some places- not needed.
-    StackExchange SDL examples in C/CPP 
+	original *VERY FLAWED* port (in C) coutesy: 
+		Faraz Shahbazker's BS-level classroom homework(GitHub) <faraz_ms@rediffmail.com>
 
-    libSVGA Lazarus wiki found here: http://wiki.lazarus.freepascal.org/svgalib
-    libSVGA in C: http://www.svgalib.org/jay/beginners_guide/beginners_guide.html
+	unfinished port (from go32v2 in FPC) courtesy: 
+		Evgeniy Ivanov <lolkaantimat@gmail.com> 
+
+	some early and or unfinished FPK (FPC) and LCL graphics unit sources 
+
+    JEDI SDL headers(unfinished)
+
+    StackExchange SDL examples in C/CPP (ported)
+
 
 manuals:
     SDL1.2 pdf
+	SDLv2.0 online documentation
+
     Borland BGI documentation by QUE Publishing ISBN 0880224290
     TCanvas LCL Documentation (different implementation of a 'SDL_screen') 
+
     Lazarus Programming by Blaise Pascal Magazine ISBN 9789490968021 
-    Getting started w Lazarus and FP ISBN 9781507632529
+    Getting started w Lazarus and FreePascal ISBN 9781507632529
+
     JEDI chm file
 	TurboVision(TVision) references (where I can find them and understand them.)
 
-	mesa docs
-	GLU docs
-	OpenGL docs
-	GLUT docs
-	freeGLUT docs
+	OpenGL books -ISBN coming- (book hasnt arrived yet for OGL RED/BLUE books)
 
-NOTE: All visual rendering routines are 'far calls' if you insist building for DOS.
-(I really cant help you if you do, but dont drop 32+ cpu support. I will merge the code if you fork it, however.)
+	online GLEW docs
+	online GLU/GLUT docs
+	online freeGLUT docs
 
-
-to animate- screen savers, etc...you need to (page)flip/rendercopy and slow down rendering timers.
-(trust me, this works-Ive written some soon-to-be-here demos)
-
+animations:
+	to animate- 
+		screen savers, etc...you need to (page)flip/rendercopy and slow down rendering timers.
+		(trust me, this works-Ive written some soon-to-be-here demos)
+		The biggest issue becomes OVER RENDERING.
 
 bounds:
    cap pixels at viewport
-   off screen..gets ignored but should throw an error- we should know screen bounds.
    (zoom in or out of a bitmap- but dont exceed bounds.) 
 
 
 on 2d games...you are effectively preloading the fore and aft areas on the 'level' like mario.
-there are ways to reduce flickering -control the amount of calls to renderClear() and RenderPresent(). 
 
 
 Palettes:
@@ -428,7 +362,7 @@ Palettes:
   Note "the holes" can be used for overlay areas onscreen when stacking layers.
   The holes are standardized to xterm specs. I think theres like 5.
 
-Im seeing a Ton of correlation between OGL/SDL and DirectX/DirectDraw (and people think there isnt any).
+  Im seeing a Ton of correlation between OGL/SDL and DirectX/DirectDraw (and people think there isnt any).
 
 
 WONTFIX:
@@ -436,55 +370,36 @@ WONTFIX:
 "Rendering onto more than one window (or renderer) can cause issues"
 "You must render in the same window that handles input"
 
-Converstion note:
-SDL routines require more than just dropping a routine in here- 
-    you have to know how the original routine wants the data-
-        get it in the right format
-        call the routine
-        and if needed-catch errors.
 
-SDL is not SIMPLE. 
-The BGI was SIMPLE.
+SDL BULLSHIT:
 
- --Jazz (comments -and code- by me unless otherwise noted)
+	SDL is not SIMPLE. 
+	The BGI was SIMPLE.
+
+--Jazz 
+(comments -and code- by me unless otherwise noted)
+
 
 TODO:
 
-input:
-	rely less on SDL and more on GL/freeGLUT operations(simpler)
-	 
-	
-finish implementation of "if Render3D":
-
-	all functions need OpenGL modifications
-	RenderCopy ->  glSwapBuffers
-	
-	2d functions:
-		surface ops with OUR INTERNAL screen buffer.(SDL_Surface doesnt exist)
-
-	3d functions:
-		no surface, no texture, no renderer, no "direct renderer" code
-		(implement these in GL/GLUT)
+	Get some framebuffer /EGL fallback code working and put it here.	 
 	
 	all color ops need mods for OpenGL(update from surface to texture ops)
 	need to implement "format agnostic" color conversion with all bpp depths
 		("depth" in OGL is considered cubic depth, not bpp)
 		
-	RECOMPILE(2.0)!!!
 } 
 
 
 uses
+
 {
-Threads and fpfork(forking), requires baseunix unit
-cthreads has to be the first unit -in this case-we so happen to support the C version.
+Threading(required):
 
-ctypes: cint,uint,PTRUint,PTR-USINT,sint...etc.
-unless you want to rewrite someone elses C, use this.
+Requires baseunix unit:
 
-
-There is a way to use SDL timers, signals and threads. 
-  _type is used instead of the reserved word 'type'
+cthreads has to be the first unit -in this case-
+	we so happen to support the C version natively.
 
 }
 
@@ -494,11 +409,14 @@ There is a way to use SDL timers, signals and threads.
 //cthreads and cmem have to be first.
 {$IFDEF unix} 
 	cthreads,cmem,baseunix, X, XLib,sysUtils,
-	 {$IFNDEF fallback} //fallback uses XCorePrim only, otherwise keep loading libs
+	 {$IFNDEF fallback} //fallback uses FrameBuffer only code(slow), otherwise keep loading libs
 		Classes,GL,GLext, GLU,
 		//probly cairo and pango too at this point.
 	 {$ENDIF}
 {$ENDIF}
+
+//ctypes: cint,uint,PTRUint,PTR-usINT,sint...etc.
+//unless you want to rewrite someone elses C, use this.
  
     ctypes,
         
@@ -508,7 +426,6 @@ There is a way to use SDL timers, signals and threads.
 		WinAPI,
 	 {$endif}
      Windows,
-     //MMsystem, --audio subsystem does uos need this?
      {$IFNDEF LCL} //conio apps only
 		crt,crtstuff,
      {$ENDIF}
@@ -523,16 +440,15 @@ There is a way to use SDL timers, signals and threads.
 
 {
 
-//messageDlg requires a result (if x=y, then..) 	
+messageDlg requires a result (if x=y, then..) 	
 
 
-//MIM joke...
 function AskMessagewButtonAnswer(title,question:string):Longint;
 begin
   AskMessagewButtonAnswer:=longint(MessageDlg(title, question, mtConfirmation, [mbYes, mbNo,mbMaybe, mbRepeatTheQuestion],0));
 end;
 
-//(asking for strings and passwords is also possible)
+(asking for strings and passwords is also possible)
 
 endif
 }
@@ -551,7 +467,7 @@ endif
     {$IFDEF MSWINDOWS}
        //we will check if this is set later.
       {$DEFINE NOCONSOLE }
-      logger,
+      
 	{$ELSE }  
     {$IFDEF unix}
     //UNIX
@@ -563,11 +479,11 @@ endif
       //we still technically DO have a console- even a GUI app can be launched from the commandline.
       //output then goes THERE-instead of the Lazarus equivalent.
       //THIS TRICK DOES NOT WORK on Windows. Windows removes crt and related units when building a UI app.
-      crt,crtstuff,logger,
+      crt,crtstuff,
     {$ENDIF}
+   logger,
   {$ENDIF}
-
-
+  
 {
 Lazarus Menu:  
 	"View" menu, under "Debug Windows" there is an entry for a "console output" 
@@ -583,7 +499,7 @@ Run -> Run Parameters, then check the box for "Use launching application".
 
 To build without the LCL(in Lazarus):
 
- Just make a normal "most basic" program and call me or SDL directly in your "uses clause".
+ Just make a normal "most basic" program and call me in your "uses clause".
 
  You will find that the LCL may be a burden or get in your way- 
 	we dont really use the fundamentals of OBJFPC, OBJPAS, or Lazarus beyond basic functions.
@@ -650,9 +566,6 @@ mutex(es):
 The idea is to talk when you have the rubber chicken or to request it or wait until others are done.
 Ideally you would mutex events and process them like cpu interrupts- one at a time.
 
--Moreso for the event handler-
-(creating a window apparently trips like 5 events??)
-
 
 sephamores are like using a loo in a castle- 
 only so many can do it at once. 
@@ -661,17 +574,19 @@ only so many can do it at once.
 
 }
 
-//share the main unit headers for the expanded units
+
 
 {$INCLUDE lazgfx.inc}
 
-//break up sub units
+
+type
+	//r,g,b,a
+	GL_Color= array [0..3] of float;
+
 {$INCLUDE palettesh.inc}
 {$INCLUDE modelisth.inc}
 
 //color conversion procs etc...taking up waay too much room in here...
-//this will need modification since we should know the surface bpp set- or at least the output bpp
-//(we dont need SDLv1 surface bpp checks)
 
 {$INCLUDE colormodsh.inc}
 
@@ -682,20 +597,6 @@ implementation
 {$INCLUDE modelist.inc}
 {$INCLUDE colormods.inc}
 
-//Get and MapRGB/RGBA in a nutshell
-
-{
-caveat: 15/16/24 bit color has no A value. 
-in 256 color mode we set the palette assuming a 32bit full DWord.
-in reality colors are 00-FF. we have simulate based on 32 bit colors- as there is no data for the old modes.
-
-problem with 15/16 color modes(or similar 3:3:2 modes-) how do we tell if the color is out of range?
-WE have to establish the params- not guess at them.
-
-24 is the easiest- with the SDL_Color array. All color bytes, and no Alpha-bit.
--As long as we deal with RGBA values(or RGB,A=255) or DWords -we are ok.
-
-}
 
 {$IFDEF mswindows}
 //Win only routines
@@ -714,11 +615,29 @@ end;
 {$endif}
 
 
-{
-//FIXME:
-	finish the OPENGL gaps before replacing this code
-    (some of this code is extremely difficult to implement- and spans over 20 years missing)
 
+//returns the floatValue of the current "RGB (BYTE) quad"
+//to be useful - or do math ops- we need the byte values.
+
+function GetColor:single;
+var
+	GotColor:float;
+
+begin
+	glGetFloatv(GL_CURRENT_COLOR,GotColor);
+    GetColor:=GotColor;
+end;
+
+function GetColor:Byte;
+var
+	GotByte:byte;
+	GotColor:float;
+begin
+	glGetFloatv(GL_CURRENT_COLOR,GotColor);
+	GetColor:=Float2Byte(GotColor);
+end;
+
+{
 
 //16 (candles) colors:
 
@@ -746,16 +665,11 @@ glPointSize(1);
 glLineWidth(4);
 
 //Dashed(stippled lines!!!!
-
-glLineStipple(1, 0x3F07);
-glEnable(GL_LINE_STIPPLE);
-
 //FAT and stippled can be combined
 
+glEnable(GL_LINE_STIPPLE);
+glLineStipple(1, 0x3F07);
 
----
-
-//GLUT input:
 
 procedure MouseButton(button, state, x, y:integer);
 begin
@@ -774,9 +688,9 @@ begin
 
 end;
 
+//has wheel moved?
 procedure MouseMotion(x,y:integer);
 begin
-//REM OUT
   // If button1 pressed, zoom in/out if mouse is moved up/down.
 
   if (g_bButton1Down) then
@@ -789,14 +703,12 @@ begin
 
 end;
 
---
-//GLOpts:
+}
 
 var
   PixelData,mypixels:array [MaxX,MaxY] of SDL_Color; //4byte array (pixel) for sizeof(screen)
   pixels15,pixels16:array [MaxX,MaxY] of word; //Word=2bytes(16 bits) of data
   maxTextureSize:integer;
-
 
 //bytes are too small for screen co-ords
 procedure DrawGLRect(x1,y1,x2,y2:Word);
@@ -808,33 +720,9 @@ procedure DrawGLRect(Rect:PSDL_Rect); overload;
 end;
 
 
-//gen and renderTex:
-glGenTextures (1, texID);
-glBindTextures (GL_TEXTURE_RECTANGLE, texID);
-
-
-if bpp =32 then
-	glTexImage2D (GL_TEXTURE_RECTANGLE, 0, GL_RGBA, MaxX, MaxY, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, frame);
-
-//make a QUAD
-glBegin (GL_QUADS);
-	glTexCoord2f (0, 0);
-	glVertex2f (0, 0);
-
-	glTexCoord2f (640, 0);
-	glVertex2f (windowWidth, 0);
-
-	glTexCoord2f (640, 480);
-	glVertex2f (windowWidth, windowHeight);
-
-	glTexCoord2f (0, 480);
-	glVertex2f (0, windowHeight);
-glEnd();
-
-//draw(slow)
-GLDrawPixels(1,1,GL_RGBA,GL_UNSIGNED_INT_8_8_8_8_REV,PSDL_Color);
-
 //similar to SDL_GetPixels
+
+//put the WHAT out of GetPixels(SDL):
 
 function readpixels:(x,y,width,height:integer; Texture:textureID):somePixelData;
 //fucked C output- so lets un-fuck it.
@@ -845,6 +733,7 @@ begin
 	4: glReadPixels(0, 0, width, height, GL_RGB, GL_BYTE, mypixels);  
 	8: glReadPixels(0, 0, width, height, GL_RGB, GL_BYTE, mypixels);  
 
+//pad w zeros??
 	15:glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1, pixels15);
 	16: glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, pixels16);
 
@@ -856,10 +745,11 @@ begin
 		end;
     32: glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, mypixels);
   end;
-  readpixels:=??
+//  readpixels:=mypixels;
 end;
 
 //co-ordinates: update texture, update rect, or update screen?
+
 
 procedure UpdateRect(x,y,width,height:integer; Texture:textureID; pixels:PixelData);
 //remember SDlv1 updateRect? This is it - in OpenGL.
@@ -901,7 +791,6 @@ begin
 		end;
    end; //case
 end;
----
 
 //color ops:
 //theres no need to query what depth/bpp we are in- we should know.
@@ -912,7 +801,7 @@ end;
 //"textures may not contain the color mode set"....(SDL)
 
 //15bit is 5551 but the alpha bit is ignored/dropped. (OGL sanity fix)
-
+}
 type
 
 	PRGB=^TRGB;
@@ -924,6 +813,7 @@ type
 //4 and 8bit routines(palette) -and look up tables- have been written already.
 
 // for 32-> 15/16 routines, drop the A bit completely. Then run one of these. 
+
 
 //(24bit RGB->15bits hex):
 procedure RGB24To15bit(in:TRGB; out:PRGB);
@@ -941,7 +831,7 @@ begin
 end;
 
 
-}
+
 
 //Convert an array of four bytes into a 32-bit DWord/LongWord.
 
@@ -995,6 +885,151 @@ begin
    somecolor^.b:=byte(^b);
    somecolor^.a:=byte(^a);
 
+end;
+
+// SDL FIXME: 50 million functs to do something!
+//these two redraw after enable/disable
+procedure EnableAAMode;
+
+begin
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glEnable(GL_BLEND);
+      glEnable(GL_POINT_SMOOTH);
+      glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+      glEnable(GL_LINE_SMOOTH);
+      glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+      glEnable(GL_POLYGON_SMOOTH);
+      glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+      glutPostRedisplay;
+end;
+
+procedure DisableAAMode;
+
+begin
+	glDisable(GL_BLEND);
+    glDisable(GL_LINE_SMOOTH);
+    glDisable(GL_POINT_SMOOTH);
+    glDisable(GL_POLYGON_SMOOTH);
+	glutPostRedisplay;
+end;
+
+
+//just changes the value- doesnt put it on screen
+procedure SetRGBColor(r,g,b:byte);
+begin
+	glColor3b (r, g, b); //sets implied 255 alpha level
+end;
+
+procedure SetRGBAColor(r,g,b,a:byte);
+begin
+	glColor4b (r, g, b,a); //YOU set alpha level-255 is solid, 0 is opaque (what are you drawing over?)
+end;
+
+procedure PutPixelRGB(r,g,b:byte);
+begin
+	glColor3b (r, g, b); //sets implied 255 alpha level
+	PutPixelXY(x,y);
+end;
+
+
+procedure PutPixelRGBA(r,g,b,a:byte);
+begin
+	glColor4b (r, g, b,a); //YOU set alpha level-255 is solid, 0 is opaque (what are you drawing over?)
+	PutPixelXY(x,y);
+end;
+
+
+procedure DrawPoly(Points:array [0..64] of PolyPts; num:byte);	
+//use predefind objects or tessellate if you have need of more surface "curvature"
+
+begin	
+	if FilledPolys then	
+		// draw solids:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	
+
+	else
+		//dont draw solids:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBegin(GL_POLYGON);
+		repeat
+			glVertex2s(Points[num]^.x,Points[num]^.y);	
+			dec(num);
+		until num=1;
+	glEnd;
+	glFlush;
+end;
+
+procedure CreateNewTexture;
+var
+   tex:GLuint;
+   
+begin
+	glGenTextures(1, tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+
+	//keep coord sane between 0 and 1
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); //X
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); //Y
+	if not drawAA then begin
+	
+		//pixely -lookig mode
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	end else
+		//smooth ele-va-tor...
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+end;
+
+var
+	pixelArray:array [0..MaxX,0..MaxY] of PSDL_Color;
+
+//RenderTexture then glFlush/RenderPresent/PageFlip)
+
+//copy pixels provided to the current Texture.
+procedure RenderToTexture
+begin
+	case bpp of:
+
+		4,8,24: RenderTextureRGB;
+	//	15,16: RendereTextureInt;
+		32: RenderTextureRGBA;
+	end;
+end;
+
+procedure RenderTextureRGB(pixels:pixelArray);
+
+begin
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT,pixelArray );
+end;
+
+
+
+//libSOIL
+procedure Load_Image
+
+var
+	width, height:integer;
+    image:PChar; 
+
+begin
+  image:=SOIL_load_image("img.png", width, height, 0, SOIL_LOAD_RGB); //load image
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image); //copyTex
+  
+end;
+
+procedure Load_ImageScaled(scaleX,ScaleY:integer);
+
+var
+    image:PChar; 
+
+begin
+  image:=SOIL_load_image("img.png", width, height, 0, SOIL_LOAD_RGB); //load image
+  //I dont think this is how its done...GL is weird in whacky ways...
+  
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ScaleX, ScaleY, 0, GL_RGB, GL_UNSIGNED_BYTE, image); //copyTex
+  
 end;
 
 
@@ -1639,6 +1674,54 @@ begin
 end;
 
 
+//USE:
+
+// (freeGLUT string types limited.)
+//RenderStringF(0.0f, 0.0f, GLUT_BITMAP_TIMES_ROMAN_24, "Hello", someGLColor);
+//RenderStringB(15, 15, GLUT_BITMAP_TIMES_ROMAN_24, "Hello", someSDLColor);
+
+//float color input(GL)
+procedure RenderStringF(x, y:Word; font:Pointer; string:PChar; rgb:GL_Color);
+
+begin
+
+  glColor3f(rgb^.r, rgb^.g, rgb^.b); 
+  glRasterPos2f(x, y);
+
+  glutBitmapString(font, string);
+end;
+
+//Byte color input(SDL)
+procedure RenderStringB(x, y:Word; font:Pointer; string:PChar; rgb:SDL_Color); 
+
+begin
+
+  glColor3b(rgb^.r, rgb^.g, rgb^.b); 
+  glRasterPos2s(x, y);
+
+  glutBitmapString(font, string);
+end;
+
+
+//uses current color set with glColor
+
+procedure PutPixel(x,y:GLShort);
+
+//GL_SHORT is 2 bytes(a Word)
+//create a 2D vertex(point) using "normal values" instead of floats.
+//DOES NOT WORK outside of GLbegin..GLend pair
+
+begin
+	glbegin(GL_POINTS); //draw WHAT? Dots/points/pixels
+		if PlotwNeighbors then begin
+			gl_PointSize = 8.0;
+			//linestyle:=THICK;
+
+		glVertex2s(x, y);
+	glend;
+	glFlush; //swoosh!
+end;
+
 //this is for dividing up the screen or dialogs (in game or in app)
 
 //TP spec says clear the last one assigned
@@ -1659,17 +1742,24 @@ end;
 
 //at each 60hz/75hz cycle--attempt to update the screen--if not paused.
 
-Proceedure videoCallback;
+Procedure videoCallback;
+//you really shouldnt use this- you should give and take TimerTicks
+//when rendering instead.
 
+var
+	refresh:single; //float
 begin
+	//if "fetch refresh data" = failed then   
+//		refresh:=1000 / 60;
+
+	//else
+	//refresh:=GotRefresh;
 
    if (not Paused) then begin //if paused then ignore screen updates
+	  if TimerTicks(Now) / refresh then //only at minimal 60hz refresh
    //interval will be one of:
    //	60,72,75,90(VR),120
-		if not Render3d then
-           SDL_RenderPresent(Renderer);
-        else //OGL
-			glutSwapBuffers;
+		glutSwapBuffers;
    end;
 end;
 
@@ -1678,12 +1768,13 @@ procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathT
 
 var
 	bpp,i:integer;
-	_initflag,_imgflags:longword; //PSDL_Flags?? no such beast 
     iconpath:string;
-    imagesON,FetchGraphMode:integer;
-	mode:PSDL_DisplayMode;
-    AudioSystemCheck:integer;
-	rate:integer;
+    FetchGraphMode:integer;
+//	mode:PSDL_DisplayMode;
+//    AudioSystemCheck:integer;
+//	rate:integer;
+	Half_Width:float;
+	Half_Height:float;
 
 begin
 
@@ -2316,9 +2407,46 @@ $F-
 
   _grResult:=OK; //we can just check the dialogs (or text output) now.
 
-  //give us standard LH corner coordinate system and reset to 0,0.
-  
-  glOrtho( 0, MaxX, MaxY, 0, 0, 1.0 );
+ 
+	
+//gimmie floats from the word based coord system
+	floatedMaxX:=Int2Float(MaxX);
+	floatedMaxY:=Int2Float(MaxY);    
+
+
+    HALF_WIDTH := floatedMaxX / 2.0f;
+    HALF_HEIGHT := floatedMaxY / 2.0f;
+
+    // Setup the projection matrix
+    glMatrixMode(GL_PROECTION);
+    glLoadIDentity();
+    glOrtho(0, MaxX, MaxY, 0.0f, 0.0f, 1000.0f);
+
+    // Setup the BGI-to-view matrix(Allegro uses similar)
+    //(setup to that we flip the X axis to get proper co ordinate system)
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslatef(-HALF_WIDTH, HALF_HEIGHT, 0.0f);
+    glScalef(1.0f, -1.0f, 1.0f);
+
+	if Render3d then begin
+		glEnable(GL_DEPTH_TEST);
+		glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT);
+	end
+
+	else begin
+		glDisable(GL_DEPTH_TEST);
+		glClear(GL_COLOR_BUFFER_BIT);
+		
+		glEnable(GL_TEXTURE_2D); // Enable 2D Textures
+		glEnable(GL_PROGRAM_POINT_SIZE); //enables fat pixels(linestyles);
+
+		//makes no sence in 3D realms to not have a Z axis(depth).
+		//we want pixels to override each other by default (unless blending)
+
+    end;	
+
+
   where.X:=0;
   where.Y:=0;
 
@@ -2356,37 +2484,7 @@ $F-
 
 end; //initgraph
 
-
-{--seems incomplete
-//stream is a chunk of audio
-
-//uos (portaudio) is significantly easier
-
-procedure InitAudio;
-var
-
-	want, have:PSDL_AudioSpec;
-	dev:SDL_AudioDeviceID;
-
-begin
-	SDL_memset(@want, 0, sizeof(want)); 
-	want^.freq = 48000;
-	want^.format = AUDIO_F32;
-	want^.channels = 2;
-	want^.samples = 4096;
-	want^.callback = MyAudioCallback; //@MyAudioCallBack??
-
-	dev := SDL_OpenAudioDevice(NiL, 0, @want, @have, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
-	if (dev = 0) then 
-	    LogLn('Failed to open audio: ' + SDL_GetError);
-	else begin
-	    if (have^.format <> want^.format) then 
-    	    SDL_Log('We didnt get Float32 audio format.');
-    
-//    SDL_PauseAudioDevice(dev, 0); // start audio playing. 
-//    SDL_Delay(5000); // let the audio callback play some sound for 5 seconds. 
-end;
-}
+//uos will handle Audio
 
 procedure closegraph;
 var
@@ -2398,6 +2496,7 @@ begin
 
   LIBGRAPHICS_ACTIVE:=false;  //Unset the variable (and disable all of our other functions in the process)
 
+{
   //if wantsInet then
 //  SDLNet_Quit;
 
@@ -2425,7 +2524,6 @@ begin
 
    SDL_DestroyCond(eventWait);
    eventWait := nil;
-
   
   if (TextFore <> Nil) then begin
 	TextFore:=Nil;
@@ -2441,21 +2539,6 @@ begin
   if wantsFullIMGSupport then 
      IMG_Quit;
 
-
-  die:=9; //signal number 9=kill
-  //Kill child if it is alive. we know the pid since we assigned it(the OS really knows it better than us)
-
-  //were stuck in a loop
-  //we can however, trip the loop to exit...
-
-  exitloop:=true;
-  Killstatus:=FpKill(EventThread,Die); //send signal (DIE) to thread
-
-  EventThread:=0;
-
-  dispose( Event );
-  //free viewports
-
   x:=8;
   repeat
 	if (Textures[x]<>Nil) then
@@ -2463,7 +2546,7 @@ begin
 		Textures[x]:=Nil;
     dec(x);
   until x=0;
-  
+ 
 
 //Dont free whats not Allocated in initgraph(do not double free)
 //routines should free what they AllocMemate on exit.
@@ -2478,30 +2561,21 @@ begin
 		Renderer:= Nil;
 		SDL_DestroyRenderer( Renderer );
 	end;	
+}
 
-	if (Window<> Nil) then begin
-		Window:= Nil;
-		SDL_DestroyWindow ( Window );
-	end;	
-  end;
-  if Render3D then
-	glutLeaveMainLoop;
-  
-  SDL_Quit; 
-
+  glutLeaveMainLoop;
+  Window:=Nil;
 
   if IsConsoleInvoked then begin
-     
          textcolor(7); //..reset standards...
          clrscr; //text clearscreen
          writeln;
   end;
-  //unless you want to mimic the last doom screen here...usually were done....  
-  //Yes you can override this function- if you need a shareware screen on exit..Hackish, but it works.
   
   halt(0); //nothing special, just bail gracefully.
 end;            	 
 
+//not really used
 function GetX:word;
 begin
   x:=where.X;
@@ -2515,30 +2589,33 @@ end;
 function GetXY:longint; 
 //This is the 1D location in the 2D graphics area(yes, its weird)
 
-//"pitch" in console mode is like 54928 or something..
+//"X pixels into the screen (or buffer) is the location of XY"
+var
+	pitch:integer;
 begin
+//ATI HD7850 -in console mode
+
+  pitch:=54928;
   x:=where.X;
   y:=where.Y;
-  GetXY := (y * (MainSurface^.pitch mod (sizeof(byte)) ) + x); //byte or word-(lousy USint definition)
+  GetXY := (y * (pitch mod (sizeof(word)) ) + x); 
 end;
 
 
-//GLUT functions
-//is OGL easier- not for everything.
-
-procedure glutInitPascal(ParseCmdLine: Boolean); 
+procedure glutInitPascal; 
 var
 	myargc:integer;
-	myargv:array[0..1] of PChar;
+	myargv: PChar;
 begin
 	//dummy this- seems to fire with or without data, according to C devs.
 	myargc:=1;
-	myargv [0]="LazGFX";
-	glutInit(@myargc, @myargv); 
+	myargv:='LazGFX';
+	glutInit(myargc, myargv); 
 end;
 
 
-//renderPresent
+//all callbacks need to be 'C declared'
+
 procedure DrawGLScene; cdecl;
 begin
   if Render3d then
@@ -2546,7 +2623,7 @@ begin
   else	
 	glClear(GL_COLOR_BUFFER_BIT); //no Z axis to work with
 
-  glutSwapBuffers;
+  glutSwapBuffers; //glFlush;
 end;
 
 procedure ReSizeGLScene(Width, Height: Integer); cdecl;
@@ -2569,7 +2646,7 @@ end;
 procedure GLKeyboard(Key: Byte); cdecl;
 begin
   if Key = 27 then //ESC
-    Halt(0);
+    Halt(0); //make sure all Halt commands and errors call closegraph!
 end;
 
 {

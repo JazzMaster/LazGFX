@@ -25,49 +25,37 @@ Since I went thru all the effort of using SDL bytes-
 
 //SDL to GL value conversion-and back- (I dont see this anywhere)
 
+{
+What we need to do here is step from 0 to 1.0 (100) in about 2.55 (255) increments.
+In this manner= each HEX byte value has a float corresponding value. 
+ 
+dividing by 1k gives us 400 or so colors- we want about half of that
+      
+}
 
-//for generic floats above value of 1.0	
-function FloatToByte(someFloat:single):byte
-begin
-   if someFloat < 2.55 then
-	  FloatToByte:=byte(round(someFloat));
-   else 
-      exit;	  
-end;
+//we need these as GL is funky.
+procedure ByteToFloat(hexColor:Byte):single;
+
+var
+	i:single;
+begin 
+  i:=ord(hexColor);  
+  //imperfect math but it works
+  i:=(i*2/1000)*2;
+  
+  //fix the funky overshoot
+  if i>1.0 then 
+	i:=1.0;
+  ByteToFloat:=i;
+end;   
+
 
 //For GLFloats with max value of 1.0
 function GLFloatToByte(someFloat:single):byte
 begin
    if (someFloat > 1.0) then 
 		exit;
-   FloatToByte:=byte(round(someFloat));
-end;
-
-//DWord,etc needs to be a byte first (hi(DWord),(lo(DWORD))
-//OpenGl doesnt use DWords- it uses RGB(A) Clusters instead
-
-
-//simply put: a float of 3.0 wont work if GLFloat maxes out at 1.0
-//output gives "whole numbers" as bytes cant have partials.
-
-function ByteToGLFloat(someByte:byte):single;
-var
-	BInt:single;
-
-begin
-   //first make the value sane (<100)
-   //this means that for each byte value- there are >2.5x values for each float/integer derived
-   if (ord(someByte) > 64) then
-	  BInt:=(ord(someByte) / 2.55); //base convert: 255(hex) = 1.0(float)
-   
-   ByteToGLFloat:= single(BInt mod 100); //convert 100 to 1.0
-end;
-
-//gimmie a float- I dont care if its GL compatible.
-function ByteToFloat(someByte:byte):single;
-
-begin
-   ByteToGLFloat:= (single(ord(someByte)) mod 100);
+   GLFloatToByte:=byte(round(someFloat));
 end;
 
 

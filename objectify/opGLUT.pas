@@ -71,7 +71,7 @@ end;
 
 implementation
 
-
+//PGD demo code has the pascal for this...
 procedure Init.Init_GLEW;
 var
    glewExperimental :boolean;
@@ -89,22 +89,27 @@ begin
     LogLN('GLEW GL_VERSION 4.5 not supported');
 end;
 
-//same as the faked FPC one - so Im not going to rewrite this rouinte- Im going to replace it.
+procedure glutInitPascal; 
+var
+	myargc:integer;
+	myargv: PChar;
+begin
+	//dummy this- seems to fire with or without data, according to C devs.
+	myargc:=1;
+	myargv:='LazGFX';
+	glutInit(myargc, myargv); 
+end;
 
 procedure Init.Init_GLUT(window:^WindowInfo; context:^ContextInfo; framebuffer:^FramebufferInfo);
 
 begin
 
-  //we need to create these fake arguments
-  int fakeargc = 1;
-  char *fakeargv[] = { "fake", NULL };
-  glutInit(&fakeargc, fakeargv);
+ glutInitPascal(false);
  
-//end rewrite
 
-  if assigned (contextInfo.core) then begin
+  if assigned (contextInfo^.core) then begin
   
-        glutInitContextVersion(contextInfo.major_version, contextInfo.minor_version);
+        glutInitContextVersion(contextInfo^.major_version, contextInfo^.minor_version);
         glutInitContextProfile(GLUT_CORE_PROFILE);
   end
   else begin
@@ -113,12 +118,12 @@ begin
        glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
   end;
  
-  glutInitDisplayMode(framebuffer.flags);
+  glutInitDisplayMode(framebuffer^.flags);
 
-  glutInitWindowPosition(window.position_x, window.position_y);
-  glutInitWindowSize(window.width, window.height);
+  glutInitWindowPosition(window^.position_x, window^.position_y);
+  glutInitWindowSize(window^.width, window^.height);
  
-  glutCreateWindow(window.name.c_str);
+  glutCreateWindow(window^.name^.c_str);
   LogLN('GLUT:initialized');
 
 //user level
