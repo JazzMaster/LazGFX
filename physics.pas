@@ -27,6 +27,9 @@ SunSpots and Flares
 
 I might be able to gleam some info from Super Mario (original code stolen by nintendo) from BP7.
 
+TODO: 
+
+	import bullet physics libraries
 }
 
 interface

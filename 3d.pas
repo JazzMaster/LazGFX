@@ -39,8 +39,8 @@ interface
 
 uses
 
-    GL,GLU; //macDraw,DirectDraw 1-3(software)
-    //(get yer own API under pre directX v9 hardware)
+    GL,GLU,GLUT; //macDraw,DirectDraw 1-3(software)
+  
 
 implementation
 
@@ -65,6 +65,8 @@ begin
 	glEndList;
 	gluDeleteQuadric( pSphereQuadric );
 end;
+
+
 
 begin
 end.

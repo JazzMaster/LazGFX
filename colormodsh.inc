@@ -1,15 +1,16 @@
 function GetRGBfromIndex(index:byte):PSDL_Color; 
 function GetDWordfromIndex(index:byte):DWord; 
-function GetRGBFromHex(input:DWord):PSDL_Color;
-function GetRGBAFromHex(input:DWord):PSDL_Color;
-function GetIndexFromHex(input:DWord):byte;
-function GetColorNameFromHex(input:dword):string;
+
+
 function GetFgRGB:PSDL_Color;
 function GetFgRGBA:PSDL_Color;
+
 function GetFGName:string;
 function GetBGName:string;
+
 function GetBGColorIndex:byte;
 function GetFGColorIndex:byte;
+
 procedure setFGColor(color:byte);
 procedure setFGColor(someDword:dword); overload;
 procedure setFGColor(r,g,b:word); overload;
@@ -18,8 +19,10 @@ procedure setBGColor(index:byte);
 procedure setBGColor(someDword:DWord); overload;
 procedure setBGColor(r,g,b:word); overload;
 procedure setBGColor(r,g,b,a:word); overload;
+
 function GetFgDWordRGBA:DWord;
 function GetBgDWordRGB(r,g,b:byte):DWord;
 function GetBgDWordRGBA(r,g,b,a:byte):DWord;
+
 procedure invertColors;
 

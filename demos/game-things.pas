@@ -76,7 +76,7 @@ IsSorry:boolean; //parcheesy,sorry,etc.
 KingME:boolean; //checkers
 CharLevel:integer; //affects everything
 currentCarryLimit:integer; //dynamic var, but set in game begining.
-CanCarryIT.IsDrunk,IsNaked:boolean;
+CanCarryIT,IsDrunk,IsNaked:boolean;
 Inventory:array [1..currentCarryLimit] of Chest;
 CharacterEffects=(stamina,health,magic,hate,love);
 Hungry,IsVampire,IsWereWolf,IsTired:boolean;
@@ -88,13 +88,12 @@ implementation
 //these two might assume a black background(which is correct- 
 //never assume, SET it.
 
-
 //a 8x8 w green background( I hope)
-procedure DrawChessBoard(renderer:^SDL_Renderer);
+procedure DrawChessBoard(renderer:PSDL_Renderer);
 
 var
   row,column,x,y:integer;
-  darea,rect:^SDL_Rect;
+  darea,rect:PSDL_Rect;
 
 begin
     row = 0;
@@ -128,7 +127,7 @@ procedure DrawChessBoard(renderer:^SDL_Renderer);
 
 var
   row,column,x,y:integer;
-  darea,rect:^SDL_Rect;
+  darea,rect:PSDL_Rect;
 
 begin
     row = 0;

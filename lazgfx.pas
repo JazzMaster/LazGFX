@@ -1,6 +1,6 @@
 Unit LazGFX; 
 
-//now officially "a MESS v4...."
+//now officially "a MESS v4...." DONT EVEN ASK ABOUT COMPILING while SDL code is here.
 
 //Range and overflow checks =ON
 {$Q+} 

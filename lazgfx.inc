@@ -1,25 +1,41 @@
 
-//thers a SHITTON of SDL refernces where we need OpenGl ones.
-//Im working on it.
-
-
 type  
 
+//you could use normal GL coords and cap at floatMax of 1.0
+// (but the coords are whacky-weird.)
 
-//direct center of screen modded by half length of the line in each direction.
+//these use normal co ord system:
+
 //verticle line: use y, not x
-//centered: (((x mod 2),(y mod 2)) - ((x1-x2) mod 2))
+
+procedure CenteredHLine(x,x2,y:Word);
+	//where is the center??
+	center:= (((x mod 2)) - ((x-x2) mod 2),(y mod 2));
+	//from center : draw line from here
+	
+end;
+
+//verticle line: use x, not y
+
+procedure CenteredVLine(x,y,y2:Word);
+	//where is the center??
+	center:= ((x mod 2),((y mod 2)) - ((y-y2) mod 2));
+	//from center : draw line from here
+	
+end;
 
 
-//how BIG is a pixel? its smaller than you think. 
 
 //You are probly used to "MotionJPEG Quantization error BLOCKS" on your TV- those are not pixels. 
 //Those are compression artifacts after loss of signal (or in weak signal areas). 
 //That started after the DVD MPEG2 standard and digital TV signals came to be.
 
-
+//STIPPLE:
 //when drawing a line- this is supposed to dictate if the line is dashed or not
 //AND how thick it is.
+
+//dotted and dashed are stipple, center uses routines above
+//the rest is POLYFILL releated.
 
   LineStyle=(solid,dotted,center,dashed);
   Thickness=(normalwidth=1,thickwidth=3,superthickwidth=5,ultimateThickwidth=7);
@@ -27,10 +43,6 @@ type
 //C style syntax-used to be a function, isnt anymore.
   grErrorType=(OK,NoGrMem,NoFontMem,FontNotFound,InvalidMode,GenError,IoError,InvalidFontType);
 
-//Pascal defines:
-//memAllocError =
-//FNF=error 2
-//IoERROR=
 
   TArcCoordsType = record
       x,y : word;
@@ -97,12 +109,6 @@ end;
 	graphics_driver=(DETECT, CGA, VGA,VESA); //cga,vga,vesa,hdmi,hdmi1.2
 
 
-//This is a 8x8 (or 8x12) Font pattern (in HEX) according to the BGI sources
-//( A blit)
-
-   FillSettingsType = (clear,lines,slashes,THslashes,THBackSlashes,BackSlashes,SMBoxes,rhombus,wall,widePTs,DensePTS);
-//Borland VGA256 sources (expansion pack) has the deatils-which are temporarily outside of this repo ATM
-
 {
 
 Modes and "the list":
@@ -137,24 +143,12 @@ var
 
 //think minimaps in games like Warcraft and Skyrim
 
-{
-User needs to implement these into GLUT event routines in the main unit.
 
-	KeyDownEventDefault:KeyDownEvent; //dont process here
-	PauseRoutineDefault:PauseRoutine;  
-	ResumeRoutineDefault:ResumeRoutine; 
-	escapeRoutineDefault:escapeRoutine;  // a 'pause' button
+//this isnt SDL- so for compatibility reasons- I can define this however I choose.
+//A "Surface" is an "array of pixels"--up to max screen resolution
 
-	KeyUpEventDefault:KeyUpEvent; //should be processing here
-	MouseMovedEventDefault:MouseMovedEvent;
-	MouseDownEventDefault:MouseDownEvent;
-	MouseUpEventDefault:MouseUpEvent;
-	MouseWheelEventDefault:MouseWheelEvent;
-	MinimizedDefault:Minimized; //pause
-	MaximizedDefault:Maximized; //resume
-	FocusedDefault:Focused; //resume
-	Lost_FocusDefault:Lost_Focus; //pause
-}
+	PSDL_Surface=^SDL_Surface;
+	SDL_Surface=array [0..MaX,0..MaxY] of SDL_Pixel;
 
 const
    //Analog joystick dead zone 
@@ -163,36 +157,23 @@ const
 
 var
 
-    chunk: PMix_Chunk; 
-    music: PMix_Music;
     Xaspect,YAspect:byte;
-    eventLock: PSDL_Mutex;
-    eventWait: PSDL_Cond;
-    video_timer_id: TSDL_TimerID;
 
     palette:PSDL_Palette;
     where:Twhere;
-	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop,LoadlibSVGA:boolean;
+	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop:boolean;
     nogoautorefresh:boolean;
     X,Y:integer;
     _grResult:grErrortype;
     
-    //SDL2 broken game controller support non-suid and root-only.
-    //again, this is wrong.
 
     //you want event driven, not input driven-the code seems to be here.
-    gGameController:PSDL_Joystick;
+//    gGameController:PSDL_Joystick;
 
-    Renderer:PSDL_Renderer;
-    //GLStencils=TnL
 
-    MainSurface,FontSurface : PSDL_Surface; //TnL mostly at this point, and for hacks
+    MainSurface,FontSurface : PSDL_Surface;
 
     srcR,destR,TextRect:PSDL_Rect;
-    //rmask,gmask,bmask,amask:longword;
-
-    ttfFont : PTTF_Font; //^TTF_Font
-    TextFore,TextBack : PSDL_Color; //font fg and bg...
 
     filename:String;
     fontpath,iconpath:PChar; // look in: "C:\windows\fonts\" or "/usr/share/fonts/"
@@ -200,21 +181,13 @@ var
 {
 
 Fonts:
-Most OSes have a default of:
+GLUT defines the following(stroked fonts):
 
-    Serif
-    Sans(Serif)
-    Gothic
-    Terminal(Code)
-    Tri-Plex
 
-and as a result, some basic fonts are also included. (Royalty FREE-in case youre wondering)
 
 }
 
     font_size:integer; 
-    style:byte; //BOLD,ITALIC,etc.
-    outline:longint;
     grErrorStrings: array [0 .. 7] of string; //or typinfo value thereof..
     AspectRatio:real; //computed from (AspectX mod AspectY)
 
@@ -231,20 +204,10 @@ Atari modes, etc. were removed. (double the res and we will talk)
 
   MaxColors:LongWord; //positive only!!
   ClipPixels: Boolean=true; //always clip, never an option "not to".
+  //we will CLAMP GL to the screen
 
   WantsJoyPad:boolean;
   screenshots:longint;
-
-//CDROM access is very limited and ancient. (Removed after SDLv1.2.)
-
-//Used mostly for Audio CDs and RedBook Audio Games.
-//This said- I have some emulators(in C) that access the Linux CDROM device....
-//the code is old (Red Hat v7? vs RHEL v7) but builds "with a few hacks".
-
-//such games have CDROM Modeswitch delays in accessing data while playing audio tracks(game skippage).
-
-//Descent II(PC) and SonicCD(PC and SEGA CD Emu) come to mind.
-//you would want ogg or mp3 or wav files these days- on some sort of storage medium.
 
   NonPalette, TrueColor,WantsAudioToo,WantsCDROM:boolean;	
   Blink:boolean;
@@ -253,71 +216,43 @@ Atari modes, etc. were removed. (double the res and we will talk)
   MaxX,MaxY:word;
   bpp:byte;
 
-  _fgcolor, _bgcolor:DWord;	//this is modified due to hi and true color support.
-  //do not use old school index numbers. FETCH the index based DWord instead.  
-  
-  flip_timer_ms:Longint; //Time in MS between Render calls. (longint orlongword) -in C.
-
-  //ideally ignore this and use GetTicks estimates with "Deltas"
-  //this is bare minimum support.
-
-//ideally we could mutex the renderer - but thats in a program, not this unit.
-
+  _fgcolor, _bgcolor:DWord;	
+  //use index colors once setup(palette unit)
  
-  EventThread:Longint; //fpc uses Longint
-  EventThreadReturnValue:LongInt; //forked processes are supposed to return a error code
-	
-
+ 
   LIBGRAPHICS_ACTIVE:boolean;
   LIBGRAPHICS_INIT:boolean;
-  RenderingDone:boolean; //did you want to pageflip now(or wait)?
 
   IsConsoleInvoked,CantDoAudio:boolean; //will audio init? and the other is tripped NOT if in X11.
   //can we modeset in a framebuffer graphics mode? YES. 
-
   
   himode,lomode:integer;
-  CurrentMode:PSDL_DisplayMode; //^SDL_DisplayMode
 
-  //TextureFormat
-  format:LongInt;
+//modelist data is derived from "our little C demo" output(XRandR probe) -on Unices
 
 
-//our data may differ from SDLs.
 type 
+//our ModeList data
+
 //the lists..
   Pmodelist=^TmodeList;
 
 //wants graphics_modes??
   TmodeList=array [0 .. 31] of TMode;
 
-  PSDLmodeList=^TSDLmodeList;
-  TSDLmodeList=array [0 .. 31] of TSDL_DisplayMode;
 
 //single mode
+
   Pmode=^TMode;
-  PSDLmode=^TSDL_DisplayMode;
 
 var
-	GLContext: TSDL_GLContext;
+//	GLContext: TSDL_GLContext;
+
 	GLFloat:single;
 	FloatInt:single;
 
-//modelist hacking
-
-//pointers
-//single modes
-
-    SDLmodePointer:PSDLMode;
     modePointer:Pmode;
 
-//list
-    SDLmodeList:PSDLmodeList;
-    modeListpointer:PmodeList;
-
-//arrays
-	ModeArray:TmodeList;
-	SDLModeArray:TSDLmodeList;
 
 //forward declared defines
 
@@ -325,41 +260,16 @@ function FetchModeList:Tmodelist;
 
 procedure RoughSteinbergDither(filename,filename2:string);
 
-{
-locking and unlocking Texture may prove futile -but changing contexts is not
-query pixelFormat (of the Texture) is required for any color conversion to take place.
-
-no fetching (peeking) is done on the Texture without the "queried pixelFormat data"
-this is normally already set for surface ops when we made the surface(and kept until surface is freed)
-
-destroying MainSurface(especially in software) is disasterous. 
-(clone MainSurface -or blit- and destroy the clone.)
-
-The reason is thus:
-
-   As with ( bpp<24)- these modes are not normally unsupported
-   Which means more work(werk werk werk)
-
-In many ways SDL2 builds on SDLv1.2 Surface routines, anyway...and cant function without it.
-
-Pushing to the renderer is ok- but if we can outright avoid working with surfaces in general- its better.
-Sometimes, however, surface ops make more logical sense.
-
-}
-
 
 //surfaceOps
-procedure lock;
-procedure unlock;
+//procedure lock;
+//procedure unlock;
 
 //works around SDL OpenGL bug where Windows got optimzed, but Unices didnt--WRONG BTW! (WRITE UNIVERSAL CODE)
-procedure Texlock(Tex:PSDL_Texture);
-procedure TexlockwRect(Tex:PSDL_Texture; Rect:PSDL_Rect);
-function lockNewTexture:PSDL_Texture;
-procedure TexUnlock(Tex:PSDL_Texture);
-
-
-//videoCallback
+//procedure Texlock(Tex:PSDL_Texture);
+//procedure TexlockwRect(Tex:PSDL_Texture; Rect:PSDL_Rect);
+//function lockNewTexture:PSDL_Texture;
+//procedure TexUnlock(Tex:PSDL_Texture);
 
 
 procedure clearscreen; 
@@ -378,7 +288,6 @@ function GetXY:longint;
 
 //this is like Update_Rect() in SDL v1.
 procedure renderTexture( tex:PSDL_Texture;  ren:PSDL_Renderer;  x,y:integer;  clip:PSDL_Rect);
-//(use SDL_RenderCopy otherwise)
 
 procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
 function getgraphmode:string; 
@@ -417,42 +326,6 @@ procedure SaveBMPImage(filename:string);
 //pull a Rect (off the renderer-back to a surface-then kick out a 1D array of SDL_Colors from inside the Rect)
 function GetPixels(Rect:PSDL_Rect):pointer;
 
-procedure IntHandler; //we should have fpforked and kick started....
-
-{ programmer needs to provide these.
-
-procedure KeyDownEvent;
-procedure PauseRoutine;  
-procedure ResumeRoutine; 
-procedure escapeRoutine;  // a 'pause' button
-procedure KeyUpEvent; //should be processing here
-procedure MouseMovedEvent;
-procedure MouseDownEvent;
-procedure MouseUpEvent;
-procedure MouseWheelEvent;
-procedure Minimized; //pause
-procedure Maximized; //resume
-procedure Focused; //resume
-procedure Lost_Focus; //pause
-
-
-ok..I think Ive figured out the whole GEtXY shit...SDL should track but doesnt.
-BGI needs these "features"
-
-so heres what we do:
-
-on each putpixel call-update WHERE.
-on each rect call-update WHERE with WxH location
-on each tri call(unless spun) set WHERE to the bottommost right corner
-...
-etc
-etc
-
-If we track where were at based upon where we want to go be should be ok but...by default
-we have no data.
-
-
-}
 
 const
    maxMode=Ord(High(Graphics_Modes));

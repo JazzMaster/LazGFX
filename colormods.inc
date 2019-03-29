@@ -2,6 +2,8 @@
 
 Colors are bit banged to hell and back.
 
+type
+
 SDL_Color=record (internal definition)
 
 	r:byte; //UInt8 in C
@@ -11,11 +13,9 @@ SDL_Color=record (internal definition)
 
 end;
 
-^SDL_Color/PSDL_Color =array [0..3] of PUInt8; (BytePtr)
+PSDL_Color =array [0..3] of PUInt8; //(BytePtr)
 
-where- as long as the pointer points to SDL_Color record:
-(byte- not float) 
-
+{
 r:=PSDL_Color^
 g:=PSDL_Color^[1]
 b:=PSDL_Color^[2]
@@ -66,7 +66,6 @@ Downsizing bits:
 -you cant put whats not there- you can only "dither down" or "fake it" by using "odd patterns".
 what this is -is tricking your eyes with "almost similar pixel data".
 
-This will be put into functions, etc..soon.
 
 32bit to 16bit RGB 565:
 //drop the LSB
@@ -84,9 +83,9 @@ mode 5551:
 
 RGB16->32:
 
-NewR: =shl 3
-NewG: =shl 2
-NewB: =shl 3 
+NewR: =R shl 3;
+NewG: =G shl 2;
+NewB: =B shl 3 ;
 NewA:=A;
 
 }
@@ -140,217 +139,6 @@ begin
 
   end;
 end;
-
-
-
-function GetRGBFromHex(input:DWord):PSDL_Color;
-var
-	i:integer;
-    somedata:PSDL_Color; 
-    r,g,b:PUInt8;
-
-begin
-
-  if bpp=8 then begin
-   if (MaxColors=256) then begin
-	   i:=0;
-	   while (i<255) do begin
-		    if (Tpalette256.dwords[i] = input) then begin //did we find a match?
- 			   GetRGBFromHex:=Tpalette256.colors[i];
-               exit;
-           
-           end else
-				inc(i);  //no
-       end;
-	  //error:no match found
-      exit;
-
-   end else if (MaxColors=16) then begin
-	    i:=0;
-	    while (i<15) do begin
-
-		    if (Tpalette16.dwords[i] = input) then begin//did we find a match?
-               GetRGBFromHex:=Tpalette16.colors[i];
-               exit;
-            end else
-				inc(i);  //no
-       end;
-	  //error:no match found
-      exit;
-
-   end;
-  end else if (bpp >8) then begin
-  
-       if IsConsoleInvoked then begin
-             writeln('Wrong routine called. Try: TrueColorGetRGBfromHex');
-             LogLn('Wrong routine called. Try: TrueColorGetRGBfromHex');
-       end;
-       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Wrong routine called. Try: TrueColorGetRGBfromHex','OK',NIL); 
- end;
-end;
-
-
-//its either we hack this to hell- or reimplement MainSurface- the easier option.
-//MainSurface^.PixelFormat is unknown-but assignable.
-//for a texture-WHICH? there is no MAIN-TEXTURE.
-
-function TrueColorGetRGBfromHex(somedata:DWord; Texture:PSDL_Texture):PSDL_Color;
-//I need to know from which Texture- (pre RenderCopy) that you want to get the data from.
-//the reason why is that we DONT HAVE the RGB values- in paletted mode- WE DO.
-//(we need to query a Texture to do this.)
-//but WHICH ONE?
-
-var
-	pitch,format,i:integer;
-    someColor:PSDL_Color;
-    r,g,b:PUINT8;
-    pixelFormat:PSDL_PixelFormat;
-
-begin
-
-//always wise to lock-and unlock but w textures(I was trying to avoid a bug) theres more to it.
-lock;
-
-// Now you want to format the color to a correct format that SDL can use.
-// Basically we convert our RGB color to a hex-like BGR color.
-  SDL_GetRGB(somedata,MainSurface^.Format, R, G, B);
-
-       somecolor^.r:=byte(^r);
-       somecolor^.g:=byte(^g);
-       somecolor^.b:=byte(^b);
-
-// Also don't forget to unlock your texture once you're done.
-UnLock;
-
-   	   TrueColorGetRGBfromHex:=somecolor;
-end;
-
-function GetRGBAFromHex(input:DWord):PSDL_Color;
-var
-	i:integer;
-    somecolor:PSDL_Color; 
-    r,g,b,a:PUInt8;
-
-begin
-   if (bpp <=8) then begin
-         if IsConsoleInvoked then
-			writeln('Cant Get RGBA data from indexed colors.');
-      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get RGBA data from indexed colors.','OK',NIL);
-      exit; 
-   end;
-
-	   SDL_GetRGBA(input,MainSurface^.format,r,g,b,a);
-       somecolor^.r:=byte(^r);
-       somecolor^.g:=byte(^g);
-       somecolor^.b:=byte(^b);
-       somecolor^.a:=byte(^a);
-   	   GetRGBAFromHex:=somecolor;
-end;
-
-
-//DWord in - Index out
-function GetIndexFromHex(input:DWord):byte;
-
-var
-	r,g,b:PUInt8;
-    color:PSDL_Color;
-    i:integer;
-
-begin
-  if (MaxColors >256) then begin
-       if IsConsoleInvoked then
-			writeln('Cant Get color name from an RGB mode colors.');
-      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get color name from an RGB mode colors.','OK',NIL);
-      exit; 
-  end;
-
-    case bpp of
-		8: begin
-			    if maxColors=256 then format:=SDL_PIXELFORMAT_INDEX8
-				else if maxColors=16 then format:=SDL_PIXELFORMAT_INDEX4MSB; 
-		end;
-   end;
-
-  SDL_GetRGB(input,MainSurface^.format,r,g,b); //Get the RGB color from the DWord given
-     color^.r:=byte(^r);
-     color^.g:=byte(^g);
-     color^.b:=byte(^b);
-
-	if MaxColors=256 then begin
-        i:=0;
-		repeat
-			if ((color^.r=Tpalette256.colors[i]^.r) and (color^.g=Tpalette256.colors[i]^.g) and (color^.b=Tpalette256.colors[i]^.b)) then begin
-				GetIndexFromHex:=i;
-				exit;
-			end;
-		    inc(i);
-		until i=255;
-   //error:no match found
-   //exit
-
-	end else if MaxColors=16 then begin
-        i:=0;
-		
-        repeat
-  			if ((color^.r=Tpalette16.colors[i]^.r) and (color^.g=Tpalette16.colors[i]^.g) and (color^.b=Tpalette16.colors[i]^.b)) then begin
-				GetIndexFromHex:=i;
-				exit;
-  			end;
-  			inc(i);
-		until i=15;
-	end;
-  //error:no match found
-  //exit
-
-end;
-
-//DWord in - string out
-function GetColorNameFromHex(input:dword):string;
-
-var
-	r,g,b:PUInt8;
-    color:PSDL_Color;
-     
-    i:integer;
-
-begin
-  if (MaxColors >256) then begin
-      if IsConsoleInvoked then
-			writeln('Cant Get color name from an RGB mode colors.');
-      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get color name from an RGB mode colors.','OK',NIL);
-      exit; 
-  end;
-  i:=0;
-
-  SDL_GetRGB(input,Mainsurface^.format,r,g,b); //Get the RGB color from the DWord given
-
-  if MaxColors=256 then begin
-	repeat
-  		if ((color^.r=Tpalette256.colors[i]^.r) and (color^.g=Tpalette256.colors[i]^.g) and (color^.b=Tpalette256.colors[i]^.b)) then begin
-			GetColorNameFromHex:=GEtEnumName(typeinfo(TPalette256Names),ord(i));
-			exit;
-  		end;
-  		inc(i);
-	until i=255;
-  //no match found
-  //exit
-
-
-  end else if MaxColors=16 then begin
-	repeat
-  		if ((color^.r=Tpalette256.colors[i]^.r) and (color^.g=Tpalette256.colors[i]^.g) and (color^.b=Tpalette256.colors[i]^.b)) then begin
-			GetColorNameFromHex:=GEtEnumName(typeinfo(TPalette16Names),ord(i));
-			exit;
-  		end;
-  		inc(i);
-	until i=15;
-  end;
-  //no match found
-  //exit
-
-end;
-
-
 
 
 //get the last color set
