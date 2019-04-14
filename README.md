@@ -526,19 +526,20 @@ The pyramid(tetrahedron) demo has been SDL v2 patched and now utilizes event bas
 		There is no text (OutText) functions in OGL right now.
 		(those are -not currently implemented- freeGLUT functions)
 
-SDL OutText routines DO NOT WORK with OGL/freeGLUT.
+SDL OutText routines DO NOT WORK with OGL/freeGLUT. THEY MUST BE REWRITTEN.
 
 
-#### BGI output
+#### Library DEMO output
 
-Hold your enthusiasm. "Its pretty primitive".
-
-![Lazarus Boat](./boatdemo/boat.png)
+![Lazarus Boat](./boat.png)
 
 ![MouseTest](./mousetest.png)
 
 ![NASA Rendered Orbits](./nasa-orbits-of-comets.png)
 
+![Polygons](./polys.png)
+
+![3D pyramid(Tris) ](./pyramid.png)
 
 ### Lets run "make"....
 
@@ -705,7 +706,6 @@ A: Hell No.
 
 I leave most excersies up to the reader- as THIS IS A LIBRARY.
 
----
 
 Q: Runtime errors..I get these STUPID ERRORS!
 
