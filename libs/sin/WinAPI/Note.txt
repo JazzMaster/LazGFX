@@ -1,0 +1,19 @@
+This seems to be SDL v1[BitBlits era] and (windows only) OpenGL 2.0 era.
+Vista was coming out when this code was written- so 
+resonably XP functions may not have been added.
+
+OpenGl is probed- but I dont see any OGL routines in here.
+
+By these standards we could dick around w X11 core lib routines all day as well.(why?)
+Code may not be thread safe, nor 64 bit.
+
+OpenGl demo has a scene glitch in it. Ive experienced similar with the Tri/Pyramid demo- but I fixed it.
+(One of the vectors is off somewhere- so the app goes nuts. It mighta-usta-worked back in the day.)
+
+3D is the only code Ive seen that uses OGL- or needed to.
+
+OGL can do 2D- if you know how (GLUT/freeGLUT makes input and else easier, too)
+
+
+seems all we need(if that) is the Windows unit (on Windows-fancy that...)
+-J

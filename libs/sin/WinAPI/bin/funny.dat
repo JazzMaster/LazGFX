@@ -1,0 +1,4 @@
+ 
+This is a demo for WinGraph. Several routines are tested here, including some additional ones which are not available in BP7: UpdateGraph, RotEllipse, DrawBezier, PutAnim, InvertRect, GetMouseButtons, etc.
+See documentation for many new routines.
+Click on the balls to stop their motion or press ESC if you got crazy.

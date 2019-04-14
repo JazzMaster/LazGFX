@@ -1,0 +1,45 @@
+{$MODE objfpc}
+
+{$IFDEF UNIX}
+  {$IF defined(DARWIN)}
+    {$DEFINE COCOA}
+    {$MODESWITCH objectivec1}
+  {$ELSE}
+    {$DEFINE X11}
+  {$ENDIF}
+{$ENDIF UNIX}
+
+
+implementation
+
+//ptc supports this but OGL doesnt.
+
+{$IFDEF GO32V2}
+uses
+  textfx2, vesa, vga, cga, timeunit, crt, go32fix, mouse33h;
+{$ENDIF GO32V2}
+
+{$IF defined(WIN32) OR defined(WIN64)}
+uses
+  Windows, p_ddraw, glext;
+{$ENDIF defined(WIN32) OR defined(WIN64)}
+
+{$IFDEF UNIX}
+uses
+  BaseUnix, Unix
+  {$IFDEF X11}
+    , ctypes, x, xlib, xutil, xatom, keysym, xkblib
+    , xrandr
+    , xf86vmode
+    , xf86dga
+    , xshm, ipc
+    , glx
+  {$ENDIF X11}
+
+  {$IFDEF COCOA}
+    , CocoaAll
+  {$ENDIF COCOA}
+  ;
+{$ENDIF UNIX}
+
+

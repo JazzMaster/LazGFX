@@ -1,0 +1,306 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Code recipes</title><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"></head>
+<body alink="#ffffcc" bgcolor="#e1bc64" link="#3333ff" text="#000000" vlink="#3333ff">
+<p><font face="Arial, Helvetica, sans-serif"><strong>Code recipes</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">This section contains
+programming tips and code recipes for WinGraph. If you have any
+questions, please check this section first.<br>
+  <br>
+  </font> <u><font face="Arial, Helvetica, sans-serif">How to compile WinGraph units </font>?</u></p>
+<p><font face="Arial, Helvetica, sans-serif">The source files are
+located in \src folder. These are 'wingraph.pas',
+'wincrt.pas' and 'winmouse.pas'. They can be compiled directly using
+the command line compiler (even after moving the files into another
+folder), or using provided batch scripts. In the later case, consult
+the file 'compile.txt' for details. </font><br>  
+  <br>
+<u><font face="Arial, Helvetica, sans-serif">How to use compiler switches in WinGraph </font>?</u></p>
+<p><font face="Arial, Helvetica, sans-serif">In  'wingraph.pas' unit there are three switches that can be played with. <font face="Courier New, Courier, monospace">256_COLOR_NAMES</font>
+switch defines 256 color name variables that can be used when selecting
+colors. If a legacy graphics driver is selected (with 16 or less
+colors), better let this switch disabled, since the colors are mapped
+incorrectly. <font face="Courier New, Courier, monospace">INIT_OPENGL</font> switch enables OpenGL drawings in the graphics window, otherwise it can be disabled. <font face="Courier New, Courier, monospace">HIDE_CONSOLE</font> switch hides temporarily the parent console window (if the program has one) at the time when graphics window is shown. <br>
+If the program generates useful output into the console during running
+(see topics about console window below) then let this switch disabled. <br>
+  Note that not all switches mentioned above are enabled by default. </font><br>
+  <br>  
+<u><font face="Arial, Helvetica, sans-serif">How to use WinGraph units for my project </font>?</u></p>
+<p><font face="Arial, Helvetica, sans-serif">You have two options here:
+(a) move the WinGraph source files (see above) into your project folder
+and compile them together with your code; (b) compile the WinGraph
+units into their default location and move compiled binaries into your
+project folder. These binaries have extensions *.o, *.ppu (for FPC) or
+*.dcu (for Delphi), and are located in \bin folder. In your program
+header write<br>
+  </font><br>
+  <font face="Courier New, Courier, monospace">uses wingraph,wincrt,winmouse;</font><br>
+  <br>
+<font face="Arial, Helvetica, sans-serif">The units WinCrt and WinMouse are optional (they add keyboard and mouse support to WinGraph). <br>
+<br>
+</font><u><font face="Arial, Helvetica, sans-serif">About WinGraph philosophy</font></u></p>
+<p><font face="Arial, Helvetica, sans-serif">Your main program window might be a console or a GUI one. It doesn't matter,
+  since WinGraph creates its own GUI window with a dedicated thread to manage
+  its messages. It will handle also all keyboard and mouse events, if WinCrt and
+  WinMouse units are included (see above). All these happen only after calling InitGraph routine.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">First you should set the dimensions of the window and the number of colors in the
+  palette by playing with drivers and modes. After setting some attributes (color,
+  font, style for lines, filling etc.) you can start drawing as in BP graph unit.
+  After each graphics operation you may check GraphResult to discover if
+  something went wrong.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">If you try to port BP legacy code to WinGraph, be careful at the following
+  aspects: routines flagged with (P) or (D) symbol could behave differently
+  (check the arguments), routines flagged with (N) are missing and Crt
+  routines for keyboard handling are emulated by WinCrt unit only after InitGraph.
+  It is a good idea to port the code first for GO32v2 target of the Free Pascal
+  compiler.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Several demos are included to accommodate yourself with the WinGraph programming
+  style.</font></p>
+<p><u><font face="Arial, Helvetica, sans-serif">Significant incompatibilities with BP graph unit</font></u></p>
+<ul>
+  <li><font face="Arial, Helvetica, sans-serif"> color names (Red, Green, ...) are not constants, but variables which are
+    mapped to the nearest color index in the palette after each call to
+    SetAllPalette</font></li>
+  <li><font face="Arial, Helvetica, sans-serif">these color variables are of type longword (not word)</font></li>
+  <li><font face="Arial, Helvetica, sans-serif">SetBkColor routine doesn't change instantly the background color, only on subsequent
+drawings</font></li>
+  <li><font face="Arial, Helvetica, sans-serif">Line and OutTextXY routines do update the current pointer</font></li>
+  <li><font face="Arial, Helvetica, sans-serif">user-defined line style works only with Line, LineRel, LineTo routines and only
+for 1-pixel width</font></li><li><font face="Arial, Helvetica, sans-serif">non solid line styles </font><font face="Arial, Helvetica, sans-serif">work only&nbsp;</font><font face="Arial, Helvetica, sans-serif">for 1-pixel width</font></li>
+  <li><font face="Arial, Helvetica, sans-serif"> PointType is defined as a record of longint (not smallint)</font></li>
+  <li><font face="Arial, Helvetica, sans-serif">if style UserFill is used in SetFillStyle routine, the color argument is ignored
+and the user-pattern will have the initial color declared with SetFillPattern
+when it was first created</font></li>
+  <li><font face="Arial, Helvetica, sans-serif"> following routines behave differently (flag D): GetMaxMode, GetModeRange and
+SetUserCharSize</font></li>
+  <li><font face="Arial, Helvetica, sans-serif">following routines are not implemented (flag N): InstallUserDriver, RegisterBGIDriver, RegisterBGIFont,
+SetGraphBufSize</font></li>
+  <li><font face="Arial, Helvetica, sans-serif">several routines accept different arguments than their BP counterparts </font><font face="Arial, Helvetica, sans-serif">(flag P)</font><font face="Arial, Helvetica, sans-serif"><br>
+  </font></li>
+</ul>
+<p><u><font face="Arial, Helvetica, sans-serif">How to initialize the graphics window </font>?</u></p>
+<p><font face="Arial, Helvetica, sans-serif">The simplest code is</font><br>
+  <br>
+  <font face="Courier New, Courier, monospace">g</font><font face="Courier New, Courier, monospace">d:=Detect;<br>
+ InitGraph(gd,gm,'');<br>
+ &lt;your code here&gt;<br>  
+  repeat until CloseGraphRequest; //this waits for close button to be clicked <br>
+CloseGraph;</font></p>
+<p><font face="Arial, Helvetica, sans-serif">If  WinCrt unit is included, the fourth line can be replaced by</font></p>
+<p><font face="Courier New, Courier, monospace">ReadKey; //this waits for any key to be pressed </font></p>
+<p><font face="Arial, Helvetica, sans-serif">However, do not use standard ReadLn routine to wait for keyboard inputs (see below) .</font> </p>
+<p><u><font face="Arial, Helvetica, sans-serif">How to open a custom-sized window </font>?</u></p>
+<p><font face="Arial, Helvetica, sans-serif">Suppose we want to open a tiny 200 by 100 graphics window. We have</font></p>
+<p><font face="Courier New, Courier, monospace">SetWindowSize(200,100);<br>
+  g</font><font face="Courier New, Courier, monospace">d:=nopalette; gm:=mCustom; <br>
+InitGraph(gd,gm,'A tiny size window');<br>
+&lt;your code here&gt;<br>
+repeat<br>
+&nbsp; Delay(10); //this gives some rest to the CPU (needs WinCrt unit)<br> 
+until CloseGraphRequest; //this waits for close button to be clicked <br>
+CloseGraph;</font></p>
+<p><font face="Arial, Helvetica, sans-serif"></font><u><font face="Arial, Helvetica, sans-serif">What's wrong with ReadLn routine </font>?</u></p>
+<p><font face="Arial, Helvetica, sans-serif">ReadLn routine waits for
+input from the parent console window, which is hidden after calling
+InitGraph. There is no way to receive inputs.<br>
+However, if you want to compile lots of legacy code, you can redefine ReadLn routine as follows</font></p>
+<p><font face="Courier New, Courier, monospace">procedure</font><font face="Courier New, Courier, monospace"> ReadLn;<br>
+  begin<br>
+&nbsp; repeat until (ReadKey=#13); <br>
+  end;</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Now you can use this routine as intended, but WinCrt unit must be included.</font> </p>
+<p><u><font face="Arial, Helvetica, sans-serif">How to avoid the parent console window to appear ?</font></u> </p>
+<p><font face="Arial, Helvetica, sans-serif">In your main program use the directive </font><br>
+    <br>
+    <font face="Courier New, Courier, monospace">{$APPTYPE GUI}</font><br>
+    <br>
+    <font face="Arial, Helvetica, sans-serif">Note that in Delphi this is the default.</font> <br>
+  <br>
+  <u><font face="Arial, Helvetica, sans-serif">Is the parent console window useful, anyway ?</font></u></p>
+<p><font face="Arial, Helvetica, sans-serif">Sometimes, yes. For
+example, in the debug phase of your program. If the parent console
+window is not inhibited (see above), you can use the standard routine
+WriteLn to output useful things during execution into the console.</font><font face="Arial, Helvetica, sans-serif"><br>  
+    <br>
+  Note that in Delphi you should use, in this case, </font> <font face="Arial, Helvetica, sans-serif">the directive </font><br>
+  <br>
+<font face="Courier New, Courier, monospace">{$APPTYPE CONSOLE}</font></p>
+<p><u><font face="Arial, Helvetica, sans-serif">How to write text with custom fonts ?</font></u></p>
+<p><font face="Arial, Helvetica, sans-serif">Suppose you want to write
+text using a specific font, for example 'Verdana' with a font size of
+18. Following routine checks if the font is registered into the system
+and sets text attributes accordingly.</font></p>
+<p><font face="Courier New, Courier, monospace">procedure ChangeFont;<br>
+    var font:smallint;<br>
+  begin<br>
+  &nbsp; font:=InstallUserFont('Verdana');<br>
+  &nbsp; if (font&lt;0) then Exit;<br>
+  &nbsp; SetTextStyle(font,HorizDir,18</font><font face="Courier New, Courier, monospace">); <br>
+ end;</font><br>
+ <br>
+ <font face="Arial, Helvetica, sans-serif">Note that several fonts are installed by default during initialization. See documentation.</font></p>
+<p><u><font face="Arial, Helvetica, sans-serif">How to perform input and output easily in the graphics window ?</font></u></p>
+<p><font face="Arial, Helvetica, sans-serif">In WinCrt unit there are
+two routines, ReadBuf and WriteBuf, which do the job nicely. They
+emulate Read an Write console routines. You have an example here </font></p>
+<p><font face="Courier New, Courier, monospace">WriteBuf('Please enter some text here: ');<br>
+ReadBuf(t,0);<br>
+WriteBuf('You entered: '+t);</font></p>
+<p><u><font face="Arial, Helvetica, sans-serif">How to add keyboard support to my graphical program ?</font></u></p>
+<p><font face="Arial, Helvetica, sans-serif">You should include the unit WinCrt and, in the main loop of the program, call a routine like this one</font> </p>
+<p><font face="Courier New, Courier, monospace">procedure CkeckKeyboard;<br>
+    var c:char; <br>
+  begin<br>
+  &nbsp; if not(KeyPressed) then Exit;	<br>
+  &nbsp; c:=ReadKey;<br>
+  &nbsp;
+case c of<br>
+&nbsp;&nbsp;&nbsp; #27:begin //Esc key<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;your code here&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end;<br>
+&nbsp;&nbsp;&nbsp; &lt;...&gt;<br>
+&nbsp; &nbsp;&nbsp;#0:begin //extended keys<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; c:=ReadKey;<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+case c of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #75:begin //Left key<br>
+&nbsp;&nbsp;	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	&lt;your code here&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	end;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;...&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end;	<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end; <br>
+&nbsp;	end;<br>
+  end;</font> </p>
+<p><font face="Arial, Helvetica, sans-serif">Consult WinGraph documentation for the full list of key codes.</font></p>
+<p><u><font face="Arial, Helvetica, sans-serif">How to add mouse support to my graphical program ?</font></u></p>
+<p><font face="Arial, Helvetica, sans-serif">You should include the unit WinMouse and, in the main loop of the program, call a routine like this one</font> </p>
+<p><font face="Courier New, Courier, monospace">procedure CkeckMouse;<br>
+  var  me:MouseEventType; <br>
+  begin<br>
+ &nbsp; if not(PollMouseEvent(me)) then Exit;<br>
+ &nbsp; GetMouseEvent(me);<br>
+&nbsp; with me do<br>
+&nbsp; </font><font face="Courier New, Courier, monospace"> case action of <br>
+&nbsp; &nbsp; MouseActionDown: begin //mouse button pressed <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+case buttons of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+MouseLeftButton: begin //Left button <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;your code here&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp; end;<br>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;...&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+end; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end;<br>
+&nbsp;&nbsp;&nbsp; &lt;...&gt;<br>
+&nbsp;	end;<br>
+end;</font> </p>
+<p><font face="Arial, Helvetica, sans-serif">Consult WinGraph documentation for a full description of type MouseEventType.</font></p>
+<p><u><font face="Arial, Helvetica, sans-serif"></font></u><u><font face="Arial, Helvetica, sans-serif">How to load a BMP image from disk </font>?</u></p>
+<p><font face="Arial, Helvetica, sans-serif">Suppose we have a 24 bits
+format uncompressed BMP image on file 'image.bmp'. The following
+routine puts this image on screen, on the top-left corner.</font></p>
+<p><font face="Courier New, Courier, monospace">procedure LoadBMP;<br>
+    var f:file; bitmap:pointer;  size:longint; <br>
+begin<br>
+&nbsp;
+{$I-} Assign(f,'image.bmp'); Reset(f,1); {$I+}<br>
+&nbsp;&nbsp;if (IOResult &lt;&gt; 0) then Exit; <br>
+&nbsp; size:=FileSize(f);<br>
+&nbsp;
+GetMem(bitmap,size);<br>
+&nbsp; BlockRead(f,bitmap^,size);<br>
+&nbsp;
+Close(f);<br>
+&nbsp; PutImage(0,0,bitmap^,NormalPut);<br>
+&nbsp;&nbsp;FreeMem(bitmap);<br>
+  end;
+</font></p>
+<p><u><font face="Arial, Helvetica, sans-serif">How to capture the window content into a BMP image on disk </font>?</u></p>
+<p><font face="Arial, Helvetica, sans-serif">To capture the entire window content to the file 'image.bmp' use the routine </font></p>
+<p><font face="Courier New, Courier, monospace">procedure SaveBMP;<br>
+var f:file; bitmap:pointer; size:longint; <br>
+begin<br>
+&nbsp;
+{$I-} Assign(f,'image.bmp'); Rewrite(f,1); {$I+}<br>
+&nbsp;&nbsp;if (IOResult &lt;&gt; 0) then Exit; <br>
+&nbsp; size:=ImageSize(0,0,GetMaxX,GetMaxY);<br>
+&nbsp;
+GetMem(bitmap,size);<br>
+&nbsp; GetImage(0,0,GetMaxX,GetMaxY,bitmap^);<br>
+&nbsp; BlockWrite(f,bitmap^,size);<br>
+&nbsp;
+Close(f);<br>
+&nbsp;&nbsp;FreeMem(bitmap);<br>
+end; </font></p>
+<p><u><font face="Arial, Helvetica, sans-serif">How to perform basic animations </font>?</u></p>
+<p><font face="Arial, Helvetica, sans-serif">This consists of two steps:<br>
+(a) Suppose we created on screen a sprite image bounded by rectange
+(0,0,24,24) and we want to have transparency set over the Black color.
+Following code do this job and puts the animation on its first position
+on screen</font></p>
+<p><font face="Courier New, Courier, monospace">GetAnim(0,0,24,24,Black,anim);<br>
+    &lt;your code here to prepare background screen&gt;<br>
+  PutAnim(xnew,ynew,anim,TransPut);<br>
+    UpdateGraph(UpdateOff); //used to reduce flickering</font></p>
+<p><font face="Arial, Helvetica, sans-serif">(b) Next code  performs one step of the animation over the screen<br>
+  <br>
+  </font><font face="Courier New, Courier, monospace"> Delay(25); //set temporization here <br>
+
+PutAnim(xold,yold,anim,BkgPut);<br>
+
+PutAnim(xnew,ynew,anim,TransPut);<br>
+UpdateGraph(UpdateNow);</font></p>
+<p><font face="Arial, Helvetica, sans-serif">You should free the animation resources at the end by calling FreeAnim.</font></p>
+<p><u><font face="Arial, Helvetica, sans-serif">  How to perform OpenGL animations </font>?</u></p>
+<p><font face="Arial, Helvetica, sans-serif">First, load OpenGL header units with
+  </font><br>
+  <br>
+<font face="Courier New, Courier, monospace">uses wingraph,{$IFDEF FPC}gl,glu;{$ELSE}opengl;{$ENDIF}</font></p>
+<p><font face="Arial, Helvetica, sans-serif">and afterwards perform some initializations</font></p>
+<p><font face="Courier New, Courier, monospace">SetOpenGLMode(DirectOn);<br>
+  &lt;your code here for OpenGL initialization scenery&gt;  <br>
+  </font><br>
+  <font face="Arial, Helvetica, sans-serif">Next, it follows the animation loop </font><br>
+  <br>
+  <font face="Courier New, Courier, monospace">repeat<br>
+  &nbsp; glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); //clear OpenGL screen <br>
+  &nbsp;	&lt;your code here for drawing OpenGL scenery&gt; <br>
+   &nbsp; UpdateGraph(UpdateNow);<br>
+  until CloseGraphRequest;</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Please consult an OpenGL manual for more details.</font></p>
+<p><u><font face="Arial, Helvetica, sans-serif">How to obtain palette effects </font>?<font face="Arial, Helvetica, sans-serif"></font></u></p>
+<p><font face="Arial, Helvetica, sans-serif">Suppose we want to show a text on screen progressively to the user (shading efect).
+Prepare the screen in advance </font></p>
+<p><font face="Courier New, Courier, monospace">SetColor(White);</font><font face="Courier New, Courier, monospace"><br>
+  SetRGBPalette(White,1,1,1);<br>
+&lt;your code here for writing text&gt;</font></p>
+<p><font face="Arial, Helvetica, sans-serif">The text is not visible yet, since it is too dark (but not Black). With the following routine we get the result</font></p>
+<p><font face="Courier New, Courier, monospace">procedure ShadingEffect;<br>
+    var i:byte; <br>
+    begin<br>
+  &nbsp;
+ for i:=50 to 250 do<br>
+&nbsp;	 begin <br>    
+&nbsp;&nbsp;&nbsp; Delay(10); //set temporization here<br>
+&nbsp;&nbsp;&nbsp;
+SetRGBPalette(White,i,i,i);<br>
+&nbsp;	
+end;<br>
+end;</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Note that this works only on palette-based drivers, such as D8bit. See documentation for details.</font></p>
+<p><strong><font face="Arial, Helvetica, sans-serif">More code recipes might come...</font></strong><br>  
+  <br>  
+  <br>  
+  <br>  
+  <br>  
+  <br>  
+  <br>  
+  <br>
+</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+</body></html>

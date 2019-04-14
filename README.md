@@ -4,9 +4,10 @@ A UNIVERSAL replacement of the "Borland Graphics Interface" (BGI)
 (For Lazarus/FPC/Pascal)
 
 Its a GRAPHICS MODE "Canvas", not unlike TCanvas. 
--You draw with it.
+-You draw with it. 2D and 3D modes are supported.
 
 We will try to use "TCanvas2 objects" as the code evolves.
+
 
 ### EXTERNAL LIBS warning:
 
@@ -14,12 +15,17 @@ This UNIT API uses several external libs-
 
 		THIS IS HOW LINUX IS DESIGNED
 		
-The location of which on Windows is completely unknown(they could be anywhere).		
+The location of which on Windows is completely unknown.
+(they could be anywhere-even missing-)
 
+FIXME: 
+	
+	files with no extension(8.3) are linux64 binaries..OOPS.
+	DO NOT try to edit these ELF binaries.
 
 Several new libraries are filling in the gaps that SDL left, fast.
 
-Glitter BoilerPlate area(GitHub) adds the following:
+Glitter BoilerPlate (on GitHub) adds the following:
 
 		libSOIL (advanced image loading -beyond BMP and TGA)
 				dropping vampyre/PasJPEG for ease of use
@@ -34,6 +40,7 @@ Glitter BoilerPlate area(GitHub) adds the following:
 Port Audio/uos implements "AUDIO"
 Pascal libNet and similar provide "NET"
 
+(DO NOT RELY on Crt.Sound() to function at all.)
 	
 ### SDL??	
 
@@ -41,29 +48,27 @@ SDL 1 and 2  "unified sources" included- for your pleasure programming.
 SDL AUDIO is encountering a random Pointer bug after failing somewhere 
 (Im assuming it cant find the soundcard device).
 
+PortAudio/uos doesnt seem to have that problem.
 
-### Port status
+### Portage status
 
 WIN32:
 
 		Win32 port is coming. I have VS2017 setup under Win7. 
 		M$FT is trying to kill off 7 and 8 again- this time by failing to implement SHA2 in Win7
+		WinAPI port is lacking in the way X11 is dodgy...hmmmmmm
 
 MAC:
 
-		My Mac mini is in pieces. NO DICE right now with XCode.
+		My Mac mini has XCode- I will look at this in a minute.
 
 Ubuntu:
 
 		has a serious FPC/Lazarus distribution flaw. 
 		I had to "reformat root" and fight the OS to fix it.
 
-PULL SUBVERSION LATEST and install those packages- 
-do NOT insall system fp-* (nor Lazarus packages) from the system repo.
-
-		If you do - youll have to find the teeth pullers.
-
-You can get it working(fixed)- but its a R-PITA.
+		DO NOT INSTALL FPC or Lazarus from the repository!!!!
+		(You have three svn packages to install instead.)
 
 
 ### Backends
@@ -75,22 +80,23 @@ Windows/ Unices can use:
 		OpenGL/freeGLUT
 
 Mobile/RasPi:
-		OpenGL ES (slight code tweaks needed)
+		OpenGL ES (hachet half-assed -more and more as time goes on)
 
 ## Ports
 
 This unit (LazGraphics) SHOULD be ported to use the following languages:
 
-		Basic(FreeBasic/QB64)
-		VB(gambas/MS-VB)
+		Basic(FreeBasic(FBC)/QB64)
+		VB(gambas/VB.Net)
 		C/VC/C sharp (backport at your own peril- NO C HERE.)
-
+		ADA
+		
 -Hooks are present w freeGLUT/GL- 
 
 		Ada 
 		FORTRAN 
-		python (pyGL)
-
+		python (pyGL/pg)
+		Gambas(via SDL-and GL libs)
 		
 -DONT ASK about assembler. The compiler does this for you.
 Assembler -in flight- does not guarantee optimized code.
@@ -107,7 +113,7 @@ So if performance is lacking(usually in math areas)-
 
 
 Ive tried to do the second for you- as best possible.
-Math is not my strong-suit.
+Math is not my strong-suit.(GL is riddled w Matrice Math)
 
 Try to keep the ports HERE- DO NOT FORK unnecessarily.
 I will be happy to import code.
@@ -121,13 +127,13 @@ I will be happy to import code.
 state:  RELEASE freeze at .80 (SUCCESS)
 master branch: code is unstable WIP. May or may not build.
 
--detectGraph() is missing.
+to Fake: detectGraph()
 
 ---
 
 ### Why does it exist?
 
-Some outdated BGI code needed to be brought up to speed.
+Some outdated code needed to be brought up to speed.
 
 You will need **this Library** if you write strictly for graphics modes or wish to.
 
@@ -229,17 +235,12 @@ The API is typically used to interact with a graphics processing unit (GPU), to 
 QUADS refers to "2D opengl". Squares have four points.
 The co ordinate system- by default is FUBAR, IMHO. Ive patched it "back to sanity".
 
-
-There is a ASS-TON of OGL snippets coming in from all angles-pun intended.
-Not all of it is in the main unit--some is directly on my desktop. 
-Code needs to be mega sorted again- as I did before.
-
-Refernece Materiels coming (OGL Red/Blue books)
+Refernece Materiels coming (OGL Red/Blue/Green/Orange books)
 
 SDL GFX unit is no longer needed(at all). 
 Dont freak out- we have similar implementation.
 
-Major missing chunks of the BGI are coming together, quickly.
+Major missing chunks of "the BGI" are coming together, quickly.
 
 
 
@@ -270,12 +271,12 @@ Lazarus is installed.
 This code doesnt call the LCL- but yours might. 
 LCL errors are up to you to fix.
 
-SDL "Pointer issues" and mem-alloc/free issues- need to be worked out by you.
+OGL/SDL "Pointer issues" and mem-alloc/free issues- need to be worked out by you.
 Im having a hard time debugging them myself- and SDL doesnt want to co operate.
 
 
 
-### Why WHYE ..WHEY..
+### Why WHYE ..WHY..
 
 There are loads of projects where people cannot revise changes publicly.
 Programmers are making it more difficult with mailing lists (spam) and "private repos".
@@ -308,8 +309,8 @@ Shoving people into SDL and saying "good luck"-
 
 **Lazarus OGL demos DO NOT work (correctly).**
 
-Code has been abandoned.
-This appears to be a "shader sequence" or "3D depth" (Z axis) problem.
+Code has been abandoned. Code that used to work- suddenly isnt working.
+(This appears to be a "shader sequence" or Perspective problem.)
 
 
 ### Focus:
@@ -336,7 +337,7 @@ NO-
 
 		1- im not that much of a genious
 		2- linux programming has 50 ways of doing things -and none- are correct
-		3- I dont know that many Linux internals
+		3- I dont know that many Linux internals(but I know enough)
 		4- I would be 350 years old before finishing(even core routines)
 
 You need development packages installed as well as the libraries themselves
@@ -408,11 +409,12 @@ Buildig on windows(no linux either way involved):
 
 	(I dont know about the Linux-connect instead of using API thing just yet)
 
-	For SIN there is a WinAPI SDL (version?) port: http://math.ubbcluj.ro/~sberinde/wingraph/main.html	
+	For SIN there is a WinAPI SDL (version): http://math.ubbcluj.ro/~sberinde/wingraph/main.html	
 
 	WARNING: The colors DO NOT conform to XTerm standards, nor CGA standards-mine DO)
 	WinDos, WinMouse, and WinCrt units were re-written by this guy, it seems.
 
+	It sucks- its ancient, 3D is dodgy- but it builds.
 
 Building on windows (cli) but using Unix/Linux subsystem:
 
@@ -436,9 +438,6 @@ Mac:
 		(Im Building for Linux x64 on Ubuntu at the moment.)
 
 
-I have a Mac and WIn7 install available- but Im working from a Linux box.
-        
-
 MOBILE:
 
     ModeList support is experimental (or non-existant) right now.
@@ -446,7 +445,8 @@ MOBILE:
 
 	Color depth is faked- its not 32bit color and 1080p on your damn phone.
 		NOR WILL IT EVER BE.
-
+		(Usually 3:3:2 or something like that.)
+		
     Android (Java/ "Pascal to Java Porting") I need help with. I have Android Studio installed.
 
     iDevices are impossible due to Apple OBJ-C proprietary licensure 
@@ -467,16 +467,18 @@ ALL ELSE FAILS:
 ## Why --Pascal-- and why now and why THIS WAY?
 
 		-Its FUN and EASY to write code for	(I like puzzles)	
-		-Full 16, 256, RGB, and RGBA support (256BIT??) up thru 1080p.
+		-Full 16, 256, RGB, and RGBA support (256BPP?) up thru 1080p.
 
 		-TCanvas for Laz doesnt quite do the job.
-		-Linux has never had a graphics engine or BGI. EVER. Only TCanvas has come close(incomplete).
-
+		-Lazarus jumps from TCanvas(half-assed) to OpenSceneGraph and busted GL.
+		
 		-GVision for Linux (Pascal version of Win311) never took off. 
 		-JEDI doesnt stand for what you think it does- its incomplete, missing, and now depreciated.
+		-Because Delphi is windows only (and it sucks)
 		
 		-Castle engine is good, BUT requires OpenGL (and Lazarus) knowhow.
-		Begging programmers are baffled.
+			(You probly dont know the how)
+			
 
 		-Most projects are non-portable. 
 		
@@ -484,10 +486,11 @@ ALL ELSE FAILS:
 			Mac uses Quartz
 			Sin uses DirectX/WinAPI.
 			Lazarus is turning into OOP OBJ customized UnFreePascal, much like VC did.
-
+				Code is either for FPC -- or its not.
+			
 		-This isnt a "class project", its my passion. Im not rushing my work.
 		-Nobody uses Int10 DOS assembler anyore. Even less use Int10 "graphics modes".
-		-This is 32/64 bits code
+		-This is 32/64 bits code. I dont write "8bit hacks".
 
 ### The objective of this package
 
@@ -521,7 +524,7 @@ Even "nil pointing" "PathToDriver" still leaves us in a window.
 
 The pyramid(tetrahedron) demo has been SDL v2 patched and now utilizes event based input alongside OGL.
 		There is no text (OutText) functions in OGL right now.
-
+			(those are freeGLUT functions)
 
 #### BGI output
 
@@ -537,9 +540,10 @@ Hold your enthusiasm. "Its pretty primitive".
 ### Lets run "make"....
 
 	MSVS requires a .sln file
-	Lazarus uses .lpk.lpi file
+	Lazarus uses .lpi file
 	XCode wants a .project file
-
+    (FPc doesnt care)
+	
 I just run FPC over the main unit file right now. Nothing fancy.
 The makefile will be used in the future. (Bash doesnt like it.)
 
@@ -559,25 +563,21 @@ Board Games/Card Games:
 	Othello, 2d chess, sorry, pente...
 	Solitare, Poker, etc.
 	
+Due to sceneGraph and complexity of OpenGL code- I am stopping here.
+The main reason is this-
+
+		Shaders!! You stop editing output on-the-fly and start buffering pre-canned shaders!
+		(by the millions)
+
+SideScrollers could be done-
+	You can have fun. A few have been done (Maryo World/HedgeWars) in SDL.
+
+3D titles like OGRE/Morrowind+ need extreme set of OGL/OCL skills.
+(I am not prepared to go there.)
+
+The C is incredibly complex and difficult to read- let alone port.
 	
-SIDESCROLLER(collision based) 2d/3d games:
-    
-    
-    "Super Nintendo" or "SEGA MegaDrive/Genesis" level of detail (like OpenSonic) or slightly above it. 
-        
-        RedBook CDROM/CDDA support is in uos units. SDL has removed the functionality.
-
-        
-3D-
-    
-    OpenFreeSpace??
-    OpenMorrowwind (uses SDL/Ogre or a combination thereof)
-	OpenSkyRim?? 
-    Open (world of) WarCraft??
-
-
 #### COPYLEFT
-  
   
 This code is a "black boxed spinoff" work written primarily for FPC in Pascal.
 Nothing was reverse engineered- except published documentation.
@@ -586,7 +586,9 @@ Borland, INC. has been bought out and seems to "be no more".
 Unlike Microsoft, I respect thier codebase and right to copyright.
 
 Original code for DOS (c) Borland, INC. 
+
 Re-ported (from C) via FreePascal (FPK) dev team, myself and a few others.
+
 I have left reference where its due in the code. 
 I only accept credit where its due me.
 
@@ -737,5 +739,3 @@ There exist a way with Qt apps to do MOC (.po) or something.
 FPC has the "feature" but I dont know how to use it.
 
 It has to do with aclocal and locales.
-
-

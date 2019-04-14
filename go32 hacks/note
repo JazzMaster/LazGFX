@@ -1,8 +1,0 @@
-OVL files:
-	This is what the TP compiler invokes for using DPMI.
-	32RTM is the actual hooked functions.
-
-DPMIINST and DPMILOAD use borland 16bit DPMI
-HDPMI(HX dos extender) uses 32bits
-
-dos tp/bp7 may support SDL v1- not SDL v2.

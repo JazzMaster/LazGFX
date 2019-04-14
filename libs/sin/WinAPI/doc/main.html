@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>WinGraph Unit</title><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"></head>
+<body alink="#ffffcc" bgcolor="#e1bc64" link="#3333ff" text="#000000" vlink="#3333ff">
+<p align="center"><font face="Arial, Helvetica, sans-serif" size="+2"><strong>WinGraph Unit</strong></font><font face="Arial, Helvetica, sans-serif"><br>
+</font><font face="Arial, Helvetica, sans-serif">v1.1 (03-2010)</font></p>
+<table align="center" border="1" cellspacing="0" width="50%">
+  <tbody><tr>
+    <td bgcolor="#660000">&nbsp;</td>
+    <td bgcolor="#999966">&nbsp;</td>
+    <td bgcolor="#cc00ff">&nbsp;</td>
+    <td bgcolor="#0000cc">&nbsp;</td>
+    <td bgcolor="#66cc33">&nbsp;</td>
+    <td bgcolor="#ffff00">&nbsp;</td>
+    <td bgcolor="#990033">&nbsp;</td>
+    <td bgcolor="#cc6633">&nbsp;</td>
+    <td bgcolor="#ff0000">&nbsp;</td>
+    <td bgcolor="#339966">&nbsp;</td>
+    <td bgcolor="#663399">&nbsp;</td>
+    <td bgcolor="#41463c">&nbsp;</td>
+    <td bgcolor="#ff33cc">&nbsp;</td>
+    <td bgcolor="#cc9966">&nbsp;</td>
+    <td bgcolor="#0099cc">&nbsp;</td>
+    <td bgcolor="#cccc99">&nbsp;</td>
+  </tr>
+</tbody></table>
+<p><font face="Arial, Helvetica, sans-serif"><strong>What is this?</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">This is a unit for
+graphics written in Pascal with source code included. You can use it in
+your own programs to create basic graphics under Win32, in a dedicated
+GUI window, without any VCL or API call. To get more feelings look at
+the demos bellow.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">It should be useful for
+those users who need a quick way to display 2D graphics in Windows (as
+it was in Borland Pascal - BP), without including huge VCL support or
+other advanced graphical libraries.</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><strong><a name="overview"></a>Overview</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">WinGraph comes from the "<strong>win</strong>dows <strong>graph</strong>ics
+unit". It is a unit written in Pascal for graphics programming under
+Win32. The source code is compatible with Free Pascal 2.4.0 and Delphi
+7 compilers. This unit is intended to be a replacement of the standard
+Free Pascal's Graph unit for Win32 operating system. The later is
+highly compatible with the legacy BP graph unit for DOS, but, at the
+same time, it is slow and not very usable. In WinGraph all routines are
+implemented using Win32 GDI API calls. So this offers good speed, quick
+coding, a certain degree of compatibility with BP graph unit and
+several extensions specific to Win32 GDI system. It also initializes
+the OpenGL driver for doing more complex graphics and allows mixing the
+WinGraph and OpenGL drawing routines. After calling the initialization
+routine the unit starts a dedicated thread and a GUI window for
+drawing. You can add keyboard and mouse support to your graphical
+program by using specific units WinCrt and WinMouse (included). Be
+aware that the unit is not entirely BP compatible.</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><strong><a name="download"></a>Package content and download</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Folders of the package are organized as follows</font></p>
+<p><font face="Arial, Helvetica, sans-serif">\wingraph              - main folder (everything is here)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \bin            - binary units and executables<br>
+&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; \demo           - demo programs<br>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp; \doc            - documentation<br>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp; \edit           - editor configuration files<br>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp; \src            - units source codes and compiler configuration files</font></p>
+<p><font face="Arial, Helvetica, sans-serif">You must preserve this
+structure, otherwise units will not compile. Compiled binaries are
+compatible only with FPC 2.4.0 and Delphi 7. For other versions you
+should recompile all units from source.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Visit the project web site at <a href="http://math.ubbcluj.ro/%7Esberinde/wingraph" target="_parent">http://math.ubbcluj.ro/~sberinde/wingraph</a><br>
+Get the latest version of the package here <a href="wingraph.zip">wingraph.zip</a></font></p>
+<p><font face="Arial, Helvetica, sans-serif"><strong>List of routines</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">A comprehensive list of all types, constants and routines defined by WinGraph and support units is included in <a href="routines.html">list of routines</a> page.</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><strong>Code recipes</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">To learn basic programming with WinGraph please consult <a href="recipes.html">code recipes</a> page. Some questions are answered there, as well.</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><strong><a name="screenshots"></a>Screenshots from demos</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Following screenshots are
+taken from the demos included in the package. Their sole purpose is to
+illustrate some of the capabilities of WinGraph. Review the source code
+for a quick learning.</font></p>
+<table align="center" border="0" cellspacing="0" height="1150" width="720">
+  <tbody><tr>
+    <td align="center" valign="middle"><img src="scr/scr1.gif" alt="screenshot-1" height="224" width="324"></td>
+    <td align="center" valign="middle"><img src="scr/scr2.gif" alt="screenshot-2" height="224" width="324"></td>
+  </tr>
+  <tr>
+    <td align="center" valign="middle"><img src="scr/scr3.gif" alt="screenshot-3" height="224" width="324"></td>
+    <td align="center" valign="middle"><img src="scr/scr4.gif" alt="screenshot-4" height="223" width="205"></td>
+  </tr>
+  <tr>
+    <td align="center" valign="middle"><img src="scr/scr5.gif" alt="screenshot-5" height="224" width="324"></td>
+    <td align="center" valign="middle"><img src="scr/scr6.gif" alt="screenshot-6" height="224" width="324"></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center" valign="middle"><img src="scr/scr7.gif" alt="screenshot-7" height="412" width="441"></td>
+  </tr>
+</tbody></table>
+<p><font face="Arial, Helvetica, sans-serif"><strong><a name="colornames"></a>List of 256 pre-defined color names</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">WinGraph is able to work
+with all 24-bit format colors. However, to facilitate quick
+programming, it defines 256 color names as below. These are standard
+names compiled from various sources. For a huge list of color names
+visit a site <a href="http://xona.com/colorlist" target="_parent">here</a>.</font></p>
+<p><img src="colors.gif" alt="color names" align="middle" height="768" width="1024"></p>
+<p><font face="Arial, Helvetica, sans-serif"><strong><a name="history"></a>Project history</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">v1.1 (03-2010)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; small bug fixes<br> &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;compatibility with current FPC compiler (2.4)<br>v1.0 (09-2008)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; small aesthetic fixes<br> &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;mainly to reflect the "mature status" of the product<br>v0.9 (09-2007)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; small fixes<br>
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; enhanced WinCrt and WinMouse units<br>
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; documentation updates <br>
+v0.8 (09-2006)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; small bug fixes<br>
+ &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; 256 pre-defined color names<br>
+ &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; more demos<br>
+ &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; enriched HTML documentation<br>
+  v0.7 (12-2005)<br>
+ &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; several bug fixes (mainly thread related)<br>
+ &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; Sound routine modified<br>
+ &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; new routine GetFontSettings<br>
+  v0.6 (05-2005)<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; code cleaning and optimization<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; better thread and palette support<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; many new routines<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WinGraph is split into 3 units:<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; WinGraph - graphics handling<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; WinCrt - keyboard handling<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; WinMouse - mouse handling<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; several bug fixes<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; documentation rewritten<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; more demos<br>
+  v0.5 (03-2004)<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; OpenGL initialization <br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; custom window size<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; demos and docs updated<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; small fixes<br>
+  v0.4 (08-2003)<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; docs written<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; first internet release<br>
+  v0.3<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; additional routines are implemented<br>
+  v0.2<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; first demo programs work<br>
+  v0.1 (06-2003)<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; project start<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; most important BP graph routines are implemented</font></p><p><font face="Arial, Helvetica, sans-serif"><strong><a name="licence"></a>Licence</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Copyright (c) 2003-2010 by Stefan Berinde</font></p>
+<p><font face="Arial, Helvetica, sans-serif">This package is Freeware,
+as long as the product which uses it is Freeware. You are allowed to do
+modifications on this unit but please state the original work. Drop me
+a line if you did something useful anyway.</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><strong>Contact author</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Stefan Berinde<br>
+  email: sberinde[at]math[dot]ubbcluj[dot]ro<br>
+  web: http://math.ubbcluj.ro/~sberinde</font></p>
+
+</body></html>

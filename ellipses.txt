@@ -1,0 +1,219 @@
+{
+we want immeadiate mode (glbegin..glend) for our tasking(BGI)
+normally you dont edit Textures(or the screen) midflight- you throw them at the renderer and
+"hope the pasta sticks".
+
+shaders free up the CPU
+(games are mostly precompiled shaders)
+
+3d objects get weird fast. 
+
+First with Planar co-ords- then w added floats....
+-then with complex polys and objects (Teapots,etc)
+-then with TnL....
+-then with complete scene rendering, complex Micro-timers, and networking (beyond scope of this code)
+
+Task switching,threading and async flows become necessary at a certain point- 
+as Ive said. SERIOUS CODE(and data) FLOWING. EVERYWHERE.
+
+Could we do an MMO- perhaps. Ive not the "scene talent" for it.
+Most take years and a team of 10+ devs. I am ONE dev.
+
+}
+
+
+//lets see which works better
+
+//x,y,W,H,100
+
+procedure DrawEllipse(cx, cy, rx, ry:single; num_segments:integer);
+var 
+   theta,c,s,t,x,y:single;
+   ii:integer;
+
+begin
+    //2Pi divided by segments
+    theta := 2 * 3.1415926 / num_segments; 
+    c := cosf(theta);//precalculate the sine and cosine
+    s := sinf(theta);
+
+    x := 1;//we start at angle = 0 
+    y := 0; 
+
+    glBegin(GL_LINE_LOOP); 
+    ii:=0;
+    repeat 
+        //apply radius and offset
+        glVertex2f(x * rx + cx, y * ry + cy);//output vertex 
+
+        //apply the rotation matrix
+        t := x;
+        x := c * x - s * y;
+        y := s * t + c * y;
+	inc(ii);
+    until(ii > num_segments;) 
+    glEnd(); 
+end;
+
+//no ints- graphics coords are not negative 
+//except when using direct GL coords--we are not.
+
+//if W+H= then circle, if not- its an ellipse(flattened bubble)
+//n=segments
+
+
+//Draws a ellpise made out of points.
+proceedure DrawEllipse(w,h:word; filled:boolean);
+var
+	x,y,z:single;
+	t:word;
+
+//2d Z=0;
+
+begin
+  if  FILLED then
+	glBegin(GL_POLYGON);
+
+  else if (not filled) then
+        glBegin(GL_POINTS); //or  glBegin(GL_LINE_LOOP); 
+
+  t:=0;
+  repeat
+      x := w*sin(t);
+      y := h*cos(t);
+      z := 0;
+      //s=short(word) -use instead of f= float(single)
+      glVertex3s(x,y,z);
+      inc(t);
+  until (t = 360);
+  glEnd();
+end;
+
+ 
+
+
+
+//get GL version num
+glGetIntegerv(GL_MAJOR_VERSION, *);
+glGetIntegerv(GL_MINOR_VERSION, *);
+
+//These are available on OpenGL version 3.0 and above contexts. If those are not available, you can use this instead:
+
+glGetString(GL_VERSION);
+if not GradientFills then
+	glShadeModel(GL_FLAT); //single color fills
+else
+	glshadeModel(GL_SMOOTH); //gradients
+
+//after case (resolution) of:
+
+//clip to 2D bounds(ortho)
+gluOrtho2D(0,MaxX, MaxY,0);
+
+
+if (blendingEnabled) then begin
+   glEnable(GL_BLEND);        // Enable blending
+   if Render3d then	//no z axis in 2 dimensions
+	   glDisable(GL_DEPTH_TEST);  // Need to disable depth testing
+end else begin
+   glDisable(GL_BLEND);
+   if Render3D then
+	   glEnable(GL_DEPTH_TEST);
+end;
+
+
+//vars
+
+screenCenterX:= x mod 2;
+screenCenterY:= y mod 2;
+
+screeCenterXY:=(x*pitch+y); 
+//see SDL for the math- (1D pointer location of a 2D array)
+
+
+//set index mode color(fg)
+Procedure SetIndexColor;
+
+begin
+	glIndexi(color);
+end;
+
+Procedure SetIndexBGColor;
+
+//the value of a byte- never the byte itself
+//Wtf is an unsigned Byte?
+
+begin
+	glIndexb(ord(color));
+	glClear(GL_COLOR_BUFFER_BIT)
+end;
+
+procedure SetGLPalette;
+
+begin
+	if MaxColors=16 then begin
+		i:=0
+		repeat
+			glutSetColor(i, ByteToGLFloat(Palette16[i]^.r), ByteToGLFloat(Palette16[i]^.g), ByteToGLFloat(Palette16[i]^.b));
+			inc(i);
+		until i=15;
+	end else if MaxColors=255 then begin
+		i:=0
+		repeat
+			glutSetColor(i, ByteToGLFloat(Palette256[i]^.r), ByteToGLFloat(Palette256[i]^.g), ByteToGLFloat(Palette256[i]^.b));
+			inc(i);
+		until i=255;
+	end;
+end;
+
+---
+
+Unit GLCube;
+
+//If you dont like Triangles....
+
+
+---
+
+//there is no way to know this size beforehand..sorrry.
+
+var
+    ImageData: array  of byte; //variable
+
+
+function ReadPixelsFromTexture:ImageData;
+//copy from VRAM into RAM(which we have more of, usually)
+
+begin
+	glGetTexLevelParameterfi( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, TextureWidth );
+	glGetTexLevelParameterfi( GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, TextureHeight );
+
+
+	//Fetches RGBA - even if not in RGBA mode.(gl glitch)
+
+	//PASCAL: sizeof(ImageData):= (4 * TextureWidth * TextureHeight);
+
+	//front left..front right...center..rear left....rear right...
+	//Stereo video output is possible(think holo-lens/AR/VR) but not the default. LEFT is.
+
+	//read from the screen
+	glReadBuffer( GL_FRONT );
+	// if reading from content not yet rendered yet:  GL_BACK
+
+	glReadPixels( 0, 0, TextureWidth, TextureHeight, GL_RGBA, GL_UNSIGNED_BYTE, ImageData );
+
+	//ImageData should now contain ALL PIXEL data from OGL Texture
+	//(not necessarily the whole screen)
+	//(in Byte format)
+	ReadPixelsFromTexture:=ImageData;
+end;
+
+{
+reading pixels isnt horribly difficult(but isnt a one-off routine):
+
+	how many to read? (1x1), (4x4)....
+	which buffer to read from?
+	READ
+	Return data fetched
+}
+

@@ -1,9 +1,9 @@
-Unit LazGFX; 
+Unit LazGFX;
 
 //now officially "a MESS v4...." DONT EVEN ASK ABOUT COMPILING while SDL code is here.
 
 //Range and overflow checks =ON
-{$Q+} 
+{$Q+}
 {$R+}
 
 {$IFDEF debug}
@@ -21,7 +21,7 @@ SEMI-"Borland compatible" w modifications.
 Lazarus graphics unit is severely lacking...use this instead.
 
 
-LGPL v2 ONLY. 
+LGPL v2 ONLY.
 You may NOT use a higher version.
 
 Only OPEN/free units and code will ever be used or linked to here.
@@ -30,7 +30,7 @@ Only cross-platform methods will be used.
 IN NO WAY SHAPE OR FORM are proprietary functions to be added here.
 	You may use them if you wish- but the result is non-portable. (more headache for ewe)
 
-Commercial software linking/building is allowed- 
+Commercial software linking/building is allowed-
  	provided I get the backported changes and modifications(in source format).
 
 I dont care what you use the source code for.
@@ -52,17 +52,18 @@ GL by itself doesnt require X11- but it does require some X11 code for "input pr
 }
 
 interface
+
 {
 -DONT RUN A LIBRARY..link to it.
 -Anonymous C kernel dev (that runs a library)
 
 This is not -and never will be- your program. Sorry, Jim.
-RELEASES are stable builds and nothing else is guaranteed. 
+RELEASES are stable builds and nothing else is guaranteed.
 
-The quote that never was- 
+The quote that never was-
 
 "Linus: Dont tell me what to do.
-I write CODE for a living. 
+I write CODE for a living.
 Everything is mutable."
 
 
@@ -71,7 +72,7 @@ We output to Surface/Texture (buffer/video buffer) usually via memcopy operation
 
 For framebuffer:
 	
-For now- we settle for a Doom like experience. 
+For now- we settle for a Doom like experience.
 	We start in text mode
 		We switch to graphics mode and do something (catch all crashes)
 	We drop back to text mode
@@ -84,7 +85,7 @@ Most of the meat and po-tae-toes are in the aux units.
 
 Canvas ops are "mostly universal".
 The differences in code are where the surface(Canvas) operations point to and color operations supported.
- 
+
  (a surface is a surface is a surface)
 	-For that matter:
 			(A texture is a texture is a texture)
@@ -99,7 +100,7 @@ There are two ways to invoke this unit-
 
 2- as a Console Application(NO GUI)
 
-In Lazarus: 
+In Lazarus:
 
 	Project-> Console App or
 	Project-> Program
@@ -115,7 +116,7 @@ Within FP application itself(FP IDE):
 	-Write the code normally
 	-Check the output window
 
-**This method offers Readln() / writeln() 
+**This method offers Readln() / writeln()
 
 **THIS CODE WILL CHECK WHICH COMPILE METHOD IS USED and log accordingly.**
 
@@ -203,7 +204,7 @@ SDL_SetColorKey(Mainsurface,SDL_TRUE,DWord);
 -Where DWord is the color for the colorkey(greenscreen effect)
 
 PNG can be quantized-
-	Quantization is not compression- 
+	Quantization is not compression-
 		its downgrading the color sheme used in storing the color
 		and then compensating for it by dithering.(Some 3D math algorithms are used.)
 	(Beyond the scope of this code)
@@ -276,7 +277,7 @@ Not Supported(SDL Limit):
 
 
 I havent added in Android or MacOS modes yet.
-You cant support portable Apple devices. 
+You cant support portable Apple devices.
 		Apple forbids it w FPC.
 
 ---
@@ -286,12 +287,12 @@ MessageBox:
 With Working messageBox(es) we dont need the console.
 You can choose the color scheme and input methods- YES/NO, OK...
 
-Lazarus Dialogs are only substituted IF LCL is loaded. 
+Lazarus Dialogs are only substituted IF LCL is loaded.
 (TVision routines wouldnt make sense in graphics modes-
 	you may use GVision routines instead)
 
 GVision requires Graphics modes(provided here) and TVision code "be left around".
-FPC team is refusing to fix TVision bugs. 
+FPC team is refusing to fix TVision bugs.
 
         This is wrong.
 
@@ -307,13 +308,13 @@ THANK YOU:
 
 Code upgraded from the following:
 
-	original *VERY FLAWED* port (in C) coutesy: 
+	original *VERY FLAWED* port (in C) coutesy:
 		Faraz Shahbazker's BS-level classroom homework(GitHub) <faraz_ms@rediffmail.com>
 
-	unfinished port (from go32v2 in FPC) courtesy: 
-		Evgeniy Ivanov <lolkaantimat@gmail.com> 
+	unfinished port (from go32v2 in FPC) courtesy:
+		Evgeniy Ivanov <lolkaantimat@gmail.com>
 
-	some early and or unfinished FPK (FPC) and LCL graphics unit sources 
+	some early and or unfinished FPK (FPC) and LCL graphics unit sources
 
     JEDI SDL headers(unfinished)
 
@@ -325,9 +326,9 @@ manuals:
 	SDLv2.0 online documentation
 
     Borland BGI documentation by QUE Publishing ISBN 0880224290
-    TCanvas LCL Documentation (different implementation of a 'SDL_screen') 
+    TCanvas LCL Documentation (different implementation of a 'SDL_screen')
 
-    Lazarus Programming by Blaise Pascal Magazine ISBN 9789490968021 
+    Lazarus Programming by Blaise Pascal Magazine ISBN 9789490968021
     Getting started w Lazarus and FreePascal ISBN 9781507632529
 
     JEDI chm file
@@ -340,14 +341,14 @@ manuals:
 	online freeGLUT docs
 
 animations:
-	to animate- 
+	to animate-
 		screen savers, etc...you need to (page)flip/rendercopy and slow down rendering timers.
 		(trust me, this works-Ive written some soon-to-be-here demos)
 		The biggest issue becomes OVER RENDERING.
 
 bounds:
    cap pixels at viewport
-   (zoom in or out of a bitmap- but dont exceed bounds.) 
+   (zoom in or out of a bitmap- but dont exceed bounds.)
 
 
 on 2d games...you are effectively preloading the fore and aft areas on the 'level' like mario.
@@ -356,9 +357,9 @@ on 2d games...you are effectively preloading the fore and aft areas on the 'leve
 Palettes:
 
    These are mostly standardized now.
-   Max colors in a palette are always 256, unless in modified CGA modes- then 16. 
+   Max colors in a palette are always 256, unless in modified CGA modes- then 16.
    Specify each DWORD value or leave it as a zero
-  
+
   Note "the holes" can be used for overlay areas onscreen when stacking layers.
   The holes are standardized to xterm specs. I think theres like 5.
 
@@ -373,22 +374,22 @@ WONTFIX:
 
 SDL BULLSHIT:
 
-	SDL is not SIMPLE. 
+	SDL is not SIMPLE.
 	The BGI was SIMPLE.
 
---Jazz 
+--Jazz
 (comments -and code- by me unless otherwise noted)
 
 
 TODO:
 
-	Get some framebuffer /EGL fallback code working and put it here.	 
+	Get some framebuffer /EGL fallback code working and put it here.	
 	
 	all color ops need mods for OpenGL(update from surface to texture ops)
 	need to implement "format agnostic" color conversion with all bpp depths
 		("depth" in OGL is considered cubic depth, not bpp)
 		
-} 
+}
 
 
 uses
@@ -403,12 +404,15 @@ cthreads has to be the first unit -in this case-
 
 }
 
-//this Logic is weirdly (prove a negative) here. 
+//this Logic is weirdly (prove a negative) here.
 //while you cant prove a negative- you can "not prove" a positive
 
 //cthreads and cmem have to be first.
-{$IFDEF unix} 
+{$IFDEF unix}
 	cthreads,cmem,baseunix, X, XLib,sysUtils,
+
+//sysUtils- FreeAndNil
+
 	 {$IFNDEF fallback} //fallback uses FrameBuffer only code(slow), otherwise keep loading libs
 		Classes,GL,GLext, GLU,
 		//probly cairo and pango too at this point.
@@ -417,15 +421,16 @@ cthreads has to be the first unit -in this case-
 
 //ctypes: cint,uint,PTRUint,PTR-usINT,sint...etc.
 //unless you want to rewrite someone elses C, use this.
- 
+
     ctypes,
-        
+
 //This logic is normal
 {$IFDEF MSWINDOWS} //as if theres a non-MS WINDOWS?
-	 {$IFDEF fallback}
-		WinAPI,
-	 {$endif}
      Windows,
+	 {$IFDEF fallback}
+		WinGraph, //WinAPI-needs rework
+	 {$endif}
+
      {$IFNDEF LCL} //conio apps only
 		crt,crtstuff,
      {$ENDIF}
@@ -453,46 +458,45 @@ end;
 endif
 }
 
-  {$IFDEF LCL}
+{$IFDEF LCL}
 	{$IFDEF LCLGTK2}
 		gtk2,
 	{$ENDIF}
 
 	{$IFDEF LCLQT}
 		qtwidgets,
-	{$ENDIF}  
-  
+	{$ENDIF}
+
 	  //works on Linux+Qt but not windows??? I have WINE and a VM- lets figure it out.
-      LazUtils,  Interfaces, Dialogs, LCLType,Forms,Controls, 
+      LazUtils,  Interfaces, Dialogs, LCLType,Forms,Controls,
     {$IFDEF MSWINDOWS}
        //we will check if this is set later.
       {$DEFINE NOCONSOLE }
-      
-	{$ELSE }  
+    {$ENDIF}
+
     {$IFDEF unix}
-    //UNIX
-    
+
       //LCL is linked in but we are not in windows.
-      //remember Lazarus by itself doesnt output debugging windows. 
+      //remember Lazarus by itself doesnt output debugging windows.
       //you have to enable this yourself.
 
       //we still technically DO have a console- even a GUI app can be launched from the commandline.
       //output then goes THERE-instead of the Lazarus equivalent.
       //THIS TRICK DOES NOT WORK on Windows. Windows removes crt and related units when building a UI app.
-      crt,crtstuff,
+        crt,crtstuff,
     {$ENDIF}
    logger,
-  {$ENDIF}
-  
-{
-Lazarus Menu:  
-	"View" menu, under "Debug Windows" there is an entry for a "console output" 
+{$ENDIF}
 
-however, if you are in a input loop or waiting for keypress- 
+{
+Lazarus Menu:
+	"View" menu, under "Debug Windows" there is an entry for a "console output"
+
+however, if you are in a input loop or waiting for keypress-
  you will not get output until your program is complete (and has stopped execution)
 
 
-In this case- Lazarus Menu:   
+In this case- Lazarus Menu:
 Run -> Run Parameters, then check the box for "Use launching application".
 (You may have to 'chmod +x' that script.)
 
@@ -501,20 +505,20 @@ To build without the LCL(in Lazarus):
 
  Just make a normal "most basic" program and call me in your "uses clause".
 
- You will find that the LCL may be a burden or get in your way- 
+ You will find that the LCL may be a burden or get in your way-
 	we dont really use the fundamentals of OBJFPC, OBJPAS, or Lazarus beyond basic functions.
 
 }
 
 //FPC generic units(OS independent)
 
-  uoslib_h,strings,typinfo,
-  
-// uos/Examples/lib folder has the required libraries for you. 
+  uos,strings,typinfo
+
+// uos/Examples/lib folder has the required libraries for you.
 // as a side-effect: CDROM Audio playback(CDDA) is added back
 
 
-{$IFDEF debug} ,heaptrc {$ENDIF} 
+{$IFDEF debug} ,heaptrc {$ENDIF}
 
 {
 OpenGL requires Quartz, which prevents building below OSX 10.2.
@@ -557,7 +561,7 @@ Cocoa (OBJ-C) is the new API
 NOTES on units used:
 
 crt is a failsafe "ncurses-ish"....output...
-crtstuff is MY enhanced dialog unit 
+crtstuff is MY enhanced dialog unit
     I will be porting this and maybe more to the graphics routines in this unit.
 
 
@@ -567,8 +571,8 @@ The idea is to talk when you have the rubber chicken or to request it or wait un
 Ideally you would mutex events and process them like cpu interrupts- one at a time.
 
 
-sephamores are like using a loo in a castle- 
-only so many can do it at once. 
+sephamores are like using a loo in a castle-
+only so many can do it at once.
 	first come- first served
 		- but theres more than one toilet
 
@@ -642,7 +646,7 @@ end;
 //16 (candles) colors:
 
 //background color(and clear):
-glClearColor(0.0, 0.0, 0.0, 0.0); 
+glClearColor(0.0, 0.0, 0.0, 0.0);
 glClear(GL_COLOR_BUFFER_BIT);
 
 //foreground color
@@ -681,7 +685,7 @@ begin
     begin
       g_bButton1Down := TRUE then
 		state := GLUT_DOWN;
-      else 
+      else
 		state:=GLUT_UP;
       g_yClick := y - (3 * g_fViewDistance);
     end;
@@ -727,11 +731,11 @@ end;
 function readpixels:(x,y,width,height:integer; Texture:textureID):somePixelData;
 //fucked C output- so lets un-fuck it.
 begin
-  case (bpp) of: 
+  case (bpp) of:
 
     //palettized (faked) 24bit
-	4: glReadPixels(0, 0, width, height, GL_RGB, GL_BYTE, mypixels);  
-	8: glReadPixels(0, 0, width, height, GL_RGB, GL_BYTE, mypixels);  
+	4: glReadPixels(0, 0, width, height, GL_RGB, GL_BYTE, mypixels);
+	8: glReadPixels(0, 0, width, height, GL_RGB, GL_BYTE, mypixels);
 
 //pad w zeros??
 	15:glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1, pixels15);
@@ -740,7 +744,7 @@ begin
 	//No upconversion.Settle for 32bit data(24+pad data).
 	24: begin
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, mypixels);  
+			glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, mypixels);
 
 		end;
     32: glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, mypixels);
@@ -774,7 +778,7 @@ begin
 	4: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_BYTE, pixels);
 	8: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_BYTE, pixels);
 
-//hacked 16bit support wo alpha 
+//hacked 16bit support wo alpha
 
 	15: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1, pixels15);
 	16: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB565,  GL_UNSIGNED_SHORT_5_6_5, pixels16);
@@ -795,7 +799,7 @@ end;
 //color ops:
 //theres no need to query what depth/bpp we are in- we should know.
 
-//the tricky part may be in reading pixels back from OGL/SDL 
+//the tricky part may be in reading pixels back from OGL/SDL
 //-and converting the output to the format we want.
 
 //"textures may not contain the color mode set"....(SDL)
@@ -812,7 +816,7 @@ type
 //4bit=8bit but less colors.
 //4 and 8bit routines(palette) -and look up tables- have been written already.
 
-// for 32-> 15/16 routines, drop the A bit completely. Then run one of these. 
+// for 32-> 15/16 routines, drop the A bit completely. Then run one of these.
 
 
 //(24bit RGB->15bits hex):
@@ -863,7 +867,7 @@ function GetByesfromDWord(someD:DWord):SDL_Color;
 var
 	someDPtr:Pointer;
     someColor:PSDL_Color;
-    
+
 begin
     someDPtr:=Nil;
     someDPtr:^someD;
@@ -962,7 +966,7 @@ end;
 procedure CreateNewTexture;
 var
    tex:GLuint;
-   
+
 begin
 	glGenTextures(1, tex);
 	glBindTexture(GL_TEXTURE_2D, tex);
@@ -1011,25 +1015,25 @@ procedure Load_Image
 
 var
 	width, height:integer;
-    image:PChar; 
+    image:PChar;
 
 begin
   image:=SOIL_load_image("img.png", width, height, 0, SOIL_LOAD_RGB); //load image
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image); //copyTex
-  
+
 end;
 
 procedure Load_ImageScaled(scaleX,ScaleY:integer);
 
 var
-    image:PChar; 
+    image:PChar;
 
 begin
   image:=SOIL_load_image("img.png", width, height, 0, SOIL_LOAD_RGB); //load image
   //I dont think this is how its done...GL is weird in whacky ways...
-  
+
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ScaleX, ScaleY, 0, GL_RGB, GL_UNSIGNED_BYTE, image); //copyTex
-  
+
 end;
 
 
@@ -1051,7 +1055,7 @@ NET:
 CLipping:
 	we always clip.  PERIOD.
 }
- 
+
 
 
 Procedure SetViewPort(X1, Y1, X2, Y2: smallint);
@@ -1074,17 +1078,17 @@ Begin
 	   X2:=MaxX;
 	   Y2:=MaxY;
        exit;
-    end;   
+    end;
   end;
 
-  // sets the RECT- doesnt do anything with it. 
+  // sets the RECT- doesnt do anything with it.
   StartXViewPort := X1;
   StartYViewPort := Y1;
   ViewWidth :=  X2-X1;
   ViewHeight:=  Y2-Y1;
-   
+
   //add viewport array code so we can remove screen 'contents' later on
-  
+
 end;
 
 procedure GetViewSettings(var viewport : ViewPortType);
@@ -1094,7 +1098,7 @@ begin
   ViewPort.X2 := ViewWidth + StartXViewPort;
   ViewPort.Y2 := ViewHeight + StartYViewPort;
 end;
- 
+
 
   procedure SetAspectRatio(Xasp, Yasp : word);
   begin
@@ -1107,16 +1111,16 @@ end;
 
 
   procedure SetWriteMode(WriteMode : smallint);
-  // TP sets the writemodes according to the following scheme (Jonas Maebe) 
+  // TP sets the writemodes according to the following scheme (Jonas Maebe)
    begin
      Case writemode of
        //for each pixel in surface.^pixels do:
        //put pixel according to mode, update surface
-       
+
        xorput, andput: CurrentWriteMode := XorPut;
        orput, copyput: CurrentWriteMode := CopyPut;
        //'Not' is atypical for unixes. (not properly implemented)
-       //1- inverted color ((MaxColors mod 2) -1) 
+       //1- inverted color ((MaxColors mod 2) -1)
        //2- background color instead of fore color(erase mode)
        notput: CurrentWriteMode := NotPut;
      End;
@@ -1124,7 +1128,7 @@ end;
    end;
 
 
-//this was ported from (SDL) C- 
+//this was ported from (SDL) C-
 //https://stackoverflow.com/questions/37978149/sdl1-sdl2-resolution-list-building-with-a-custom-screen-mode-class
 
 function FetchModeList:Tmodelist;
@@ -1158,15 +1162,15 @@ while  (display_index <= display_count) do begin
 
         if (SDL_GetDisplayMode(display_index, mode_index, SDLmodePointer) = 0) then begin //mode supported
 
-            //Log: pixelFormat(bpp)MaxX,MaXy,refrsh_rate            
+            //Log: pixelFormat(bpp)MaxX,MaXy,refrsh_rate
             LogLn(IntToStr(SDL_BITSPERPIXEL(SDLmodePointer^.format))+' bpp'+ IntToStr(SDLmodePointer^.w)+ ' x '+IntToStr(SDLmodePointer^.h)+ '@ '+IntToStr(SDLmodePointer^.refresh_rate)+' Hz ');
 
             //store data in a modeList array
 
-                SDLmodeArray[i].format:=SDL_BITSPERPIXEL(SDLmodePointer^.format);            
-                SDLmodeArray[i].w:=SDLmodePointer^.w;                
-                SDLmodeArray[i].h:=SDLmodePointer^.h;                
-                SDLmodeArray[i].refresh_rate:=SDLmodePointer^.refresh_rate;                
+                SDLmodeArray[i].format:=SDL_BITSPERPIXEL(SDLmodePointer^.format);
+                SDLmodeArray[i].w:=SDLmodePointer^.w;
+                SDLmodeArray[i].h:=SDLmodePointer^.h;
+                SDLmodeArray[i].refresh_rate:=SDLmodePointer^.refresh_rate;
                 SDLmodeArray[i].driverdata:=SDLmodePointer^.driverdata;
 
         end;
@@ -1174,7 +1178,7 @@ while  (display_index <= display_count) do begin
         inc(mode_index);
     end;
     inc(display_index);
-    
+
 end;
 
 end;
@@ -1261,8 +1265,8 @@ var
    MoonOrange:boolean;
 
 begin
-  EventThread:=fpfork; 
-  
+  EventThread:=fpfork;
+
   if (EventThread=0) then begin //we didnt fpfork....
      if IsConsoleInvoked then begin
         Logln('EPIC FAILURE: SDL requires multiprocessing. I cant seem to fpfork. ');
@@ -1278,8 +1282,8 @@ begin
     repeat
       delay(1000);
 
-{ 
-this is how to do it- 
+{
+this is how to do it-
 //FIXME: needs freeGLUT mod
 
 var
@@ -1298,18 +1302,18 @@ var
 	  case( event.type ) of
 	  SDL_KEYDOWN:
 	    c=event.key.keysym.sym;
-	    if (isprint(c)) then begin  
+	    if (isprint(c)) then begin
 	      i:=0;
           if GetString=true then begin
-              repeat 
+              repeat
                 somestring[i]:=c;
                 inc(i);
               until (c=SDLK_RETURN) or (i=len(somestring));
           end else begin
-             GetChar:=c;    
+             GetChar:=c;
           end;
         end; //Is printable char
-            
+
 	    exit;
       end;
 	  SDL_ACTIVEEVENT:
@@ -1342,12 +1346,12 @@ var
 	oldpixel,newpixel,quant_error:DWord;
 	file1,file2:file;
     Buf : Array[1..4096] of byte;
-    
+
 
 begin
-    assign(file1,filename); 
-    assign(file2,filename2); 
-  
+    assign(file1,filename);
+    assign(file2,filename2);
+
     blockread(file1,buf,sizeof(file));
 
   while Y<MaxY do begin
@@ -1378,7 +1382,7 @@ Got weird fucked up c boolean evals? (JEEZ theyre a BITCH to understand....)
   wonky "what ? (eh vs uh) : something" ===> if (evaluation) then (= to this) else (equal to that)
 (usually a boolean eval with a byte input- an overflow disaster waiting to happen)
 
-for example: 
+for example:
 	SDL_SetRenderDrawBlend(renderer, (a = 255) ? SDL_BLEND_NONE : SDL_BLEND_BLEND);
 
 }
@@ -1458,14 +1462,14 @@ begin
   pitch:=0;
   if (LIBGRAPHICS_ACTIVE=false) then begin
     Logln('I cant lock a Texture if we are not active: Call initgraph first');
-    exit;    
+    exit;
   end;
   if (Tex = Nil) then begin
      if IsConsoleInvoked then
         LogLn('Cant Lock unassigned Texture');
      {$ifdef lcl}
 			ShowMessage('Cannot Lock an unassigned Texture.');
-	 {$endif}   
+	 {$endif}
      exit;
   end;
   paused:=true;
@@ -1487,14 +1491,14 @@ var
 begin
   if (LIBGRAPHICS_ACTIVE=false) then begin
     Logln('I cant lock a Texture if we are not active: Call initgraph first');
-    exit;    
+    exit;
   end;
   if (Tex = Nil) then begin
      if IsConsoleInvoked then
         LogLn('Cant Lock unassigned Texture');
      {$ifdef lcl}
 			ShowMessage('Cannot Lock an unassigned Texture.');
-	 {$endif}   
+	 {$endif}
      exit;
   end;
   paused:=true;
@@ -1513,7 +1517,7 @@ var
 begin
   if (LIBGRAPHICS_ACTIVE=false) then begin
     Logln('I cant lock a Texture if we are not active: Call initgraph first');
-    exit;    
+    exit;
   end;
 //case bpp of... sets PixelFormat(forcibly)
   Paused:=true;
@@ -1525,7 +1529,7 @@ begin
         LogLn('Cant Allocate Texture');
      {$ifdef lcl}
 			ShowMessage('Cannot Allocate Texture.');
-	 {$endif}   
+	 {$endif}
 
      exit;
   end;
@@ -1544,7 +1548,7 @@ begin
 
   if (LIBGRAPHICS_ACTIVE=false) then begin
     Logln('I cant unlock a Texture if we are not active: Call initgraph first');
-    exit;    
+    exit;
   end;
 {$IFDEF mswindows}
     //we are done playing with pixels so....
@@ -1554,7 +1558,7 @@ begin
 //get stuff ready for the renderer and render.
   SDL_SetRenderTarget(renderer, NiL);
   SDL_RenderCopy(renderer, tex, NiL, NiL);
-  SDL_DestroyTexture(tex); 
+  SDL_DestroyTexture(tex);
   Paused:=false;
 end;
 
@@ -1567,7 +1571,7 @@ begin
 		// if Render3d then GL_Clear;
 end;
 
-procedure clearscreen; 
+procedure clearscreen;
 //this is an alias routine
 
 begin
@@ -1588,14 +1592,14 @@ begin
            Logln('ERROR: i cant do that. not indexed.');
 		 {$ifdef lcl}
 			ShowMessage('Attempted to Clearscreen(index) with non-indexed data.');
-		 {$endif}   
+		 {$endif}
 
-        LogLn('Attempting to clearscreen(index) with non-indexed data.');           
-        exit; 
+        LogLn('Attempting to clearscreen(index) with non-indexed data.');
+        exit;
     end;
     if MaxColors=16 then
        somecolor:=Tpalette16.colors[index];
-    
+
     if MaxColors=256 then
        somecolor:=Tpalette256.colors[index];
 
@@ -1625,7 +1629,7 @@ begin
         repeat
             if color=Tpalette16.DWords[i] then begin;
                 somecolor:=Tpalette16.colors[i];
-                exit; 
+                exit;
             end;
             inc(i);
         until i=15;		
@@ -1636,7 +1640,7 @@ begin
         repeat
             if color=Tpalette256.DWords[i] then begin;
                 somecolor:=Tpalette256.colors[i];
-                exit; 
+                exit;
             end;
             inc(i);
         until i=255;		
@@ -1685,18 +1689,18 @@ procedure RenderStringF(x, y:Word; font:Pointer; string:PChar; rgb:GL_Color);
 
 begin
 
-  glColor3f(rgb^.r, rgb^.g, rgb^.b); 
+  glColor3f(rgb^.r, rgb^.g, rgb^.b);
   glRasterPos2f(x, y);
 
   glutBitmapString(font, string);
 end;
 
 //Byte color input(SDL)
-procedure RenderStringB(x, y:Word; font:Pointer; string:PChar; rgb:SDL_Color); 
+procedure RenderStringB(x, y:Word; font:Pointer; string:PChar; rgb:SDL_Color);
 
 begin
 
-  glColor3b(rgb^.r, rgb^.g, rgb^.b); 
+  glColor3b(rgb^.r, rgb^.g, rgb^.b);
   glRasterPos2s(x, y);
 
   glutBitmapString(font, string);
@@ -1749,7 +1753,7 @@ Procedure videoCallback;
 var
 	refresh:single; //float
 begin
-	//if "fetch refresh data" = failed then   
+	//if "fetch refresh data" = failed then
 //		refresh:=1000 / 60;
 
 	//else
@@ -1784,7 +1788,7 @@ begin
     end;
 		 {$ifdef lcl}
 			ShowMessage('Initgraph: Graphics already active.');
-		 {$endif}   
+		 {$endif}
 
     exit;
   end;
@@ -1792,28 +1796,28 @@ begin
   iconpath:='./sdlbgi.bmp'; //sdl2.0 doesnt use this.
 
 //this has to be done inline to the running code, unfortunately
-  case(graphmode) of 
+  case(graphmode) of
 	     mCGA:begin
 			MaxX:=320;
 			MaxY:=240;
-			bpp:=4; 
+			bpp:=4;
 			MaxColors:=16;
             NonPalette:=false;
 		    TrueColor:=false;	
             XAspect:=4;
-            YAspect:=3; 
+            YAspect:=3;
 		end;
 
         //color tv mode
 		VGAMed:begin
             MaxX:=320;
 			MaxY:=240;
-			bpp:=8; 
+			bpp:=8;
 			MaxColors:=16;
             NonPalette:=false;
 		    TrueColor:=false;	
             XAspect:=4;
-            YAspect:=3; 
+            YAspect:=3;
 
 		end;
 
@@ -1825,48 +1829,48 @@ begin
 		VGAHi:begin
             MaxX:=640;
 			MaxY:=480;
-			bpp:=4; 
+			bpp:=4;
 			MaxColors:=16;
             NonPalette:=false;
     		TrueColor:=false;	
             XAspect:=4;
-            YAspect:=3; 
+            YAspect:=3;
 
 		end;
 
 		VGAHix256:begin
             MaxX:=640;
 			MaxY:=480;
-			bpp:=8; 
+			bpp:=8;
 			MaxColors:=256;
             NonPalette:=False;
 		    TrueColor:=false;	
             XAspect:=4;
-            YAspect:=3; 
+            YAspect:=3;
 
 		end;
 
 		VGAHix32k:begin //im not used to these ones (15bits)
            MaxX:=640;
 		   MaxY:=480;
-		   bpp:=15; 
+		   bpp:=15;
 		   MaxColors:=32768;
            NonPalette:=true;
            TrueColor:=false;
            XAspect:=4;
-           YAspect:=3; 
+           YAspect:=3;
 
 		end;
 
 		VGAHix64k:begin
            MaxX:=640;
 		   MaxY:=480;
-		   bpp:=16; 
+		   bpp:=16;
 		   MaxColors:=65535;
            NonPalette:=true;
 		   TrueColor:=false;	
            XAspect:=4;
-           YAspect:=3; 
+           YAspect:=3;
 
 		end;
 
@@ -1875,24 +1879,24 @@ begin
 		m800x600x16:begin
             MaxX:=800;
 			MaxY:=600;
-			bpp:=4; 
+			bpp:=4;
 			MaxColors:=16;
             NonPalette:=false;
 		    TrueColor:=false;	
             XAspect:=4;
-            YAspect:=3; 
+            YAspect:=3;
 
 		end;
 
 		m800x600x256:begin
             MaxX:=800;
 			MaxY:=600;
-			bpp:=8; 
+			bpp:=8;
 			MaxColors:=256;
             NonPalette:=false;
 		    TrueColor:=false;	
             XAspect:=4;
-            YAspect:=3; 
+            YAspect:=3;
 
 		end;
 
@@ -1900,12 +1904,12 @@ begin
 		m800x600x32k:begin
            MaxX:=800;
 		   MaxY:=600;
-		   bpp:=15; 
+		   bpp:=15;
 		   MaxColors:=32768;
            NonPalette:=true;
 		   TrueColor:=false;	
            XAspect:=4;
-           YAspect:=3; 
+           YAspect:=3;
 
 		end;
 
@@ -1913,36 +1917,36 @@ begin
 		m1024x768x256:begin
             MaxX:=1024;
 			MaxY:=768;
-			bpp:=8; 
+			bpp:=8;
 			MaxColors:=256;
             NonPalette:=false;
 		    TrueColor:=false;	
             XAspect:=4;
-            YAspect:=3; 
+            YAspect:=3;
 
 		end;
 
 		m1024x768x32k:begin
            MaxX:=1024;
 		   MaxY:=768;
-		   bpp:=15; 
+		   bpp:=15;
 		   MaxColors:=32768;
            NonPalette:=true;
 		   TrueColor:=false;	
            XAspect:=4;
-           YAspect:=3; 
+           YAspect:=3;
 
 		end;
 
 		m1024x768x64k:begin
            MaxX:=1024;
 		   MaxY:=768;
-		   bpp:=16; 
+		   bpp:=16;
 		   MaxColors:=65535;
            NonPalette:=true;
 		   TrueColor:=false;	
            XAspect:=4;
-           YAspect:=3; 
+           YAspect:=3;
 
 		end;
 
@@ -1950,168 +1954,168 @@ begin
 		m1280x720x256:begin
             MaxX:=1280;
 			MaxY:=720;
-			bpp:=8; 
+			bpp:=8;
 			MaxColors:=256;
             NonPalette:=false;
 		    TrueColor:=false;	
             XAspect:=16;
-            YAspect:=9; 
+            YAspect:=9;
 
 		end;
 
 		m1280x720x32k:begin
           MaxX:=1280;
 		   MaxY:=720;
-		   bpp:=15; 
+		   bpp:=15;
 		   MaxColors:=32768;
            NonPalette:=true;
 		   TrueColor:=false;	
            XAspect:=16;
-           YAspect:=9; 
+           YAspect:=9;
 
 		end;
 
 		m1280x720x64k:begin
            MaxX:=1280;
 		   MaxY:=720;
-		   bpp:=16; 
+		   bpp:=16;
 		   MaxColors:=65535;
            NonPalette:=true;
 		   TrueColor:=false;	
            XAspect:=16;
-           YAspect:=9; 
+           YAspect:=9;
 
 		end;
 
 		m1280x720xMil:begin
 		   MaxX:=1280;
 		   MaxY:=720;
-		   bpp:=24; 
+		   bpp:=24;
 		   MaxColors:=16777216;
            NonPalette:=true;
 		   TrueColor:=true;	
            XAspect:=16;
-           YAspect:=9; 
+           YAspect:=9;
 
 		end;
 
 		m1280x1024x256:begin
             MaxX:=1280;
 			MaxY:=1024;
-			bpp:=8; 
+			bpp:=8;
 			MaxColors:=256;
             NonPalette:=false;
 		    TrueColor:=false;	
             XAspect:=4;
-            YAspect:=3; 
+            YAspect:=3;
 
 		end;
 
 		m1280x1024x32k:begin
            MaxX:=1280;
 		   MaxY:=1024;
-		   bpp:=15; 
+		   bpp:=15;
 		   MaxColors:=32768;
            NonPalette:=true;
 		   TrueColor:=false;	
            XAspect:=4;
-           YAspect:=3; 
+           YAspect:=3;
 
 		end;
 
 		m1280x1024x64k:begin
            MaxX:=1280;
 		   MaxY:=1024;
-		   bpp:=16; 
+		   bpp:=16;
 		   MaxColors:=65535;
            NonPalette:=true;
 		   TrueColor:=false;	
            XAspect:=4;
-           YAspect:=3; 
+           YAspect:=3;
 
 		end;
 
 		m1280x1024xMil:begin
            MaxX:=1280;
 		   MaxY:=1024;
-		   bpp:=24; 
+		   bpp:=24;
 		   MaxColors:=16777216;
            NonPalette:=true;
 		   TrueColor:=true;	
            XAspect:=4;
-           YAspect:=3; 
+           YAspect:=3;
 
 		end;
 
 {		m1280x1024xMil2:begin
            MaxX:=1280;
 		   MaxY:=1024;
-		   bpp:=32; 
+		   bpp:=32;
 		   MaxColors:=4294967296;
            NonPalette:=true;
 		   TrueColor:=true;	
            XAspect:=4;
-           YAspect:=3; 
+           YAspect:=3;
 
 		end;
 }
 		m1366x768x256:begin
             MaxX:=1366;
 			MaxY:=768;
-			bpp:=8; 
+			bpp:=8;
 			MaxColors:=256;
             NonPalette:=false;
 		    TrueColor:=false;	
             XAspect:=16;
-            YAspect:=9; 
+            YAspect:=9;
 
 		end;
 
 		m1366x768x32k:begin
            MaxX:=1366;
 		   MaxY:=768;
-		   bpp:=15; 
+		   bpp:=15;
 		   MaxColors:=32768;
            NonPalette:=true;
 		   TrueColor:=false;	
            XAspect:=16;
-           YAspect:=9; 
+           YAspect:=9;
 
 		end;
 
 		m1366x768x64k:begin
            MaxX:=1366;
 		   MaxY:=768;
-		   bpp:=16; 
+		   bpp:=16;
 		   MaxColors:=65535;
            NonPalette:=true;
 		   TrueColor:=false;	
            XAspect:=16;
-           YAspect:=9; 
+           YAspect:=9;
 
 		end;
 
 		m1366x768xMil:begin
            MaxX:=1366;
 		   MaxY:=768;
-		   bpp:=24; 
+		   bpp:=24;
 		   MaxColors:=16777216;
            NonPalette:=true;
 		   TrueColor:=true;	
            XAspect:=16;
-           YAspect:=9; 
+           YAspect:=9;
 
 		end;
 
 {		m1366x768xMil2:begin
            MaxX:=1366;
 		   MaxY:=768;
-		   bpp:=32; 
+		   bpp:=32;
 		   MaxColors:=4294967296;
            NonPalette:=true;
 		   TrueColor:=true;	
            XAspect:=16;
-           YAspect:=9; 
+           YAspect:=9;
 
 		end;
 }
@@ -2119,48 +2123,48 @@ begin
 		m1920x1080x256:begin
             MaxX:=1920;
 			MaxY:=1080;
-			bpp:=8; 
+			bpp:=8;
 			MaxColors:=256;
             NonPalette:=false;
 		    TrueColor:=false;	
             XAspect:=16;
-            YAspect:=9; 
+            YAspect:=9;
 
 		end;
 
 		m1920x1080x32k:begin
 		   MaxX:=1920;
 		   MaxY:=1080;
-		   bpp:=15; 
+		   bpp:=15;
 		   MaxColors:=32768;
            NonPalette:=true;
 		   TrueColor:=false;	
            XAspect:=16;
-           YAspect:=9; 
+           YAspect:=9;
 
 		end;
 
 		m1920x1080x64k:begin
 		   MaxX:=1920;
 		   MaxY:=1080;
-		   bpp:=16; 
+		   bpp:=16;
 		   MaxColors:=65535;
            NonPalette:=true;
 		   TrueColor:=false;	
            XAspect:=16;
-           YAspect:=9; 
+           YAspect:=9;
 
 		end;
 
-		m1920x1080xMil:begin  
+		m1920x1080xMil:begin
  	       MaxX:=1920;
 		   MaxY:=1080;
-		   bpp:=24; 
+		   bpp:=24;
 		   MaxColors:=16777216;
            NonPalette:=true;
 		   TrueColor:=true;	
            XAspect:=16;
-           YAspect:=9; 
+           YAspect:=9;
 
 		end;
 
@@ -2168,26 +2172,26 @@ begin
 		m1920x1080xMil2: begin
  	       MaxX:=1920;
 		   MaxY:=1080;
-		   bpp:=32; 
+		   bpp:=32;
 		   MaxColors:=4294967296;
            NonPalette:=true;
 		   TrueColor:=true;	
            XAspect:=16;
-           YAspect:=9; 
+           YAspect:=9;
 
 		end;
-}	    
+}	
   end;{case}
 
 //once is enough with this list...its more of a nightmare than you know.
 //(its assigned before entries are checked)
 
-    //fire and forget- surface formats               
+    //fire and forget- surface formats
     case bpp of
 
 		8: begin
 			    if maxColors=256 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX8
-				else if maxColors=16 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX4MSB; 
+				else if maxColors=16 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX4MSB;
 		end;
 		15: MainSurface^.format:=SDL_PIXELFORMAT_RGB555;
 
@@ -2206,7 +2210,7 @@ begin
    //this is why I removed all of that code..."define what exactly"??
 
 
-//  if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
+//  if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER;
 //  if WantsJoyPadAudio then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
 //if WantInet then _initflag:= SDL_Init_Net;
 
@@ -2242,14 +2246,14 @@ begin
        //temporarily not available
 	   {$ifdef lcl}
 			ShowMessage('Graphics detrection not available at this time.');
-   	   {$endif}   
+   	   {$endif}
 
 //    Fetchgraphmode := DetectGraph; //need to kick back the higest supported mode...
   end;
 
   NoGoAutoRefresh:=false;
-  LIBGRAPHICS_INIT:=true; 
-  LIBGRAPHICS_ACTIVE:=false; 
+  LIBGRAPHICS_INIT:=true;
+  LIBGRAPHICS_ACTIVE:=false;
 
 
 //force a safe shutdown.
@@ -2257,7 +2261,7 @@ begin
 
 //if the app crashes we could be in an unknown state-which is bad.
  AddExitProc(CloseGraph);
- 
+
 {
 atexit handling:
 basically it prevents random exits- all exits must do whatever is in the routine.
@@ -2266,17 +2270,17 @@ basically it prevents random exits- all exits must do whatever is in the routine
 FPC:  AddExitProc(CloseGraph);
 
 TP: use the olschool method:
- 
+
  OldExitProc := ExitProc;                - save previous exit proc -cpu: push exit()
- ExitProc := @MyExitProc;               - insert our exit proc in chain 
+ ExitProc := @MyExitProc;               - insert our exit proc in chain
 
 $F+
 procedure MyExitProc;
 begin
   //shut everything down
   ExitProc := OldExitProc;  Restore exit procedure address -cpu: pop exit()
-  CloseGraph;               Shut down the graphics system 
-end; 
+  CloseGraph;               Shut down the graphics system
+end;
 $F-
 
 }
@@ -2286,33 +2290,33 @@ $F-
 {  //Hide, mouse.
   if not Render3d then
 	SDL_ShowCursor(SDL_DISABLE);
-   
+
 
 //lets get the current refresh rate and set a screen timer to it.
 // we cant fetch this from X11? sure we can.
 
-  
+
   mode^.format := SDL_PIXELFORMAT_UNKNOWN;
   mode^.w:=0;
   mode^.h:=0;
   mode^.refresh_rate:=0;
   mode^.driverdata:=Nil;
   //for physical screen 0 do..
-  
+
   //The SDl equivalent error of: attempting to probe VideoModeInfo block when (VESA) isnt initd results in issues....
-  
+
   if(SDL_GetCurrentDisplayMode(0, mode) <> 0) then begin
     if IsConsoleInvoked then
 			Logln('Cant get current video mode info. Non-critical error.');
 		$ifdef lcl
 			ShowMessage('SDL cant get the data for the current mode.');
-   	   $endif   
+   	   $endif
 	end;
 
   //dont refresh faster than the screen.
-  if (mode^.refresh_rate > 0)  then 
-     //either force a INT- or convert from REAL. 
-     
+  if (mode^.refresh_rate > 0)  then
+     //either force a INT- or convert from REAL.
+
      flip_timer_ms := round(mode^.refresh_rate)
 
   else
@@ -2336,18 +2340,18 @@ $F-
 
   rate:=60; //temp code
   FSMode:=MaxX,'x',MaxY,':',bpp,'@',rate; //build the string
-  
+
   SetGraphMode(Graphmode,wantFullScreen);
-  
+
 	//the event handler
 	GlutMainLoop;
 
 
- { 
+ {
   CantDoAudio:=false;
     //prepare mixer
   if WantsAudioToo then begin
-    AudioSystemCheck:=InitAudio;    
+    AudioSystemCheck:=InitAudio;
     if AudioSystemCheck <> 0 then begin
         if IsConsoleInvoked then
                 LogLn('There is no audio. Mixer did not init.')
@@ -2358,13 +2362,13 @@ $F-
 
   //initialization of TrueType font engine
   if TTF_Init = -1 then begin
-    
+
     if IsConsoleInvoked then begin
         Logln('I cant engage the font engine, sirs.');
     end;
     $ifdef lcl
 			ShowMessage('ERROR: I cant engage the font engine, sirs.');
-    $endif  
+    $endif
 		
     _graphResult:=-3; //the most likely cause, not enuf ram.
     closegraph;
@@ -2374,26 +2378,26 @@ $F-
 //set some sane default variables
   _fgcolor := $FFFFFFFF;	//Default drawing color = white (15)
   _bgcolor := $000000FF;	//default background = black(0)
-  
+
 {
   GL_fgcolor:=1.0;
   GL_bgcolor:=0;
 }
 
-  someLineType:= NormalWidth; 
+  someLineType:= NormalWidth;
 
 //  lineinfo.linestyle:=solidln;
 //     fillsettings.pattern:=solidfill;
 
   ClipPixels := TRUE;
-  
-  // Set initial viewport 
+
+  // Set initial viewport
   StartXViewPort := 0;
   StartYViewPort := 0;
   ViewWidth := MaxX;
   ViewHeight := MaxY;
 
-  // normal write mode 
+  // normal write mode
   CurrentWriteMode := CopyPut;
 
   // set default font (8x8)
@@ -2407,11 +2411,11 @@ $F-
 
   _grResult:=OK; //we can just check the dialogs (or text output) now.
 
- 
+
 	
 //gimmie floats from the word based coord system
 	floatedMaxX:=Int2Float(MaxX);
-	floatedMaxY:=Int2Float(MaxY);    
+	floatedMaxY:=Int2Float(MaxY);
 
 
     HALF_WIDTH := floatedMaxX / 2.0f;
@@ -2453,33 +2457,33 @@ $F-
 {
   SDL_ShowCursor(SDL_ENABLE);
 
-  //Check for joysticks 
+  //Check for joysticks
   if WantsJoyPad then begin
- 
+
     if( SDL_NumJoysticks < 1 ) then begin
         if IsConsoleInvoked then
-			Logln( 'Warning: No joysticks connected!' ); 
+			Logln( 'Warning: No joysticks connected!' );
     $ifdef lcl
 			ShowMessage('Warning: No joysticks connected!');
-    $endif   
-        
-    end else begin //Load joystick 
-	    gGameController := SDL_JoystickOpen( 0 ); 
-    
-        if( gGameController = NiL ) then begin  
+    $endif
+
+    end else begin //Load joystick
+	    gGameController := SDL_JoystickOpen( 0 );
+
+        if( gGameController = NiL ) then begin
 	        if IsConsoleInvoked then begin
-		    	Logln( 'Warning: Unable to open game controller! SDL Error: '+ SDL_GetError); 
+		    	Logln( 'Warning: Unable to open game controller! SDL Error: '+ SDL_GetError);
                 LogLn(SDL_GetError);
             end;
     $ifdef lcl
 			ShowMessage('Warning: Unable to open game controller!');
-    $endif   
+    $endif
 
             noJoy:=true;
         end;
         noJoy:=false;
-    end; 
-  end; //Joypad 
+    end;
+  end; //Joypad
 }
 
 end; //initgraph
@@ -2501,15 +2505,15 @@ begin
 //  SDLNet_Quit;
 
   if wantsJoyPad then
-    SDL_JoystickClose( gGameController ); 
+    SDL_JoystickClose( gGameController );
   gGameController := Nil;
 
   if WantsAudioToo then begin
     Mix_CloseAudio; //close- even if playing
 
     if chunk<>Nil then
-        Mix_FreeChunk(chunk); 
-    if music<> Nil then 
+        Mix_FreeChunk(chunk);
+    if music<> Nil then
         Mix_FreeMusic(music);
 
     Mix_Quit;
@@ -2524,7 +2528,7 @@ begin
 
    SDL_DestroyCond(eventWait);
    eventWait := nil;
-  
+
   if (TextFore <> Nil) then begin
 	TextFore:=Nil;
 	dispose(TextFore);
@@ -2536,7 +2540,7 @@ begin
   TTF_CloseFont(ttfFont);
   TTF_Quit;
   //its possible that extended images are used also for font datas...
-  if wantsFullIMGSupport then 
+  if wantsFullIMGSupport then
      IMG_Quit;
 
   x:=8;
@@ -2546,7 +2550,7 @@ begin
 		Textures[x]:=Nil;
     dec(x);
   until x=0;
- 
+
 
 //Dont free whats not Allocated in initgraph(do not double free)
 //routines should free what they AllocMemate on exit.
@@ -2571,9 +2575,9 @@ begin
          clrscr; //text clearscreen
          writeln;
   end;
-  
+
   halt(0); //nothing special, just bail gracefully.
-end;            	 
+end;            	
 
 //not really used
 function GetX:word;
@@ -2586,7 +2590,7 @@ begin
   y:=where.Y;
 end;
 
-function GetXY:longint; 
+function GetXY:longint;
 //This is the 1D location in the 2D graphics area(yes, its weird)
 
 //"X pixels into the screen (or buffer) is the location of XY"
@@ -2598,11 +2602,11 @@ begin
   pitch:=54928;
   x:=where.X;
   y:=where.Y;
-  GetXY := (y * (pitch mod (sizeof(word)) ) + x); 
+  GetXY := (y * (pitch mod (sizeof(word)) ) + x);
 end;
 
 
-procedure glutInitPascal; 
+procedure glutInitPascal;
 var
 	myargc:integer;
 	myargv: PChar;
@@ -2610,7 +2614,7 @@ begin
 	//dummy this- seems to fire with or without data, according to C devs.
 	myargc:=1;
 	myargv:='LazGFX';
-	glutInit(myargc, myargv); 
+	glutInit(myargc, myargv);
 end;
 
 
@@ -2630,16 +2634,16 @@ procedure ReSizeGLScene(Width, Height: Integer); cdecl;
 begin
   if Height = 0 then
     Height := 1;
- 
+
   glViewport(0, 0, MaxX, MaxY);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity;
   gluPerspective(45, Width mod Height, 0.1, 1000);
- 
+
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity;
 
-  
+
 end;
 
 //isnt this easy?
@@ -2650,7 +2654,7 @@ begin
 end;
 
 {
- Draw an Texture to an Renderer at x, y. 
+ Draw an Texture to an Renderer at x, y.
  preserve the texture's width and height- also taking a clip of the texture if desired
 
 - we can use just RenderCopy, but it doesnt take stretching or clipping into account.(its sloppy)
@@ -2680,9 +2684,9 @@ begin
 end;
 
 
-procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
+procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean);
 //initgraph should call us to prevent code duplication
-//exporting a record is safer..but may change "a chunk of code" in places.   
+//exporting a record is safer..but may change "a chunk of code" in places.
 var
 	flags:longint;
     success,IsThere,RendedWindow:integer;
@@ -2703,19 +2707,19 @@ begin
 
 	if (LIBGRAPHICS_INIT=false) then begin
 		
-		if IsConsoleInvoked then 
-			Logln('Call initgraph before calling setGraphMode.') 
-		else 
+		if IsConsoleInvoked then
+			Logln('Call initgraph before calling setGraphMode.')
+		else
     {$ifdef lcl}
 			ShowMessage('setGraphMode called too early. Call InitGraph first.');
-    {$endif}   
+    {$endif}
 
 	    exit;
 	end
 	else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //initgraph called us
 			glutInitPascal(False);
 
-			glutInitWindowSize(MaxX, MaxY); 
+			glutInitWindowSize(MaxX, MaxY);
 		case(bpp) of: //with chosen resolutions bpp do
 		//always use double buffering(pageFLipping)
 		//force a compatible 555 15bit depth		
@@ -2723,23 +2727,23 @@ begin
         //4bit is a limited paletted 8 bit mode (mode hack)
 
 			4:GLMode:='index double';
-			8:GLMode:='index double'; 
-			15:GLMode:='rgb depth=15 double'; 
-			16:GLMode:='red=5 green=6 blue=5 depth=16 double'; 
-			24:GLMode:='rgb double'; 
-			32:	GLMode:='rgba double'; 
+			8:GLMode:='index double';
+			15:GLMode:='rgb depth=15 double';
+			16:GLMode:='red=5 green=6 blue=5 depth=16 double';
+			24:GLMode:='rgb double';
+			32:	GLMode:='rgba double';
 		end; //case
-		glutInitDisplayString(GLMode); 
+		glutInitDisplayString(GLMode);
 		if WantsFullScreen then begin
 				glutGameModeString(FSMode);
 				glutEnterGameMode;
 				glutSetCursor(GLUT_CURSOR_NONE);
 		end else begin //windowed
 			
-			ScreenWidth := glutGet(GLUT_SCREEN_WIDTH); 
-			ScreenHeight := glutGet(GLUT_SCREEN_HEIGHT); 
-			glutInitWindowPosition((ScreenWidth - AppWidth) div 2, (ScreenHeight - AppHeight) div 2); 
-			glutCreateWindow('Lazarus Graphics Application'); 
+			ScreenWidth := glutGet(GLUT_SCREEN_WIDTH);
+			ScreenHeight := glutGet(GLUT_SCREEN_HEIGHT);
+			glutInitWindowPosition((ScreenWidth - AppWidth) div 2, (ScreenHeight - AppHeight) div 2);
+			glutCreateWindow('Lazarus Graphics Application');
 			
 		end
 	    prepareOpenGL;	
@@ -2763,9 +2767,9 @@ begin
 
     if bpp=4 then
       InitPalette16
-    else if bpp=8 then 
-      InitPalette256; 
-      
+    else if bpp=8 then
+      InitPalette256;
+
 	if (bpp<=8) then begin
 		for x:=0 to MaxColors do begin
 			if MaxColors =16 then
@@ -2792,7 +2796,7 @@ begin
 				glutSetCursor(GLUT_CURSOR_NONE);
 		end else begin //windowed
 			
-			glutInitWindowSize(MaxX, MaxY); 
+			glutInitWindowSize(MaxX, MaxY);
 		case(bpp) of: //with chosen resolutions bpp do
 		//always use double buffering(pageFLipping)
 		//force a compatible 555 15bit depth		
@@ -2800,23 +2804,23 @@ begin
         //4bit is a limited paletted 8 bit mode (mode hack)
 
 			4:GLMode:='index double';
-			8:GLMode:='index double'; 
-			15:GLMode:='rgb depth=15 double'; 
-			16:GLMode:='red=5 green=6 blue=5 depth=16 double'; 
-			24:GLMode:='rgb double'; 
-			32:	GLMode:='rgba double'; 
+			8:GLMode:='index double';
+			15:GLMode:='rgb depth=15 double';
+			16:GLMode:='red=5 green=6 blue=5 depth=16 double';
+			24:GLMode:='rgb double';
+			32:	GLMode:='rgba double';
 		end; //case
-		glutInitDisplayString(GLMode); 
+		glutInitDisplayString(GLMode);
 		if WantsFullScreen then begin
 				glutGameModeString(FSMode);
 				glutEnterGameMode;
 				glutSetCursor(GLUT_CURSOR_NONE);
 		end else begin //windowed
 			
-			ScreenWidth := glutGet(GLUT_SCREEN_WIDTH); 
-			ScreenHeight := glutGet(GLUT_SCREEN_HEIGHT); 
-			glutInitWindowPosition((ScreenWidth - AppWidth) div 2, (ScreenHeight - AppHeight) div 2); 
-			glutCreateWindow('Lazarus Graphics Application'); 
+			ScreenWidth := glutGet(GLUT_SCREEN_WIDTH);
+			ScreenHeight := glutGet(GLUT_SCREEN_HEIGHT);
+			glutInitWindowPosition((ScreenWidth - AppWidth) div 2, (ScreenHeight - AppHeight) div 2);
+			glutCreateWindow('Lazarus Graphics Application');
 			
 		end
 	    prepareOpenGL;	
@@ -2840,9 +2844,9 @@ begin
 
     if bpp=4 then
       InitPalette16
-    else if bpp=8 then 
-      InitPalette256; 
-      
+    else if bpp=8 then
+      InitPalette256;
+
 	if (bpp<=8) then begin
 		for x:=0 to MaxColors do begin
 			if MaxColors =16 then
@@ -2857,7 +2861,7 @@ begin
 end; //setGraphMode
 
 
-function getgraphmode:string; 
+function getgraphmode:string;
 //it could also be that the monitor output is not in the modelist
 var
     bppstring:string;
@@ -2868,7 +2872,7 @@ var
     thismode:PSDL_DisplayMode;
 
 begin
-   if LIBGRAPHICS_ACTIVE then begin 
+   if LIBGRAPHICS_ACTIVE then begin
         SDL_GetCurrentDisplayMode(0, thismode); //go get w,h,format and refresh rate..
         findX:=MainSurface^.w;
 		findY:=MainSurface^.h;
@@ -2881,7 +2885,7 @@ begin
 			        getgraphmode:=GetEnumName(TypeInfo(Graphics_modes), Ord(x));
 					exit;
 			end;
-            
+
             bpp:=bpp * bpp; //bpp^2 - if x and y match, save time
 			inc(x);
 		end;
@@ -2891,10 +2895,10 @@ begin
 
     {$ifdef lcl}
 			ShowMessage('ERROR: Cant find current mode in modelist.');
-    {$endif}   
+    {$endif}
 
-   end;   
-end;    
+   end;
+end;
 
 procedure restorecrtmode; //wrapped closegraph function
 begin
@@ -2903,7 +2907,7 @@ begin
 	if IsConsoleInvoked then begin
         LogLn('you didnt call initGraph yet...try again?');
         exit;
-    end;    
+    end;
   end;
   closegraph;
 end;
@@ -2916,18 +2920,18 @@ begin
    if LIBGRAPHICS_ACTIVE then
    //pulling from ModeList data is much faster than querying the renderer or unfetching rendered surface data
    //if graphics is active- assume we have the data set.
-     getMaxX:=(MaxX - 1); 
+     getMaxX:=(MaxX - 1);
 end;
 
 function getmaxY:word;
 begin
    if LIBGRAPHICS_ACTIVE then
-     GetMaxY:=(MaxY - 1); 
+     GetMaxY:=(MaxY - 1);
 end;
 
-{ 
+{
 Blittering and doing things by hand is very ancient means of doing things.
-OpenGL fills in the pixels for us- this is no longer needed, nor is the math for it. 
+OpenGL fills in the pixels for us- this is no longer needed, nor is the math for it.
 
 SDL_ScrollX(Surface,DifX);
 SDL_ScrollY(Surface,DifY);
@@ -2935,7 +2939,7 @@ SDL_ScrollY(Surface,DifY);
 if youre looking for batched ops:
 
 procedure BatchRenderPixels;
-var 
+var
   PolyArray=array[1..points] of SDL_Point;
 
 begin
@@ -2945,7 +2949,7 @@ begin
   polyarray[2].x:=7
   polyarray[2].y:=7
 
-  SDL_RenderDrawPoints( renderer,polyarray,points);  
+  SDL_RenderDrawPoints( renderer,polyarray,points);
 end;
 
 Polygons:
@@ -2961,7 +2965,7 @@ var
   format:longword;
   TempSurface:PSDL_Surface;
   bpp:byte;
-  p:pointer; //the pixel data we want 
+  p:pointer; //the pixel data we want
   GotColor:PSDL_Color;
   pewpew:longword; //DWord....
   pointpew:PtrUInt;
@@ -2978,7 +2982,7 @@ begin
     case bpp of
 		8: begin
 			    if maxColors=256 then format:=SDL_PIXELFORMAT_INDEX8
-				else if maxColors=16 then format:=SDL_PIXELFORMAT_INDEX4MSB; 
+				else if maxColors=16 then format:=SDL_PIXELFORMAT_INDEX4MSB;
 		end;
 		15: format:=SDL_PIXELFORMAT_RGB555;
 
@@ -2995,19 +2999,19 @@ begin
 
 
     //(we do this backwards....rendered to surface of the size of 1 pixel)
-    if ((MaxColors=256) or (MaxColors=16)) then TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 8, format) 
+    if ((MaxColors=256) or (MaxColors=16)) then TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 8, format)
     //its weird...get 4bit indexed colors list in longword format but force me into 256 color mode???
 
     else if (MaxColors>256) then begin
         case (bpp) of
-		    15: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 15, format); 
-			16: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 16, format); 
-			24: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 24, format); 
-			32: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 32, format); 
+		    15: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 15, format);
+			16: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 16, format);
+			24: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 24, format);
+			32: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 32, format);
 			else begin
     {$ifdef lcl}
 			ShowMessage('Wrong bpp given to get a pixel. I dont how you did this.');
-    {$endif}   
+    {$endif}
 
 				 if IsConsoleInvoked then
 					LogLn('Wrong bpp given to get a pixel. I dont how you did this.');
@@ -3020,13 +3024,13 @@ begin
     SDL_RenderReadPixels(renderer, rect, format, TempSurface^.pixels, TempSurface^.pitch);
 
 
-    p:=TempSurface^.pixels;  
-    bpp := TempSurface^.format^.BytesPerPixel; 
+    p:=TempSurface^.pixels;
+    bpp := TempSurface^.format^.BytesPerPixel;
     //The C is flawed! 15bpp not taken into account.
     //ignorance is stupidity and laziness!
 
     // Here TempSurface^.pixels is the address to the pixel data (1px) we want to retrieve
-    
+
 
 {
 
@@ -3039,7 +3043,7 @@ is thusly:
 
   is P a byte? (16/256 colors)
   is P a Word? NO. NEVER.Not enough BPP data returned.
-  is P a partial DWord? (15/16bit/24bit colors) - spew SDL_Color data (for each byte inside P), 
+  is P a partial DWord? (15/16bit/24bit colors) - spew SDL_Color data (for each byte inside P),
       then fetch an appropriate DWord from that
       (this is a bitwise operation, so we need the DWord inside the pointer to work with the data)
 
@@ -3053,9 +3057,9 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
 -you nuked it!
 
 }
-    case (bpp) of 
+    case (bpp) of
        8:begin //256 colors
-        //now take the longword output 
+        //now take the longword output
 
           //check for the hidden 4bpp modes we made available
           if MaxColors=16 then begin
@@ -3079,7 +3083,7 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
             //to do this one- we split out the RGB pairs, shift them,then recombine them.
             SDL_GetRGB(Longword(^p),TempSurface^.format,r,g,b);
 
-			//play fetch            
+			//play fetch
 
              gotcolor^.r:=(byte(^r) );
 		     gotcolor^.g:=(byte(^g) );;
@@ -3100,7 +3104,7 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
 
             SDL_GetRGB(Longword(^p),TempSurface^.format,r,g,b);
 
-			//play fetch            
+			//play fetch
 
              gotcolor^.r:=(byte(^r) );
 		     gotcolor^.g:=(byte(^g) );
@@ -3121,7 +3125,7 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
       24: begin //24bit
             SDL_GetRGB(Longword(^p),TempSurface^.format,r,g,b);
 
-			//play fetch            
+			//play fetch
 
              gotcolor^.r:=(byte(^r) );
 		     gotcolor^.g:=(byte(^g) );
@@ -3134,18 +3138,18 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
       32: //32bit
 
 	        GetPixel:=DWord(p);
-   
+
       else
       {$ifdef lcl}
 			ShowMessage('Cant Get Pixel values...');
-      {$endif}   
-  
+      {$endif}
+
          if IsConsoleInvoked then
                 LogLn('Cant Get Pixel values...');
     end; //case
 
     SDL_FreeSurface(Tempsurface);
-    
+
 end;
 
 Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
@@ -3154,23 +3158,23 @@ Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
 begin
 
   if (bpp<4) or (bpp >32) then
- 
+
   begin
     {$ifdef lcl}
 			ShowMessage('Cant Put Pixel values...');
-    {$endif}   
+    {$endif}
             if IsConsoleInvoked then
                 LogLn('Cant Put Pixel values...');
 			exit;
   end;
-  
+
   SDL_RenderDrawPoint( Renderer, X, Y );
-  
+
 end;
 
 //PUT a pixel HERE- with THIS color
 procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word; color:byte); overload;
-//indexed 
+//indexed
 var
 	someColor:PSDL_Color;
 	r,g,b:byte;
@@ -3180,7 +3184,7 @@ begin
 
 //wrong routine called
   if bpp>8 then exit;
-  
+
   if (bpp=4) then
 	someColor:=Tpalette16.Colors[color]
   else if (bpp=8) then
@@ -3191,7 +3195,7 @@ begin
 	b:=somecolor^.b;
 
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
-	SDL_SetRenderDrawColor(renderer, r, g, b, 255); 
+	SDL_SetRenderDrawColor(renderer, r, g, b, 255);
 	SDL_RenderDrawPoint(renderer, x, y);
 end;
 
@@ -3200,7 +3204,7 @@ procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word; r,g,b:byte); overload;
 
 begin
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
-	SDL_SetRenderDrawColor(renderer, r, g, b, 255); 
+	SDL_SetRenderDrawColor(renderer, r, g, b, 255);
 	SDL_RenderDrawPoint(renderer, x, y);
 end;
 
@@ -3257,9 +3261,9 @@ most people dont usually care but with the BGI -WE DO.
 
 SDL2:
 
-    How do we scan the unknown? 
+    How do we scan the unknown?
     1- ask SDL for supported list of Modes supported (solve X by providing it)
-    2- we have to compare it to something. This is the puzzle-to what? 
+    2- we have to compare it to something. This is the puzzle-to what?
         we are set higher than the mode we want. (We WANT the unsupported modes and depths)
 
 so- we get the current screen resolution and check if requested mode is smaller-if so, GOOD.
@@ -3270,29 +3274,29 @@ so- we get the current screen resolution and check if requested mode is smaller-
 
 {    i:=(Ord(High(Graphics_Modes))-1)
 
-    //CurrentMode:=SDL_GetCurrentMode	 
+    //CurrentMode:=SDL_GetCurrentMode	
 	repeat
 
    		testbpp:=SDL_VideoModeOK(modelist.width[i], modelist.height[i], modelist.bpp[i], _initflag); //flags from initgraph
 
         //if Currentmode=ModeRequested (testbpp=1) then...
-	 
-        if (testbpp=1) then begin 
-            
+	
+        if (testbpp=1) then begin
+
             //initGraph just wants the number of the enum value, which we check for
-            DetectGraph:=byte(i); 
+            DetectGraph:=byte(i);
             exit;
     	end;
 		dec(i);
 	until i:=1;
     //there is still one mode remaining.
-	testbpp:=SDL_VideoModeOK(modelist.width[i], modelist.height[i], modelist.bpp[i], _initflag);		         
+	testbpp:=SDL_VideoModeOK(modelist.width[i], modelist.height[i], modelist.bpp[i], _initflag);		
 	if (testbpp=0) then begin //did we run out of modes?
         if IsConsoleInvoked then
             writeln('We ran out of modes to check.');
             //LogLn('We ran out of modes to check.');
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There are no graphics modes available to set. Bailing..','OK',NIL);
-		CloseGraph; 
+		CloseGraph;
 	end;
 	DetectGraph:=byte(i);
 
@@ -3349,7 +3353,7 @@ begin
 				Logln('Unknown graphdriver setting.');
     {$ifdef lcl}
 			ShowMessage('Unknown graphdriver setting.');
-    {$endif}   
+    {$endif}
 
 		end;
 	end;
@@ -3387,19 +3391,19 @@ begin
    if windownumber=8 then begin
     {$ifdef lcl}
 			ShowMessage('Attempt to create too many viewports.');
-    {$endif}   
+    {$endif}
 
       if IsConsoleInvoked then
         LogLn('Attempt to create too many viewports.');
       exit;
    end;
    //get viewport size and put into LastRect
-   SDL_RenderGetViewport(renderer,Lastrect); 
+   SDL_RenderGetViewport(renderer,Lastrect);
    //current co ords = last, then add one.
    inc(windownumber);
 
    //LINUX claims of xor,xnor "not being supported"- so let "work around it".
-   
+
   //store the current viewport data
   saveSurface := NiL;
   infosurface:=Nil;
@@ -3412,18 +3416,18 @@ begin
   saveSurface := SDL_CreateRGBSurfaceWithFormatFrom(ScreenData, infoSurface^.w, infoSurface^.h, infoSurface^.format^.BitsPerPixel, (infoSurface^.w * infoSurface^.format^.BytesPerPixel),longword( infoSurface^.format));
 
   if (saveSurface = NiL) then begin
-  
+
     {$ifdef lcl}
 			ShowMessage('Couldnt create SDL_Surface from renderer pixel data');
-    {$endif}   
+    {$endif}
 
 
       LogLn('Couldnt create SDL_Surface from renderer pixel data. ');
       LogLn(SDL_GetError);
       exit;
-                    
+
   end;
-   
+
    Textures[windownumber]:=SDL_CreateTextureFromSurface(renderer,saveSurface);
 
    //free data
@@ -3432,11 +3436,11 @@ begin
    saveSurface := NiL;
    infosurface:=Nil;
    ScreenData:=Nil;
-  
 
-   SDL_RenderSetViewport( Renderer, Rect );  
+
+   SDL_RenderSetViewport( Renderer, Rect );
    //clearviewport(_fgcoor);
-  
+
    //"Clipping" is a joke- we always clip.
    //The trick is: do we zoom out? In Most cases- NO. We zoom IN.
 
@@ -3453,14 +3457,14 @@ var
 begin
 
    if windownumber=0 then begin
-   
+
     {$ifdef lcl}
 			ShowMessage('Attempt to remove non-existant viewport.');
-    {$endif}   
-  
+    {$endif}
+
     if IsConsoleInvoked then
         LogLn('Attempt to remove non-existant viewport.');
-    exit; 
+    exit;
    end;
    if windownumber > 1 then begin
   		ThisRect^.X:=TexBounds[windownumber]^.X;
@@ -3474,7 +3478,7 @@ begin
  	    LastRect^.Y:=TexBounds[windownumber-1]^.Y;
  	    LastRect^.W:=TexBounds[windownumber-1]^.W;
 	    LastRect^.H:=TexBounds[windownumber-1]^.H;
-   
+
        //remove the viewport by removing the texture and redrawing the screen.
        //the problem with textures is that they are part of a one-way road. ARG!
 
@@ -3483,11 +3487,11 @@ begin
         SDL_RenderCopy(renderer,Textures[windownumber-1],Nil,LastRect);
         SDL_RenderPresent(renderer);
 
-		SDL_RenderSetViewport( Renderer, LastRect ); 
+		SDL_RenderSetViewport( Renderer, LastRect );
         dec(windownumber);
 //unfreeze movement
         exit;
-   end; 
+   end;
    //else: last window remaining
    Textures[1]:=nil;
    SDL_RenderSetViewport( Renderer,nil);  //reset to full size "screen"
@@ -3502,7 +3506,7 @@ begin
    LastRect^.Y:=0;
    LastRect^.W:=MaxX;
    LastRect^.H:=MaxY;
-   
+
    dec(windownumber);
 
    //unfreeze movement
@@ -3516,7 +3520,7 @@ procedure InstallUserDriver(Name: string; AutoDetectPtr: Pointer);
 begin
     {$ifdef lcl}
 			ShowMessage('Function No longer supported: InstallUserDriver');
-    {$endif}   
+    {$endif}
 
    LogLn('Function No longer supported: InstallUserDriver');
 end;
@@ -3526,7 +3530,7 @@ procedure RegisterBGIDriver(driver: pointer);
 begin
     {$ifdef lcl}
 			ShowMessage('Function No longer supported: RegisterBGIDriver');
-    {$endif}   
+    {$endif}
 
 
    LogLn('Function No longer supported: RegisterBGIDriver');
@@ -3536,7 +3540,7 @@ end;
 function GetMaxColor: word;
 //Use "MaxColors" if looking to use Random(Color).
 //This gives you the HUMAN READABLE MAX amount of colors available.
-  
+
 begin
       GetMaxColor:=MaxColors+1; // based on an index of zero so add one 255=>256
 end;
@@ -3569,7 +3573,7 @@ var
 begin
 
     tex:= NiL;
-    Tex:=IMG_LoadTexture(renderer,filename); 
+    Tex:=IMG_LoadTexture(renderer,filename);
     SDL_RenderCopy(renderer, tex, Nil, Nil); //scales image to output window size(size of undefined Rect)
 end;
 
@@ -3578,11 +3582,11 @@ end;
 
 procedure PlotPixelWNeighbors(x,y:integer);
 //this makes the bigger Pixels
- 
-// (in other words "blocky bullet holes"...)  
+
+// (in other words "blocky bullet holes"...)
 // EXPERT topic: smoothing reduces jagged edges
 
-begin                
+begin
    //more efficient to render a Rect.
 
    New(Rect);
@@ -3591,19 +3595,19 @@ begin
    case (Thick) of
        NormalWidth: begin
              Rect^.w:=2;
-			 Rect^.h:=2;   
+			 Rect^.h:=2;
        end;
-       ThickWidth: begin  
+       ThickWidth: begin
              Rect^.w:=4;
-			 Rect^.h:=4;   
+			 Rect^.h:=4;
        end;
        SuperThickWidth: begin
              Rect^.w:=6;
-			 Rect^.h:=6;   
+			 Rect^.h:=6;
        end;
-       UltimateThickWidth: begin  
+       UltimateThickWidth: begin
              Rect^.w:=8;
-			 Rect^.h:=8;   
+			 Rect^.h:=8;
        end;
    end;
    SDL_RenderFillRect(renderer, rect);
@@ -3618,15 +3622,15 @@ begin
 		end;
 		ThickWidth:begin
 			x:=x+4;
-			y:=y+4;  
+			y:=y+4;
 		end;
 		SuperThickWidth: begin
             x:=x+6;
-			y:=y+6;  
+			y:=y+6;
        end;
-       UltimateThickWidth: begin  
+       UltimateThickWidth: begin
             x:=x+8;
-			y:=y+8;  
+			y:=y+8;
        end;
    end;
 end;
@@ -3647,22 +3651,22 @@ begin
   saveSurface := NiL;
   infosurface:=Nil;
   ScreenData:=Nil;
-  ScreenData:=GetPixels(Nil); 
-  
+  ScreenData:=GetPixels(Nil);
+
   infoSurface := SDL_GetWindowSurface(Window);
   saveSurface := SDL_CreateRGBSurfaceWithFormatFrom(ScreenData, infoSurface^.w, infoSurface^.h, infoSurface^.format^.BitsPerPixel, (infoSurface^.w * infoSurface^.format^.BytesPerPixel), longword(infoSurface^.format));
 
   if (saveSurface = NiL) then begin
     {$ifdef lcl}
 			ShowMessage('Couldnt create SDL_Surface from renderer pixel data');
-    {$endif}   
+    {$endif}
 
       if IsConsoleInvoked then begin
-          LogLn('Couldnt create SDL_Surface from renderer pixel data');      
+          LogLn('Couldnt create SDL_Surface from renderer pixel data');
           LogLn(SDL_GetError);
       end;
       exit;
-                    
+
   end;
   SDL_SaveBMP(saveSurface, filename);
   SDL_FreeSurface(saveSurface);
@@ -3696,7 +3700,7 @@ var
 
   I didnt design SDL, sorry. Maybe thats why its SLOW???
   src: VGA graphics 101 - address A000, 386+ VRAM (and LFB) access.
-  NOTE: 
+  NOTE:
      You probly CANNOT directly write here.. (blame X11 or Windows or Apple)
      (Because youre staring at the array right now, reading this.)
 }
@@ -3704,13 +3708,13 @@ var
   AttemptRead:integer;
 
 begin
-   if ((Rect^.w=1) or (Rect^.h=1)) then begin    
-     if IsConsoleInvoked then begin       
+   if ((Rect^.w=1) or (Rect^.h=1)) then begin
+     if IsConsoleInvoked then begin
         LogLn('USE GetPixel. This routine FETCHES MORE THAN ONE');
-     end;  
+     end;
     {$ifdef lcl}
 			ShowMessage('USE GetPixel. This routine FETCHES MORE THAN ONE');
-    {$endif}   
+    {$endif}
 
      exit;
    end;
@@ -3718,11 +3722,11 @@ begin
    pixels:=Nil;
    pitch:=0;
 
-                 
+
     case bpp of
 		8: begin
 			    if maxColors=256 then format:=SDL_PIXELFORMAT_INDEX8
-				else if maxColors=16 then format:=SDL_PIXELFORMAT_INDEX4MSB; 
+				else if maxColors=16 then format:=SDL_PIXELFORMAT_INDEX4MSB;
 		end;
 		15: format:=SDL_PIXELFORMAT_RGB555;
 
@@ -3741,12 +3745,12 @@ begin
 //rect is Nil to copy the entire rendering target
 
    AttemptRead:= SDL_RenderReadPixels( renderer, rect, format, pixels, pitch);
-   
+
    //pitch at this point could be 2,3,4,etc.. and must otherwise be taken into account.
    if (AttemptRead<0) then begin
     {$ifdef lcl}
 			ShowMessage('Attempt to read pixel data failed.');
-    {$endif}   
+    {$endif}
 
       if IsConsoleInvoked then begin
           LogLn('Attempt to read pixel data failed.');
@@ -3782,7 +3786,7 @@ begin
 
    Result := ASingle;
 end;
-    
+
 begin  //main()
 
 //while I dont like the assumption that all linux apps are console apps- technically its true.
@@ -3806,11 +3810,11 @@ begin  //main()
   if (GetEnvironmentVariable('DISPLAY') = '') then begin //init frameBuffer code here
 
 
-//old behaviour 
+//old behaviour
     LogLN('X11 has not fired. Bailing.');	
     halt(0);
 
-  end;   
+  end;
 {$ENDIF}
 
 

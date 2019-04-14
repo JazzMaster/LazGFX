@@ -1,0 +1,1591 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>List of routines</title><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"></head>
+<body alink="#ffffcc" bgcolor="#e1bc64" link="#3333ff" text="#000000" vlink="#3333ff">
+<p><font face="Arial, Helvetica, sans-serif"><strong>Routines overview</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Legend: <strong><font color="#ffffff" face="Courier New, Courier, monospace">I</font></strong><font face="Courier New, Courier, monospace"> =</font> identic implementation (as in BP)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;<strong><font color="#00ff00" face="Courier New, Courier, monospace">P</font></strong><font face="Courier New, Courier, monospace"> =</font> same implementation but parameters with different meanings / values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<strong><font color="#ff00cc" face="Courier New, Courier, monospace">D</font></strong><font face="Courier New, Courier, monospace"> =</font> different implementation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<strong><font color="#990000" face="Courier New, Courier, monospace">A</font></strong><font face="Courier New, Courier, monospace"> =</font> additional one<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<strong><font color="#000000" face="Courier New, Courier, monospace">N</font></strong><font face="Courier New, Courier, monospace"> =</font> found in BP but not implemented here (absolete)</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Initialization routines</font></p>
+<p><font face="Courier New, Courier, monospace">(</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font><font face="Courier New, Courier, monospace"></font></font><font face="Courier New, Courier, monospace">) <a href="#ClearDevice">ClearDevice</a>       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font><font face="Courier New, Courier, monospace"></font></font><font face="Courier New, Courier, monospace">) <a href="#CloseGraph">CloseGraph</a>        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#CloseGraphRequest">CloseGraphRequest</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font><font face="Courier New, Courier, monospace"></font></font><font face="Courier New, Courier, monospace">) <a href="#DetectGraph">DetectGraph</a>       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font><font face="Courier New, Courier, monospace"></font></font><font face="Courier New, Courier, monospace">) <a href="#GetDriverName">GetDriverName</a>     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetGraphMode">GetGraphMode</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><strong><font color="#ff00cc" face="Courier New, Courier, monospace">D</font></strong></font><font face="Courier New, Courier, monospace">) <a href="#GetMaxMode">GetMaxMode</a>        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font><font face="Courier New, Courier, monospace"></font></font><font face="Courier New, Courier, monospace">) <a href="#GetModeName">GetModeName</a>       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><strong><font color="#ff00cc" face="Courier New, Courier, monospace">D</font></strong></font><font face="Courier New, Courier, monospace">) <a href="#GetModeRange">GetModeRange</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font><font face="Courier New, Courier, monospace"></font></font><font face="Courier New, Courier, monospace">) <a href="#GraphDefaults">GraphDefaults</a>     &nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GraphEnabled">GraphEnabled</a>      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GraphErrorMsg">GraphErrorMsg</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font><font face="Courier New, Courier, monospace"></font></font><font face="Courier New, Courier, monospace">) <a href="#GraphResult">GraphResult</a>       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#00ff00">P</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#InitGraph">InitGraph</a>         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#000000">N</font></strong></font></font><font face="Courier New, Courier, monospace">) InstallUserDriver<br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#OpenGLEnabled">OpenGLEnabled</a>     &nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#000000">N</font></strong></font></font><font face="Courier New, Courier, monospace">) RegisterBGIDriver &nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#RestoreCrtMode">RestoreCRTMode</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#000000">N</font></strong></font></font><font face="Courier New, Courier, monospace">) SetGraphBufSize   &nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetGraphMode">SetGraphMode</a>      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetOpenGLMode">SetOpenGLMode</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetWindowSize">SetWindowSize</a>     &nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#UpdateGraph">UpdateGraph</a></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Screen management routines</font></p>
+<p><font face="Courier New, Courier, monospace">(</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#ClearViewPort">ClearViewPort</a>     &nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#FreeAnim">FreeAnim</a>          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetAnim">GetAnim</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetAspectRatio">GetAspectRatio</a>    &nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetImage">GetImage</a>          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetMaxX">GetMaxX</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetMaxY">GetMaxY</a>           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetViewSettings">GetViewSettings</a>   &nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetX">GetX</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetY">GetY</a>              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#ImageSize">ImageSize</a>         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#PutAnim">PutAnim</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#00ff00">P</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#PutImage">PutImage</a>          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetActivePage">SetActivePage</a>     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetAspectRatio">SetAspectRatio</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetViewPort">SetViewPort</a>       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetVisualPage">SetVisualPage</a>     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#00ff00">P</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetWriteMode">SetWriteMode</a></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Color management routines</font></p>
+<p><font face="Courier New, Courier, monospace">(</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetBkColor">GetBkColor</a>        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetColor">GetColor</a>          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetDefaultPalette">GetDefaultPalette</a><br>
+  (<font face="Arial, Helvetica, sans-serif"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetNamesPalette">GetNamesPalette</a>&nbsp; &nbsp;  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetMaxColor">GetMaxColor</a>       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetPalette">GetPalette</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetPaletteSize">GetPaletteSize</a>    &nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetPixel">GetPixel</a>          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetRGBColor">GetRGBColor</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetRGBComponents">GetRGBComponents</a>  &nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetSystemPalette">GetSystemPalette</a>     &nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetAllPalette">SetAllPalette</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetBkColor">SetBkColor</a>        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetColor">SetColor</a>          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetPalette">SetPalette</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetRGBPalette">SetRGBPalette</a></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Drawing primitives routines</font></p>
+<p><font face="Courier New, Courier, monospace">(</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#Arc">Arc</a>               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#Circle">Circle</a>            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#DrawBezier">DrawBezier</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#DrawPoly">DrawPoly</a>          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#Ellipse">Ellipse</a>           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetArcCoords">GetArcCoords</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetLineSettings">GetLineSettings</a>   &nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#Line">Line</a>              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#LineRel">LineRel</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#LineTo">LineTo</a>            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#MoveRel">MoveRel</a>           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#MoveTo">MoveTo</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#PutPixel">PutPixel</a>          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#Rectangle">Rectangle</a>         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#RotEllipse">RotEllipse</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#00ff00">P</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetLineStyle">SetLineStyle</a></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Filled drawings routines</font></p>
+<p><font face="Courier New, Courier, monospace">(</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#Bar">Bar</a>               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#Bar3D">Bar3D</a>             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#Chord">Chord</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#FillEllipse">FillEllipse</a>       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#FillPoly">FillPoly</a>          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#FillRect">FillRect</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#FloodFill">FloodFill</a>         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetFillPattern">GetFillPattern</a>    &nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetFillSettings">GetFillSettings</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#InvertRect">InvertRect</a>        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#PieSlice">PieSlice</a>          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#RoundRect">RoundRect</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#Sector">Sector</a>            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetFillPattern">SetFillPattern</a>    &nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#00ff00">P</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetFillStyle">SetFillStyle</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetFloodMode">SetFloodMode</a></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Text and font management routines</font></p>
+<p><font face="Courier New, Courier, monospace">(</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetFontSettings">GetFontSettings</a>   &nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetTextSettings">GetTextSettings</a>   &nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#00ff00">P</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#InstallUserFont">InstallUserFont</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#OutText">OutText</a>           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#OutTextXY">OutTextXY</a>         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#000000">N</font></strong></font></font><font face="Courier New, Courier, monospace">) RegisterBGIFont<br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#00ff00">P</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetTextJustify">SetTextJustify</a>    &nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#00ff00">P</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetTextStyle">SetTextStyle</a>      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><strong><font color="#ff00cc" face="Courier New, Courier, monospace">D</font></strong></font><font face="Courier New, Courier, monospace">) <a href="#SetUserCharSize">SetUserCharSize</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#TextHeight">TextHeight</a>        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font color="#ffffff" face="Courier New, Courier, monospace"><strong>I</strong></font></font><font face="Courier New, Courier, monospace">) <a href="#TextWidth">TextWidth</a></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Keyboard management routines (requires WinCrt)</font></p>
+<p><font face="Courier New, Courier, monospace">(</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#Delay">Delay</a>             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#KeyPressed">KeyPressed</a>        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#ReadBuf">ReadBuf</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#ReadKey">ReadKey</a>           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#Sound">Sound</a>             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#WriteBuf">WriteBuf</a></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Mouse management routines (requires WinMouse)</font></p>
+<p><font face="Courier New, Courier, monospace">(</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetMouseButtons">GetMouseButtons</a> &nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetMouseEvent">GetMouseEvent</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetMouseX">GetMouseX</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetMouseY">GetMouseY</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#GetMouseWheel">GetMouseWheel</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font><font face="Courier New, Courier, monospace">(</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#PollMouseEvent">PollMouseEvent</a><br>
+  (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#PutMouseEvent">PutMouseEvent</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace"><strong><font color="#990000">A</font></strong></font></font><font face="Courier New, Courier, monospace">) <a href="#SetMouseXY">SetMouseXY</a></font></p>
+<p><font face="Arial, Helvetica, sans-serif"><strong>Types overview</strong></font></p>
+<p><font face="Courier New, Courier, monospace">AnimatType = record<a name="AnimatType"></a><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	bitHnd,maskHnd,bkgHnd: longword;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end;</font></p>
+<p><font face="Courier New, Courier, monospace">ArcCoordsType = record<a name="ArcCoordsType"></a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+x,y,xstart,ystart,xend,yend: smallint;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end;</font></p>
+<p><font face="Courier New, Courier, monospace">FillSettingsType = record<a name="FillSettingsType"></a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+pattern: word;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+color: longword;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end;</font></p>
+<p><font face="Courier New, Courier, monospace">FillPatternType = array [1..8] of byte;<a name="FillPatternType"></a></font></p>
+<p><font face="Courier New, Courier, monospace">LineSettingsType = record<a name="LineSettingsType"></a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+linestyle,pattern,thickness: word;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end;</font></p>
+<p><font face="Courier New, Courier, monospace">PaletteType = record<a name="PaletteType"></a><br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; size: word;<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; colors: array[0..255] of longword;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end;</font></p>
+<p><font face="Courier New, Courier, monospace">PointType = record<a name="PointType"></a><br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x,y: longint;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end;</font></p>
+<p><font face="Courier New, Courier, monospace">TextSettingsType = record<a name="TextSettingsType"></a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font,direction,charsize,horiz,vert: word;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end;</font></p>
+<p><font face="Courier New, Courier, monospace">ViewPortType = record<a name="ViewPortType"></a><br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; x1,y1,x2,y2: smallint;<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; clip: boolean;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end;</font></p>
+<p><font face="Courier New, Courier, monospace">MouseEventType =  record<a name="MouseEventType"></a><br>
+</font><font face="Courier New, Courier, monospace">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;action: word;<br>
+</font><font face="Courier New, Courier, monospace">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  buttons: word;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  x,y: word; <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  wheel: smallint; <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+end;</font></p>
+<p><font face="Courier New, Courier, monospace"></font><font face="Arial, Helvetica, sans-serif"><strong> Variables &amp; constants overview</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Wingraph version (string)</font><br>
+  <font face="Courier New, Courier, monospace">WinGraphVer</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Error codes (smallint)</font><br>
+  <font face="Courier New, Courier, monospace">grOk,grNoInitGraph,grInvalidDriver,grInvalidMode,grNotWindow,grInvalidFont,
+  grInvalidFontNum,grInvalidParam,grNoPalette,grNoOpenGL,grError</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Graphics drivers (smallint)</font><br>
+  <font face="Courier New, Courier, monospace">D1bit,D4bit,D8bit,Detect,NoPalette,HercMono,VGA,SVGA</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Graphics modes (smallint)</font><br>
+  <font face="Courier New, Courier, monospace">m320x200,m640x200,m640x350,m640x480,m720x350,m800x600,m1024x768,m1280x1024,
+  mDefault,mMaximized,mFullScr,mCustom,HercMonoHi,VGALo,VGAMed,VGAHi</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Update graphics constants (word)</font><br>
+  <font face="Courier New, Courier, monospace">UpdateOff,UpdateOn,UpdateNow</font></p>
+<p><font face="Arial, Helvetica, sans-serif">OpenGL drawing modes (boolean)</font><br>
+  <font face="Courier New, Courier, monospace">DirectOn,DirectOff</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Clipping constants (boolean)</font><br>
+  <font face="Courier New, Courier, monospace">ClipOn,ClipOff</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Raster operation constants (word)</font><br>
+  <font face="Courier New, Courier, monospace">CopyPut,XorPut,OrPut,AndPut,NotPut,NotOrPut,InvBitOrPut,InvScrAndPut,<br>
+  NormalPut,TransPut,MaskPut,BkgPut</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Drawing modes on screen (smallint)</font><br>
+  <font face="Courier New, Courier, monospace">CopyMode,XorMode,OrMode,AndMode,NotMode,NotScrMode,NotXorMode,NotOrMode,
+  NotAndMode,InvColAndMode,InvColOrMode,InvScrAndMode,InvScrOrMode,BlackMode,
+  WhiteMode,EmptyMode,Transparent,Opaque</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Alphabetical color names (longword)</font><font face="Arial, Helvetica, sans-serif"><a name="Alphabeticalcolornames"></a></font><br>
+  <font face="Courier New, Courier, monospace">AliceBlue,AlizarinCrimson,Amber,Amethyst,AntiqueWhite,Aquamarine,Asparagus,<br>
+  Azure,Beige,Bisque,Bistre,BitterLemon,Black,BlanchedAlmond,BlazeOrange,Blue,<br>
+  BlueViolet,BondiBlue,Brass,BrightGreen,BrightTurquoise,BrightViolet,Bronze,<br>
+  Brown,Buff,Burgundy,BurlyWood,BurntOrange,BurntSienna,BurntUmber,CadetBlue,<br>
+  CamouflageGreen,Cardinal,Carmine,Carrot,Casper,Celadon,Cerise,Cerulean,<br>
+  CeruleanBlue,Chartreuse,Chocolate,Cinnamon,Cobalt,Copper,Coral,Corn,<br>
+  CornflowerBlue,Cornsilk,Cream,Crimson,Cyan,DarkBlue,DarkBrown,DarkCerulean,<br>
+  DarkChestnut,DarkCoral,DarkCyan,DarkGoldenrod,DarkGray,DarkGreen,DarkIndigo,<br>
+  DarkKhaki,DarkMagenta,DarkOlive,DarkOliveGreen,DarkOrange,DarkOrchid,<br>
+  DarkPastelGreen,DarkPink,DarkRed,DarkSalmon,DarkScarlet,DarkSeaGreen,<br>
+  DarkSlateBlue,DarkSlateGray,DarkSpringGreen,DarkTan,DarkTangerine,<br>
+  DarkTeaGreen,DarkTerraCotta,DarkTurquoise,DarkViolet,DeepPink,DeepSkyBlue,<br>
+  Denim,DimGray,DodgerBlue,Emerald,Eggplant,FernGreen,FireBrick,Flax,<br>
+  FloralWhite,ForestGreen,Fractal,Fuchsia,Gainsboro,Gamboge,GhostWhite,Gold,<br>
+  Goldenrod,Gray,GrayAsparagus,GrayTeaGreen,Green,GreenYellow,Heliotrope,<br>
+  Honeydew,HotPink,IndianRed,Indigo,InternationalKleinBlue,InternationalOrange,<br>
+  Ivory,Jade,Khaki,Lavender,LavenderBlush,LawnGreen,Lemon,LemonChiffon,<br>
+  LightBlue,LightBrown,LightCoral,LightCyan,LightGoldenrodYellow,LightGray,<br>
+  LightGreen,LightMagenta,LightPink,LightRed,LightSalmon,LightSeaGreen,<br>
+  LightSkyBlue,LightSlateGray,LightSteelBlue,LightYellow,Lilac,Lime,LimeGreen,<br>
+  Linen,Magenta,Malachite,Maroon,Mauve,MediumAquamarine,MediumBlue,<br>
+  MediumOrchid,MediumPurple,MediumSeaGreen,MediumSlateBlue,MediumSpringGreen,<br>
+  MediumTurquoise,MediumVioletRed,MidnightBlue,MintCream,MistyRose,Moccasin,<br>
+  MoneyGreen,Monza,MossGreen,MountbattenPink,Mustard,NavajoWhite,Navy,Ochre,<br>
+  OldGold,OldLace,Olive,OliveDrab,Orange,OrangeRed,Orchid,PaleBrown,<br>
+  PaleCarmine,PaleChestnut,PaleCornflowerBlue,PaleGoldenrod,PaleGreen,<br>
+  PaleMagenta,PaleMauve,PalePink,PaleSandyBrown,PaleTurquoise,PaleVioletRed,<br>
+  PapayaWhip,PastelGreen,PastelPink,Peach,PeachOrange,PeachPuff,PeachYellow,<br>
+  Pear,Periwinkle,PersianBlue,Peru,PineGreen,Pink,PinkOrange,Plum,PowderBlue,<br>
+  PrussianBlue,Puce,Pumpkin,Purple,RawUmber,Red,Reef,RobinEggBlue,RosyBrown,<br>
+  RoyalBlue,Russet,Rust,SaddleBrown,Saffron,Salmon,SandyBrown,Sangria,Sapphire,<br>
+  Scarlet,SchoolBusYellow,SeaGreen,SeaShell,SelectiveYellow,Sepia,Sienna,<br>
+  Silver,SkyBlue,SlateBlue,SlateGray,Snow,SpringGreen,SteelBlue,SwampGreen,<br>
+  Taupe,Tangerine,Teal,TeaGreen,Tenne,TerraCotta,Thistle,Tomato,Turquoise,<br>
+  Ultramarine,Vermilion,Violet,VioletEggplant,Viridian,Wheat,White,WhiteSmoke,<br>
+  Wisteria,Yellow,YellowGreen,Zinnwaldite</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Drawing style for lines (word)</font><br>
+  <font face="Courier New, Courier, monospace">SolidLn,DottedLn,DashDotLn,DashedLn,DashDotDotLn,UserBitLn,NullLn</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Thick constants for lines (word)</font><br>
+  <font face="Courier New, Courier, monospace">NormWidth,DoubleWidth,TripleWidth,QuadWidth,ThickWidth</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Filling patterns (word)</font><br>
+  <font face="Courier New, Courier, monospace">EmptyFill,SolidFill,LineFill,ColFill,HatchFill,SlashFill,BkSlashFill,<br>
+  XHatchFill,UserFill,NoFill</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Bar3D constants (boolean)</font><br>
+  <font face="Courier New, Courier, monospace">TopOn,TopOff</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Flood mode constants (smallint)</font><br>
+  <font face="Courier New, Courier, monospace">BorderFlood,SurfaceFlood</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Justify constants for text (word)</font><br>
+  <font face="Courier New, Courier, monospace">LeftText,CenterText,RightText,TopText,BottomText,BaselineText</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Direction constants for text (word)</font><br>
+  <font face="Courier New, Courier, monospace">HorizDir,VertDir</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Font constants for text (word)</font><a name="Fontconstantsfortext"></a><br>
+  <font face="Courier New, Courier, monospace">CourierNewFont,MSSansSerifFont,TimesNewRomanFont,ArialFont,<br>
+  DefaultFont</font></p>
+<p><font face="Arial, Helvetica, sans-serif">More font constants for text (word)</font><br>
+  <font face="Courier New, Courier, monospace">ItalicFont,UnderlineFont,BoldFont</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Caret format: block or underline (boolean)</font><br>
+    <font face="Courier New, Courier, monospace">CaretBlock</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Caret blink rate in tenths of a second (word)</font><br>
+    <font face="Courier New, Courier, monospace">BlinkRate</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Mouse constants (word)</font><br>
+<font face="Courier New, Courier, monospace">MouseActionDown,MouseActionUp,MouseActionMove,MouseActionWheel,<br>
+</font><font face="Courier New, Courier, monospace">MouseLeftButton,MouseRightButton,MouseMiddleButton</font><font face="Courier New, Courier, monospace">,</font><font face="Courier New, Courier, monospace">MouseShiftKey</font><font face="Courier New, Courier, monospace">,<br>
+</font><font face="Courier New, Courier, monospace">MouseCtrlKey</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><strong>WinGraph routines</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">WinGraph is the main unit used to perform graphics in a GUI window using a set 
+  of routines similar to those from Borland Pascal (BP) graph unit.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------<a name="Arc"></a><br>
+    procedure Arc(x,y:smallint; start,stop,radius:word);<br>
+-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Draws part of a circle with center at (<font face="Courier New, Courier, monospace">x,y</font>), radius (<font face="Courier New, Courier, monospace">radius</font>), starting from
+  angle (<font face="Courier New, Courier, monospace">start</font>), stopping at angle (<font face="Courier New, Courier, monospace">stop</font>). These angles are measured
+  counter-clockwise. It uses current foreground color. To draw an entire
+circle use <a href="#Circle">Circle</a>.</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><a href="#Arc">Arc</a> is a particular case of <a href="#Ellipse">Ellipse</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="Bar"></a><br>
+    <font face="Courier New, Courier, monospace">procedure Bar(x1,y1,x2,y2:smallint);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Draws and fills a rectangle with opposite corners at (<font face="Courier New, Courier, monospace">x1,y1</font>) and (<font face="Courier New, Courier, monospace">x2,y2</font>), using the current fill style and color. This rectangle has no border. Use <a href="#FillRect">FillRect</a> to draw a filled rectangle with border.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="Bar3D"></a><br>
+    <font face="Courier New, Courier, monospace">procedure Bar3D(x1,y1,x2,y2:smallint; depth:word; top:boolean);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Draws and fills a 3-dimensional bar with opposite corners of the front facet
+  at (<font face="Courier New, Courier, monospace">x1,y1</font>) and (<font face="Courier New, Courier, monospace">x2,y2</font>). It uses the current foreground color. Only front facet
+  is filled with the current fill style and color. Argument (<font face="Courier New, Courier, monospace">depth</font>) specifies
+  the number of pixels used to show the depth of the bar. If (<font face="Courier New, Courier, monospace">top</font>) is true,
+  then a 3-dimensional top is drawn. Its pre-defined values are<br>
+    <font face="Courier New, Courier, monospace">TopOn</font> = true<br>
+    <font face="Courier New, Courier, monospace">TopOff</font> = false</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Use <a href="#Bar">Bar</a> to draw a 2-dimensional bar.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="Chord"></a><br>
+    <font face="Courier New, Courier, monospace">procedure Chord(x,y:smallint; start,stop,xradius,yradius:word);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Draws and fills a chord (a region bounded by the intersection of an ellipse
+  and a line segment - called a secant). It uses the current foreground color
+  and fill style. The arguments have the same meaning as in <a href="#Ellipse">Ellipse</a>. To draw a
+  sector of an ellipse use <a href="#Sector">Sector</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><font face="Arial, Helvetica, sans-serif"><a name="Circle"></a></font><br>
+    <font face="Courier New, Courier, monospace">procedure Circle(x,y:smallint; radius:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Draws a complete circle with center at (<font face="Courier New, Courier, monospace">x,y</font>) and radius (<font face="Courier New, Courier, monospace">radius</font>). To draw
+  part of a circle use <a href="#Arc">Arc</a>.<br>  
+  <br>
+</font><font face="Arial, Helvetica, sans-serif"><a href="#Circle">Circle</a> is a particular case of <a href="#Ellipse">Ellipse</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="ClearDevice"></a><br>
+    <font face="Courier New, Courier, monospace">procedure ClearDevice;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Clears the entire graphics screen using <a href="#ClearViewPort">ClearViewPort</a> routine. See that
+  routine for details. Current pointer is reset at (0,0), that is top-left corner of the screen.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="ClearViewPort"></a><br>
+    <font face="Courier New, Courier, monospace">procedure ClearViewPort;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Clears the current viewport. The current background color is used as filling
+  color. The pointer is set at (0,0), that is top-left corner of the viewport. See also <a href="#SetViewPort">SetViewPort</a> and <a href="#SetBkColor">SetBkColor</a> for more details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="CloseGraph"></a><br>
+    <font face="Courier New, Courier, monospace">procedure CloseGraph;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Closes the graphics window and releases all resources related to it. The
+  parent console window is shown again in foreground (if any). You can restore back the graphics
+  window using <a href="#SetGraphMode">SetGraphMode</a> or <a href="#InitGraph">InitGraph</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="CloseGraphRequest"></a><br>
+    <font face="Courier New, Courier, monospace">function CloseGraphRequest: boolean;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">It checks whether the user clicked the close button of the graphics window
+  with the mouse. It is up to the programmer to handle this request. Usually,
+  <a href="#CloseGraph">CloseGraph</a> routine must be invoked. If the window does not have a title bar
+  such an event cannot be recorded.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">If WinCrt unit is included, a sequence of keystrokes <font face="Courier New, Courier, monospace">#0#107</font> (Alt-F4) is also
+  generated.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="DetectGraph"></a><br>
+    <font face="Courier New, Courier, monospace">procedure DetectGraph(out driver,mode:smallint);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns default values for graphics driver (<font face="Courier New, Courier, monospace">driver</font>) and mode (<font face="Courier New, Courier, monospace">mode</font>). These
+  values equal <font face="Courier New, Courier, monospace">driver=NoPalette</font> and <font face="Courier New, Courier, monospace">mode=mDefault</font>. That is, a window with
+  all colors available and with default size. See <a href="#InitGraph">InitGraph</a> for a list of drivers
+  and modes.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="DrawBezier"></a><br>
+    <font face="Courier New, Courier, monospace">procedure DrawBezier(nrpoints:word; var polypoints);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Draws one or more cubic Bezier curves, using the current foreground color.
+  A Bezier curve is defined by two endpoints and two control points in between.
+  A number of 3N+1 vertices will define exactly N Bezier curves. The arguments
+  are the same as in <a href="#DrawPoly">DrawPoly</a>.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">It can be used to draw irregular curves, but a particular case is a rotated
+  ellipse. See <a href="#RotEllipse">RotEllipse</a> for details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="DrawPoly"></a><br>
+    <font face="Courier New, Courier, monospace">procedure DrawPoly(nrpoints:word; var polypoints);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Draws a polygon with (<font face="Courier New, Courier, monospace">nrpoints</font>) corner points, using the current foreground
+  color and line style. Argument (<font face="Courier New, Courier, monospace">polypoints</font>) should be an array of type
+  <a href="#PointType">PointType</a> containing at least (<font face="Courier New, Courier, monospace">nrpoints</font>) records. No check is performed.
+  The last corner point is not drawn.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">It is usually faster that using several <a href="#LineTo">LineTo</a> calls.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="Ellipse"></a><br>
+    <font face="Courier New, Courier, monospace">procedure Ellipse(x,y:smallint; start,stop,xradius,yradius:word);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Draws part of an ellipse with center at (<font face="Courier New, Courier, monospace">x,y</font>). Arguments (<font face="Courier New, Courier, monospace">xradius</font>) and (<font face="Courier New, Courier, monospace">yradius</font>)
+  are the horizontal and vertical radii of the ellipse, (<font face="Courier New, Courier, monospace">start</font>) and (<font face="Courier New, Courier, monospace">stop</font>) are
+  the starting and stopping angles of the arc of the ellipse. They are measured
+  counter-clockwise from the x-axis (3 o&#8217;clock is equal to 0 degrees). It uses
+  current foreground color. To draw part of a circle use <a href="#Arc">Arc</a>.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">To draw a rotated ellipse use <a href="#RotEllipse">RotEllipse</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="FillEllipse"></a><br>
+    <font face="Courier New, Courier, monospace">procedure FillEllipse(x,y:smallint;xradius,yradius:word);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Draws and fills an entire ellipse with center at (<font face="Courier New, Courier, monospace">x,y</font>). Arguments (<font face="Courier New, Courier, monospace">xradius</font>) 
+  and (<font face="Courier New, Courier, monospace">yradius</font>) are the horizontal and vertical radii of the ellipse. It uses
+  the current foreground color and fill style. To draw a sector of an ellipse
+  use <a href="#Sector">Sector</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="FillPoly"></a><br>
+    <font face="Courier New, Courier, monospace">procedure FillPoly(nrpoints:word; var polypoints);</font><br>
+    <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Draws and fills a polygon, using the current foreground color, line and fill
+  style. The arguments are the same as in <a href="#DrawPoly">DrawPoly</a>.</font><font face="Arial, Helvetica, sans-serif"> The polygon is closed automatically by drawing a line from the last vertex
+  to the first.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="FillRect"></a><br>
+    <font face="Courier New, Courier, monospace">procedure FillRect(x1,y1,x2,y2:smallint);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Draws and fills a rectangle, using the current foreground color, line and fill
+  style. The arguments are the same as in <a href="#Rectangle">Rectangle</a>. To draw a borderless
+  rectangle use <a href="#Bar">Bar</a> instead.</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><a href="#FillRect">FillRect</a> is a particular case of <a href="#FillPoly">FillPoly</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="FloodFill"></a><br>
+    <font face="Courier New, Courier, monospace">procedure FloodFill(x,y:smallint; color:longword);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Fills a region surrounding the point (<font face="Courier New, Courier, monospace">x,y</font>) until a color-condition is met.
+  This condition depends on (<font face="Courier New, Courier, monospace">color</font>) and the flood mode. This mode is set with
+  <a href="#SetFloodMode">SetFloodMode</a> routine.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">There are some reasons this routine might fail:<br>
+  (1) the filling could not be completed (out of memory) - unlikely <br>
+  (2) the specified point has the boundary color specified by the (<font face="Courier New, Courier, monospace">color</font>)<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; parameter (in <font face="Courier New, Courier, monospace">BorderFlood</font> mode)<br>
+  (3) the specified point does not have the color specified by (<font face="Courier New, Courier, monospace">color</font>)<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; parameter (in <font face="Courier New, Courier, monospace">SurfaceFlood</font> mode)<br>
+  (4) the point is outside the current viewport, that is, it is not visible</font></p>
+<p><font face="Arial, Helvetica, sans-serif">See <a href="#SetFloodMode">SetFloodMode</a> for details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="FreeAnim"></a><br>
+    <font face="Courier New, Courier, monospace">procedure FreeAnim(var anim:<a href="#AnimatType">AnimatType</a>);</font><br>
+    <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+    </font><font face="Arial, Helvetica, sans-serif">Frees the animation resources associated with the animation handle (<font face="Courier New, Courier, monospace">anim</font>). See <a href="#GetAnim">GetAnim</a> for more details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetAnim"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetAnim(x1,y1,x2,y2:smallint; color:longword; out anim:<a href="#AnimatType">AnimatType</a>);</font><br>
+    <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+    </font><font face="Arial, Helvetica, sans-serif">An animation structure contains a bitmap, its mask and a background image.
+  With such a structure you can create transparent bitmaps and animations,
+  but you have no programmatic access to this structure.</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><a href="#GetAnim">GetAnim</a> returns in variable (<font face="Courier New, Courier, monospace">anim</font>) the handle of an animation with a bitmap
+  image taken from screen in the rectangle defined by coordinates (<font face="Courier New, Courier, monospace">x1,y1,x2,y2</font>).
+  A mask image is also created and room for background image is reserved.
+  The system stores itself all animation resources into memory. Use <a href="#FreeAnim">FreeAnim</a> to
+  release the memory after use. The (<font face="Courier New, Courier, monospace">color</font>) is the transparent color to be set.
+  This color is turned into black in the bitmap image and OR-ed with the screen
+  color. Use <a href="#PutAnim">PutAnim</a> to place the animation back on screen.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetArcCoords"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetArcCoords(out arccoords:<a href="#ArcCoordsType">ArcCoordsType</a>);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns the coordinates of the last <a href="#Arc">Arc</a>, <a href="#Circle">Circle</a> or <a href="#Ellipse">Ellipse</a> call.
+  The structure (<font face="Courier New, Courier, monospace">arccoords</font>) contains the coordinates of the conic center, start and end arc coordinates.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetAspectRatio"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetAspectRatio(out xasp,yasp:word);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns the aspect ratio of the screen as given by <font face="Courier New, Courier, monospace">xasp/yasp</font>. To set a new
+  aspect ratio use <a href="#SetAspectRatio">SetAspectRatio</a>. See that routine for more details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetBkColor"></a><br>
+    <font face="Courier New, Courier, monospace">function GetBkColor: longword;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns the current background color. This is a palette entry for palette-based
+  drivers and an absolute RGB color for non-palette driver. Use <a href="#SetBkColor">SetBkColor</a> to set
+  a new color.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetColor"></a><br>
+    <font face="Courier New, Courier, monospace">function GetColor: longword;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns the current drawing color. This is a palette entry for palette-based
+  drivers and an absolute RGB color for non-palette driver. Use <a href="#SetColor">SetColor</a> to set
+  a new color.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetDefaultPalette"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetDefaultPalette(out palette:<a href="#PaletteType">PaletteType</a>);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns default VGA palette with maximum of 256 colors. By default, in
+  palette-based drivers, all color names are mapped to entries into this palette.
+  In this manner you get the same composition for each of 16 basic colors as
+  in BP graph unit. To retrive standard (real) composition for each color name
+  you should use <a href="#GetNamesPalette">GetNamesPalette</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetDriverName"></a><br>
+    <font face="Courier New, Courier, monospace">function GetDriverName:shortstring;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns the name of the selected graphics driver (and number of available
+  colors). See <a href="#InitGraph">InitGraph</a> for a list of graphics drivers.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetFillPattern"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetFillPattern(out fillpattern:<a href="#FillPatternType">FillPatternType</a>);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns in (<font face="Courier New, Courier, monospace">fillpattern</font>) the current fill-pattern array. This was set using
+  <a href="#SetFillPattern">SetFillPattern</a> routine.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetFillSettings"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetFillSettings(out fillinfo:<a href="#FillSettingsType">FillSettingsType</a>);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns the current fill-settings in (<font face="Courier New, Courier, monospace">fillinfo</font>). This structure contains the
+  fill pattern and color, as set by <a href="#SetFillStyle">SetFillStyle</a> routine.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetFontSettings"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetFontSettings(out fontname:shortstring; out width,height:word;<br>
+  out ttfont:boolean);<br>
+    -------------------------------------------------------------------<br>
+    </font><font face="Arial, Helvetica, sans-serif">Retrieves some information about the current selected font. First argument
+  contains the full registered name of the font (ex. '<font face="Courier New, Courier, monospace">Courier New</font>'). It is the same name used by routine <a href="#InstallUserFont">InstallUserFont</a> when the font was installed.
+  Variables (<font face="Courier New, Courier, monospace">width</font>) and (<font face="Courier New, Courier, monospace">height</font>) contain the maximum dimensions of the
+  characters in the font. If you want to retrive the dimensions of specific
+  characters use <a href="#TextWidth">TextWidth</a> and <a href="#TextHeight">TextHeight</a> routines. Boolean argument (<font face="Courier New, Courier, monospace">ttfont</font>)
+  specify if the technology of this font is a TrueType one. If so, the text
+  can be rotated on screen using <a href="#SetTextStyle">SetTextStyle</a> routine. Otherwise, it cannot be
+  rotated.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetGraphMode"></a><br>
+    <font face="Courier New, Courier, monospace">function GetGraphMode:smallint;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the current (or last used) graphics mode. See <a href="#InitGraph">InitGraph</a> for a list
+of graphics modes.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetImage"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetImage(x1,y1,x2,y2:smallint; out bitmap);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Places a copy of the screen area given by rectangle with coordinates 
+  (<font face="Courier New, Courier, monospace">x1,y1,x2,y2</font>) in the variable (<font face="Courier New, Courier, monospace">bitmap</font>). This variable must have enough room to 
+  accomodate the image (use <a href="#ImageSize">ImageSize</a> to get the exact size). Afterwards the 
+image can be put back on screen using <a href="#PutImage">PutImage</a>.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">The format of bitmap is hardcoded to 24 bits per pixel, so it is driver
+  independent. In fact (<font face="Courier New, Courier, monospace">bitmap</font>) will contain the complet structure of a BMP image and can be saved on disk and loaded into your favourite image viewer.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">See <a href="#PutImage">PutImage</a> for more details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetLineSettings"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetLineSettings(out lineinfo:<a href="#LineSettingsType">LineSettingsType</a>);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the current line settings in (<font face="Courier New, Courier, monospace">lineinfo</font>). That is, line style, pattern
+and thickness, as set by <a href="#SetLineStyle">SetLineStyle</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetNamesPalette"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetNamesPalette(out palette:<a href="#PaletteType">PaletteType</a>);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the palette having entries the color names. It stores the standard
+  composition for all color names defined by WinGraph. In non-palette driver,
+  color names are mapped to entries into this palette. This is not the default
+  palette. The first color entry in this palette is not <font face="Courier New, Courier, monospace">Black</font>. There is a total
+  of 256 pre-defined color names. If you feel this is useless for you, or if you
+  want to retrive the legacy values of 16 color names as in BP, please recompile
+the source with conditional <font face="Courier New, Courier, monospace">256_COLOR_NAMES</font> disabled.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">See the screenshot "colors.gif" in "\doc" folder and also the section <a href="#Alphabeticalcolornames">Alphabetical color names</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetMaxColor"></a><br>
+    <font face="Courier New, Courier, monospace">function GetMaxColor: longword;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the highest color which can be set with <a href="#SetColor">SetColor</a> or other routines
+  that accept colors. Depending on palette, this color is not always <font face="Courier New, Courier, monospace">White</font>.
+All colors between 0 and <a href="#GetMaxColor">GetMaxColor</a> are guarantied to be valid.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">In palette-based drivers this function equals <a href="#GetPaletteSize">GetPaletteSize</a> -1, otherwise it equals&nbsp;</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace">$FFFFFF</font></font><font face="Arial, Helvetica, sans-serif">.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetMaxMode"></a><br>
+    <font face="Courier New, Courier, monospace">function GetMaxMode: smallint;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the maximum valid mode number. This is always <font face="Courier New, Courier, monospace">mFullScr</font>. See
+    <a href="#InitGraph">InitGraph</a> for more details. If you want to retrive user screen dimensions
+(desktop dimensions) call <a href="#GetModeRange">GetModeRange</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetMaxX"></a><br>
+    <font face="Courier New, Courier, monospace">function GetMaxX: smallint;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the maximum x-coordinate (horizontal) in pixels. This equals
+the client area width minus 1. Maximum is placed on the right side.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetMaxY"></a><br>
+    <font face="Courier New, Courier, monospace">function GetMaxY: smallint;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns the maximum y-coordinate (vertical) in pixels. This equals
+  the client area height minus 1. Maximum is placed on the bottom side.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetModeName"></a><br>
+    <font face="Courier New, Courier, monospace">function GetModeName(mode:smallint): shortstring;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the name of the specified graphics mode (<font face="Courier New, Courier, monospace">mode</font>). See <a href="#InitGraph">InitGraph</a> for
+a list of graphics modes.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetModeRange"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetModeRange(driver:smallint; out width,height:smallint);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Contrary to BP, it returns the width and height, in pixels, of the user
+  screen (desktop). That is, (<font face="Courier New, Courier, monospace">width</font>) contains the width and (<font face="Courier New, Courier, monospace">height</font>) contains
+  the height. They do not depend on the (<font face="Courier New, Courier, monospace">driver</font>), which is a dummy argument.
+  Using this routine you can learn about the dimensions of the user screen
+  before calling <a href="#InitGraph">InitGraph</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetPalette"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetPalette(out palette:<a href="#PaletteType">PaletteType</a>);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns in (<font face="Courier New, Courier, monospace">palette</font>) the current palette. To retrive just the palette size
+use <a href="#GetPaletteSize">GetPaletteSize</a>. See <a href="#SetAllPalette">SetAllPalette</a> for more details on palettes.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetPaletteSize"></a><br>
+    <font face="Courier New, Courier, monospace">function GetPaletteSize: smallint;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns the maximum number of entries in the current palette. To retrive
+  the entire palette structure use <a href="#GetPalette">GetPalette</a>. See <a href="#SetAllPalette">SetAllPalette</a> for more details on palettes.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetPixel"></a><br>
+    <font face="Courier New, Courier, monospace">function GetPixel(x,y:smallint): longword;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Gets the pixel color of the point at position (<font face="Courier New, Courier, monospace">x,y</font>). This is a palette entry
+  for palette-based drivers and an absolute RGB color for non-palette driver.
+To set a new color for the pixel use <a href="#PutPixel">PutPixel</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetRGBColor"></a><br>
+    <font face="Courier New, Courier, monospace">function GetRGBColor(r,g,b:word): longword;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">For non-palette driver it returns an absolute RGB color value. In palette-based
+  drivers it returns the color (palette index) nearest to the specified RGB composition.
+See <a href="#SetRGBPalette">SetRGBPalette</a> routine for a description of input parameters. <br>
+<br>
+</font><font face="Arial, Helvetica, sans-serif">You can use it before <a href="#InitGraph">InitGraph</a> to create true color entries into a palette. </font><font face="Arial, Helvetica, sans-serif">Use <a href="#GetRGBComponents">GetRGBComponents</a> to convert an absolute RGB color backward into its RGB
+intensity components.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetRGBComponents"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetRGBComponents(color:longword; out r,g,b:word);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns the (Red,Green,Blue) intensity components of the color (<font face="Courier New, Courier, monospace">color</font>) in
+  (<font face="Courier New, Courier, monospace">r</font>), (<font face="Courier New, Courier, monospace">g</font>), (<font face="Courier New, Courier, monospace">b</font>) variables. Their values range between
+  0 and 255. For example, <font face="Courier New, Courier, monospace">Black</font> returns (0,0,0). See also <a href="#GetRGBColor">GetRGBColor</a>. Parameter (<font face="Courier New, Courier, monospace">color</font>) is a palette index in palette-based drivers
+  and a true RGB color for the non-palette driver. </font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetSystemPalette"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetSystemPalette(out palette:<a href="#PaletteType">PaletteType</a>);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns a maximum of
+256 colors from Windows system palette. This is the palette initialized
+by the operating system at start-up. You have no guaranty that this
+palette is the same across all systems. In fact, it's not.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetTextSettings"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetTextSettings(out textinfo:<a href="#TextSettingsType">TextSettingsType</a>);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the current font and text settings in argument (<font face="Courier New, Courier, monospace">textinfo</font>). This
+  contains the font type, direction, magnification, horizontal and vertical alignment, as set by <a href="#SetTextStyle">SetTextStyle</a> and <a href="#SetTextJustify">SetTextJustify</a> routines.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetViewSettings"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetViewSettings(out viewport:<a href="#ViewPortType">ViewPortType</a>);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the current viewport and clipping settings in (<font face="Courier New, Courier, monospace">viewport</font>). You can
+change these settings using <a href="#SetViewPort">SetViewPort</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetX"></a><br>
+    <font face="Courier New, Courier, monospace">function GetX: smallint;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the x-coordinate of the current position of the graphical pointer
+in pixels. It ranges between 0 and <a href="#GetMaxX">GetMaxX</a>. It increases from left to right.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetY"></a><br>
+    <font face="Courier New, Courier, monospace">function GetY: smallint;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the y-coordinate of the current position of the graphical pointer
+in pixels. It ranges between 0 and <a href="#GetMaxY">GetMaxY</a>. It increases from top to bottom.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GraphDefaults"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GraphDefaults;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Resets graphics
+settings to their default values for palette, line style, foreground
+and background colors, filling pattern and style, text style and
+placement, viewport, write mode and aspect ratio. This routine is first
+used by <a href="#InitGraph">InitGraph</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GraphEnabled"></a><br>
+    <font face="Courier New, Courier, monospace">function GraphEnabled: boolean;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Tests if the graphics window is enabled. If so, you can perform graphics.
+  Usually, after <a href="#InitGraph">InitGraph</a>, this routine  returns <font face="Courier New, Courier, monospace">true</font> and, after <a href="#CloseGraph">CloseGraph</a>, it returns <font face="Courier New, Courier, monospace">false</font>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GraphErrorMsg"></a><br>
+    <font face="Courier New, Courier, monospace">function GraphErrorMsg(errorcode:smallint): shortstring;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns a string describing the error (<font face="Courier New, Courier, monospace">errorcode</font>). This string can be
+  used to let the user know what went wrong. We have the following types of error codes:<br>
+  <font face="Courier New, Courier, monospace">grOk</font> - no error<br>
+  <font face="Courier New, Courier, monospace">grInvalidDriver</font> - invalid graphics driver<br>
+  <font face="Courier New, Courier, monospace">grInvalidMode</font> - invalid graphics mode<br>
+  <font face="Courier New, Courier, monospace">grNotWindow </font>- creation of graphics window failed<br>
+  <font face="Courier New, Courier, monospace">grNoInitGraph</font> - graphics window not initialized<br>
+  <font face="Courier New, Courier, monospace">grInvalidFont</font> - invalid font selection<br>
+  <font face="Courier New, Courier, monospace">grInvalidFontNum</font> - invalid font number<br>
+  <font face="Courier New, Courier, monospace">grInvalidParam</font> - invalid parameter value<br>
+  <font face="Courier New, Courier, monospace">grNoPalette</font> - no palette available<br>
+  <font face="Courier New, Courier, monospace">grNoOpenGL</font> - OpenGL driver not initialized<br>
+  <font face="Courier New, Courier, monospace">grError</font> - general graphics error</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Use <a href="#GraphResult">GraphResult</a> to return an error code.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GraphResult"></a><br>
+    <font face="Courier New, Courier, monospace">function GraphResult: smallint;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns an error code for the last graphics operation. If the returned value
+  is zero (<font face="Courier New, Courier, monospace">grOK</font>), all went well. A value different from zero means an error has
+  occurred. Most of  routines which draw something on screen, set or query some
+  drawing attributes can produce a <a href="#GraphResult">GraphResult</a> different from zero. </font><font face="Arial, Helvetica, sans-serif">Calling this routine once will reset the error code back to zero.</font> <font face="Arial, Helvetica, sans-serif"><a href="#GraphResult">GraphResult</a> should be used after <a href="#InitGraph">InitGraph</a> to discover initialization problems,
+  since that routine may fail on some situations: graphics driver and mode is
+  not supported, or default fonts cannot be installed, or OpenGL driver cannot
+  be initialized, etc.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Each error code has an associated error message. Use <a href="#GraphErrorMsg">GraphErrorMsg</a> to get this
+message. See that routine for a list of error codes.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="ImageSize"></a><br>
+    <font face="Courier New, Courier, monospace">function ImageSize(x1,y1,x2,y2:smallint): longint;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns the number of bytes needed to store the image from the rectangle
+  defined by coordinates (<font face="Courier New, Courier, monospace">x1,y1,x2,y2</font>). It should be used before calling <a href="#GetImage">GetImage</a> 
+and <a href="#PutImage">PutImage</a>. See those routines for details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="InitGraph"></a><br>
+    <font face="Courier New, Courier, monospace">procedure InitGraph(var driver,mode:smallint; const title:shortstring);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Initializes the graphics window. Graphics drivers (<font face="Courier New, Courier, monospace">driver</font>) are:<br>
+  <font face="Courier New, Courier, monospace">D1bit</font> - 2 colors<br>
+  <font face="Courier New, Courier, monospace">D4bit</font> - 16 colors<br>
+  <font face="Courier New, Courier, monospace">D8bit</font> - 256 colors<br>
+  <font face="Courier New, Courier, monospace">Detect</font> - routine <a href="#DetectGraph">DetectGraph</a> is used<br>
+  <font face="Courier New, Courier, monospace">NoPalette</font> - no palette, all colors in the system are available<br>
+  <font face="Courier New, Courier, monospace">HercMono=D1bit</font><br>
+  <font face="Courier New, Courier, monospace">VGA=D4bit</font><br>
+  <font face="Courier New, Courier, monospace">SVGA=D8bit</font></font></p>
+<p><font face="Arial, Helvetica, sans-serif">If you select a driver with palette,  you get a limited
+  number of available colors (the palette entries, 256  or less). See also <a href="#SetAllPalette">SetAllPalette</a>. </font><font face="Arial, Helvetica, sans-serif">If <font face="Courier New, Courier, monospace">NoPalette</font> driver is selected then all colors generated by the system are
+  available. Color names are mapped to their pre-defined RGB values. If
+    <font face="Courier New, Courier, monospace">driver=Detect</font> then <a href="#InitGraph">InitGraph</a> returns in (<font face="Courier New, Courier, monospace">driver</font>) and (<font face="Courier New, Courier, monospace">mode</font>) their default
+values given by <a href="#DetectGraph">DetectGraph</a> and initializes the graphics window.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Graphics modes (<font face="Courier New, Courier, monospace">mode</font>) are:<br>
+    <font face="Courier New, Courier, monospace">m320x200</font> - 320 by 200 pixels<br>
+    <font face="Courier New, Courier, monospace">m640x200</font> - 640 by 200 pixels<br>
+    <font face="Courier New, Courier, monospace">m640x350</font>   - and so on ...<br>
+    <font face="Courier New, Courier, monospace">m640x480</font><br>
+  <font face="Courier New, Courier, monospace">m720x350</font><br>
+  <font face="Courier New, Courier, monospace">m800x600</font><br>
+  <font face="Courier New, Courier, monospace">m1024x768</font><br>
+  <font face="Courier New, Courier, monospace">m1280x1024</font><br>
+  <font face="Courier New, Courier, monospace">mDefault</font> -  default size given by Windows system<br>
+  <font face="Courier New, Courier, monospace">mMaximized</font> - a maximized window (with caption bar)<br>
+  <font face="Courier New, Courier, monospace">mFullScr</font> - a full screen window (no caption bar)<br>
+  <font face="Courier New, Courier, monospace">mCustom</font> - a custom sized window (use <a href="#SetWindowSize">SetWindowSize</a> first to set its dimensions)<br>
+  <font face="Courier New, Courier, monospace">HercMonoHi=m720x350</font><br>
+  <font face="Courier New, Courier, monospace">VGALo=m640x200</font><br>
+  <font face="Courier New, Courier, monospace">VGAMed=m640x350</font><br>
+  <font face="Courier New, Courier, monospace">VGAHi=m640x480</font></font></p>
+<p><font face="Arial, Helvetica, sans-serif">All modes for which the graphics window fits into the screen (with or without
+  a caption bar) are valid. The third argument (<font face="Courier New, Courier, monospace">title</font>), if not empty, sets the
+  title of the graphics window, otherwise this title is set to WinGraph version
+string (</font><font face="Courier New, Courier, monospace">WinGraphVer</font><font face="Arial, Helvetica, sans-serif">).</font></p>
+<p><font face="Arial, Helvetica, sans-serif">The routine sets the attributes for the graphics window and creates a dedicated
+  thread for messaging the window. Before returning it sets the active page,
+  installs several default fonts, invokes <a href="#GraphDefaults">GraphDefaults</a> to get default settings
+  for drawings, enables OpenGL driver (if conditional <font face="Courier New, Courier, monospace">INIT_OPENGL</font> is set in the
+  source code) and hides the parent console window (if any and if conditional <font face="Courier New, Courier, monospace">HIDE_CONSOLE</font> is set in the
+  source code as well ). </font><font face="Arial, Helvetica, sans-serif">See <a href="#GraphResult">GraphResult</a> for possible failure problems.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Most of WinGraph routines do nothing useful before <a href="#InitGraph">InitGraph</a> is invoked. Anyway, the following ones do work:<br>
+  <a href="#DetectGraph">DetectGraph</a><br>
+  <a href="#GetDefaultPalette">GetDefaultPalette</a><br>
+  <a href="#GetNamesPalette">GetNamesPalette</a><br>
+  <a href="#GetMaxMode">GetMaxMode</a><br>
+  <a href="#GetModeName">GetModeName</a><br>
+  <a href="#GetModeRange">GetModeRange</a><br>
+  <a href="#GraphEnabled">GraphEnabled</a><br>
+  <a href="#GraphErrorMsg">GraphErrorMsg</a><br>
+  <a href="#GraphResult">GraphResult</a><br>
+  <a href="#ImageSize">ImageSize</a><br>
+  <a href="#InitGraph">InitGraph</a><br>
+  <a href="#GetRGBColor">GetRGBColor</a><br>
+  <a href="#GetRGBComponents">GetRGBComponents</a><br>
+  <a href="#SetGraphMode">SetGraphMode</a><br>
+  <a href="#SetWindowSize">SetWindowSize</a></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Use <a href="#CloseGraph">CloseGraph</a> to close the graphics window.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="InstallUserFont"></a><br>
+    <font face="Courier New, Courier, monospace">function InstallUserFont(const fontname:shortstring): smallint;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Installs a new font and returns its index into the installed font table.
+  This index can be used with <a href="#SetTextStyle">SetTextStyle</a> to enable the font for texts. The parameter (<font face="Courier New, Courier, monospace">fontname</font>) must be a valid family font name registered into the
+  system (ex: ' <font face="Courier New, Courier, monospace">Fixedsys</font>'). The name IS case sensitive. If the font cannot be
+  registered, <a href="#InstallUserFont">InstallUserFont</a> will return -1.</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><a href="#InitGraph">InitGraph</a> installs several fonts using this routine. Default font is set to
+  '<font face="Courier New, Courier, monospace">Courier New</font>'. Other installed fonts are listed in section <a href="#Fontconstantsfortext">Font constants for text</a>. For more info about fonts see <a href="#SetTextStyle">SetTextStyle</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="InvertRect"></a><br>
+    <font face="Courier New, Courier, monospace">procedure InvertRect(x1,y1,x2,y2:smallint);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Performs a logical <font face="Courier New, Courier, monospace">NOT</font> operation on the color values for each pixel in the
+specified rectangle defined by coordinates (<font face="Courier New, Courier, monospace">x1,y1,x2,y2</font>).</font></p>
+<p><font face="Arial, Helvetica, sans-serif">On monochrome driver, <a href="#InvertRect">InvertRect</a> makes white pixels black and black pixels
+  white. On color drivers, the inversion depends on how colors are generated.
+  Calling <a href="#InvertRect">InvertRect</a> twice for the same rectangle restores the display to its
+  previous colors. It does not perform well on palette-based drivers.
+  See also <a href="#SetWriteMode">SetWriteMode</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="Line"></a><br>
+    <font face="Courier New, Courier, monospace">procedure Line(x1,y1,x2,y2:smallint);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Draws a line starting from (<font face="Courier New, Courier, monospace">x1,y1</font>) to (<font face="Courier New, Courier, monospace">x2,y2</font>), using the current foregroung
+  color and line style. The current position is moved to (<font face="Courier New, Courier, monospace">x2,y2</font>). See <a href="#LineTo">LineTo</a> for more details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="LineRel"></a><br>
+    <font face="Courier New, Courier, monospace">procedure LineRel(dx,dy:smallint);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Draws a line starting from the current pointer position to the point (<font face="Courier New, Courier, monospace">dx,dy</font>),
+  relative to the current position, using the current foreground color and line
+  style. The current position is moved to the endpoint of the line. See <a href="#LineTo">LineTo</a> 
+for more details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="LineTo"></a><br>
+    <font face="Courier New, Courier, monospace">procedure LineTo(x,y:smallint);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Draws a line starting from the current pointer position to the point (<font face="Courier New, Courier, monospace">x,y</font>),
+  using the current foregroung color and line style. The current position is moved to (<font face="Courier New, Courier, monospace">x,y</font>).</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Use <a href="#SetLineStyle">SetLineStyle</a> routine to set the line attributes and <a href="#SetColor">SetColor</a> to set its color.
+  Use <a href="#MoveTo">MoveTo</a> to change the current pointer position. To draw a line with absolute coordinates use <a href="#Line">Line</a> routine instead.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="MoveRel"></a><br>
+    <font face="Courier New, Courier, monospace">procedure MoveRel(dx,dy:smallint);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Moves the pointer to coordinates (dx,dy), relative to the current pointer 
+position. See <a href="#MoveTo">MoveTo</a> for more details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="MoveTo"></a><br>
+    <font face="Courier New, Courier, monospace">procedure MoveTo(x,y:smallint);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Moves the pointer to coordinates (<font face="Courier New, Courier, monospace">x,y</font>) which are viewport-relative. See
+    <a href="#SetViewPort">SetViewPort</a> for more details. Only the following routines use or move the
+  current pointer:<br>
+  <a href="#ClearDevice">ClearDevice</a><br>
+  <a href="#ClearViewPort">ClearViewPort</a><br>
+  <a href="#GraphDefaults">GraphDefaults</a><br>
+  <a href="#Line">Line</a><br>
+  <a href="#LineRel">LineRel</a><br>
+  <a href="#LineTo">LineTo</a><br>
+  <a href="#MoveRel">MoveRel</a><br>
+  <a href="#MoveTo">MoveTo</a><br>
+  <a href="#OutText">OutText</a><br>
+  <a href="#OutTextXY">OutTextXY</a><br>
+  <a href="#SetViewPort">SetViewPort</a></font></p>
+<p><font face="Arial, Helvetica, sans-serif">No check is made regarding coordinates range.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="OpenGLEnabled"></a><br>
+    <font face="Courier New, Courier, monospace">function OpenGLEnabled: boolean;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Checks whether OpenGL driver is initialized. If not, you are not able to
+  perform OpenGL drawings. This can happen if <font face="Courier New, Courier, monospace">INIT_OPENGL</font> conditional is not
+  enabled in the source code, or the current selected graphics driver does
+  not support OpenGL initialization. <font face="Courier New, Courier, monospace">D1bit</font> graphics driver does not support
+OpenGL drawings. See <a href="#InitGraph">InitGraph</a> for a description of graphics drivers.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">OpenGL driver can be initialized in two ways. See <a href="#SetOpenGLMode">SetOpenGLMode</a> for details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="OutText"></a><br>
+    <font face="Courier New, Courier, monospace">procedure OutText(const textstring:shortstring);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Puts (<font face="Courier New, Courier, monospace">textstring</font>) on the screen, at the current pointer position, using the
+  current font and text settings. The current position is moved to the end of
+  the text. Use <a href="#SetTextStyle">SetTextStyle</a> to change font style and <a href="#SetTextJustify">SetTextJustify</a> to change
+  text alignment. To put text on an absolute location use <a href="#OutTextXY">OutTextXY</a> instead.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><font face="Arial, Helvetica, sans-serif"><a name="OutTextXY"></a><br>
+    <font face="Courier New, Courier, monospace">procedure OutTextXY(x,y:smallint; const textstring:shortstring);</font><br>
+</font><font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Puts (<font face="Courier New, Courier, monospace">textstring</font>) on the screen, at the coordinates (<font face="Courier New, Courier, monospace">x,y</font>), using the current
+  font and text settings. The current position is moved to the end of the text.
+  See <a href="#OutText">OutText</a> for more details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="PieSlice"></a><br>
+    <font face="Courier New, Courier, monospace">procedure PieSlice(x,y:smallint; start,stop,radius:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Draws and fills a
+circular sector (a region bounded by the intersection of a circle and
+two radials - called pie slice). It uses the current foreground color
+and fill style. The arguments have the same meaning as in <a href="#Arc">Arc</a>. To draw an entire disk use <a href="#FillEllipse">FillEllipse</a>.<br>
+  <br>
+  <a href="#PieSlice">PieSlice</a></font><font face="Arial, Helvetica, sans-serif"> is a particular case of <a href="#Sector">Sector</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------<a name="PutAnim"></a><br>
+  procedure PutAnim(x1,y1:smallint; var anim:<a href="#AnimatType">AnimatType</a>; bit:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><font face="Arial, Helvetica, sans-serif"><br>
+</font><font face="Arial, Helvetica, sans-serif"><a href="#PutAnim">PutAnim</a> puts the animation with the specified handle (<font face="Courier New, Courier, monospace">anim</font>) on screen at given
+  coordinates (<font face="Courier New, Courier, monospace">x1,y1</font>). Such an animation is previously created with <a href="#GetAnim">GetAnim</a>.
+  See that routine for more details. Argument (<font face="Courier New, Courier, monospace">bit</font>) determines how the animation
+  will be placed. Pre-defined values include those from <a href="#PutImage">PutImage</a> routine and,   
+  in addition</font><font face="Arial, Helvetica, sans-serif">:<br>
+  </font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace">TransPut</font> - copies the animation to the screen with transparent color enabled<br>
+  <font face="Courier New, Courier, monospace">MaskPut</font> - copies the animation mask to the screen<br>
+  <font face="Courier New, Courier, monospace">BkgPut </font>- copies the animation background (taken from previous <a href="#PutAnim">PutAnim</a>)
+to the screen</font></p>
+<p><font face="Arial, Helvetica, sans-serif">In palette-based drivers the colors in the animation are mapped to the palette
+  entries. Anyway, because the palette is just a logical one, you should use
+    <a href="#UpdateGraph">UpdateGraph</a> routine to assure that the animation on screen has the same color
+  composition as appear in the active page. Due to same reason, raster operations
+do not perform well on such drivers.</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><a href="#PutAnim">PutAnim</a> is usually faster than <a href="#PutImage">PutImage</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><font face="Arial, Helvetica, sans-serif"></font><a name="PutImage"></a><br>
+    <font face="Courier New, Courier, monospace">procedure PutImage(x1,y1:smallint; var bitmap; bit:word);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Places the image from (<font face="Courier New, Courier, monospace">bitmap</font>) on the screen at (<font face="Courier New, Courier, monospace">x1,y1</font>). Argument (<font face="Courier New, Courier, monospace">bit</font>)
+  determines how the bitmap will be placed. Pre-defined values are:<br>
+  <font face="Courier New, Courier, monospace">CopyPut</font> - copies the bitmap directly to the screen<br>
+  <font face="Courier New, Courier, monospace">XorPut</font> - combines the colors of the bitmap and the screen by using the
+  logical <font face="Courier New, Courier, monospace">XOR</font> operator<br>
+  <font face="Courier New, Courier, monospace">OrPut</font> - combines the colors of the bitmap and the screen by using the
+  logical <font face="Courier New, Courier, monospace">OR</font> operator<br>
+  <font face="Courier New, Courier, monospace">AndPut</font> - combines the colors of the bitmap and the screen by using the
+  logical <font face="Courier New, Courier, monospace">AND</font> operator<br>
+  <font face="Courier New, Courier, monospace">NotPut</font> - copies the inverted bitmap to the screen<br>
+  <font face="Courier New, Courier, monospace">NotOrPut</font> - combines the colors of the bitmap and the screen by using the
+  logical <font face="Courier New, Courier, monospace">OR</font> operator and then inverts the resultant color<br>
+  <font face="Courier New, Courier, monospace">InvBitOrPut</font> - combines the colors of the inverted bitmap with the colors
+  of the screen by using the logical <font face="Courier New, Courier, monospace">OR</font> operator<br>
+  <font face="Courier New, Courier, monospace">InvScrAndPut</font> - combines the inverted colors of the screen with the colors
+  of the bitmap by using the logical <font face="Courier New, Courier, monospace">AND</font> operator<br>
+  <font face="Courier New, Courier, monospace">NormalPut=CopyPut</font></font></p>
+<p><font face="Arial, Helvetica, sans-serif">In palette-based drivers the colors in the bitmap are mapped to the palette
+  entries. Anyway, because the palette is just a logical one you should use  <a href="#UpdateGraph">UpdateGraph</a> routine to assure that the bitmap on screen has the same color
+  composition as appear in the active page. Due to same reason, raster operations
+  do not perform well on such drivers.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">With <a href="#PutImage">PutImage</a> you can put on screen any external BMP image having 24 bits format.
+  See <a href="#GetImage">GetImage</a> for more details.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">If you want to perform animations please consider using <a href="#PutAnim">PutAnim</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="PutPixel"></a><br>
+    <font face="Courier New, Courier, monospace">procedure PutPixel(x,y:smallint; color:longword);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Puts a point at position (<font face="Courier New, Courier, monospace">x,y</font>) using color (<font face="Courier New, Courier, monospace">color</font>). Check <a href="#SetColor">SetColor</a> to learn
+about color values. Use <a href="#GetPixel">GetPixel</a> to retrive a pixel color.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="Rectangle"></a><br>
+    <font face="Courier New, Courier, monospace">procedure Rectangle(x1,y1,x2,y2:smallint);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Draws a rectangle defined by the top-left corner (<font face="Courier New, Courier, monospace">x1,y1</font>) and the bottom-right
+  corner (<font face="Courier New, Courier, monospace">x2,y2</font>). It uses the current foreground color and line style. To draw
+a filled rectangle use <a href="#FillRect">FillRect</a>.</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><a href="#Rectangle">Rectangle</a> is a particular case of <a href="#DrawPoly">DrawPoly</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="RestoreCrtMode"></a><br>
+    <font face="Courier New, Courier, monospace">procedure RestoreCrtMode;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">It is completely equivalent with <a href="#CloseGraph">CloseGraph</a>. See that routine for details.
+Can be used in combination with <a href="#SetGraphMode">SetGraphMode</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="RotEllipse"></a><br>
+    <font face="Courier New, Courier, monospace">procedure RotEllipse(x,y,rot:smallint; xradius,yradius:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Draws a rotated ellipse with center at (<font face="Courier New, Courier, monospace">x,y</font>). Arguments (<font face="Courier New, Courier, monospace">xradius</font>) and (<font face="Courier New, Courier, monospace">yradius</font>)
+  are the horizontal and vertical radii of the ellipse, (<font face="Courier New, Courier, monospace">rot</font>) defines the rotation
+  angle measured counter-clockwise in degrees. It uses current foreground color.
+It is implemented using <a href="#DrawBezier">DrawBezier</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="RoundRect"></a><br>
+    <font face="Courier New, Courier, monospace">procedure RoundRect(x1,y1,x2,y2,r:smallint);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Draws and fills a rectangle with rounded corners, using the current foreground
+  color, fill style and color. The argument (<font face="Courier New, Courier, monospace">r</font>) is the radius of a circle used
+to draw the corners. The other parameters are the same as in <a href="#Rectangle">Rectangle</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="Sector"></a><br>
+    <font face="Courier New, Courier, monospace">procedure Sector(x,y:smallint; start,stop,xradius,yradius:word);</font><br>
+    <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Draws and fills an elliptical sector (a region bounded by the intersection
+  of an ellipse and two radials). It uses the current foreground color and fill
+  style. The arguments have the same meaning as in <a href="#Ellipse">Ellipse</a>. To draw a sector
+of a circle use <a href="#PieSlice">PieSlice</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetActivePage"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetActivePage(page:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Sets the active page
+where all drawings are performed. If different than visual page, these
+drawings do not appear on screen. At least 4 active pages exist
+(starting with 0), but this number can be increased from the source
+code. This routine can be used to create multiple outputs. See also
+<a href="#SetVisualPage">SetVisualPage</a>.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Programmatically, an active page is a memory copy of the graphics window.
+  This copy is also used by the messaging thread to refresh the graphics window
+as necessary.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">You can use <a href="#UpdateGraph">UpdateGraph</a> routine to refresh the graphics window with the content
+  of the current active page. This is useful if drawings are not performed
+directly on the graphics window.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetAllPalette"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetAllPalette(var palette);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Sets the current palette to the specified one. (<font face="Courier New, Courier, monospace">palette</font>) is an untyped
+  variable, usually pointing to a record of type <a href="#PaletteType">PaletteType</a>. After changing
+  the palette content, the colors on screen are updated instantly. To change
+just some entries into the palette use <a href="#SetRGBPalette">SetRGBPalette</a>.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">The (<font face="Courier New, Courier, monospace">size</font>) field of <a href="#PaletteType">PaletteType</a> structure gives the number of colors in the
+  palette and (<font face="Courier New, Courier, monospace">colors</font>) field should contain absolute RGB color values.
+Such values can be generated with the <a href="#GetRGBColor">GetRGBColor</a> routine, before calling <a href="#InitGraph">InitGraph</a>.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Color names (<font face="Courier New, Courier, monospace">Red</font>, <font face="Courier New, Courier, monospace">Green</font>, ...) are not constants, but variables which are mapped
+  to the nearest entries into the selected palette. Depending on selected palette, the
+result is not always as their names suggest. See <a href="#GetNamesPalette">GetNamesPalette</a> for more details.</font> </p>
+<p><font face="Arial, Helvetica, sans-serif">Because the palette is just a logical one, changing the palette entries
+  might require setting again foreground and background colors. Otherwise,
+old colors outside the palette range could remain in use.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetAspectRatio"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetAspectRatio(xasp,yasp:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Sets the aspect ratio of the screen to the ratio given by <font face="Courier New, Courier, monospace">xasp/yasp</font>.
+It affects only routines for circular shapes. Does not have a practical
+use other than backward compatibility with BP. Default values are
+(10000,10000).
+See also <a href="#GetAspectRatio">GetAspectRatio</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetBkColor"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetBkColor(color:longword);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Sets the background color to (<font face="Courier New, Courier, monospace">color</font>). Check <a href="#SetColor">SetColor</a> to learn about color
+values.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">The background color is the color used to clear portions of the screen
+  (or the entire viewport). It is also used as dual color in filling patterns.
+<a href="#SetBkColor">SetBkColor</a> affects only subsequent drawings. Default color is <font face="Courier New, Courier, monospace">Black</font>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetColor"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetColor(color:longword);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Sets the foreground color to (<font face="Courier New, Courier, monospace">color</font>). For palette-based drivers the value of
+  (<font face="Courier New, Courier, monospace">color</font>) is an index into the palette. For non-palette driver (<font face="Courier New, Courier, monospace">color</font>) stores
+  a 24 bits RGB value encoded in hexadecimal form. The low-order byte
+  contains a value for the relative intensity of red, the second byte contains a
+  value for green and the third byte contains a value for blue (ex <font face="Courier New, Courier, monospace">$0000FF</font> is <font face="Courier New, Courier, monospace">Red</font>).
+In both cases, pre-defined color names can be used instead of pure numbers.</font> <font face="Arial, Helvetica, sans-serif">Consult <a href="#InitGraph">InitGraph</a> about graphics drivers and  the section <a href="#Alphabeticalcolornames">Alphabetical color names</a>. See <a href="#GetNamesPalette">GetNamesPalette</a> routine for more details on colors.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">The foreground color is the color used for drawing contours, lines and text.
+  Other primitives have different ways to specify the color. Default color is
+<font face="Courier New, Courier, monospace">White</font>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetFillPattern"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetFillPattern(fillpattern:<a href="#FillPatternType">FillPatternType</a>; color:longword);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Selects a user-defined fill pattern which will be used in <a href="#SetFillStyle">SetFillStyle</a> routine with
+  <font face="Courier New, Courier, monospace">UserFill</font> hatch set. The pattern is an 8x8 raster, corresponding to the
+  64 bits in (<font face="Courier New, Courier, monospace">fillpattern</font>). Foreground pattern color is set to (<font face="Courier New, Courier, monospace">color</font>). Default
+  is <font face="Courier New, Courier, monospace">White</font>. Background pattern color is the background color selected by
+<a href="#SetBkColor">SetBkColor</a>. Check <a href="#SetColor">SetColor</a> to learn more about colors.</font><br>
+<br>
+<font face="Arial, Helvetica, sans-serif">Before returning it calls <a href="#SetFillStyle">SetFillStyle</a> routine to put the pattern into effect.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetFillStyle"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetFillStyle(pattern:word; color:longword);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Sets the filling pattern and color for filled drawings routines. Argument
+  (<font face="Courier New, Courier, monospace">pattern</font>) can be one of the following constants:<br>
+  <font face="Courier New, Courier, monospace">EmptyFill</font> - background color hatch<br>
+  <font face="Courier New, Courier, monospace">SolidFill</font> - solid hatch<br>
+  <font face="Courier New, Courier, monospace">LineFill</font> - horizontal hatch<br>
+  <font face="Courier New, Courier, monospace">ColFill</font> - vertical hatch<br>
+  <font face="Courier New, Courier, monospace">HatchFill</font> - horizontal and vertical cross-hatch<br>
+  <font face="Courier New, Courier, monospace">SlashFill</font> - 45-degree upward, left-to-right hatch<br>
+  <font face="Courier New, Courier, monospace">BkSlashFill</font> - 45-degree downward, left-to-right hatch<br>
+  <font face="Courier New, Courier, monospace">XHatchFill</font> - 45-degree cross-hatch<br>
+  <font face="Courier New, Courier, monospace">UserFill</font> - user-defined hatch<br>
+  <font face="Courier New, Courier, monospace">NoFill</font> - no hatch</font></p>
+<p><font face="Arial, Helvetica, sans-serif">If (<font face="Courier New, Courier, monospace">pattern</font>) equals <font face="Courier New, Courier, monospace">UserFill</font>, the user-defined pattern set by <a href="#SetFillPattern">SetFillPattern</a> becomes the active pattern. In this case, the argument (color) is ignored.</font><font face="Arial, Helvetica, sans-serif"> Parameter (<font face="Courier New, Courier, monospace">color</font>) is used to fill the shapes. Default is <font face="Courier New, Courier, monospace">White</font>. Check <a href="#SetColor">SetColor</a> to learn
+about color values.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetFloodMode"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetFloodMode(floodmode:smallint);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Sets the mode in witch flood-fills are performed with <a href="#FloodFill">FloodFill</a> routine.
+  Argument (<font face="Courier New, Courier, monospace">floodmode</font>) has the following pre-defined values:<br>
+  <font face="Courier New, Courier, monospace">BorderFlood</font> - the fill area is bounded by the color specified in <a href="#FloodFill">FloodFill</a>;
+  filling begins at the specified point and continues in all directions until it reaches the color bounding the area; this
+  is the default.<br>
+  <font face="Courier New, Courier, monospace">SurfaceFlood</font> - the fill area is defined by the color that is specified in  <a href="#FloodFill">FloodFill</a>; filling begins at the specified point and continues in all directions over all adjacent regions containing the
+  specified color; this mode is useful for filling areas with
+multicolored boundaries</font></p>
+<p><font face="Arial, Helvetica, sans-serif">See also <a href="#FloodFill">FloodFill</a> routine.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetGraphMode"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetGraphMode(mode:smallint);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Sets the graphics window back on screen using graphics mode (<font face="Courier New, Courier, monospace">mode</font>) and
+  the previous selected driver. All previous graphics settings are lost.
+See <a href="#InitGraph">InitGraph</a> for details.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">It should be used after <a href="#CloseGraph">CloseGraph</a> or <a href="#RestoreCrtMode">RestoreCRTMode</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetLineStyle"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetLineStyle(linestyle,pattern,thickness:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Sets the drawing style for lines. The (<font face="Courier New, Courier, monospace">linestyle</font>) is one of the following
+  constants:<br>
+  <font face="Courier New, Courier, monospace">SolidLn</font> - solid line<br>
+  <font face="Courier New, Courier, monospace">DashedLn</font> - dashed line<br>
+  <font face="Courier New, Courier, monospace">DottedLn</font> - dotted line<br>
+  <font face="Courier New, Courier, monospace">DashDotLn</font> - alternating dashes and dots line<br>
+  <font face="Courier New, Courier, monospace">DashDotDotLn</font> - dashes and double dots line<br>
+  <font face="Courier New, Courier, monospace">UserBitLn</font> - user defined line<br>
+  <font face="Courier New, Courier, monospace">NullLn</font> - invisible line</font></p>
+<p><font face="Arial, Helvetica, sans-serif">If <font face="Courier New, Courier, monospace">UserBitLn</font> is specified then (<font face="Courier New, Courier, monospace">pattern</font>) should contain the 16-bit pattern. In all
+  another cases (<font face="Courier New, Courier, monospace">pattern</font>) is ignored. The parameter (<font face="Courier New, Courier, monospace">thickness</font>) indicates how
+  thick the line should be:<br>
+  <font face="Courier New, Courier, monospace">NormWidth</font> - one pixel width<br>
+  <font face="Courier New, Courier, monospace">DoubleWidth</font> - two pixels width<br>
+  <font face="Courier New, Courier, monospace">TripleWidth</font> - three pixels width<br>
+  <font face="Courier New, Courier, monospace">QuadWidth</font> - four pixels width<br>
+  <font face="Courier New, Courier, monospace">ThickWidth=TripleWidth</font></font></p>
+<p><font face="Arial, Helvetica, sans-serif">If </font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace">(thickness</font>) &lt;&gt;</font><font face="Arial, Helvetica, sans-serif">&nbsp;</font><font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace">NormWidth</font></font><font face="Arial, Helvetica, sans-serif"> then </font><font face="Arial, Helvetica, sans-serif">(<font face="Courier New, Courier, monospace">linestyle</font>) is ignored and the line is drawn solid, due to Windows GDI limitations.<br>(<font face="Courier New, Courier, monospace">thickness</font>) is ignored for <font face="Courier New, Courier, monospace">UserBitLn</font> style because of missing implementation.
+  Use <a href="#SetColor">SetColor</a> to set the line color.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetOpenGLMode"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetOpenGLMode(direct:boolean);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">It changes the drawing mode for OpenGL routines. Argument (<font face="Courier New, Courier, monospace">direct</font>) is one
+  of the following constants:<br>
+  <font face="Courier New, Courier, monospace">DirectOff</font> - OpenGL driver doesn't write directly on screen<br>
+  <font face="Courier New, Courier, monospace">DirectOn</font> - OpenGL driver writes directly on screen</font></p>
+<p><font face="Arial, Helvetica, sans-serif">In the first mode (<font face="Courier New, Courier, monospace">DirectOff</font>) all OpenGL drawings are performed into the
+  OpenGL buffer. Because of that you must use OpenGL specific command <font face="Courier New, Courier, monospace">glFlush()</font>  to release this buffer into the active page after each frame. This mode is
+  mainly used for static OpenGL drawings when speed is not so important. In
+  palette-based drivers the OpenGL drawings are affected by the selected palette.
+This is the default mode.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">In the second mode (<font face="Courier New, Courier, monospace">DirectOn</font>) all OpenGL drawings are performed directly
+  on screen. That means high-speed graphics, but no possibility to keep a copy
+  of OpenGL output into the active page. This mode is mainly used for dynamic
+  images when speed is important. OpenGL drawings are not affected by the
+selected palette.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">In both modes you must use <a href="#UpdateGraph"><font face="Courier New, Courier, monospace">UpdateGraph</font></a><font face="Courier New, Courier, monospace">(UpdateNow)</font> after each frame, in order
+  to update the screen. When changing the OpenGL mode, all previous OpenGL
+settings are lost.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">You can mix OpenGL and WinGraph routines but this is usually not recommended.
+  If you do so keep in mind the following: in (<font face="Courier New, Courier, monospace">DirectOff</font>) mode WinGraph routines
+  must be called after <font face="Courier New, Courier, monospace">glFlush()</font> is issued and <a href="#UpdateGraph"><font face="Courier New, Courier, monospace">UpdateGraph</font></a><font face="Courier New, Courier, monospace">(UpdateOff)</font> should be
+  activated first to avoid screen updates between commands; in (<font face="Courier New, Courier, monospace">DirectOn</font>) mode
+  you can mix these routines as you want but screen flickering may appear.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Before calling OpenGL routines you should check with <a href="#OpenGLEnabled">OpenGLEnabled</a>  if
+OpenGL driver is initialized. See that routine for more details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetPalette"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetPalette(nrcolor,color:word);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Changes the (<font face="Courier New, Courier, monospace">nrcolor</font>)-th entry in the current palette with (<font face="Courier New, Courier, monospace">color</font>) value. This argument (<font face="Courier New, Courier, monospace">color</font>) is an index into the default VGA palette, returned by
+  <a href="#GetDefaultPalette">GetDefaultPalette</a>. It ranges between 0 and 255, so is not limited to the
+  current palette size. To change a palette entry with a true color use
+  <a href="#SetRGBPalette">SetRGBPalette</a> instead.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetRGBPalette"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetRGBPalette(nrcolor,r,g,b:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Sets current palette entry (<font face="Courier New, Courier, monospace">nrcolor</font>) with an absolute RGB value: (<font face="Courier New, Courier, monospace">r</font>)-red,
+  (<font face="Courier New, Courier, monospace">g</font>)-green, (<font face="Courier New, Courier, monospace">b</font>)-blue. These arguments range between 0 and 255. Color names are
+  not mapped to the new palette entry. See <a href="#SetAllPalette">SetAllPalette</a> for details on palette
+operation.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetTextJustify"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetTextJustify(horiz,vert:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">It controls the placement of new text, relative to the cursor position.
+  Argument (<font face="Courier New, Courier, monospace">horiz</font>) controls horizontal placement, and can be one of the following pre-defined constants:<br>
+  <font face="Courier New, Courier, monospace">LeftText</font> - text is set left of the pointer<br>
+  <font face="Courier New, Courier, monospace">CenterText</font> - text is set centered horizontally on the pointer<br>
+  <font face="Courier New, Courier, monospace">RightText</font> - text is set to the right of the pointer</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Argument (<font face="Courier New, Courier, monospace">vert</font>) controls the vertical placement of the text. Its value can be
+  one of the following pre-defined constants:<br>
+  <font face="Courier New, Courier, monospace">TopText</font> - text is placed above the pointer<br>
+  <font face="Courier New, Courier, monospace">BottomText </font>- text is placed under the pointer<br>
+  <font face="Courier New, Courier, monospace">BaselineText</font> - text is placed relative to its base line</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Default text placement is <font face="Courier New, Courier, monospace">LeftText</font> and <font face="Courier New, Courier, monospace">TopText</font>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetTextStyle"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetTextStyle(font,direction,charsize:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">It controls the style of text to be put on the screen. Pre-defined constants
+  for (<font face="Courier New, Courier, monospace">font</font>) are:<br>
+  <font face="Courier New, Courier, monospace">CourierNewFont</font> - Courier New font<br>
+  <font face="Courier New, Courier, monospace">MSSansSerifFont</font> - MS Sans Serif font<br>
+  <font face="Courier New, Courier, monospace">TimesNewRomanFont</font> - Times New Roman font<br>
+  <font face="Courier New, Courier, monospace">ArialFont</font> - Arial font<br>
+  <font face="Courier New, Courier, monospace">DefaultFont=CourierNewFont</font></font></p>
+<p><font face="Arial, Helvetica, sans-serif">Besides, any successfully installed user font can be used insted. See    <a href="#InstallUserFont">InstallUserFont</a> for details. All these fonts can be OR-ed with the following
+  additional styles to change their appearance:<br>
+  <font face="Courier New, Courier, monospace">ItalicFont</font> - italic font<br>
+  <font face="Courier New, Courier, monospace">UnderlineFont </font>- underlined font<br>
+  <font face="Courier New, Courier, monospace">BoldFont</font> - bold font</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Argument (<font face="Courier New, Courier, monospace">direction</font>) sets the direction of text. It can be any positive value in
+  degrees or one of the following constants:<br>
+  <font face="Courier New, Courier, monospace">HorizDir</font> = 0<br>
+  <font face="Courier New, Courier, monospace">VertDir</font> = 90</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Between 1 and 5, (<font face="Courier New, Courier, monospace">charsize</font>) represents the magnification of the characters
+  with a standard font size of 8 pixels. Above 6 it represents an absolute font
+size. Default is set to 16.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Be aware that some fonts (including pre-defined) do not support all these
+  styles. See <a href="#GetFontSettings">GetFontSettings</a> routine for more details. Use <a href="#SetColor">SetColor</a> to set
+text color.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetUserCharSize"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetUserCharSize(nCharExtra,nBreakExtra,dummy1,dummy2:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">First argument (<font face="Courier New, Courier, monospace">nCharExtra</font>) sets the intercharacter spacing in text and the
+  second one (<font face="Courier New, Courier, monospace">nBreakExtra</font>) sets the amount of space reserved for break character.
+  The other ones are dummy arguments (not used). This is a major incompatibility
+  with BP graph unit.  Default values are
+zero.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">See <a href="#SetTextStyle">SetTextStyle</a> for other text styles.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetViewPort"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetViewPort(x1,y1,x2,y2:smallint; clip:boolean);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Sets the current output viewport to the rectangle defined by the top-left
+  corner (<font face="Courier New, Courier, monospace">x1,y1</font>) and the bottom-right corner (<font face="Courier New, Courier, monospace">x2,y2</font>). If (<font face="Courier New, Courier, monospace">clip</font>) is true, anything
+  drawn outside the viewport will be clipped (not drawn). Coordinates specified
+  after this call are relative to the top-left corner of the viewport. Cursor
+  position is reset to (0,0). The following clipping constants are defined:<br>
+  <font face="Courier New, Courier, monospace">ClipOn</font> = true<br>
+  <font face="Courier New, Courier, monospace">ClipOff </font>= false</font></p>
+<p><font face="Arial, Helvetica, sans-serif">OpenGL drawings are not bounded to the viewport.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetVisualPage"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetVisualPage(page:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Sets the visual page to be displayed onto the graphics window. For more info
+see <a href="#SetActivePage">SetActivePage</a> routine. <a href="#UpdateGraph">UpdateGraph</a> uses this routine to force screen refreshes.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetWindowSize"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetWindowSize(width,height:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Sets the dimensions of the graphics window to be created by <a href="#InitGraph">InitGraph</a>.
+  In this case you must use <font face="Courier New, Courier, monospace">mCustom</font> graphics mode. (<font face="Courier New, Courier, monospace">width</font>) is the width and
+  (<font face="Courier New, Courier, monospace">height</font>) is the height in pixels of the window client area. See <a href="#InitGraph">InitGraph</a> for
+more details.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetWriteMode"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetWriteMode(writemode:smallint);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">It specifies what binary operation is performed when drawing on screen. Argument
+  (<font face="Courier New, Courier, monospace">writemode</font>) has two components. First component is the foreground mix mode.
+  It affects contours (including lines) and filled shapes (excluding <a href="#Bar">Bar</a>).
+  Can be one of the following pre-defined constants:<br>
+  <font face="Courier New, Courier, monospace">CopyMode</font> - pixels are simply copied onto the screen<br>
+  <font face="Courier New, Courier, monospace">XorMode</font> - pixels are combination of the drawing color and screen color,
+  but not in both (logical <font face="Courier New, Courier, monospace">XOR</font>)<br>
+  <font face="Courier New, Courier, monospace">OrMode</font> - pixels are combination of the drawing color and screen color
+  (logical <font face="Courier New, Courier, monospace">OR</font>)<br>
+  <font face="Courier New, Courier, monospace">AndMode</font> - pixels are combination of the colors common to both the drawing
+  and screen (logical <font face="Courier New, Courier, monospace">AND</font>)<br>
+  <font face="Courier New, Courier, monospace">NotMode</font> - pixels are the inverse of the drawing color (logical <font face="Courier New, Courier, monospace">NOT</font>)<br>
+  <font face="Courier New, Courier, monospace">NotScrMode</font> - pixels are the inverse of the screen color<br>
+  <font face="Courier New, Courier, monospace">NotXorMode</font> - pixels are the inverse of the <font face="Courier New, Courier, monospace">XorMode</font> color<br>
+  <font face="Courier New, Courier, monospace">NotOrMode</font> - pixels are the inverse of the <font face="Courier New, Courier, monospace">OrMode</font> color<br>
+  <font face="Courier New, Courier, monospace">NotAndMode</font> - pixels are the inverse of the <font face="Courier New, Courier, monospace">AndMode</font> color<br>
+  <font face="Courier New, Courier, monospace">InvColAndMode</font> - pixels are combination of the colors common to both the
+  screen and the inverse of drawing color<br>
+  <font face="Courier New, Courier, monospace">InvColOrMode</font> - pixels are combination of the screen color and the inverse
+  of drawing color<br>
+  <font face="Courier New, Courier, monospace">InvScrAndMode</font> - pixels are combination of the colors common to both the
+  drawing and the inverse of screen color<br>
+  <font face="Courier New, Courier, monospace">InvScrOrMode</font> - pixels are combination of the drawing color and the inverse
+  of screen color<br>
+  <font face="Courier New, Courier, monospace">BlackMode</font> - pixels are always 0<br>
+  <font face="Courier New, Courier, monospace">WhiteMode</font> - pixels are always 1<br>
+  <font face="Courier New, Courier, monospace">EmptyMode</font> - screen pixels remain unchanged</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Second component is the background mix mode. It affects only texts. Can be one
+  of the following two pre-defined constants:<br>
+</font><font face="Courier New, Courier, monospace">Transparent</font><font face="Arial, Helvetica, sans-serif"> - screen remains untouched (as in BP graph unit)<br>
+  <font face="Courier New, Courier, monospace">Opaque</font>      - screen is filled with the current background color before the
+  text is drawn</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Argument (<font face="Courier New, Courier, monospace">writemode</font>) is an <font face="Courier New, Courier, monospace">OR</font>-ed combination of the foreground and background
+mix modes. By default it equals <font face="Courier New, Courier, monospace">CopyMode OR Transparent</font>.</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><a href="#SetWriteMode">SetWriteMode</a> does not perform well on palette-based drivers, especially if
+  the palette was not retrived by <a href="#GetSystemPalette">GetSystemPalette</a> routine. Anyway, because the
+  palette is just a logical one you must use <a href="#UpdateGraph">UpdateGraph</a> routine to assure that
+the screen has the same color composition as the active page.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">You can use <a href="#InvertRect">InvertRect</a> to perform logical <font face="Courier New, Courier, monospace">NOT</font> operations over the screen
+  content.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="TextHeight"></a><br>
+    <font face="Courier New, Courier, monospace">function TextHeight(const textstring:shortstring): word;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the height (in pixels) of the (<font face="Courier New, Courier, monospace">textstring</font>) in the current font style.
+This value might be altered by a call to <a href="#SetTextStyle">SetTextStyle</a> or <a href="#SetUserCharSize">SetUserCharSize</a></font>.</p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="TextWidth"></a><br>
+    <font face="Courier New, Courier, monospace">function TextWidth(const textstring:shortstring): word;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the width (in pixels) of the (<font face="Courier New, Courier, monospace">textstring</font>) in the current font style.
+This value might be altered by a call to <a href="#SetTextStyle">SetTextStyle</a> or <a href="#SetUserCharSize">SetUserCharSize</a>.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="UpdateGraph"></a><br>
+    <font face="Courier New, Courier, monospace">procedure UpdateGraph(bit:word);</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">This routine is used to manage all graphics operations. By default, these
+  operations are performed simultaneously onto the graphics window and
+  in memory (the current active page). However, you can change this behaviour
+  with <a href="#UpdateGraph">UpdateGraph</a>. The meaning of (<font face="Courier New, Courier, monospace">bit</font>) is the following:<br>
+  <font face="Courier New, Courier, monospace">UpdateOff</font> - graphics operations are not performed directly on screen,
+  only on memory (you can gain some speed here)<br>
+  <font face="Courier New, Courier, monospace">UpdateOn</font> - graphics operations are also performed directly on screen
+  (this is the default)<br>
+  <font face="Courier New, Courier, monospace">UpdateNow</font> - screen is updated with the content of the current active page
+right now; used in conjunction with <font face="Courier New, Courier, monospace">UpdateOff</font>. </font></p>
+<p><font face="Arial, Helvetica, sans-serif">This<a href="#UpdateGraph"></a> routine is useful to synchronize the output of several graphics operations,
+  in order to reduce screen flickering. In addition, you must use  <a href="#UpdateGraph"><font face="Courier New, Courier, monospace">UpdateGraph</font></a><font face="Courier New, Courier, monospace">(UpdateNow)</font> to force updating the screen after each OpenGL frame.
+  See <a href="#SetOpenGLMode">SetOpenGLMode</a> for details.</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><strong>WinCrt routines</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">WinCrt unit adds keyboard support to WinGraph. Graphics window must be enabled
+with <a href="#InitGraph">InitGraph</a> in order to use this unit properly.</font></p>
+<p><font face="Courier New, Courier, monospace"></font><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="Delay"></a><br>
+    <font face="Courier New, Courier, monospace">procedure Delay(ms:word);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">It delays the main thread a specified number of milliseconds (<font face="Courier New, Courier, monospace">ms</font>). Keyboard
+  and mouse events are still recorded. You can use this routine in a waiting loop (as <font face="Courier New, Courier, monospace"><a href="#Delay">Delay</a>(10)</font>), if you want your program not consume most of all CPU cycles.  <a href="#ReadBuf">ReadBuf</a> and <a href="#ReadKey">ReadKey</a> routines are using this technique.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">The specified number is an approximation, the result may be off a lot,
+  if system load is high.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="KeyPressed"></a><br>
+    <font face="Courier New, Courier, monospace">function KeyPressed: boolean;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Scans the keyboard buffer and sees if a key has been pressed. If this is the
+  case, <font face="Courier New, Courier, monospace">true</font> is returned. If not, <font face="Courier New, Courier, monospace">false</font> is returned. The <font face="Courier New, Courier, monospace">Shift</font>, <font face="Courier New, Courier, monospace">Alt</font> and <font face="Courier New, Courier, monospace">Ctrl</font> keys
+  are not reported. The key is not removed from the buffer, and can hence still
+  be read after the <a href="#KeyPressed">KeyPressed</a> function has been called, using <a href="#ReadKey">ReadKey</a> routine.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="ReadBuf"></a><br>
+    <font face="Courier New, Courier, monospace">procedure ReadBuf(out buf:shortstring; maxchar:byte);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Emulates the Read console routine for WinGraph. It creates a blinking caret
+  and waits for the user to input several keys until <font face="Courier New, Courier, monospace">Enter</font> key (<font face="Courier New, Courier, monospace">#13</font>) is pressed
+  or a number of (<font face="Courier New, Courier, monospace">maxchar</font>) characters is reached. If (<font face="Courier New, Courier, monospace">maxchar</font>) is set to 0 at
+  most 255 characters are accepted. Argument (<font face="Courier New, Courier, monospace">buf</font>) will store the sequence
+  of input characters. The accepted ASCII range is between <font face="Courier New, Courier, monospace">' '</font>(space) to
+  <font face="Courier New, Courier, monospace">'~'</font>(tilde). Extended or function keys are ignored. Among usual edit keys only
+  <font face="Courier New, Courier, monospace">BackSpace</font> is recognized.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">The routine uses <font face="Courier New, Courier, monospace">DefaultFont</font> to write characters horizontally on screen and
+  manage itself the placement and intercharacter spaces. All other text styles
+specified by the user are accounted for.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Text is positioned at the current pixel location. The entire screen scrolls
+  up if necessary. Next <a href="#ReadBuf">ReadBuf</a> call places the caret on new line.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><font face="Arial, Helvetica, sans-serif"><a name="ReadKey"></a><br>
+    <font face="Courier New, Courier, monospace">function ReadKey: char;</font><br></font><font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+    </font><font face="Arial, Helvetica, sans-serif">Returns one key from the keyboard buffer. If an extended or function key has
+  been pressed, then the zero ASCII code is returned (<font face="Courier New, Courier, monospace">#0</font>). You can then read
+  the scan code of the key with a second <a href="#ReadKey">ReadKey</a> call.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Most of the key codes from a DOS console are implemented in WinCrt, together with many other ones.
+  See below for a full list.<br>
+  <br>
+  </font><font face="Courier New, Courier, monospace"><strong></strong>Key&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Normal &nbsp;&nbsp; Shift &nbsp;&nbsp;&nbsp; Ctrl
+&nbsp;&nbsp;&nbsp;&nbsp; Alt<br>
+  ---------------------------------------------------------<br>
+A
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#97 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #65 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#30<br>
+B
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#98 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #66 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#2 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#48<br>
+C
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#99 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #67 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#3 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#46<br>
+D
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#100 &nbsp;&nbsp;&nbsp;&nbsp; #68 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #4
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#32<br>
+E
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#101 &nbsp;&nbsp;&nbsp;&nbsp; #69 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #5
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#18<br>
+F
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#102 &nbsp;&nbsp;&nbsp;&nbsp; #70 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #6
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#33<br>
+G
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#103 &nbsp;&nbsp;&nbsp;&nbsp; #71 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #7
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#34<br>
+H
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#104 &nbsp;&nbsp;&nbsp;&nbsp; #72 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #8
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#35<br>
+I
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#105 &nbsp;&nbsp;&nbsp;&nbsp; #73 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #9
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#23<br>
+J
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#106 &nbsp;&nbsp;&nbsp;&nbsp; #74 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #10
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#36<br>
+K
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#107 &nbsp;&nbsp;&nbsp;&nbsp; #75 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #11
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#37<br>
+L
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#108 &nbsp;&nbsp;&nbsp;&nbsp; #76 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #12
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#38<br>
+M
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#109 &nbsp;&nbsp;&nbsp;&nbsp; #77 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #13
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#50<br>
+N
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#110 &nbsp;&nbsp;&nbsp;&nbsp; #78 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #14
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#49<br>
+O
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#111 &nbsp;&nbsp;&nbsp;&nbsp; #79 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #15
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#24<br>
+P
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#112 &nbsp;&nbsp;&nbsp;&nbsp; #80 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #16
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#25<br>
+Q
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#113 &nbsp;&nbsp;&nbsp;&nbsp; #81 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #17
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#16<br>
+R
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#114 &nbsp;&nbsp;&nbsp;&nbsp; #82 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #18
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#19<br>
+S
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#115 &nbsp;&nbsp;&nbsp;&nbsp; #83 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #19
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#31<br>
+T
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#116 &nbsp;&nbsp;&nbsp;&nbsp; #84 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #20
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#20<br>
+U
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#117 &nbsp;&nbsp;&nbsp;&nbsp; #85 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #21
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#22<br>
+V
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#118 &nbsp;&nbsp;&nbsp;&nbsp; #86 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #22
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#47<br>
+W
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#119 &nbsp;&nbsp;&nbsp;&nbsp; #87 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #23
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#17<br>
+X
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#120 &nbsp;&nbsp;&nbsp;&nbsp; #88 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #24
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#45<br>
+Y
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#121 &nbsp;&nbsp;&nbsp;&nbsp; #89 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #25
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#21<br>
+Z
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#122 &nbsp;&nbsp;&nbsp;&nbsp; #90 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #26
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#44</font></p>
+<p><font face="Courier New, Courier, monospace">0 )
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#48 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #41 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#10 &nbsp;&nbsp;&nbsp; #0#129<br> 1 !
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#49 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #33 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#1 &nbsp;&nbsp;&nbsp;&nbsp; #0#120<br>
+2 @
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#50 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #64 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#2 &nbsp;&nbsp;&nbsp;&nbsp; #0#121<br>
+3 #
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#51 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #35 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#3 &nbsp;&nbsp;&nbsp;&nbsp; #0#122<br>
+4 $
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#52 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #36 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#4 &nbsp;&nbsp;&nbsp;&nbsp; #0#123<br>
+5 %
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#53 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #37 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#5 &nbsp;&nbsp;&nbsp;&nbsp; #0#124<br>
+6 ^
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#54 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #94 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#6 &nbsp;&nbsp;&nbsp;&nbsp; #0#125<br>
+7 &amp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#55 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #38 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#7 &nbsp;&nbsp;&nbsp;&nbsp; #0#126<br>
+8 *
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#56 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #42 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#8 &nbsp;&nbsp;&nbsp;&nbsp; #0#127<br>
+9 (
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#57 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #40 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#9 &nbsp;&nbsp;&nbsp;&nbsp; #0#128</font></p>
+<p><font face="Courier New, Courier, monospace">` ~
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#96 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #126 &nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br> - _
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#45 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #95 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+= +
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#61 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #43 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+\ |
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#92 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #124 &nbsp;&nbsp;&nbsp;&nbsp; #28
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+[ }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#91 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #123 &nbsp;&nbsp;&nbsp;&nbsp; #27
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+] }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#93 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #125 &nbsp;&nbsp;&nbsp;&nbsp; #29
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+; :
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#59 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #58 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+' "
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#39 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #34 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+, &lt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#44 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #60 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+. &gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#46 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #62 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+/ ?
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#47 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #63 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+SPACEBAR &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #32
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #32 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #32
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#11</font></p>
+<p><font face="Courier New, Courier, monospace">TAB
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#9 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #9
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #30 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+-<br> CAPS LOCK &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+BACKSPACE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #8
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #8
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #127 &nbsp;&nbsp;&nbsp;&nbsp; #0#14<br>
+ENTER &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #13
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #13 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #10
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#166<br>
+APP KEY &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#151
+&nbsp;&nbsp; #0#151 &nbsp;&nbsp; #0#151 &nbsp;&nbsp; #0#151<br>
+WIN KEY &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -</font></p>
+<p><font face="Courier New, Courier, monospace">INS
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#82 &nbsp;&nbsp;&nbsp; #0#82 &nbsp;&nbsp;&nbsp; #0#146 &nbsp;&nbsp;
+#0#162<br> DEL
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#83 &nbsp;&nbsp;&nbsp; #0#83 &nbsp;&nbsp;&nbsp; #0#147 &nbsp;&nbsp;
+#0#163<br>
+HOME &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#71 &nbsp;&nbsp;&nbsp; #0#71 &nbsp;&nbsp;&nbsp; #0#119 &nbsp;&nbsp;
+#0#164<br>
+END
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#79 &nbsp;&nbsp;&nbsp; #0#79 &nbsp;&nbsp;&nbsp; #0#117 &nbsp;&nbsp;
+#0#165<br>
+PAGE UP &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#73
+&nbsp;&nbsp;&nbsp; #0#73 &nbsp;&nbsp;&nbsp; #0#132 &nbsp;&nbsp; #0#153<br>
+PAGE DOWN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#81 &nbsp;&nbsp;&nbsp;
+#0#81 &nbsp;&nbsp;&nbsp; #0#118 &nbsp;&nbsp; #0#161</font></p>
+<p><font face="Courier New, Courier, monospace">ARROW UP
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#72 &nbsp;&nbsp;&nbsp;
+#0#72 &nbsp;&nbsp;&nbsp; #0#141 &nbsp;&nbsp; #0#152<br> ARROW DOWN
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#80 &nbsp;&nbsp;&nbsp; #0#80
+&nbsp;&nbsp;&nbsp; #0#145 &nbsp;&nbsp; #0#160<br>
+ARROW LEFT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#75 &nbsp;&nbsp;&nbsp;
+#0#75 &nbsp;&nbsp;&nbsp; #0#115 &nbsp;&nbsp; #0#155<br>
+  ARROW RIGHT     &nbsp;&nbsp;&nbsp;&nbsp; #0#77     &nbsp;&nbsp;&nbsp; #0#77    &nbsp;&nbsp;&nbsp; #0#116  &nbsp;&nbsp; #0#157</font></p>
+<p><font face="Courier New, Courier, monospace">ESC
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#27 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #27 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br> F1
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#59 &nbsp;&nbsp;&nbsp; #0#84 &nbsp;&nbsp;&nbsp; #0#94
+&nbsp;&nbsp;&nbsp; #0#104<br>
+F2
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#60 &nbsp;&nbsp;&nbsp; #0#85 &nbsp;&nbsp;&nbsp; #0#95
+&nbsp;&nbsp;&nbsp; #0#105<br>
+F3
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#61 &nbsp;&nbsp;&nbsp; #0#86 &nbsp;&nbsp;&nbsp; #0#96
+&nbsp;&nbsp;&nbsp; #0#106<br>
+F4
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#62 &nbsp;&nbsp;&nbsp; #0#87 &nbsp;&nbsp;&nbsp; #0#97
+&nbsp;&nbsp;&nbsp; #0#107<br>
+F5
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#63 &nbsp;&nbsp;&nbsp; #0#88 &nbsp;&nbsp;&nbsp; #0#98
+&nbsp;&nbsp;&nbsp; #0#108<br>
+F6
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#64 &nbsp;&nbsp;&nbsp; #0#89 &nbsp;&nbsp;&nbsp; #0#99
+&nbsp;&nbsp;&nbsp; #0#109<br>
+F7
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#65 &nbsp;&nbsp;&nbsp; #0#90 &nbsp;&nbsp;&nbsp; #0#100 &nbsp;&nbsp;
+#0#110<br>
+F8
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#66 &nbsp;&nbsp;&nbsp; #0#91 &nbsp;&nbsp;&nbsp; #0#101 &nbsp;&nbsp;
+#0#111<br>
+F9
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#67 &nbsp;&nbsp;&nbsp; #0#92 &nbsp;&nbsp;&nbsp; #0#102 &nbsp;&nbsp;
+#0#112<br>
+F10
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#68 &nbsp;&nbsp;&nbsp; #0#93 &nbsp;&nbsp;&nbsp; #0#103 &nbsp;&nbsp;
+#0#113<br>
+F11
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#133 &nbsp;&nbsp; #0#135 &nbsp;&nbsp; #0#137 &nbsp;&nbsp; #0#139<br>
+F12
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#134 &nbsp;&nbsp; #0#136 &nbsp;&nbsp; #0#138 &nbsp;&nbsp; #0#140<br>
+PRINT SCR &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+SCROLL LOCK &nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #3
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+PAUSE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#12 &nbsp;&nbsp;&nbsp; #0#12 &nbsp;&nbsp;&nbsp; #3
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#169</font></p>
+<p><font face="Courier New, Courier, monospace">NUMPAD 0
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #48
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#82 &nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br> NUMPAD 1
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #49
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#79 &nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+NUMPAD 2 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #50
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#80 &nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+NUMPAD 3 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #51
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#81 &nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+NUMPAD 4 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #52
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#75 &nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+NUMPAD 5 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #53
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#76 &nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+NUMPAD 6 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #54
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#77 &nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+NUMPAD 7 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #55
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#71 &nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+NUMPAD 8 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #56
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#72 &nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+NUMPAD 9 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #57
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#73 &nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+  NUMPAD CLEAR       &nbsp;&nbsp;&nbsp; #0#76     &nbsp;&nbsp;&nbsp; #0#76    &nbsp;&nbsp;&nbsp; #0#143  &nbsp;&nbsp; #0#76<br>
+NUMPAD LOCK &nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -<br>
+NUMPAD DIVIDE &nbsp;&nbsp; #47 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #47
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#148 &nbsp;&nbsp; #0#69<br>
+NUMPAD MULTIPLY&nbsp; #42 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #42
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#149 &nbsp;&nbsp; #0#70<br>
+NUMPAD SUBTRACT&nbsp; #45 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #45
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#142 &nbsp;&nbsp; #0#74<br>
+NUMPAD ADD &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #43
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #43 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+#0#144 &nbsp;&nbsp; #0#78<br>
+NUMPAD ENTER &nbsp;&nbsp;&nbsp; #13 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #13
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #10 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#166<br>
+NUMPAD DECIMAL  &nbsp; #46         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #0#83    &nbsp;&nbsp;&nbsp; #0#150  &nbsp;&nbsp; #0#114</font><font face="Courier New, Courier, monospace"><br>
+<br>
+</font><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="Sound"></a><br>
+    <font face="Courier New, Courier, monospace">procedure Sound(hz,dur:word);</font><br>
+    <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+    </font><font face="Arial, Helvetica, sans-serif">Generates simple tones on the speaker. Parameter (<font face="Courier New, Courier, monospace">hz</font>) is the frequency of
+  the sound in hertz. Its valid range is between 37 through 32767. (<font face="Courier New, Courier, monospace">dur</font>)
+is the duration of the sound in milliseconds.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="WriteBuf"></a><br>
+    <font face="Courier New, Courier, monospace">procedure WriteBuf(buf:shortstring);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Emulates the Write console routine for WinGraph. It prints on screen every
+  character found in (<font face="Courier New, Courier, monospace">buf</font>), but only in the range <font face="Courier New, Courier, monospace">' '</font>(space) to <font face="Courier New, Courier, monospace">'~'</font>(tilde). 
+  All other characters are silently ignored. Carriage return (<font face="Courier New, Courier, monospace">#13</font>) is also
+  recognized.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">The routine uses <font face="Courier New, Courier, monospace">DefaultFont</font> to write characters horizontally on screen and
+  manage itself the placement and intercharacter spaces. All other text styles
+specified by the user are accounted for.</font></p>
+<p><font face="Arial, Helvetica, sans-serif">Text is positioned at the current pixel location. The entire screen scrolls
+  up if necessary. Next <a href="#WriteBuf">WriteBuf</a> call places the text on the same line, unless a carriage return is encountered.<br>
+</font><br>
+<font face="Arial, Helvetica, sans-serif"><strong>WinMouse routines</strong></font></p>
+<p><font face="Arial, Helvetica, sans-serif">WinMouse unit adds</font><font face="Arial, Helvetica, sans-serif"> mouse support to WinGraph. Graphics window must be enabled
+with <a href="#InitGraph">InitGraph</a> in order to use this unit properly.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetMouseButtons"></a><br>
+    <font face="Courier New, Courier, monospace">function GetMouseButtons: word;</font><br>
+<font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+</font><font face="Arial, Helvetica, sans-serif">Returns the current button state of the mouse  and the state of <font face="Courier New, Courier, monospace">Shift</font> and <font face="Courier New, Courier, monospace">Ctrl</font> keys. It might be an <font face="Courier New, Courier, monospace">OR</font>-ed
+  combination of the following constants:<br>
+  <font face="Courier New, Courier, monospace">MouseLeftButton</font> - the left mouse button is held down<br>
+  <font face="Courier New, Courier, monospace">MouseRightButton</font> - the right mouse button is held down<br> 
+  <font face="Courier New, Courier, monospace">MouseMiddleButton</font> - the middle mouse button is held down</font><br>
+  <font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace">MouseShiftKey</font> - the <font face="Courier New, Courier, monospace">Shift</font> key  is held down</font><br>
+  <font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace">MouseCtrlKey</font> - the</font><font face="Arial, Helvetica, sans-serif"> <font face="Courier New, Courier, monospace">Ctrl</font> key  is held down</font><br>
+  <br>
+<font face="Arial, Helvetica, sans-serif">If no buttons nor keys are held down the function returns zero.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetMouseEvent"></a><br>
+    <font face="Courier New, Courier, monospace">procedure GetMouseEvent(out MouseEvent:<a href="#MouseEventType">MouseEventType</a>);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Returns the next mouse event in the queue (a movement, button press, button
+  release or wheel scroll), and waits for one if none is available. The field (<font face="Courier New, Courier, monospace">buttons</font>) of
+  (<font face="Courier New, Courier, monospace">MouseEvent</font>) argument is loaded with the mouse buttons, <font face="Courier New, Courier, monospace">Shift</font> and <font face="Courier New, Courier, monospace">Ctrl</font> keys which are pressed during
+  the event (see <a href="#GetMouseButtons">GetMouseButtons</a> for a description). The fields (<font face="Courier New, Courier, monospace">x</font>), (<font face="Courier New, Courier, monospace">y</font>) store mouse position, (<font face="Courier New, Courier, monospace">wheel</font>)&nbsp;stores mouse wheel rotation (in 120 steps increment, positive away from user) and (<font face="Courier New, Courier, monospace">action</font>) stores the event. It might be one of the
+  following constants:<br>
+  <font face="Courier New, Courier, monospace">MouseActionDown</font> - a mouse button is pressed<br>
+  <font face="Courier New, Courier, monospace">MouseActionUp</font> - a mouse button is released<br>
+  <font face="Courier New, Courier, monospace">MouseActionMove</font> - mouse cursor is moved</font><br>
+  <font face="Arial, Helvetica, sans-serif"><font face="Courier New, Courier, monospace">MouseActionWheel</font> - mouse wheel is rotated</font></p>
+<p><font face="Arial, Helvetica, sans-serif"></font><font face="Arial, Helvetica, sans-serif">The mouse event queue can hold multiple events till they are fetched.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetMouseX"></a><br>
+    <font face="Courier New, Courier, monospace">function GetMouseX: word;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Queries the current horizontal position of the mouse cursor. This position is
+  measured in pixels, starting at 0 on the left side of the screen.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetMouseY"></a><br>
+    <font face="Courier New, Courier, monospace">function GetMouseY: word;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Queries the current vertical position of the mouse cursor. This position is
+  measured in pixels, starting at 0 on the top side of the screen.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="GetMouseWheel" id="GetMouseWheel"></a><br>
+  <font face="Courier New, Courier, monospace">function GetMouseWheel: smallint;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Queries
+the mouse wheel rotation status (in 120 steps increment, positive away
+from user). It returns zero if wheel is not rotated.</font> <font face="Arial, Helvetica, sans-serif">Calling this routine once will reset wheel rotation status back to zero.</font></p>
+<p><font face="Courier New, Courier, monospace"></font><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="PollMouseEvent"></a><br>
+  <font face="Courier New, Courier, monospace">function PollMouseEvent(out MouseEvent:<a href="#MouseEventType">MouseEventType</a>): boolean;</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Checks whether a mouse event is available in the queue, and returns it in
+          (<font face="Courier New, Courier, monospace">MouseEvent</font>) argument if one is found. The function result is true in that case.
+          If no mouse event is pending, the function result is false, and the content
+          of (<font face="Courier New, Courier, monospace">MouseEvent</font>) is unchanged. Note that after a call to <a href="#PollMouseEvent">PollMouseEvent</a>, the
+          event should still be removed from the mouse event queue with a call to
+<a href="#GetMouseEvent">GetMouseEvent</a>. See that routine for a description of (<font face="Courier New, Courier, monospace">MouseEvent</font>) argument.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="PutMouseEvent"></a><br>
+    <font face="Courier New, Courier, monospace">procedure PutMouseEvent(const MouseEvent:<a href="#MouseEventType">MouseEventType</a>);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Adds (<font face="Courier New, Courier, monospace">MouseEvent</font>) to the mouse event queue. This can be used to simulate a
+  mouse event.</font></p>
+<p><font face="Courier New, Courier, monospace">-------------------------------------------------------------------</font><a name="SetMouseXY"></a><br>
+    <font face="Courier New, Courier, monospace">procedure SetMouseXY(x,y:word);</font><br>
+  <font face="Courier New, Courier, monospace">-------------------------------------------------------------------<br>
+  </font><font face="Arial, Helvetica, sans-serif">Places the mouse cursor at position (<font face="Courier New, Courier, monospace">x,y</font>). It is measured in pixels,
+  starting at (0,0) from the top-left corner of the screen.</font></p>
+<p>&nbsp;</p>
+<p align="center"><font face="Courier New, Courier, monospace">--- end of document ---</font></p>
+</body></html>

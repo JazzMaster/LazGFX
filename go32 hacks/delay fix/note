@@ -1,7 +1,0 @@
-	Use The provided EXE to patch the runtine unit.
-OR 
-	check out crt.tpu and override it -check in-  a modified open source "fixed" version.
-
-Apps will not run if built straight with the TP BGI due to incorrect timing math.
-
-
