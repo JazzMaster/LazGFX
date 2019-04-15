@@ -49,6 +49,10 @@ procedure Render_Cube;
 
 
 implementation
+//for each 3D object You have to manually adjust the camera angle - or loop the draw command in 
+//a Rotate3f loop(to spin it).
+
+//Im not going to tell you what to do- the demos speak for themselves.
 
 //size??
 procedure Render_Sphere;
@@ -72,13 +76,19 @@ begin
 end;
 
 procedure Render_Cube;
-//pushed back- this takes up most of the screen real estate
 
+//Takes 6 color inputs- you wouldnt want ME deciding what color your cube is....
+//(you can also add "skins" or shaders to this)
 begin
 
 // Render a cube
 glBegin( GL_QUADS );
     // Top face
+
+//FIXME: (unsigned byte=int from byteValue)
+//      glColori(ord(vertexColor[x]^.r),ord(vertexColor[x]^.g),ord(vertexColor[x]^.b));
+// -for all of these
+
     glColor3f(   0.0f, 1.0f,  0.0f );  // Green
     glVertex3f(  1.0f, 1.0f, -1.0f );  // Top-right of top face
     glVertex3f( -1.0f, 1.0f, -1.0f );  // Top-left of top face
@@ -122,6 +132,138 @@ glBegin( GL_QUADS );
 glEnd();
 
 end;
+
+
+procedure Cylinder;
+var
+  around: integer;
+begin
+  glBegin(GL_TRIANGLE_STRIP);
+    for around := 0 to 35 do
+    begin
+      glVertex3f(circleX[around],circleY[around],-0.4);
+      glVertex3f(circleX[around],circleY[around],+0.4);
+    end; {for}
+    glVertex3f(circleX[0],circleY[0],-0.4);
+    glVertex3f(circleX[0],circleY[0],+0.4);
+  glEnd;
+end;
+
+procedure Cone;
+var
+  around: integer;
+begin
+  glBegin(GL_TRIANGLE_FAN);
+    glVertex3f(0.0,0.0,0.4);
+    for around := 35 downto 0 do
+      glVertex3f(circleX[around],circleY[around],0.0);
+    glVertex3f(circleX[35],circleY[35],0.0);
+  glEnd;
+end;
+
+procedure Dome;
+var
+  olddiam,
+  oldlayer,
+  diam,
+  layer: double;
+  place,
+  around: integer;
+begin
+  for place := 1 to 9 do
+  begin
+    layer := circleY[place];
+    diam := circleX[place]*2.5;
+    if place=1 then
+    begin
+      glFrontFace(GL_CCW);
+      glBegin(GL_TRIANGLE_FAN);
+        glVertex3f(0.0,0.0,0.4);
+        for around := 35 downto 0 do
+          glVertex3f(circleX[around]*diam,circleY[around]*diam,layer);
+        glVertex3f(circleX[35]*diam,circleY[35]*diam,layer);
+    end else begin
+      glFrontFace(GL_CW);
+      glBegin(GL_TRIANGLE_STRIP);
+        for around := 0 to 35 do
+        begin
+          glVertex3f(circleX[around]*olddiam,circleY[around]*olddiam,oldlayer);
+          glVertex3f(circleX[around]*diam,circleY[around]*diam,layer);
+        end; {for}
+        glVertex3f(circleX[0]*olddiam,circleY[0]*olddiam,oldlayer);
+        glVertex3f(circleX[0]*diam,circleY[0]*diam,layer);
+    end;
+    glEnd;
+    olddiam := diam;
+    oldlayer := layer;
+  end; {for}
+end;
+
+
+procedure Pyramid;
+begin
+ glBegin(GL_TRIANGLES);
+//yellow
+    glCOLOR3f(1.0, 1.0, 0.0);
+    glVERTEX3f(thh, 0.0, 0.0);
+    glVERTEX3f(-thh, hh, 0.0);
+    glVERTEX3f(-thh, -hh, 0.5);
+
+//cyan 
+    glCOLOR3f(0.0, 1.0, 1.0);
+    glVERTEX3f(thh, 0.0, 0.0);
+    glVERTEX3f(-thh, -hh, -0.5);
+    glVERTEX3f(-thh, hh, 0.0);
+
+//magenta 
+    glCOLOR3f(1.0, 0.0, 1.0);
+    glVERTEX3f(thh, 0.0, 0.0);
+    glVERTEX3f(-thh, -hh, 0.5);
+    glVERTEX3f(-thh, -hh, -0.5);
+
+//white 
+    glCOLOR3f(1.0, 1.0, 1.0);
+    glVERTEX3f(-thh, -hh, 0.5);
+    glVERTEX3f(-thh, hh, 0.0);
+    glVERTEX3f(-thh, -hh, -0.5);
+  glEnd;
+end;
+
+
+{
+procedure Pyramid;
+begin
+
+  glBegin(GL_TRIANGLE_FAN);
+    glVertex3f(+0.0,+0.0,+0.0);
+    glVertex3f(-0.3,+0.3,-0.4);
+    glVertex3f(+0.3,+0.3,-0.4);
+    glVertex3f(+0.0,-0.3,-0.4);
+    glVertex3f(-0.3,+0.3,-0.4);
+  glEnd;
+end;
+
+procedure Cube;
+//cubes have 6 sides...hmmmmm
+begin
+  glBegin(GL_TRIANGLE_STRIP);
+    glVertex3f(-0.4,+0.4,+0.4);
+    glVertex3f(-0.4,-0.4,+0.4);
+
+    glVertex3f(+0.4,+0.4,+0.4);
+    glVertex3f(+0.4,-0.4,+0.4);
+
+    glVertex3f(+0.4,+0.4,-0.4);
+    glVertex3f(+0.4,-0.4,-0.4);
+
+    glVertex3f(-0.4,+0.4,-0.4);
+    glVertex3f(-0.4,-0.4,-0.4);
+
+    glVertex3f(-0.4,+0.4,+0.4);
+    glVertex3f(-0.4,-0.4,+0.4);  
+  glEnd;
+end;
+}
 
 begin
 end.

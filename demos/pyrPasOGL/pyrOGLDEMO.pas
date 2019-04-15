@@ -5,7 +5,7 @@
 PROGRAM pyrOGLDEMO;
 
 uses
-    sdl2,sdl2_ttf,gl,glu,glext;
+    sdl2,gl,glu,glext;
 var
 	quit,minimized:boolean;
     X,y:integer;
@@ -16,14 +16,12 @@ var
    
     window:PSDL_Window; //A window... heh..."windows" he he...
 
-h,hh,th,thh:REAL;
+    h,hh,th,thh:REAL;
 
 procedure QuitRoutine;
-//no more crashes on exit....
 
 begin
 //say goodbye to everyone (one at a time) in french....
-  TTF_Quit;
   Dispose(e);
 
 //  SDL_DestroyTexture(texture2);
@@ -33,8 +31,6 @@ begin
   
   halt(0); 
 end;
-
-//Font rendering requires OpenGl code- not renderer code.Removed.
 
 
 //MAIN():
@@ -73,14 +69,19 @@ SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
 Context:= SDL_GL_CreateContext(window);
 
 glCLEARCOLOR(0.0, 0.0, 1.0, 0.0);
+
 glVIEWPORT(0,0,640,480);
 glMATRIXMODE(GL_PROJECTION);
 glLOADIDENTITY;
+
 gluPERSPECTIVE(45.0, 640.0/480.0, 1.0, 3.0);
 glMATRIXMODE(GL_MODELVIEW);
 glLOADIDENTITY;
+
 glCLEAR(GL_COLOR_BUFFER_BIT);
-glENABLE(GL_CULL_FACE);
+
+glENABLE(GL_CULL_FACE); //remove non-visible sides(youre not showing the back of an object)
+
 glTRANSLATEf(0.0, 0.0, -2.0);
 
    New(e);
@@ -127,6 +128,7 @@ glTRANSLATEf(0.0, 0.0, -2.0);
 //render here
 
 glROTATEf(3, 0.0, 1.0, 0.0);
+
 glCLEAR(GL_COLOR_BUFFER_BIT );
 
  glBegin(GL_TRIANGLES);
@@ -152,6 +154,7 @@ glCLEAR(GL_COLOR_BUFFER_BIT );
     glVERTEX3f(-thh, hh, 0.0);
     glVERTEX3f(-thh, -hh, -0.5);
   glEnd;
+
   SDL_GL_SwapWindow(window);
   sdl_delay(10);
     end; //notminimized
