@@ -4,11 +4,17 @@ A UNIVERSAL replacement of the "Borland Graphics Interface" (BGI)
 (For Lazarus/FPC/Pascal)
 
 Its a GRAPHICS MODE "Canvas", not unlike TCanvas. 
--You draw with it. 2D and 3D modes are supported.
 
-Scene Rendering support is limited. Try "Castle Engine".
+-You draw with it. 
+2D and 3D modes are supported.
 
-TL;DR?? TOO BAD. READ. I WILL HOLD YOU TO THIS TEXT.
+Scene Rendering support is limited. 
+Try "Castle Engine".
+
+TL;DR?? 
+TOO BAD. 
+READ. 
+I WILL HOLD YOU TO THIS TEXT.
 
 
 ### LEGAL-ese
@@ -19,17 +25,17 @@ Since I am starting to see changes in NASA/JPL and other demos out in the wild-
 Licensed under Apache License, Version 2.0.
 This statement applies to all code enclosed herein:
 
-
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
         WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-        See the License FILE for the specific language governing permissions and
-        limitations under the License.
+
+        See the License FILE for the specific language governing permissions AND
+        LIMITATIONS under the License.
 
 
 ### Render-Targets
 
-Default 2D target is OpenGL/freeGLUT/GLU/GLEW/GLFW (depending)
+Default 2D target is OpenGL via freeGLUT
 
 MAY also use as a fallback(slow):
 
@@ -38,11 +44,7 @@ MAY also use as a fallback(slow):
         WinAPI (needs a rewrite)
         libX11 (primitives)
 
-Default 3D target is OpenGL/freeGLUT/GLU/GLEW/GLFW (depending)
-
-        No context= No 3D
-        Insufficient RAM= Program abort (cannot work around this)
-        Insufficient VRAM should throw us into software rendering mode(SLOW)
+Default 3D target is OpenGL via freeGLUT
 
 
 ### EXTERNAL LIBS warning:
@@ -54,23 +56,22 @@ This UNIT API uses several external libs-
 The location of which on Windows is completely unknown.
 (they could be anywhere-even missing-)
 
-FIXME: 
-	
-	files with no extension(8.3) are linux64 binaries..OOPS.
-	DO NOT try to edit these ELF binaries.
-
 
 ### Why is SDL here?
 
 SDL 1 and 2  "unified sources" included- for your pleasure programming.
+
 SDL2_AUDIO is encountering a random Pointer bug after failing somewhere .
 (Im assuming it cant find the soundcard device. PortAudio/uos doesnt seem to have that problem.)
 
 I have found that SDL is scattered to the winds, and that developing for it -is hard- because of that.
 But its good code to get started with.
+It will give you a basic idea what - and how- things work.
 
-OGL and SDL (in 3d) dont mix very well.
-You dont need SDL for input. freeGLUT/OGL gives it to you.
+OpenGL and SDL (in 3d) dont mix very well.
+
+You dont need SDL for input. 
+freeGLUT/OGL gives it to you.
 
 
 ### Portage status
@@ -524,13 +525,6 @@ ALL ELSE FAILS:
         3) To teach you - 
 		so that you can code with or in competition to- my code.
 
-#### License		 
-
-I hope it is useful..yada yada yada....YMMV. 
-**Read the Licence agreement provided**
-
-		LGPLv2 (due to being a library)
-
 
 #### Where is the application?
 
@@ -605,24 +599,6 @@ The C is incredibly complex and difficult to read- let alone port.
 Some of this portage is coming from PGD- its already in Pascal.
         
         Im just fixing the breakage.	
-
-
-#### COPYLEFT
-  
-This code is a "black boxed spinoff" work written primarily for FPC in Pascal.
-Nothing was reverse engineered- except published documentation.
-
-Borland, INC. has been bought out and seems to "be no more".
-Unlike Microsoft, I respect thier codebase and right to copyright.
-
-        Original code for DOS (c) Borland, INC. 
-
-Re-ported (from C) via FreePascal (FPK) dev team, myself and a few others.
-
-        I have left reference where its due in the code. 
-        I only accept credit where its due me.
-
-Embrecardo has taken over Delphi after about 3 corporate buyouts.
 
 
 ## Final NOTE:
