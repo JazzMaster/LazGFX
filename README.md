@@ -16,94 +16,15 @@ TL;DR?? TOO BAD. READ. I WILL HOLD YOU TO THIS TEXT.
 Since I am starting to see changes in NASA/JPL and other demos out in the wild-
 **LEGAL DEFINITIONS and MUMBO-JUMBO MUST BE ADHERED TO**.
 
-
-**THIS IS OPEN SOURCE, NON-FREE 'modified LGPL v2' -ONLY- SOFTWARE.**
-
-EX: 
-
-        I dont care if BOEING uses the code or not-
-
-What I care abt is the changes to **MY code** given back to **me** for the ARCH/EMBED CPU/GPU in question.
-ONLY THE CODE **YOU** CHANGED/ADDED- can be made proprietary (and forbidden from ME).
-
-Any code before initGraph- or after closeGraph- may be proprietary.
-Lower-level routines may in fact be proprietary- but **my code** will **never** be proprietary.
-
-I do not care if the patch set works by itself, or not.
-
-        I will happily post said patch for said arch combo(for those using such- to benefit). 
-
-These changes - **MUST COME BACK TO ME**.
-END OF DISCUSSION.
-
-If you dont agree- DO NOT USE(or port) my code. 
-PERIOD.
-
-**I will sue** to protect this right(and I will win). 
-If you want to challenge me (in open court -and loose) be my guest.
+Licensed under Apache License, Version 2.0.
+This statement applies to all code enclosed herein:
 
 
-I may not use(or write) C- but I will happily post ALL portage.
-Code will be examined prior to merging. **It may be rejected.**
-
-IM DOING (THINGS) THIS (WAY) FOR A REASON. 
-YOU MAY NOT CIRCUMVENT SAID REASONING.
-EVER.
-
-
-**DO NOT REDISTRIBUTE PARTIAL SECTIONS OF THIS CODE**.
-THIS CONSTITUTES THEFT( of Intellectual Property).
-
-Either redistrute all of it(fork it)- or dont use **any** of it.
-Private repos are fine. Just send me the changes- when you are done.
-
-        Only changes to MY UNITS/SubUnits are required to be returned to me. 
-            Changes to others code used here- would be appreciated.
-
-**This code is Copywrighted**. 
-Removing ANY such notices constitutes THEFT( of Intellectual Property).
-**This includes from FPC staff**.
-
-I have done my best to copy verbatim as applicable- any prior notices and clauses.
-I have only modded the notices due to the nature of the code used.
-These clauses **are still applicable. Nobody prior has waived any rights.**
-
-GPLv3, freeware, abandonware, MIT all expressly allow changes without backports.
-X11 and Mozilla licenses restrict some rights.
-
-GPLv2 **expressly forbids** any changes without backports. 
-
-        YOU MUST COPY the original code and make notice of changes.
-        YOU MUST CC me said changes.
-
-        YOU MUST ALSO -POINT TO- the original code(most of which is on GitHub or subversion repositories).
-
-Most people- do not pay attention to the following sentence- which IS LEGALLY BINDING:
-
-        You cannot change code licenses "UNLESS EXPRESSLY GRANTED" from GPLv2 to GPLv3.
-
-This permission **IS NOT GRANTED**.
-
-        I DONT CARE. 
-        THIS WONT CHANGE. 
-        EVER.
-        DO NOT WRITE ME ABOUT THIS.
-
-THEREFORE- 
-
-        THIS software CAN be considered NON-FREE - but OPEN source.
-
-ASSUMING the above CAVEATS:
-
-YOU **MAY** use this code for **any** means- 
-
-        -Proprietary/ CLOSED SOURCE projects
-            (as long as I am CC changes to MY CODE- 
-            I will allow waiver of GPL/LGPL code release requirement in final product)
-
-        -PUBLIC/ OPEN source projects
-        -for PROFIT(without a penny sent to me)
-        -etc.
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License FILE for the specific language governing permissions and
+        limitations under the License.
 
 
 ### Render-Targets
