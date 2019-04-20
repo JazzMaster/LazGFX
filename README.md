@@ -558,12 +558,18 @@ SDL OutText routines DO NOT WORK with OGL/freeGLUT. THEY MUST BE REWRITTEN.
 
 ### Lets run "make"....
 
-	MSVS requires a .sln file
+The Makefile has been fixed and now works. 
+It should crossplatform TO Windows FROM Unices(once the source builds) and
+produce multi-platform output for both x86 and x64 cpus.
+
+OSX cannot be made this way- you need APPLE APIs to do that.
+
 	Lazarus uses .lpi file
 	XCode wants a .project file
 	
-I just run FPC over the main unit file right now. Nothing fancy.
-The makefile will be used in the future. (Bash doesnt like it.)
+I just run FPC over the main unit file right now. 
+
+Nothing fancy.
 
 
 ### DEMOS!!! LOADS OF DEMOS!!!
