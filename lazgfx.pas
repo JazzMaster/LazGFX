@@ -292,6 +292,7 @@ WONTFIX:
 "Rendering onto more than one window (or renderer) can cause issues"
 "You must render in the same window that handles input"
 
+("depth" in OGL is considered cubic depth (think layers of felt) , not bpp)
 
 
 --Jazz
@@ -300,12 +301,8 @@ WONTFIX:
 
 TODO:
 
-	Get some framebuffer /EGL fallback code working and put it here.	
+	Get some framebuffer fallback code working and put it here.	
 	
-	all color ops need mods for OpenGL(update from surface to texture ops)
-	need to implement "format agnostic" color conversion with all bpp depths
-		("depth" in OGL is considered cubic depth (think layers of felt) , not bpp)
-		
 }
 
 
@@ -328,7 +325,8 @@ cthreads has to be the first unit -in this case-
 {$IFDEF unix}
 	cthreads,cmem,baseunix, X, XLib,sysUtils,
 
-//sysUtils- FreeAndNil
+//you need to tell me- if you need fallback APIs.
+//in most cases, you wont need them.
 
 	 {$IFNDEF fallback} //fallback uses FrameBuffer only code(slow), otherwise keep loading libs
 		Classes,GL,GLext, GLU,
@@ -344,6 +342,7 @@ cthreads has to be the first unit -in this case-
 //This logic is normal
 {$IFDEF MSWINDOWS} //as if theres a non-MS WINDOWS?
      Windows,
+//delphiGL
 	 {$IFDEF fallback}
 		WinGraph, //WinAPI-needs rework
 	 {$endif}
@@ -496,31 +495,7 @@ only so many can do it at once.
 }
 
 
-type  
-
-//you could use normal GL coords and cap at floatMax of 1.0
-// (but the coords are whacky-weird.)
-
-//these use normal co ord system:
-
-//verticle line: use y, not x
-
-procedure CenteredHLine(x,x2,y:Word);
-	//where is the center??
-	center:= (((x mod 2)) - ((x-x2) mod 2),(y mod 2));
-	//from center : draw line from here
-	
-end;
-
-//verticle line: use x, not y
-
-procedure CenteredVLine(x,y,y2:Word);
-	//where is the center??
-	center:= ((x mod 2),((y mod 2)) - ((y-y2) mod 2));
-	//from center : draw line from here
-	
-end;
-
+type
 
 
 //You are probly used to "MotionJPEG Quantization error BLOCKS" on your TV- those are not pixels. 
@@ -1656,6 +1631,30 @@ procedure invertColors;
 
 implementation
 
+
+//you could use normal GL coords and cap at floatMax of 1.0
+// (but the coords are whacky-weird.)
+
+
+//Horizontal line: use x, not y
+
+procedure CenteredHLine(x,x2,y:Word);
+	//where is the center??
+	center:= (((x mod 2)) - ((x-x2) mod 2),(y mod 2));
+	//from center : draw line from here
+	HLIne(x,y,x2);
+end;
+
+//verticle line: use y, not x
+
+procedure CenteredVLine(x,y,y2:Word);
+	//where is the center??
+	center:= ((x mod 2),((y mod 2)) - ((y-y2) mod 2));
+	//from center : draw line from here
+	VLIne(x,y,y2);
+end;
+
+
 {
 greyscale palettes are required for either loading or displaying in BW, or some subset thereof.
 this isnt "exactly" duplicated code
@@ -1691,6 +1690,8 @@ dividing by 1k gives us 400 or so colors- we want about half of that
       
 }
 
+//aux routines need to imported from an aux unit. You might need them for something else.
+
 //we need these as GL is funky.
 procedure ByteToFloat(hexColor:Byte):single;
 
@@ -1716,6 +1717,17 @@ begin
    GLFloatToByte:=byte(round(someFloat));
 end;
 
+{
+theres one flaw here:
+    you need an initial setup before doing anything in low color modes
+    if you like you can change values on-the-fly(these are SDL_Color "tuple"(24bit) bytes-alpha bit is skipped)
+        **PLEASE dont change these HERE unless theres something wrong.**
+
+        and theres no way for me to know what the new color data is- im plugging vars blind here
+    -at least until you reset the palette.
+
+    This is accepted behaviour.
+}
 
 procedure initPaletteGrey16;
 
@@ -1814,6 +1826,39 @@ begin
 	
 
 end;
+
+{
+Thers a RUB here:
+    CGA uses 4 colors from 16 possible but in higher depths-there is no way to tell what the color is set to.
+        Ideally you would restrict to "nearest colors" using some algorithm.
+        RGB is a sane, reasonable value for a CGA palette. Its just not "historically accurate".
+        (I cant stop you- but Id start with THESE defaults)
+
+    Same with EGA. EGA and above were programmable.
+    VGA was a standard- but Ive seen some awkward VGA palettes, too.
+    Thank God palettes stopped at 256 colors.
+
+    Think in "crayon colors" and you will do fine here.
+    (There is a small box, a medium box, and a YUGE box of crayons here.)
+
+CGA Palette:
+MaxColors is set inside InitGraph's modelist.
+
+160x100: full 16 available
+
+320x200: one of these (modes 0,1,2)
+
+0: red, yellow, green, black
+1: cyan, magenta, white, black
+2: white, red, cyan, black (greyscale)
+
+640x200: Black and white only
+
+EGA Palette(full 64):
+
+
+
+}
 
 procedure initPalette16;
 
