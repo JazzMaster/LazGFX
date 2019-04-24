@@ -1,0 +1,26 @@
+speed under SDL2: 
+
+can get 1ms or faster if using streaming textures and certain color modes
+The color conversion is what slows you down.
+
+const
+    texWidth:word; = 1024;
+    texHeight:word; = 1024;
+
+var 
+    texture:PSDL_Texture;
+    pixels: array [0..( texWidth * texHeight * 4 )] of byte;
+
+begin
+    texWidth:= 1024;
+    texHeight:= 1024;
+
+    texture:= SDL_CreateTexture (renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, texWidth, texHeight);
+
+    //do something
+
+    SDL_UpdateTexture (texture, NiL, pixels, texWidth * 4 );
+    SDL_RenderCopy( renderer, texture, NiL, NiL );
+    SDL_RenderPresent( renderer );
+
+end;

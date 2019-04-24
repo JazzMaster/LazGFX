@@ -2,17 +2,11 @@
 
 Framebuffer Graphics routines for Freepascal. 
 
-Im not sure if PTC gives us FB or not-
-if not - we need to implement it.
-
-It gives us X11, OSX, and WinAPI.
 We dont need Xlib- we DO need: freeGLUT,GL,GLU
-	Xlib is a freeGLUT/GL depend(s).
 
-	You can do GL with PTC.
+        (To which- we need an input handler ring buffer loop)
 	
 FreeImage is better than this hackish code- GOD I H8 libJPEG.	
-
 
 ---
 This code may or may not work with a KMS Kernel.
@@ -37,3 +31,8 @@ functions.
 
 (libJPEG is NOT easy to understand, nor from experience -easy to get working)
 PNG, BMP, and TGA(targa)- however- are easy to implement.
+
+This uses a graphics context(modeswitched from text mode) and possibly CPU only optimizations
+for 2D or 3D calls. X11 or Win32 environment **IS recommended**.
+
+

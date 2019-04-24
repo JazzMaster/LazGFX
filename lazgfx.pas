@@ -21,17 +21,11 @@ SEMI-"Borland compatible" w modifications.
 Lazarus graphics unit is severely lacking...use this instead.
 
 
-LGPL v2 ONLY.
-You may NOT use a higher version.
-
 Only OPEN/free units and code will ever be used or linked to here.
 Only cross-platform methods will be used.
 
 IN NO WAY SHAPE OR FORM are proprietary functions to be added here.
 	You may use them if you wish- but the result is non-portable. (more headache for ewe)
-
-Commercial software linking/building is allowed-
- 	provided I get the backported changes and modifications(in source format).
 
 I dont care what you use the source code for.
 	I would prefer- however-
@@ -45,6 +39,7 @@ Although designed "for games programming"..the integration involved by the USE, 
 of SDL and X11Core/WinAPI(GDI)/Cairo(GTK/GDK)/OpenGL/DirectX highlights so many OS internals its not even funny.
 
 GL by itself doesnt require X11- but it does require some X11 code for "input processing".
+This is moot point with libPTC.
 
 -It is Linux that is the complex BEAST that needs taming.
 	Everyone seem to be writing in proprietary windowsGL, DirectX,etc.
@@ -194,14 +189,16 @@ Note the HALF-LIFE/POSTAL implementation of SDL(steam):
 Most Games use transparency(PNG) for "invisible background" effects.
 -While this is true, however, BMPs can also be used w "colorkey values".
 
-Compressed textures use weird bitpacking methods to store data- both on disk, and in VRAM.
-
 -for example:
 
 SDL_BlitSurface (srcSurface,srcrect,dstSurface,dstrect);
 SDL_SetColorKey(Mainsurface,SDL_TRUE,DWord);
 
 -Where DWord is the color for the colorkey(greenscreen effect)
+
+
+Compressed textures use weird bitpacking methods to store data- both on disk, and in VRAM.
+These are not compress image formats- the video card cannot understand those.
 
 PNG can be quantized-
 	Quantization is not compression-
@@ -227,54 +224,7 @@ However- its not impossible.
     switching all colors (or each individual color) straight to grey wont work- the entire image would go grey.
     you want gracefully delayed steps(and block user input while doing it) over the course of nano-seconds.
 
-
-
-Color Modes:
-
-BPP 	 COLORS						RGB value
-4		(16) 						NA (hacked in bit based RGBI)
-8		(256) 						111
-
-15		(32768) "thousands" 		- no alpha 555 /(16384 colors w alpha) 5551
-16		(65536) "thousands" 		-(w alpha and 32K colors -5551) or (wo alpha -565)
-
-24		(16,777,216) 				-TRUE COLOR mode "millions" - no alpha 888
-32		(4,294,967,296) 			--(TRUE COLOR(24) plus full alpha-bit) 8888
-
-Not yet supported with SDL (but perhaps with OGL):
-
-30		(1,073,741,824) 			--DEEP color "billions" 10:10:10
-32		4 Bil						10:10:10:2
-36		(68,719,476,736) 			--DEEP color 12:12:12
-48		(281,474,976,710,656) 		--VERY DEEP color "trillions" 12:12:12:12??
-
-64      ????						16:16:16:16??
-
-Common Resolutions:
-
-Resolution					BPP Supported
-320x200 					4/8bpp
-320x240 					4/8bpp
-
-640x480 					4/8/16bpp
-800x600 					4/8/16bpp
-
-1024x768 					8/16/24bpp
-FlatPanels(1366x768)		8/16/24bpp
-
-720p(1280x720)				8/16/24bpp
-1366x768  					8/16/24bpp/32?
-1280x1024 					8/16/24bpp/32?
-1080p(1920x1080) 			8/16/24bpp/32?
-
-These are weird: (its 4K but not 4K...)
-2k (3840x2160)  			8/16/24bpp
-
-
-Not Supported(SDL Limit):
-4k (7680x4320) 				8/16/24/30/36bpp
-8k (?? x ??)                8/16/24/30/36/48
-
+Modes:
 
 I havent added in Android or MacOS modes yet.
 You cant support portable Apple devices.
@@ -304,41 +254,6 @@ I havent done this yet.
 
 	You should log something.
 
-THANK YOU:
-
-Code upgraded from the following:
-
-	original *VERY FLAWED* port (in C) coutesy:
-		Faraz Shahbazker's BS-level classroom homework(GitHub) <faraz_ms@rediffmail.com>
-
-	unfinished port (from go32v2 in FPC) courtesy:
-		Evgeniy Ivanov <lolkaantimat@gmail.com>
-
-	some early and or unfinished FPK (FPC) and LCL graphics unit sources
-
-    JEDI SDL headers(unfinished)
-
-    StackExchange SDL examples in C/CPP (ported)
-
-
-manuals:
-    SDL1.2 pdf
-	SDLv2.0 online documentation
-
-    Borland BGI documentation by QUE Publishing ISBN 0880224290
-    TCanvas LCL Documentation (different implementation of a 'SDL_screen')
-
-    Lazarus Programming by Blaise Pascal Magazine ISBN 9789490968021
-    Getting started w Lazarus and FreePascal ISBN 9781507632529
-
-    JEDI chm file
-	TurboVision(TVision) references (where I can find them and understand them.)
-
-	OpenGL books -ISBN coming- (book hasnt arrived yet for OGL RED/BLUE books)
-
-	online GLEW docs
-	online GLU/GLUT docs
-	online freeGLUT docs
 
 animations:
 	to animate-
@@ -356,12 +271,18 @@ on 2d games...you are effectively preloading the fore and aft areas on the 'leve
 
 Palettes:
 
+   CGA
+   EGA
+   VGA
+ 
    These are mostly standardized now.
-   Max colors in a palette are always 256, unless in modified CGA modes- then 16.
-   Specify each DWORD value or leave it as a zero
+   Max colors in a palette are always 256, CGA modes 16, EGA (16 of 64).
+   EGA is commonly mistaken for CGA due to the higher resolution.
+
+  Data is a packed Record (4 byte aligned)
 
   Note "the holes" can be used for overlay areas onscreen when stacking layers.
-  The holes are standardized to xterm specs. I think theres like 5.
+  The holes are standardized to xterm specs. I think theres like 5 (for VGA mode).
 
   Im seeing a Ton of correlation between OGL/SDL and DirectX/DirectDraw (and people think there isnt any).
 
@@ -372,10 +293,6 @@ WONTFIX:
 "You must render in the same window that handles input"
 
 
-SDL BULLSHIT:
-
-	SDL is not SIMPLE.
-	The BGI was SIMPLE.
 
 --Jazz
 (comments -and code- by me unless otherwise noted)
@@ -387,7 +304,7 @@ TODO:
 	
 	all color ops need mods for OpenGL(update from surface to texture ops)
 	need to implement "format agnostic" color conversion with all bpp depths
-		("depth" in OGL is considered cubic depth, not bpp)
+		("depth" in OGL is considered cubic depth (think layers of felt) , not bpp)
 		
 }
 
@@ -455,7 +372,7 @@ end;
 
 (asking for strings and passwords is also possible)
 
-endif
+
 }
 
 {$IFDEF LCL}
@@ -485,7 +402,6 @@ endif
       //THIS TRICK DOES NOT WORK on Windows. Windows removes crt and related units when building a UI app.
         crt,crtstuff,
     {$ENDIF}
-   logger,
 {$ENDIF}
 
 {
@@ -514,11 +430,12 @@ To build without the LCL(in Lazarus):
 
   uos,strings,typinfo
 
+
 // uos/Examples/lib folder has the required libraries for you.
 // as a side-effect: CDROM Audio playback(CDDA) is added back
 
 
-{$IFDEF debug} ,heaptrc {$ENDIF}
+{$IFDEF debug} ,heaptrc,logger {$ENDIF}
 
 {
 OpenGL requires Quartz, which prevents building below OSX 10.2.
@@ -534,7 +451,7 @@ Cocoa (OBJ-C) is the new API
 	{$linkframework GLUT}
 
 
-//you have to install fpc thru XCode and build a demo to patch this line.
+//you have to install fpc thru XCode and build a demo -to patch the above includes.
 
 //	{$linklib gcc} -REAL pascal doesnt use C. There is a dialect that does.
 // apparently some programmers see C as a religion...they want to convert everyone to it.
@@ -579,27 +496,2957 @@ only so many can do it at once.
 }
 
 
+type  
 
-{$INCLUDE lazgfx.inc}
+//you could use normal GL coords and cap at floatMax of 1.0
+// (but the coords are whacky-weird.)
+
+//these use normal co ord system:
+
+//verticle line: use y, not x
+
+procedure CenteredHLine(x,x2,y:Word);
+	//where is the center??
+	center:= (((x mod 2)) - ((x-x2) mod 2),(y mod 2));
+	//from center : draw line from here
+	
+end;
+
+//verticle line: use x, not y
+
+procedure CenteredVLine(x,y,y2:Word);
+	//where is the center??
+	center:= ((x mod 2),((y mod 2)) - ((y-y2) mod 2));
+	//from center : draw line from here
+	
+end;
+
+
+
+//You are probly used to "MotionJPEG Quantization error BLOCKS" on your TV- those are not pixels. 
+//Those are compression artifacts after loss of signal (or in weak signal areas). 
+//That started after the DVD MPEG2 standard and digital TV signals came to be.
+
+//STIPPLE:
+//when drawing a line- this is supposed to dictate if the line is dashed or not
+//AND how thick it is.
+
+//dotted and dashed are stipple, center uses routines above
+//the rest is POLYFILL releated.
+
+  LineStyle=(solid,dotted,center,dashed);
+  Thickness=(normalwidth=1,thickwidth=3,superthickwidth=5,ultimateThickwidth=7);
+
+//C style syntax-used to be a function, isnt anymore.
+  grErrorType=(OK,NoGrMem,NoFontMem,FontNotFound,InvalidMode,GenError,IoError,InvalidFontType);
+
+
+  TArcCoordsType = record
+      x,y : word;
+      xstart,ystart : word;
+      xend,yend : word;
+  end;
+
+//for MoveRel(MoveRelative)
+  Twhere=record
+     x,y:word;
+  end;
+
+//all the types to be had 
+//originally bugged as "off by one"
+
+//yes you can represent via pointer but the conversion gets hairy, fast.
+
+LongString=array [0..1] of string;
+StringTuple,Striplet=array [0..2] of string;
+QuadString=array [0..3] of string;
+//You could go up to screen height-sizeOfStringOnScreen(24-48) depending on font size (10-12)
+
+//0..7=8 = byte(stored in hex)
+Bibble, Biplet=array [0..1] of boolean;
+Tribble, Triblet=array [0..2] of boolean;
+Quibble, Quiblet=array [0..3] of boolean;
+Pibble, Piblet=array [0..4] of boolean;
+Xibble, Hexlet=array [0..5] of boolean;
+Hibble, Heptlet=array [0..6] of boolean;
+
+
+//Word = 2bytes
+//24bits storage hack(r,g,b) -in binary form
+ByteTuple,Biplet=array [0..2] of Byte;
+//DWord=4 bytes
+
+//DWord=2words
+//TriWord technically..
+WordTuple,Wiplet=array [0..2] of Word;
+//Quad=4words
+
+//2 quads
+Biqu=array [0..1] of QWord; //128bits
+TriQuad=array [0..2] of QWord; //192bits
+LongQuad=array [0..3] of QWord; //256bits
+
+//sort of -SDL_Rect implementation
+
+PRect=^Rect;
+Rect=record
+	x1:byte;
+	y1:byte;
+	x2:byte;
+	y2:byte;
+end;
+
+//A Ton of code enforces a viewport mandate- that even sans viewports- the screen is one.
+//This is better used with screen shrinking effects
+
+
+//graphdriver is not really used half the time anyways..most people probe.
+//these are range checked numbers internally.
+
+	graphics_driver=(DETECT, CGA, VGA,VESA); //cga,vga,vesa,hdmi,hdmi1.2
+
+
+{
+
+Modes and "the list":
+
+byte because we cant have "the negativity"..
+could be 5000 modes...we dont care...
+the number is tricky..since we cant setup a variable here...its a "sequential byte".
+
+yes we could do it another way...but then we have to pre-call the setup routine and do some other whacky crap.
+
+
+Y not 4K modes?
+1080p is reasonable stopping point until consumers buy better hardware...which takes years...
+most computers support up to 1080p output..it will take some more lotta years for that to change.
+
+
+}
+
+
+var
+  thick:thickness;
+
+//This is for updating sections or "viewports".
+//I doubt we need much more than 4 viewports. Dialogs are handled seperately(and then removed)
+  texBounds: array [0..4] of PSDL_Rect;
+  textures: array [0..4] of PSDL_Texture;
+
+  windownumber:byte;
+  somelineType:thickness;
+//you only scroll,etc within a viewport- you cant escape from it without help.
+//you can flip between them, however.
+
+//think minimaps in games like Warcraft and Skyrim
+
+
+//this isnt SDL- so for compatibility reasons- I can define this however I choose.
+//A "Surface" is an "array of pixels"--up to max screen resolution
+
+	PSDL_Surface=^SDL_Surface;
+	SDL_Surface=array [0..MaX,0..MaxY] of SDL_Pixel;
+
+const
+   //Analog joystick dead zone 
+   JOYSTICK_DEAD_ZONE = 8000;
+   //joysticks seem to be slow to respond in some games....
+
+var
+
+    Xaspect,YAspect:byte;
+
+    palette:PSDL_Palette;
+    where:Twhere;
+	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop:boolean;
+    nogoautorefresh:boolean;
+    X,Y:integer;
+    _grResult:grErrortype;
+    
+
+    //you want event driven, not input driven-the code seems to be here.
+//    gGameController:PSDL_Joystick;
+
+
+    MainSurface,FontSurface : PSDL_Surface;
+
+    srcR,destR,TextRect:PSDL_Rect;
+
+    filename:String;
+    fontpath,iconpath:PChar; // look in: "C:\windows\fonts\" or "/usr/share/fonts/"
+
+{
+
+Fonts:
+GLUT defines the following(stroked fonts):
+
+
+
+}
+
+    font_size:integer; 
+    grErrorStrings: array [0 .. 7] of string; //or typinfo value thereof..
+    AspectRatio:real; //computed from (AspectX mod AspectY)
+
+{
+older modes are not used, so y keep them in the list??
+ (M)CGA because well..I think you KNOW WHY Im being called here....
+
+ mode13h(320x200x16 or x256) : EXTREMELY COMMON GAME PROGRAMMING
+ (we use the more square pixel mode)
+
+Atari modes, etc. were removed. (double the res and we will talk)
+
+}
+
+  MaxColors:LongWord; //positive only!!
+  ClipPixels: Boolean=true; //always clip, never an option "not to".
+  //we will CLAMP GL to the screen
+
+  WantsJoyPad:boolean;
+  screenshots:longint;
+
+  NonPalette, TrueColor,WantsAudioToo,WantsCDROM:boolean;	
+  Blink:boolean;
+  CenterText:boolean=false; //see crtstuff unit for the trick
+  
+  MaxX,MaxY:word;
+  bpp:byte;
+
+  _fgcolor, _bgcolor:DWord;	
+  //use index colors once setup(palette unit)
+ 
+ 
+  LIBGRAPHICS_ACTIVE:boolean;
+  LIBGRAPHICS_INIT:boolean;
+
+  IsConsoleInvoked,CantDoAudio:boolean; //will audio init? and the other is tripped NOT if in X11.
+  //can we modeset in a framebuffer graphics mode? YES. 
+  
+  himode,lomode:integer;
+
+//modelist data is derived from "our little C demo" output(XRandR probe) -on Unices
+
+
+type 
+//our ModeList data
+
+//the lists..
+  Pmodelist=^TmodeList;
+
+//wants graphics_modes??
+  TmodeList=array [0 .. 31] of TMode;
+
+
+//single mode
+
+  Pmode=^TMode;
+
+var
+//	GLContext: TSDL_GLContext;
+
+	GLFloat:single;
+	FloatInt:single;
+
+    modePointer:Pmode;
+
+
+//forward declared defines
+
+function FetchModeList:Tmodelist;
+
+procedure RoughSteinbergDither(filename,filename2:string);
+
+
+//surfaceOps
+//procedure lock;
+//procedure unlock;
+
+//works around SDL OpenGL bug where Windows got optimzed, but Unices didnt--WRONG BTW! (WRITE UNIVERSAL CODE)
+//procedure Texlock(Tex:PSDL_Texture);
+//procedure TexlockwRect(Tex:PSDL_Texture; Rect:PSDL_Rect);
+//function lockNewTexture:PSDL_Texture;
+//procedure TexUnlock(Tex:PSDL_Texture);
+
+
+procedure clearscreen; 
+procedure clearscreen(index:byte); overload;
+procedure clearscreen(color:Dword); overload;
+procedure clearscreen(r,g,b:byte); overload;
+procedure clearscreen(r,g,b,a:byte); overload;
+
+procedure clearviewport;
+procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
+procedure closegraph;
+
+function GetX:word;
+function GetY:word;
+function GetXY:longint; 
+
+//this is like Update_Rect() in SDL v1.
+procedure renderTexture( tex:PSDL_Texture;  ren:PSDL_Renderer;  x,y:integer;  clip:PSDL_Rect);
+
+procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
+function getgraphmode:string; 
+procedure restorecrtmode;
+
+function getmaxX:word;
+function getmaxY:word;
+
+function GetPixel(x,y:integer):DWord;
+Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
+
+function getdrivername:string;
+Function detectGraph:byte;
+function getmaxmode:string;
+procedure getmoderange(graphdriver:integer);
+
+procedure SetViewPort(Rect:PSDL_Rect);
+procedure RemoveViewPort(windownumber:byte);
+
+procedure InstallUserDriver(Name: string; AutoDetectPtr: Pointer);
+procedure RegisterBGIDriver(driver: pointer);
+
+function GetMaxColor: word;
+
+procedure LoadImage(filename:PChar; Rect:PSDL_Rect);
+procedure LoadImageStretched(filename:PChar);
+
+function  getDwordFromSDLColor(someColor:PSDL_Color):DWord;
+function  getDwordFromBytes(r,g,b,a:Byte):DWord;
+function GetByesfromDWord(someD:DWord):SDL_Color;
+
+procedure PlotPixelWNeighbors(x,y:integer);
+
+procedure SaveBMPImage(filename:string);
+
+//pull a Rect (off the renderer-back to a surface-then kick out a 1D array of SDL_Colors from inside the Rect)
+function GetPixels(Rect:PSDL_Rect):pointer;
+
+
+const
+   maxMode=Ord(High(Graphics_Modes));
 
 
 type
 	//r,g,b,a
 	GL_Color= array [0..3] of float;
 
-{$INCLUDE palettesh.inc}
-{$INCLUDE modelisth.inc}
+
+{
+
+256 and below "color" paletted modes-
+this gets harder as we go along but this is the "last indexed mode". 
+
+colors (indexes) above 255 should throw an error if using palettes.
+
+(technically they are rgb(a) colors and have no index anymore)
+(so we are in true colors and straight rgb/rgba after this.....)
+
+You need RGB data for TRUE color modes.
+ 
+'A' bit affects transparency 
+
+The default setting is to ignore it(FF) in 256 color modes.
+	(m)CGA is a touch whacky.
+
+Most bitmap or blitter or renderer or opengl based code uses some sort of shader(or composite image).
+This isnt covered here.
+
+This is for drawing "primitives" on the "surface".....
+"advanced primitives" require alpha bit hacking or TRUE COLOR MODE.
+
+-One step at a time.
+
+each 256 SDL_color= r,g,b,a whereas in range of 0-255(FF FF) per color.
+for 16 color modes we use 0-7(0F) and an alpha mask to simulate RGBI mode
+ 
+16 color mode is technically a wonky spec(RGB+CMY+WB):
+	officially this is composed of:  RGB plus I(light/dark) modes.
+
+CMYK isnt really a video color standard normally because pixels are RGB. 
+CMYK is for printing. 
+	The reason has to do with color gamut and other huffy-puff.
+
+(Learn photography if you want the color headache)
+ 
+CGA modes threw us this curveball:
+	4 color , 4 palette hi bit resolution modes that are half ass documented. 
+	Theres no need for those modes anymore.(think t shirt half-tones for screen printing)
+
+this is the best I can implement this data given that specs are all over the place- 
+	and I want this standardized as much as pssible given that we have very high color setings available
+	
+VGA/SVGA (Video gate array / super video gate array) and 
+VESA (video electronic standards association) modes are available now.
+
+-of course SDL just simulates all of this (inside a window)
+
+
+we can use SetColor(SkyBlue3); in 256 modes with this- since we know which color index it is.
+
+this is only for the default palette of course- if you muck with it.....
+ and only up to 256 colors....sorry.
+
+}
+
+//blink is a "text attribute" ..a feature...not a color
+// -it was implemented in hardware in early 80s
+
+//write..wait.erase..wait..rewrite..just like the blinking cursor..
+
+{
+
+colors: 
+
+	MUST be hard defined to set the pallete prior to drawing.
+}
+
+type
+
+
+//There IS a way to ge the Names listed here- the magic type info library
+//this cuts down on spurious string data and standardizes the palette names a bit also
+
+
+//iirc - its ...RED,BLUE,GREEN... on the ol 8088s...
+// K-R-B-G-C-M-Br Gy-Gyd R-B-G-C-M-Y-W (CGA)
+// vs 
+// K-B-G-C-R-M-Br Gy-Gyd- B-G-C-R-M-Y-W (wikipedia) 
+//the xterm 256 spec reflects this- oddly.
+
+
+//these names CANNOT overlap. If you want to change them, be my guest.
+
+//you cant fuck up the first 16- Borland INC (RIP) made that "the standard"
+TPalette16Names=(BLACK,RED,BLUE,GREEN,CYAN,MAGENTA,BROWN,LTGRAY,GRAY,LTRED,LTBLUE,LTGREEN,LTCYAN,LTMAGENTA,YELLOW,WHITE);
+TPalette16NamesGrey=(gBLACK,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11,g12,g13,g14,gWHITE);
+
+//tfs=two fifty six
+
+//original xterm must have these stored somewhere as string data because parts of "unused holes" and "duplicate data" exist
+
+// I can guarantee you a shade of slateBlue etc.. but not the exact shade.
+//(thank you very much whichever programmer fucked this up for us)
+
+
+TPalette256Names=(
+
+tfsBLACK,
+maroon,
+tfsGREEN,
+olive,
+navy,
+purple,
+teal,
+silver,
+grey,
+tfsRED,
+lime,
+tfsYELLOW,
+tfsBLUE,
+fuchsia,
+aqua,
+tfsWHITE,
+
+Grey0,
+NavyBlue,
+DarkBlue,
+Blue3,
+Blue4,
+Blue1,
+
+DarkGreen,
+DeepSkyBlue4,
+DeepSkyBlue6,
+DeepSkyBlue7,
+DeepSkyBlue3,
+
+DodgerBlue3,
+DodgerBlue2,
+
+Green4,
+SpringGreen4,
+
+
+Turquoise4,
+DeepSkyBlue5,
+DeepSkyBlue2,
+DodgerBlue1,
+Green3,
+
+SpringGreen3,
+DarkCyan,
+LightSeaGreen,
+
+DeepSkyBlue1,
+DeepSkyBlue8,
+Green5,
+
+SpringGreen5,
+SpringGreen1,
+Cyan3,
+
+DarkTurquoise,
+Turquoise2,
+
+Green1,
+
+SpringGreen2,
+SpringGreen,
+MediumSpringGreen,
+Cyan2,
+Cyan1,
+
+DarkRed,
+DeepPink4,
+Purple4,
+Purple5,
+Purple3,
+
+BlueViolet,
+Orange4,
+Grey37,
+MediumPurple4,
+SlateBlue3,
+SlateBlue2,
+RoyalBlue1,
+
+UnUsedHole5,
+DarkSeaGreen5,
+
+PaleTurquoise4,
+SteelBlue,
+SteelBlue3,
+
+CornflowerBlue,
+UnUsedHole3,
+
+DarkSeaGreen4,
+CadetBlue,
+CadetBlue1,
+
+SkyBlue2,
+SteelBlue1,
+
+UnUsedHole4,
+PaleGreen3,
+SeaGreen3,
+
+Aquamarine3,
+MediumTurquoise,
+
+SteelBlue2,
+UnUsedHole1,
+
+SeaGreen2,
+SeaGreen,
+SeaGreen1,
+
+Aquamarine1,
+DarkSlateGray2,
+DarkRed2,
+DeepPink5,
+
+DarkMagenta,
+DarkMagenta1,
+
+DarkViolet,
+Purple1,
+Orange5,
+LightPink4,
+Plum4,
+MediumPurple3,
+MediumPurple5,
+SlateBlue1,
+Yellow4,
+
+
+Wheat4,
+Grey53,
+LightSlateGrey,
+MediumPurple,
+LightSlateBlue,
+Yellow5,
+
+DarkOliveGreen3,
+DarkSeaGreen,
+LightSkyBlue1,
+LightSkyBlue2,
+SkyBlue3,
+
+UnUsedHole2,
+
+DarkOliveGreen4,
+PaleGreen4,
+DarkSeaGreen3,
+DarkSlateGray3,
+
+SkyBlue1,
+UnUsedHole,
+
+LightGreen,
+LightGreen1,
+
+PaleGreen1,
+Aquamarine2,
+DarkSlateGray1,
+
+Red3,
+DeepPink6,
+MediumVioletRed,
+Magenta3,
+DarkViolet2, 
+Purple2,
+DarkOrange1,
+IndianRed,
+
+HotPink3,
+MediumOrchid3,
+MediumOrchid,
+MediumPurple2,
+DarkGoldenrod,
+
+LightSalmon3,
+RosyBrown,
+Grey63,
+MediumPurple6,
+MediumPurple1,
+Gold3,
+DarkKhaki,
+NavajoWhite3,
+Grey69,
+LightSteelBlue3,
+LightSteelBlue,
+
+Yellow3,
+DarkOliveGreen5,
+DarkSeaGreen6,
+DarkSeaGreen2,
+
+LightCyan3,
+LightSkyBlue3,
+GreenYellow,
+
+DarkOliveGreen2,
+PaleGreen2,
+DarkSeaGreen7,
+DarkSeaGreen1,
+
+PaleTurquoise1,
+Red4,
+DeepPink3,
+DeepPink7,
+Magenta5,
+Magenta6,
+Magenta2,
+DarkOrange2,
+IndianRed1,
+HotPink4,
+HotPink2,
+Orchid,
+MediumOrchid1,
+Orange1,
+LightSalmon2,
+LightPink1,
+Pink1,
+
+Plum2,
+Violet,
+Gold2,
+LightGoldenrod4,
+Tan,
+MistyRose3,
+Thistle3,
+
+Plum3,
+Yellow7,
+Khaki3,
+LightGoldenrod2,
+LightYellow3,
+Grey84,
+LightSteelBlue1,
+Yellow2,
+
+DarkOliveGreen,
+DarkOliveGreen1,
+DarkSeaGreen8,
+Honeydew2,
+LightCyan1,
+Red1,
+DeepPink2,
+DeepPink,
+DeepPink1,
+Magenta4,
+Magenta1,
+OrangeRed,
+IndianRed2,
+IndianRed3,
+HotPink,
+HotPink1,
+MediumOrchid2,
+DarkOrange,
+Salmon1,
+
+LightCoral,
+PaleVioletRed,
+
+Orchid2,
+Orchid1,
+Orange,
+SandyBrown,
+LightSalmon,
+LightPink,
+
+Pink,
+Plum,
+Gold,
+LightGoldenrod5,
+LightGoldenrod3,
+NavajoWhite1,
+MistyRose1,
+Thistle1,
+Yellow1,
+LightGoldenrod1,
+Khaki1,
+Wheat1,
+Cornsilk,
+
+Grey100,
+Grey3,
+Grey7,
+Grey11,
+Grey15,
+Grey19,
+Grey23,
+Grey27,
+Grey30,
+Grey35,
+
+Grey39,
+Grey42,
+Grey46,
+Grey50,
+Grey54,
+Grey58,
+Grey62,
+Grey66,
+Grey70,
+Grey74,
+
+Grey78,
+Grey82,
+Grey85,
+Grey89,
+Grey93);
+
+
+//this one is HELL!
+TPalette256NamesGrey=(
+
+tfsGBlack,
+tfsG1,
+tfsG2,
+tfsG3,
+tfsG4,
+tfsG5,
+tfsG6,
+tfsG7,
+tfsG8,
+tfsG9,
+tfsG10,
+
+tfsG11,
+tfsG12,
+tfsG13,
+tfsG14,
+tfsG15,
+
+tfsG16,
+tfsG17,
+tfsG18,
+tfsG19,
+tfsG20,
+
+tfsG21,
+tfsG22,
+tfsG23,
+tfsG24,
+tfsG25,
+tfsG26,
+tfsG27,
+tfsG28,
+tfsG29,
+tfsG30,
+
+tfsG31,
+tfsG32,
+tfsG33,
+tfsG34,
+tfsG35,
+tfsG36,
+tfsG37,
+tfsG38,
+tfsG39,
+tfsG40,
+
+tfsG41,
+tfsG42,
+tfsG43,
+tfsG44,
+tfsG45,
+tfsG46,
+tfsG47,
+tfsG48,
+tfsG49,
+tfsG50,
+
+tfsG51,
+tfsG52,
+tfsG53,
+tfsG54,
+tfsG55,
+
+tfsG56,
+tfsG57,
+tfsG58,
+tfsG59,
+tfsG60,
+tfsG61,
+tfsG62,
+tfsG63,
+tfsG64,
+tfsG65,
+
+tfsG66,
+tfsG67,
+tfsG68,
+tfsG69,
+tfsG70,
+tfsG71,
+tfsG72,
+tfsG73,
+tfsG74,
+tfsG75, 
+
+tfsG76,
+tfsG77,
+tfsG78, 
+
+tfsG79,
+tfsG80,
+tfsG81,
+tfsG82,
+tfsG83,
+tfsG84,
+tfsG85,
+tfsG86,
+tfsG87,
+tfsG88, 
+
+tfsG89,
+tfsG90,
+tfsG91,
+tfsG92,
+tfsG93,
+tfsG94,
+tfsG95,
+tfsG96,
+tfsG97,
+tfsG98, 
+
+tfsG99,
+tfsG100,
+tfsG101,
+tfsG102,
+tfsG103,
+tfsG104,
+tfsG105,
+tfsG106,
+tfsG107,
+tfsG108, 
+
+tfsG109,
+tfsG110,
+tfsG111,
+tfsG112,
+tfsG113,
+tfsG114,
+tfsG115,
+tfsG116,
+tfsG117,
+tfsG118, 
+
+tfsG119,
+tfsG120,
+tfsG121,
+tfsG122,
+tfsG123,
+tfsG124,
+tfsG125,
+tfsG126,
+tfsG127,
+tfsG128, 
+
+tfsG129,
+tfsG130,
+tfsG131,
+tfsG132,
+tfsG133,
+tfsG134,
+tfsG135,
+tfsG136,
+tfsG137,
+tfsG138, 
+
+tfsG139,
+tfsG140,
+tfsG141,
+tfsG142,
+tfsG143,
+tfsG144,
+tfsG145,
+tfsG146,
+tfsG147,
+tfsG148, 
+
+tfsG149,
+tfsG150,
+tfsG151,
+tfsG152,
+tfsG153,
+tfsG154,
+tfsG155, 
+tfsG156,
+tfsG157,
+tfsG158, 
+
+tfsG159,
+tfsG160,
+tfsG161,
+tfsG162,
+tfsG163,
+tfsG164,
+tfsG165,
+tfsG166,
+tfsG167,
+tfsG168, 
+
+tfsG169,
+tfsG170,
+tfsG171,
+tfsG172,
+tfsG173,
+tfsG174,
+tfsG175,
+tfsG176,
+tfsG177,
+tfsG178, 
+
+tfsG179,
+tfsG180,
+tfsG181,
+tfsG182,
+tfsG183,
+tfsG184,
+tfsG185,
+tfsG186,
+tfsG187,
+tfsG188, 
+
+tfsG189,
+tfsG190,
+tfsG191,
+tfsG192,
+tfsG193,
+tfsG194,
+tfsG195,
+tfsG196,
+tfsG197,
+tfsG198, 
+
+tfsG199,
+tfsG200,
+tfsG201,
+tfsG202,
+tfsG203,
+tfsG204,
+tfsG205,
+tfsG206,
+tfsG207,
+tfsG208,
+
+tfsG209,
+tfsG210,
+tfsG211,
+tfsG212,
+tfsG213,
+tfsG214,
+tfsG215,
+tfsG216,
+tfsG217,
+tfsG218,
+
+tfsG219,
+tfsG220,
+tfsG221,
+tfsG222,
+tfsG223,
+tfsG224,
+tfsG225,
+tfsG226,
+tfsG227,
+tfsG228,
+tfsG229,
+
+tfsG230,
+tfsG231,
+tfsG232,
+tfsG233,
+tfsG234,
+tfsG235,
+tfsG236,
+tfsG237,
+tfsG238,
+tfsG239,
+tfsG240,
+
+tfsG241,
+tfsG242,
+tfsG243,
+tfsG244,
+tfsG245,
+tfsG246,
+tfsG247,
+tfsG248,
+tfsG249,
+tfsG250,
+
+tfsG251,
+tfsG252,
+tfsG253,
+tfsG254,
+tfsGWhite
+
+);
+
+//faked "SDL"
+
+SDL_Color=record
+	r,g,b,a:byte;
+end;
+
+//the other include file (palette) has the conversion code
+
+//if LE:
+GL_RGBColor=record
+	r,g,b:single;
+end;
+
+GL_Color=record
+	r,g,b,a:single;
+end;
+
+//else: flip the data value the other way around
+
+
+//I dunno what I was thinkin here w "TSDLColors"-3-14-2019
+TRec16=record
+  
+	colors:array [0..15] of PSDL_COLOR; 
+
+end;
+
+
+//this is the XTerm 256 definition...
+
+//palette tricks would then need to use : colors[1].a hacks.
+
+//just so you can see the amount of datas were dealing with here.
+//really shouldnt go there..and waay too many palettes out there.
+//this really should be read in from a file.
+
+//anyways- as "standard" as I can get.Most UNICES use this.
+
+
+TRec256=record
+
+  colors:array [0..255] of PSDL_COLOR; ; //this is setup later on. 
+
+end;
+
+
+var
+//this one is unorthodox due to the totally destructive downsizing and image degredation needed
+//and its "best guess"
+  GreyList16:array [0..48] of byte;
+
+  valuelist16: array [0..48] of byte;
+  valuelist256: array [0..767] of byte;
+
+  TPalette16:TRec16;
+  TPalette16Grey:TRec16;
+
+  TPalette256:TRec256;
+  TPalette256Grey:TRec256;
+
+
+type
+
+	graphics_modes=(
+
+mCGA, 
+VGAMed,vgaMedx256,
+vgaHi,VGAHix256,VGAHix32k,VGAHix64k,
+m800x600x16,m800x600x256,m800x600x32k,m800x800x64k,
+m1024x768x256,m1024x768x32k,m1024x768x64k,m1024x768xMil,
+m1280x720x256,m1280x720x32k,m1280x720x64k,m1280x720xMil,
+m1280x1024x256,m1280x1024x32k,m1280x1024x64k,m1280x1024xMil,
+m1366x768x256,m1366x768x32k,m1366x768x64k,m1366x768xMil,
+m1920x1080x256,m1920x1080x32k,m1920x1080x64k,m1920x1080xMil);
+
+//data is in the main unit Init routines.
+
+Tmode=record
+//non-negative and some values are yuuge
+	ModeNumber:byte;
+  	ModeName:string;
+ 	MaxColors:DWord; //LongWord??
+    bpp:byte;
+  	MaxX:Word;
+    MaxY:Word;
+	XAspect:byte;
+	YAspect:byte;
+	AspectRatio:real; //things are computed from this somehow...
+end; //record
+
+
 
 //color conversion procs etc...taking up waay too much room in here...
 
-{$INCLUDE colormodsh.inc}
+function GetRGBfromIndex(index:byte):PSDL_Color; 
+function GetDWordfromIndex(index:byte):DWord; 
+
+
+function GetFgRGB:PSDL_Color;
+function GetFgRGBA:PSDL_Color;
+
+function GetFGName:string;
+function GetBGName:string;
+
+function GetBGColorIndex:byte;
+function GetFGColorIndex:byte;
+
+procedure setFGColor(color:byte);
+procedure setFGColor(someDword:dword); overload;
+procedure setFGColor(r,g,b:word); overload;
+procedure setFGColor(r,g,b,a:word); overload;
+procedure setBGColor(index:byte);
+procedure setBGColor(someDword:DWord); overload;
+procedure setBGColor(r,g,b:word); overload;
+procedure setBGColor(r,g,b,a:word); overload;
+
+function GetFgDWordRGBA:DWord;
+function GetBgDWordRGB(r,g,b:byte):DWord;
+function GetBgDWordRGBA(r,g,b,a:byte):DWord;
+
+procedure invertColors;
+
 
 
 implementation
 
-{$INCLUDE palettes.inc}
-{$INCLUDE modelist.inc}
-{$INCLUDE colormods.inc}
+{
+greyscale palettes are required for either loading or displaying in BW, or some subset thereof.
+this isnt "exactly" duplicated code
+
+hardspec it first, then allow user defined- or "pre-saved" files
+that not to say you cant init, save, then load thru the main code instead of useing the hard spec.
+
+the hardspec is here as a default setting, much like most 8x8 font sometimes are included
+by default in graphics modes source code.
+
+these are zero based colors. for 16 color modes- 88 or even 80 is not correct, 70 or 7f is.
+the 256 hex color data was pulled from xterm (and CGA) specs.
+
+
+the only guaranteed perfect palette code is (m)CGA -tweaked by me, and Greyscale 256.
+(greyscale mCGA is a hackish guess based on rough math, given 14 colors, and also black and white)
+256 should mimic xterm colors IF the endianess is correct and I dont need DWord hex math ops
+
+Float to byte routine are optional-
+	added because loads of OpenGL examples use floats (but YOU dont need to).
+
+Since I went thru all the effort of using SDL bytes- 
+ 	Im going to BYTE YOU- instead of floating the boat(he he he).
+}
+
+//SDL to GL value conversion-and back- (I dont see this anywhere)
+
+{
+What we need to do here is step from 0 to 1.0 (100) in about 2.55 (255) increments.
+In this manner= each HEX byte value has a float corresponding value. 
+ 
+dividing by 1k gives us 400 or so colors- we want about half of that
+      
+}
+
+//we need these as GL is funky.
+procedure ByteToFloat(hexColor:Byte):single;
+
+var
+	i:single;
+begin 
+  i:=ord(hexColor);  
+  //imperfect math but it works
+  i:=(i*2/1000)*2;
+  
+  //fix the funky overshoot
+  if i>1.0 then 
+	i:=1.0;
+  ByteToFloat:=i;
+end;   
+
+
+//For GLFloats with max value of 1.0
+function GLFloatToByte(someFloat:single):byte
+begin
+   if (someFloat > 1.0) then 
+		exit;
+   GLFloatToByte:=byte(round(someFloat));
+end;
+
+
+procedure initPaletteGrey16;
+
+var
+   i,num:integer;
+
+
+begin  
+
+valuelist16[0]:=$00;
+valuelist16[1]:=$00;
+valuelist16[2]:=$00;
+valuelist16[3]:=$11;
+valuelist16[4]:=$11;
+valuelist16[5]:=$11;
+valuelist16[6]:=$22;
+valuelist16[7]:=$22;
+valuelist16[8]:=$22;
+valuelist16[9]:=$33;
+valuelist16[10]:=$33;
+valuelist16[11]:=$33;
+valuelist16[12]:=$44;
+valuelist16[13]:=$44;
+valuelist16[14]:=$44;
+valuelist16[15]:=$55;
+valuelist16[16]:=$55;
+valuelist16[17]:=$55;
+valuelist16[18]:=$66;
+valuelist16[19]:=$66;
+valuelist16[20]:=$66;
+valuelist16[21]:=$77;
+valuelist16[22]:=$77;
+valuelist16[23]:=$77;
+valuelist16[24]:=$88;
+valuelist16[25]:=$88;
+valuelist16[26]:=$88;
+valuelist16[27]:=$99;
+valuelist16[28]:=$99;
+valuelist16[29]:=$99;
+valuelist16[30]:=$aa;
+valuelist16[31]:=$aa;
+valuelist16[32]:=$aa;
+valuelist16[33]:=$bb;
+valuelist16[34]:=$bb;
+valuelist16[35]:=$bb;
+valuelist16[36]:=$cc;
+valuelist16[37]:=$cc;
+valuelist16[38]:=$cc;
+valuelist16[39]:=$dd;
+valuelist16[40]:=$dd;
+valuelist16[41]:=$dd;
+valuelist16[42]:=$ee;
+valuelist16[43]:=$ee;
+valuelist16[44]:=$ee;
+valuelist16[45]:=$ff;
+valuelist16[46]:=$ff;
+valuelist16[47]:=$ff;
+
+   i:=0;
+   num:=0; 
+   repeat 
+      Tpalette16.colors[num]^.r:=valuelist16[i];
+      Tpalette16.colors[num]^.g:=valuelist16[i+1];
+      Tpalette16.colors[num]^.b:=valuelist16[i+2];
+      Tpalette16.colors[num]^.a:=$ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
+      inc(i,3);
+      inc(num); 
+  until num=15;
+
+//we dont need no stinkin DWORDS!
+
+end;
+
+
+procedure initPaletteGrey256;
+
+//easy peasy to setup.
+
+var
+    i,num:integer;
+
+
+begin  
+
+//(we dont setup valuelist by hand this time)
+
+   i:=0;
+  repeat 
+      Tpalette256Grey.colors[num]^.r:=Byte(longint(i));
+      Tpalette256Grey.colors[num]^.g:=Byte(longint(i));
+      Tpalette256Grey.colors[num]^.b:=Byte(longint(i));
+      Tpalette256Grey.colors[num]^.a:=$ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
+      inc(i); //notice the difference <-HERE ..where RGB are the same values
+  until i=255;
+
+	
+
+end;
+
+procedure initPalette16;
+
+var
+   num,i:integer;
+
+begin  
+//Color Sequence:
+//K HiR HiG HiB HiC HiM HiY HiGR LoGr LoR LoG LoB LoC LoM LoY W
+//these are binary driven FULL ON /FULL OFF
+
+valuelist16[0]:=$00;
+valuelist16[1]:=$00;
+valuelist16[2]:=$00;
+
+valuelist16[3]:=$7f;
+valuelist16[4]:=$00;
+valuelist16[5]:=$00;
+
+valuelist16[6]:=$00;
+valuelist16[7]:=$7f;
+valuelist16[8]:=$00;
+
+valuelist16[9]:=$00;
+valuelist16[10]:=$00;
+valuelist16[11]:=$7f;
+
+//yellow
+valuelist16[12]:=$7f;
+valuelist16[13]:=$7f;
+valuelist16[14]:=$00;
+
+valuelist16[15]:=$7f;
+valuelist16[16]:=$00;
+valuelist16[17]:=$7f;
+
+valuelist16[18]:=$00;
+valuelist16[19]:=$7f;
+valuelist16[20]:=$7f;
+
+//2 greys
+valuelist16[21]:=$f0;
+valuelist16[22]:=$f0;
+valuelist16[23]:=$f0;
+
+valuelist16[24]:=$f0;
+valuelist16[25]:=$f0;
+valuelist16[26]:=$f0;
+//end greys
+
+valuelist16[27]:=$ff;
+valuelist16[28]:=$00;
+valuelist16[29]:=$00;
+
+valuelist16[30]:=$00;
+valuelist16[31]:=$ff;
+valuelist16[32]:=$00;
+
+valuelist16[33]:=$00;
+valuelist16[34]:=$00;
+valuelist16[35]:=$ff;
+
+valuelist16[36]:=$00;
+valuelist16[37]:=$ff;
+valuelist16[38]:=$ff;
+
+valuelist16[39]:=$ff;
+valuelist16[40]:=$00;
+valuelist16[41]:=$ff;
+
+//14=Y
+valuelist16[42]:=$7f;
+valuelist16[43]:=$7f;
+valuelist16[44]:=$00;
+
+//white is specified later(wonky palette)
+
+   i:=0;
+   num:=0; 
+   repeat 
+      Tpalette16.colors[num]^.r:=valuelist16[i];
+      Tpalette16.colors[num]^.g:=valuelist16[i+1];
+      Tpalette16.colors[num]^.b:=valuelist16[i+2];
+      Tpalette16.colors[num]^.a:=$ff;
+      inc(i,3);
+      inc(num); 
+  until num=7;
+
+   i:=25;
+   num:=8; 
+   repeat 
+      Tpalette16.colors[num]^.r:=valuelist16[i];
+      Tpalette16.colors[num]^.g:=valuelist16[i+1];
+      Tpalette16.colors[num]^.b:=valuelist16[i+2];
+      Tpalette16.colors[num]^.a:=$7f;
+      inc(i,3);
+      inc(num); 
+  until num=14;
+  //white
+      Tpalette16.colors[15]^.r:=$ff;
+      Tpalette16.colors[15]^.g:=$ff;
+      Tpalette16.colors[15]^.b:=$ff;
+      Tpalette16.colors[15]^.a:=$ff;
+  
+
+end;
+
+
+procedure Save16Palette(filename:string);
+
+var
+	palette16File : File of TRec16;
+	i,num            : integer;
+
+Begin
+	initPalette16;
+	Assign(palette16File, filename);
+	ReWrite(palette16File);
+
+	Write(palette16File, TPalette16); //dump everything out
+	Close(palette16File);
+	
+End;
+
+//we should ask if we want to read a color or BW file, else we duplicate code for one line of changes.
+//there is a way to check- but we would have to peek inside the file or just display it and assume things.
+//this could shove a BW file in the color section or a color file in the BW section...
+//anyway, theres two sets of arrays and you can reset to defaults if you need to.
+
+procedure Read16Palette(filename:string; ReadColorFile:boolean);
+
+Var
+	palette16File  : File of TRec16;
+	i,num            : integer;
+    palette:PSDL_Palette;
+
+Begin
+	Assign(palette16File, filename);
+	ReSet(palette16File);
+    Seek(palette16File, 0); //find first record
+    if ReadColorFile =true then
+		Read(palette16File, TPalette16) //read everything in
+	else
+		Read(palette16File, TPalette16GRey); 
+	    
+	Close(palette16File);
+
+//TODO: now fill the palette (GL)
+
+
+end;
+
+procedure initPalette256;
+
+//256 color VGA palette based on XTerm colors(Unix)
+// however the first 16 are off according to mCGA specs and have been corrected.
+//xterms dont use "bold text by deault" an maybe this is where the confusion is.
+
+//furthermore there are other 256rgb palettes.
+
+
+var
+    num,i:integer;
+
+
+begin  
+//old cga palette
+valuelist256[0]:=$00;
+valuelist256[1]:=$00;
+valuelist256[2]:=$00;
+
+valuelist256[3]:=$7f;
+valuelist256[4]:=$00;
+valuelist256[5]:=$00;
+
+valuelist256[6]:=$00;
+valuelist256[7]:=$7f;
+valuelist256[8]:=$00;
+
+valuelist256[9]:=$00;
+valuelist256[10]:=$00;
+valuelist256[11]:=$7f;
+
+valuelist256[12]:=$7f;
+valuelist256[13]:=$7f;
+valuelist256[14]:=$00;
+
+valuelist256[15]:=$7f;
+valuelist256[16]:=$00;
+valuelist256[17]:=$7f;
+
+valuelist256[18]:=$00;
+valuelist256[19]:=$7f;
+valuelist256[20]:=$7f;
+
+valuelist256[21]:=$f0;
+valuelist256[22]:=$f0;
+valuelist256[23]:=$f0;
+
+valuelist256[24]:=$f0;
+valuelist256[25]:=$f0;
+valuelist256[26]:=$f0;
+
+valuelist256[27]:=$ff;
+valuelist256[28]:=$00;
+valuelist256[29]:=$00;
+
+valuelist256[30]:=$00;
+valuelist256[31]:=$ff;
+valuelist256[32]:=$00;
+
+valuelist256[33]:=$00;
+valuelist256[34]:=$00;
+valuelist256[35]:=$ff;
+
+valuelist256[36]:=$00;
+valuelist256[37]:=$00;
+valuelist256[38]:=$ff;
+
+valuelist256[39]:=$ff;
+valuelist256[40]:=$00;
+valuelist256[41]:=$ff;
+
+valuelist256[42]:=$7f;
+valuelist256[43]:=$7f;
+valuelist256[44]:=$00;
+
+valuelist256[45]:=$ff;
+valuelist256[46]:=$ff;
+valuelist256[47]:=$ff;
+
+//end old 16 color palette
+
+valuelist256[48]:=$00;
+valuelist256[49]:=$00;
+valuelist256[50]:=$00;
+
+valuelist256[51]:=$00;
+valuelist256[52]:=$00;
+valuelist256[53]:=$5f;
+valuelist256[54]:=$00;
+valuelist256[55]:=$00;
+valuelist256[56]:=$87;
+valuelist256[57]:=$00;
+valuelist256[58]:=$00;
+valuelist256[59]:=$af;
+valuelist256[60]:=$00;
+valuelist256[61]:=$00;
+valuelist256[62]:=$d7;
+valuelist256[63]:=$00;
+valuelist256[64]:=$00;
+valuelist256[65]:=$ff;
+valuelist256[66]:=$00;
+valuelist256[67]:=$5f;
+valuelist256[68]:=$00;
+valuelist256[69]:=$00;
+valuelist256[70]:=$5f;
+valuelist256[71]:=$5f;
+valuelist256[72]:=$00;
+valuelist256[73]:=$5f;
+valuelist256[74]:=$87;
+valuelist256[75]:=$00;
+valuelist256[76]:=$5f;
+valuelist256[77]:=$af;
+valuelist256[78]:=$00;
+valuelist256[79]:=$5f;
+valuelist256[80]:=$d7;
+valuelist256[81]:=$00;
+valuelist256[82]:=$5f;
+valuelist256[83]:=$ff;
+valuelist256[84]:=$00;
+valuelist256[85]:=$87;
+valuelist256[86]:=$00;
+valuelist256[87]:=$00;
+valuelist256[88]:=$87;
+valuelist256[89]:=$5f;
+valuelist256[90]:=$00;
+valuelist256[91]:=$87;
+valuelist256[92]:=$87;
+valuelist256[93]:=$00;
+valuelist256[94]:=$87;
+valuelist256[95]:=$af;
+valuelist256[96]:=$00;
+valuelist256[97]:=$87;
+valuelist256[98]:=$d7;
+valuelist256[99]:=$00;
+valuelist256[100]:=$87;
+
+valuelist256[101]:=$ff;
+valuelist256[102]:=$00;
+valuelist256[103]:=$af;
+valuelist256[104]:=$00;
+valuelist256[105]:=$00;
+valuelist256[106]:=$af;
+valuelist256[107]:=$5f;
+valuelist256[108]:=$00;
+valuelist256[109]:=$af;
+valuelist256[110]:=$87;
+valuelist256[111]:=$00;
+valuelist256[112]:=$af;
+valuelist256[113]:=$af;
+valuelist256[114]:=$00;
+valuelist256[115]:=$af;
+valuelist256[116]:=$d7;
+valuelist256[117]:=$00;
+valuelist256[118]:=$af;
+valuelist256[119]:=$ff;
+valuelist256[120]:=$00;
+valuelist256[121]:=$d7;
+valuelist256[122]:=$00;
+valuelist256[123]:=$00;
+valuelist256[124]:=$d7;
+valuelist256[125]:=$5f;
+valuelist256[126]:=$00;
+valuelist256[127]:=$d7;
+valuelist256[128]:=$87;
+valuelist256[129]:=$00;
+valuelist256[130]:=$d7;
+valuelist256[131]:=$af;
+valuelist256[132]:=$00;
+valuelist256[133]:=$d7;
+valuelist256[134]:=$d7;
+valuelist256[135]:=$00;
+valuelist256[136]:=$d7;
+valuelist256[137]:=$ff;
+valuelist256[138]:=$00;
+valuelist256[139]:=$ff;
+valuelist256[140]:=$00;
+valuelist256[141]:=$00;
+valuelist256[142]:=$ff;
+valuelist256[143]:=$5f;
+valuelist256[144]:=$00;
+valuelist256[145]:=$ff;
+valuelist256[146]:=$87;
+valuelist256[147]:=$00;
+valuelist256[148]:=$ff;
+valuelist256[149]:=$af;
+valuelist256[150]:=$00;
+
+valuelist256[151]:=$ff;
+valuelist256[152]:=$d7;
+valuelist256[153]:=$00;
+valuelist256[154]:=$ff;
+valuelist256[155]:=$ff;
+valuelist256[156]:=$5f;
+valuelist256[157]:=$00;
+valuelist256[158]:=$00;
+valuelist256[159]:=$5f;
+valuelist256[160]:=$00;
+valuelist256[161]:=$5f;
+valuelist256[162]:=$5f;
+valuelist256[163]:=$00;
+valuelist256[164]:=$87;
+valuelist256[165]:=$5f;
+valuelist256[166]:=$00;
+valuelist256[167]:=$af;
+valuelist256[168]:=$5f;
+valuelist256[169]:=$00;
+valuelist256[170]:=$d7;
+valuelist256[171]:=$5f;
+valuelist256[172]:=$00;
+valuelist256[173]:=$ff;
+valuelist256[174]:=$5f;
+valuelist256[175]:=$5f;
+valuelist256[176]:=$00;
+valuelist256[177]:=$5f;
+valuelist256[178]:=$5f;
+valuelist256[179]:=$5f;
+valuelist256[180]:=$5f;
+valuelist256[181]:=$5f;
+valuelist256[182]:=$87;
+valuelist256[183]:=$5f;
+valuelist256[184]:=$5f;
+valuelist256[185]:=$af;
+valuelist256[186]:=$5f;
+valuelist256[187]:=$5f;
+valuelist256[188]:=$d7;
+valuelist256[189]:=$5f;
+valuelist256[190]:=$5f;
+valuelist256[191]:=$ff;
+valuelist256[192]:=$5f;
+valuelist256[193]:=$87;
+valuelist256[194]:=$00;
+valuelist256[195]:=$5f;
+valuelist256[196]:=$87;
+valuelist256[197]:=$5f;
+valuelist256[198]:=$5f;
+valuelist256[199]:=$87;
+valuelist256[200]:=$87;
+
+valuelist256[201]:=$5f;
+valuelist256[202]:=$87;
+valuelist256[203]:=$af;
+valuelist256[204]:=$5f;
+valuelist256[205]:=$87;
+valuelist256[206]:=$d7;
+valuelist256[207]:=$5f;
+valuelist256[208]:=$87;
+valuelist256[209]:=$ff;
+valuelist256[210]:=$5f;
+valuelist256[211]:=$af;
+valuelist256[212]:=$00;
+valuelist256[213]:=$5f;
+valuelist256[214]:=$af;
+valuelist256[215]:=$5f;
+valuelist256[216]:=$5f;
+valuelist256[217]:=$af;
+valuelist256[218]:=$87;
+valuelist256[219]:=$5f;
+valuelist256[220]:=$af;
+valuelist256[221]:=$af;
+valuelist256[222]:=$5f;
+valuelist256[223]:=$af;
+valuelist256[224]:=$d7;
+valuelist256[225]:=$5f;
+valuelist256[226]:=$af;
+valuelist256[227]:=$ff;
+valuelist256[228]:=$5f;
+valuelist256[229]:=$d7;
+valuelist256[230]:=$00;
+valuelist256[231]:=$5f;
+valuelist256[232]:=$d7;
+valuelist256[233]:=$5f;
+valuelist256[234]:=$5f;
+valuelist256[235]:=$d7;
+valuelist256[236]:=$87;
+valuelist256[237]:=$5f;
+valuelist256[238]:=$d7;
+valuelist256[239]:=$af;
+valuelist256[240]:=$5f;
+valuelist256[241]:=$d7;
+valuelist256[242]:=$d7;
+valuelist256[243]:=$5f;
+valuelist256[244]:=$d7;
+valuelist256[245]:=$ff;
+valuelist256[246]:=$5f;
+valuelist256[247]:=$ff;
+valuelist256[248]:=$00;
+valuelist256[249]:=$5f;
+valuelist256[250]:=$ff;
+valuelist256[251]:=$5f;
+valuelist256[252]:=$5f;
+valuelist256[253]:=$ff;
+valuelist256[254]:=$87;
+valuelist256[255]:=$5f;
+valuelist256[256]:=$ff;
+valuelist256[257]:=$af;
+valuelist256[258]:=$5f;
+valuelist256[259]:=$ff;
+valuelist256[260]:=$d7;
+
+valuelist256[261]:=$5f;
+valuelist256[262]:=$ff;
+valuelist256[263]:=$ff;
+valuelist256[264]:=$87;
+valuelist256[265]:=$00;
+valuelist256[266]:=$00;
+valuelist256[267]:=$87;
+valuelist256[268]:=$00;
+valuelist256[269]:=$5f;
+valuelist256[270]:=$87;
+valuelist256[271]:=$00;
+valuelist256[272]:=$87;
+valuelist256[273]:=$87;
+valuelist256[274]:=$00;
+valuelist256[275]:=$af;
+valuelist256[276]:=$87;
+valuelist256[277]:=$00;
+valuelist256[278]:=$d7;
+valuelist256[279]:=$87;
+valuelist256[280]:=$00;
+valuelist256[281]:=$ff;
+valuelist256[282]:=$87;
+valuelist256[283]:=$5f;
+valuelist256[284]:=$00;
+valuelist256[285]:=$87;
+valuelist256[286]:=$5f;
+valuelist256[287]:=$5f;
+valuelist256[288]:=$87;
+valuelist256[289]:=$5f;
+valuelist256[290]:=$87;
+valuelist256[291]:=$87;
+valuelist256[292]:=$5f;
+valuelist256[293]:=$af;
+valuelist256[294]:=$87;
+valuelist256[295]:=$5f;
+valuelist256[296]:=$d7;
+valuelist256[297]:=$87;
+valuelist256[298]:=$5f;
+valuelist256[299]:=$ff;
+valuelist256[300]:=$87;
+
+valuelist256[301]:=$87;
+valuelist256[302]:=$00;
+valuelist256[303]:=$87;
+valuelist256[304]:=$87;
+valuelist256[305]:=$5f;
+valuelist256[306]:=$87;
+valuelist256[307]:=$87;
+valuelist256[308]:=$87;
+valuelist256[309]:=$87;
+valuelist256[310]:=$87;
+valuelist256[311]:=$af;
+valuelist256[312]:=$87;
+valuelist256[313]:=$87;
+valuelist256[314]:=$d7;
+valuelist256[315]:=$87;
+valuelist256[316]:=$87;
+valuelist256[317]:=$ff;
+valuelist256[318]:=$87;
+valuelist256[319]:=$af;
+valuelist256[320]:=$00;
+valuelist256[321]:=$87;
+valuelist256[322]:=$af;
+valuelist256[323]:=$5f;
+valuelist256[324]:=$87;
+valuelist256[325]:=$af;
+valuelist256[326]:=$87;
+valuelist256[327]:=$87;
+valuelist256[328]:=$af;
+valuelist256[329]:=$af;
+valuelist256[330]:=$87;
+valuelist256[331]:=$af;
+valuelist256[332]:=$d7;
+valuelist256[333]:=$87;
+valuelist256[334]:=$af;
+valuelist256[335]:=$ff;
+valuelist256[336]:=$87;
+valuelist256[337]:=$d7;
+valuelist256[338]:=$00;
+valuelist256[339]:=$87;
+valuelist256[340]:=$d7;
+valuelist256[341]:=$5f;
+valuelist256[342]:=$87;
+valuelist256[343]:=$d7;
+valuelist256[344]:=$87;
+valuelist256[345]:=$87;
+valuelist256[346]:=$d7;
+valuelist256[347]:=$af;
+valuelist256[348]:=$87;
+valuelist256[349]:=$d7;
+valuelist256[350]:=$d7;
+valuelist256[351]:=$87;
+valuelist256[352]:=$d7;
+valuelist256[353]:=$ff;
+valuelist256[354]:=$87;
+valuelist256[355]:=$ff;
+valuelist256[356]:=$00;
+valuelist256[357]:=$87;
+valuelist256[358]:=$ff;
+valuelist256[359]:=$5f;
+valuelist256[360]:=$87;
+valuelist256[361]:=$ff;
+valuelist256[362]:=$87;
+valuelist256[363]:=$87;
+valuelist256[364]:=$ff;
+valuelist256[365]:=$af;
+valuelist256[366]:=$87;
+valuelist256[367]:=$ff;
+valuelist256[368]:=$d7;
+valuelist256[369]:=$87;
+valuelist256[370]:=$ff;
+valuelist256[371]:=$ff;
+valuelist256[372]:=$af;
+valuelist256[373]:=$00;
+valuelist256[374]:=$00;
+valuelist256[375]:=$af;
+valuelist256[376]:=$00;
+valuelist256[377]:=$5f;
+valuelist256[378]:=$af;
+valuelist256[379]:=$00;
+valuelist256[380]:=$87;
+valuelist256[381]:=$af;
+valuelist256[382]:=$00;
+valuelist256[383]:=$af;
+valuelist256[384]:=$af;
+valuelist256[385]:=$00;
+valuelist256[386]:=$d7;
+valuelist256[387]:=$af;
+valuelist256[388]:=$00;
+valuelist256[389]:=$af;
+valuelist256[390]:=$af;
+valuelist256[391]:=$5f;
+valuelist256[392]:=$00;
+valuelist256[393]:=$af;
+valuelist256[394]:=$5f;
+valuelist256[395]:=$5f;
+valuelist256[396]:=$af;
+valuelist256[397]:=$5f;
+valuelist256[398]:=$87;
+valuelist256[399]:=$af;
+valuelist256[400]:=$5f;
+
+valuelist256[401]:=$af;
+valuelist256[402]:=$af;
+valuelist256[403]:=$5f;
+valuelist256[404]:=$d7;
+valuelist256[405]:=$af;
+valuelist256[406]:=$5f;
+valuelist256[407]:=$ff;
+valuelist256[408]:=$af;
+valuelist256[409]:=$87;
+valuelist256[410]:=$00;
+valuelist256[411]:=$af;
+valuelist256[412]:=$87;
+valuelist256[413]:=$5f;
+valuelist256[414]:=$af;
+valuelist256[415]:=$87;
+valuelist256[416]:=$87;
+valuelist256[417]:=$af;
+valuelist256[418]:=$87;
+valuelist256[419]:=$af;
+valuelist256[420]:=$af;
+valuelist256[421]:=$87;
+valuelist256[422]:=$d7;
+valuelist256[423]:=$af;
+valuelist256[424]:=$87;
+valuelist256[425]:=$ff;
+valuelist256[426]:=$af;
+valuelist256[427]:=$af;
+valuelist256[428]:=$00;
+valuelist256[429]:=$af;
+valuelist256[430]:=$af;
+valuelist256[431]:=$5f;
+valuelist256[432]:=$af;
+valuelist256[433]:=$af;
+valuelist256[434]:=$87;
+valuelist256[435]:=$af;
+valuelist256[436]:=$af;
+valuelist256[437]:=$af;
+valuelist256[438]:=$af;
+valuelist256[439]:=$af;
+valuelist256[440]:=$d7;
+
+
+valuelist256[441]:=$af;
+valuelist256[442]:=$af;
+valuelist256[443]:=$ff;
+valuelist256[444]:=$af;
+valuelist256[445]:=$d7;
+valuelist256[446]:=$00;
+valuelist256[447]:=$af;
+valuelist256[448]:=$d7;
+valuelist256[449]:=$5f;
+
+valuelist256[450]:=$af;
+valuelist256[451]:=$d7;
+valuelist256[452]:=$87;
+valuelist256[453]:=$af;
+valuelist256[454]:=$d7;
+valuelist256[455]:=$af;
+valuelist256[456]:=$af;
+valuelist256[457]:=$d7;
+valuelist256[458]:=$d7;
+valuelist256[459]:=$af;
+
+valuelist256[460]:=$d7;
+valuelist256[461]:=$ff;
+valuelist256[462]:=$af;
+valuelist256[463]:=$ff;
+valuelist256[464]:=$00;
+valuelist256[465]:=$af;
+valuelist256[466]:=$ff;
+valuelist256[467]:=$5f;
+valuelist256[468]:=$af;
+valuelist256[469]:=$ff;
+
+valuelist256[470]:=$87;
+valuelist256[471]:=$af;
+valuelist256[472]:=$ff;
+valuelist256[473]:=$af;
+valuelist256[474]:=$af;
+valuelist256[475]:=$ff;
+valuelist256[476]:=$d7;
+valuelist256[477]:=$af;
+valuelist256[478]:=$ff;
+valuelist256[479]:=$ff;
+
+valuelist256[480]:=$d7;
+valuelist256[481]:=$00;
+valuelist256[482]:=$00;
+valuelist256[483]:=$d7;
+valuelist256[484]:=$00;
+valuelist256[485]:=$5f;
+valuelist256[486]:=$d7;
+valuelist256[487]:=$00;
+valuelist256[488]:=$87;
+valuelist256[489]:=$d7;
+valuelist256[490]:=$00;
+
+valuelist256[491]:=$af;
+valuelist256[492]:=$d7;
+valuelist256[493]:=$00;
+valuelist256[494]:=$d7;
+valuelist256[495]:=$d7;
+valuelist256[496]:=$00;
+valuelist256[497]:=$ff;
+valuelist256[498]:=$d7;
+valuelist256[499]:=$5f;
+
+valuelist256[500]:=$00;
+valuelist256[501]:=$d7;
+valuelist256[502]:=$5f;
+valuelist256[503]:=$5f;
+valuelist256[504]:=$d7;
+valuelist256[505]:=$5f;
+valuelist256[506]:=$87;
+valuelist256[507]:=$d7;
+valuelist256[508]:=$5f;
+valuelist256[509]:=$af;
+valuelist256[510]:=$d7;
+valuelist256[511]:=$5f;
+valuelist256[512]:=$d7;
+valuelist256[513]:=$d7;
+valuelist256[514]:=$5f;
+valuelist256[515]:=$ff;
+valuelist256[516]:=$d7;
+valuelist256[517]:=$87;
+valuelist256[518]:=$00;
+valuelist256[519]:=$d7;
+valuelist256[520]:=$87;
+valuelist256[521]:=$5f;
+valuelist256[522]:=$d7;
+valuelist256[523]:=$87;
+valuelist256[524]:=$87;
+valuelist256[525]:=$d7;
+valuelist256[526]:=$87;
+valuelist256[527]:=$af;
+valuelist256[528]:=$d7;
+valuelist256[529]:=$87;
+
+valuelist256[530]:=$d7;
+valuelist256[531]:=$d7;
+valuelist256[532]:=$87;
+valuelist256[533]:=$ff;
+valuelist256[534]:=$d7;
+valuelist256[535]:=$af;
+valuelist256[536]:=$00;
+valuelist256[537]:=$d7;
+valuelist256[538]:=$af;
+valuelist256[539]:=$5f;
+
+valuelist256[540]:=$d7;
+valuelist256[541]:=$af;
+valuelist256[542]:=$87;
+valuelist256[543]:=$d7;
+valuelist256[544]:=$af;
+valuelist256[545]:=$af;
+valuelist256[546]:=$d7;
+valuelist256[547]:=$af;
+valuelist256[548]:=$d7;
+valuelist256[549]:=$d7;
+valuelist256[550]:=$af;
+valuelist256[551]:=$ff;
+valuelist256[552]:=$d7;
+valuelist256[553]:=$d7;
+valuelist256[554]:=$00;
+valuelist256[555]:=$d7;
+valuelist256[556]:=$d7;
+valuelist256[557]:=$5f;
+valuelist256[558]:=$d7;
+valuelist256[559]:=$d7;
+valuelist256[560]:=$87;
+
+valuelist256[561]:=$d7;
+valuelist256[562]:=$d7;
+valuelist256[563]:=$af;
+valuelist256[564]:=$d7;
+valuelist256[565]:=$d7;
+valuelist256[566]:=$d7;
+valuelist256[567]:=$d7;
+valuelist256[568]:=$d7;
+valuelist256[569]:=$ff;
+
+valuelist256[570]:=$d7;
+valuelist256[571]:=$ff;
+valuelist256[572]:=$00;
+valuelist256[573]:=$d7;
+valuelist256[574]:=$ff;
+valuelist256[575]:=$5f;
+valuelist256[576]:=$d7;
+valuelist256[577]:=$ff;
+valuelist256[578]:=$87;
+valuelist256[579]:=$d7;
+
+valuelist256[580]:=$ff;
+valuelist256[581]:=$af;
+valuelist256[582]:=$d7;
+valuelist256[583]:=$ff;
+valuelist256[584]:=$d7;
+valuelist256[585]:=$d7;
+valuelist256[586]:=$ff;
+valuelist256[587]:=$ff;
+valuelist256[588]:=$ff;
+valuelist256[589]:=$00;
+
+valuelist256[590]:=$00;
+valuelist256[591]:=$ff;
+valuelist256[592]:=$00;
+valuelist256[593]:=$5f;
+valuelist256[594]:=$ff;
+valuelist256[595]:=$00;
+valuelist256[596]:=$87;
+valuelist256[597]:=$ff;
+valuelist256[598]:=$00;
+valuelist256[599]:=$af;
+
+valuelist256[600]:=$ff;
+valuelist256[601]:=$00;
+valuelist256[602]:=$d7;
+valuelist256[603]:=$ff;
+valuelist256[604]:=$00;
+valuelist256[605]:=$ff;
+valuelist256[606]:=$ff;
+valuelist256[607]:=$5f;
+valuelist256[608]:=$00;
+valuelist256[609]:=$ff;
+
+valuelist256[610]:=$5f;
+valuelist256[611]:=$5f;
+valuelist256[612]:=$ff;
+valuelist256[613]:=$5f;
+valuelist256[614]:=$87;
+valuelist256[615]:=$ff;
+valuelist256[616]:=$5f;
+valuelist256[617]:=$af;
+valuelist256[618]:=$ff;
+valuelist256[619]:=$5f;
+
+valuelist256[620]:=$d7;
+valuelist256[621]:=$ff;
+valuelist256[622]:=$5f;
+valuelist256[623]:=$ff;
+valuelist256[624]:=$ff;
+valuelist256[625]:=$87;
+valuelist256[626]:=$00;
+valuelist256[627]:=$ff;
+valuelist256[628]:=$87;
+valuelist256[629]:=$5f;
+
+valuelist256[630]:=$ff;
+valuelist256[631]:=$87;
+valuelist256[632]:=$87;
+valuelist256[633]:=$ff;
+valuelist256[634]:=$87;
+valuelist256[635]:=$af;
+valuelist256[636]:=$ff;
+valuelist256[637]:=$87;
+valuelist256[638]:=$d7;
+valuelist256[639]:=$ff;
+
+valuelist256[640]:=$87;
+valuelist256[641]:=$ff;
+valuelist256[642]:=$ff;
+valuelist256[643]:=$af;
+valuelist256[644]:=$00;
+valuelist256[645]:=$ff;
+valuelist256[646]:=$af;
+valuelist256[647]:=$5f;
+valuelist256[648]:=$ff;
+valuelist256[649]:=$af;
+
+valuelist256[650]:=$87;
+valuelist256[651]:=$ff;
+valuelist256[652]:=$af;
+valuelist256[653]:=$af;
+valuelist256[654]:=$ff;
+valuelist256[655]:=$af;
+valuelist256[656]:=$d7;
+valuelist256[657]:=$ff;
+valuelist256[658]:=$af;
+valuelist256[659]:=$ff;
+
+valuelist256[660]:=$ff;
+valuelist256[661]:=$d7;
+valuelist256[662]:=$00;
+valuelist256[663]:=$ff;
+valuelist256[664]:=$d7;
+valuelist256[665]:=$5f;
+valuelist256[666]:=$ff;
+valuelist256[667]:=$d7;
+valuelist256[668]:=$87;
+valuelist256[669]:=$ff;
+
+valuelist256[670]:=$d7;
+valuelist256[671]:=$af;
+valuelist256[672]:=$ff;
+valuelist256[673]:=$d7;
+valuelist256[674]:=$d7;
+valuelist256[675]:=$ff;
+valuelist256[676]:=$d7;
+valuelist256[677]:=$ff;
+valuelist256[678]:=$ff;
+valuelist256[679]:=$ff;
+
+valuelist256[680]:=$00;
+valuelist256[681]:=$ff;
+valuelist256[682]:=$ff;
+valuelist256[683]:=$5f;
+valuelist256[684]:=$ff;
+valuelist256[685]:=$ff;
+valuelist256[686]:=$87;
+valuelist256[687]:=$ff;
+valuelist256[688]:=$ff;
+valuelist256[689]:=$af;
+
+valuelist256[690]:=$ff;
+valuelist256[691]:=$ff;
+valuelist256[692]:=$d7;
+valuelist256[693]:=$ff;
+valuelist256[694]:=$ff;
+valuelist256[695]:=$ff;
+valuelist256[696]:=$08;
+valuelist256[697]:=$08;
+valuelist256[698]:=$08;
+valuelist256[699]:=$12;
+
+valuelist256[700]:=$12;
+valuelist256[701]:=$12;
+valuelist256[702]:=$1c;
+valuelist256[703]:=$1c;
+valuelist256[704]:=$1c;
+valuelist256[705]:=$26;
+valuelist256[706]:=$26;
+valuelist256[707]:=$26;
+valuelist256[708]:=$30;
+valuelist256[709]:=$30;
+
+valuelist256[710]:=$30;
+valuelist256[711]:=$3a;
+valuelist256[712]:=$3a;
+valuelist256[713]:=$3a;
+valuelist256[714]:=$44;
+valuelist256[715]:=$44;
+valuelist256[716]:=$44;
+valuelist256[717]:=$4e;
+valuelist256[718]:=$4e;
+valuelist256[719]:=$4e;
+
+valuelist256[720]:=$58;
+valuelist256[721]:=$58;
+valuelist256[722]:=$58;
+valuelist256[723]:=$62;
+valuelist256[724]:=$62;
+valuelist256[725]:=$62;
+valuelist256[726]:=$6c;
+valuelist256[727]:=$6c;
+valuelist256[728]:=$6c;
+valuelist256[729]:=$76;
+
+valuelist256[730]:=$76;
+valuelist256[731]:=$76;
+valuelist256[732]:=$80;
+valuelist256[733]:=$80;
+valuelist256[734]:=$80;
+valuelist256[735]:=$8a;
+valuelist256[736]:=$8a;
+valuelist256[737]:=$8a;
+valuelist256[738]:=$94;
+valuelist256[739]:=$94;
+
+valuelist256[740]:=$94;
+valuelist256[741]:=$9e;
+valuelist256[742]:=$9e;
+valuelist256[743]:=$9e;
+valuelist256[744]:=$a8;
+valuelist256[745]:=$a8;
+valuelist256[746]:=$a8;
+valuelist256[747]:=$b2;
+valuelist256[748]:=$b2;
+valuelist256[749]:=$b2;
+
+valuelist256[750]:=$bc;
+valuelist256[751]:=$bc;
+valuelist256[752]:=$bc;
+valuelist256[753]:=$c6;
+valuelist256[754]:=$c6;
+valuelist256[755]:=$c6;
+valuelist256[756]:=$d0;
+valuelist256[757]:=$d0;
+valuelist256[758]:=$d0;
+valuelist256[759]:=$da;
+
+valuelist256[760]:=$da;
+valuelist256[761]:=$da;
+valuelist256[762]:=$e4;
+valuelist256[763]:=$e4;
+valuelist256[764]:=$e4;
+valuelist256[765]:=$ee;
+valuelist256[766]:=$ee;
+valuelist256[767]:=$ee;
+
+//correct for the wonky cga palette
+
+   i:=0;
+   num:=0; 
+   repeat 
+      Tpalette16.colors[num]^.r:=valuelist256[i];
+      Tpalette16.colors[num]^.g:=valuelist256[i+1];
+      Tpalette16.colors[num]^.b:=valuelist256[i+2];
+      Tpalette16.colors[num]^.a:=$ff;
+      inc(i,3);
+      inc(num); 
+  until num=7;
+
+   i:=25;
+   num:=8; 
+   repeat 
+      Tpalette256.colors[num]^.r:=valuelist256[i];
+      Tpalette256.colors[num]^.g:=valuelist256[i+1];
+      Tpalette256.colors[num]^.b:=valuelist256[i+2];
+      Tpalette256.colors[num]^.a:=$7f;
+      inc(i,3);
+      inc(num); 
+  until num=14;
+
+  //white
+      Tpalette256.colors[15]^.r:=$ff;
+      Tpalette256.colors[15]^.g:=$ff;
+      Tpalette256.colors[15]^.b:=$ff;
+      Tpalette256.colors[15]^.a:=$ff;
+  
+//continue w rest of colors
+
+   i:=48;
+   num:=16; 
+   repeat
+      Tpalette256.colors[num]^.r:=valuelist256[i];
+      Tpalette256.colors[num]^.g:=valuelist256[i+1];
+      Tpalette256.colors[num]^.b:=valuelist256[i+2];
+      Tpalette256.colors[num]^.a:=$ff; 
+      inc(i,3);
+      inc(num); 
+  until num=767;
+
+	
+end;
+
+
+//supply a filename like:
+// yes, you should be using long file names
+// PAL256C.dat or PAL256BW.dat
+
+//(dont make me duplicate code to change two lines)
+
+procedure Save256Palette(filename:string);
+
+Var
+	palette256File  : File of TRec256;
+	i,num            : integer;
+
+Begin
+
+    //save us a lot of code and work
+    initPalette256;
+	Assign(palette256File, filename);
+	ReWrite(palette256File);
+
+	Write(palette256File, TPalette256); 
+	Close(palette256File);
+	
+End;
+
+
+procedure Read256Palette(filename:string; ReadColorFile:boolean);
+
+Var
+	palette256File  : File of TRec256;
+	i,num            : integer;
+    palette: PSDL_Palette;
+
+Begin
+	Assign(palette256File, filename);
+	ReSet(palette256File);
+    Seek(palette256File, 0); //find first record
+
+	Read(palette256File, TPalette256); 
+	Close(palette256File);	
+	
+//TODO: set palette (GL)	
+
+end;
+
+//initgraph
+//setgraphmide
+//detectGraphicsModes
+
+//etc go here.
+
+{
+
+Colors are bit banged to hell and back.
+
+type
+
+SDL_Color=record (internal definition)
+
+	r:byte; //UInt8 in C
+	g:byte;
+	b:byte;
+	a:byte; 
+
+end;
+
+PSDL_Color =array [0..3] of PUInt8; //(BytePtr)
+
+{
+r:=PSDL_Color^
+g:=PSDL_Color^[1]
+b:=PSDL_Color^[2]
+a:=PSDL_Color^[3]
+
+(its a c-like hack that works)
+
+
+24 bit and awkward modes:
+Tuples (just RGB values) dont exist in Pascal(or C).Its a Python Thing.
+*FIXED : 3/8/19  
+
+
+Colors:
+
+(try not to confuse BIT with BYTE here)
+
+4bit(16 color) has to be mapped into RGB 8-bit colors(limited palette, not full)
+ByteMask of 0f/f0 is traditionally used in the past because RGBA color modes didnt exist yet.
+
+Alpha:(this is weird implementation but it works)
+
+ff means use full color output
+7f can be used as half-shading-giving us RGBI siulation
+00 means "dont write the color"
+
+
+8bit-(256 color) is paletted RGB mode (1:1:1)
+	-this is the last paletted mode
+
+JPEG format uses a 256 color palette(even a modified one).
+Jpeg2000 uses 12bit
+
+---
+4bit(16)->8bit(256):
+
+NO CHANGE, just switch palettes.
+
+
+	just use the first 16 colors of the palette and add more colors to it
+	its easier to not do 4bit conversion, but use 8bit color and convert that.
+
+	- is it possible the original 16 colors can point elsewhere- yes, 
+	but that would de-standardize "upscaling the colors"
+
+Downsizing bits:
+
+-you cant put whats not there- you can only "dither down" or "fake it" by using "odd patterns".
+what this is -is tricking your eyes with "almost similar pixel data".
+
+
+32bit to 16bit RGB 565:
+//drop the LSB
+
+NewR: = R shr 3;
+NewG: = G shr 2;
+NewB: = B shr 3;
+NewA:=$ff;
+
+16bit(565) can also be 15bit color(5551):
+
+mode 5551: 
+ 	ff or 7f for the last byte(not bit)
+	we still have 32K colors, just two sets -light and dark-like 16 color mode but with more colors
+
+RGB16->32:
+
+NewR: =R shl 3;
+NewG: =G shl 2;
+NewB: =B shl 3 ;
+NewA:=A;
+
+}
+
+
+//semi-generic color functions
+
+
+function GetRGBfromIndex(index:byte):PSDL_Color; 
+//if its indexed- we have the rgb definition already!!
+
+var
+   somecolor:PSDL_Color;
+   
+begin
+  if bpp=8 then begin
+
+    if MaxColors =16 then
+	      somecolor:=Tpalette16.colors[index] //literally get the SDL_color from the index
+    else if MaxColors=256 then
+	      somecolor:=Tpalette256.colors[index]; 
+    GetRGBFromIndex:=somecolor;
+  end else begin
+    if IsConsoleInvoked then
+		writeln('Attempt to fetch RGB from non-Indexed color.Wrong routine called.');
+   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to fetch RGB from non-Indexed color.Wrong routine called.','OK',NIL); 
+   
+    exit;
+  end;
+end;
+
+function GetDWordfromIndex(index:byte):DWord; 
+//if its indexed- we have the rgb definition already!!
+
+var
+   somecolor:DWord;
+   
+begin
+  if bpp=8 then begin
+    if MaxColors =16 then
+	      somecolor:=Tpalette16.DWords[index] //literally get the DWord from the index
+    else if MaxColors=256 then
+	      somecolor:=Tpalette256.DWords[index]; 
+    
+   GetDWordFromIndex:=somecolor;
+  end else begin
+      if IsConsoleInvoked then
+	    	writeln('Attempt to fetch indexed DWord from non-indexed color');
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to fetch indexed DWord from non-indexed color','OK',NIL); 
+      exit;
+
+  end;
+end;
+
+
+//get the last color set
+
+function GetFgRGB:PSDL_Color;
+var
+  color:PSDL_Color;
+  r,g,b,a:PUInt8;
+
+
+begin
+	SDL_GetRenderDrawColor(renderer,r,g,b,a);
+    color^.r:=byte(^r);
+    color^.g:=byte(^g);
+    color^.b:=byte(^b);
+    color^.a:= $ff;
+    GetFgRGB:=color; 
+end;
+
+function GetFgRGBA:PSDL_Color;
+
+var
+  color:PSDL_Color;
+  r,g,b,a:PUInt8;
+
+
+begin
+	SDL_GetRenderDrawColor(renderer,r,g,b,a);
+    color^.r:=byte(^r);
+    color^.g:=byte(^g);
+    color^.b:=byte(^b);
+    color^.a:= byte(^a);
+    GetFgRGBA:=color; 
+
+end;
+
+//give me the name(string) of the current fg or bg color (paletted modes only) from the screen
+
+function GetFGName:string;
+
+var
+   i:byte;
+   somecolor:PSDL_Color;
+   someDWord:DWord;
+
+begin
+   if (MaxColors> 256) then begin
+
+      If IsConsoleInvoked then
+			Writeln('Cant Get color name from an RGB mode colors.');
+	  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get color name from an RGB mode colors.','OK',NIL);
+	  exit;
+   end;
+   i:=0;
+   i:=GetFGColorIndex;
+
+   if MaxColors=256 then begin
+	      GetFGName:=GEtEnumName(typeinfo(TPalette256Names),ord(i));
+		  exit;
+   end else if MaxColors=64 then begin
+	      GetFGName:=GEtEnumName(typeinfo(TPalette16Names),ord(i));
+		  exit;
+   end;	
+
+end;
+
+
+function GetBGName:string;
+
+var
+   i:byte;
+   somecolor:PSDL_Color;
+   someDWord:DWord;
+
+begin
+   if (MaxColors> 256) then begin
+
+      If IsConsoleInvoked then
+			Writeln('Cant Get color name from an RGB mode colors.');
+	  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get color name from an RGB mode colors.','OK',NIL);
+	  exit;
+   end;
+   i:=0;
+   i:=GetBGColorIndex;
+
+   if MaxColors=256 then begin
+	      GetBGName:=GEtEnumName(typeinfo(TPalette256Names),ord(i));
+		  exit;
+   end else if MaxColors=64 then begin
+	      GetBGName:=GEtEnumName(typeinfo(TPalette16Names),ord(i));
+		  exit;
+   end;	
+
+end;
+
+
+//returns the current color index
+//BG is the tricky part- we need to have set something previously.
+
+function GetBGColorIndex:byte;
+
+var
+   i:integer;
+
+begin
+     
+     if MaxColors=64 then begin
+     i:=0;
+        repeat
+	        if TPalette16.dwords[i]= _bgcolor then begin
+		        GetBGColorIndex:=i;
+			    exit;
+            end;
+            inc(i);
+       until i=15;
+    end;
+     
+     if MaxColors=256 then begin
+       i:=0; 
+       repeat
+	        if TPalette256.dwords[i]= _bgcolor then begin
+		        GetBGColorIndex:=i;
+			    exit;
+            end;
+            inc(i);
+       until i=255;
+
+	 end else begin
+		If IsConsoleInvoked then
+			Writeln('Cant Get index from an RGB mode (or non-palette) colors.');
+	    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get index from an RGB mode (or non-palette) colors.','OK',NIL);
+		exit;
+	 end;
+end;
+
+
+function GetFGColorIndex:byte;
+
+var
+   i:integer;
+   someColor:PSDL_Color;
+   r,g,b,a:PUInt8;
+
+begin
+    SDL_GetRenderDrawColor(renderer,r,g,b,a); //returns SDL color but we want a DWord of it
+    somecolor^.r:=byte(^r);
+    somecolor^.g:=byte(^g);
+    somecolor^.b:=byte(^b);
+    somecolor^.a:= $ff;
+     
+     if MaxColors=64 then begin
+       i:=0;  
+       repeat
+	        if ((TPalette16.colors[i]^.r=somecolor^.r) and (TPalette16.colors[i]^.g=somecolor^.g) and (TPalette16.colors[i]^.b=somecolor^.b))  then begin
+		        GetFGColorIndex:=i;
+			    exit;
+            end;
+            inc(i);
+       until i=15;
+     end;
+     
+     if MaxColors=256 then begin
+       i:=0; 
+       repeat
+	        if ((TPalette256.colors[i]^.r=somecolor^.r) and (TPalette256.colors[i]^.g=somecolor^.g) and (TPalette256.colors[i]^.b=somecolor^.b))  then begin
+		        GetFGColorIndex:=i;
+			    exit;
+            end;
+            inc(i);
+       until i=255;
+
+	 end else begin
+		If IsConsoleInvoked then
+			Writeln('Cant Get index from an RGB mode colors.');
+
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get index from an RGB mode colors.','OK',NIL);
+		exit;
+	 end;
+end;
+
+
+{
+How to implement "turtle graphics":
+
+on start( the end of initgraph): 
+
+show a turtle in center of the screen as a "mouse cursor"
+and give user option of "mouse"(pen) or keyboard for input(or assume it)
+
+
+PenUp -(GotoXY and wait for PenDown to be called)
+PenDown -(Line x,y from relx,rely and wait for penUp to be called)
+
+
+are the only routines we need.
+
+to exit:
+
+InTurtleGraphics:=false;
+SDL_RenderClear;
+
+closeGraph when done.
+
+However- this was before the era of the mouse and we can do better in SDL.
+
+Create a "clickable canvas".
+
+PenDown is DownMouseButton[x]
+PenUp is UpMouseButton[x]
+
+- (you are drawing with the mouse, not the keyboard.)
+- this demo has been done.
+
+(easily catchable in the event handler)
+
+}
+
+
+//"overloading" make things so much easier for us....
+
+//sets pen color given an indexed input
+procedure setFGColor(color:byte);
+var
+	colorToSet:PSDL_Color;
+    r,g,b:PUInt8;
+begin
+
+   if MaxColors=256 then begin
+        colorToSet:=Tpalette256.colors[color];
+        SDL_SetRenderDrawColor( Renderer, ord(colorToSet^.r), ord(colorToSet^.g), ord(colorToSet^.b), 255 ); 
+   end else if MaxColors=64 then begin
+		colorToSet:=Tpalette16.colors[color];
+        SDL_SetRenderDrawColor( Renderer, ord(colorToSet^.r), ord(colorToSet^.g), ord(colorToSet^.b), 255 ); 
+   end;
+end;
+
+
+//sets pen color to given dword.
+procedure setFGColor(someDword:dword); overload;
+var
+    r,g,b:PUInt8;
+    somecolor:PSDL_Color;
+begin
+
+//again- as with below-
+//check bpp <=8 to see if we have the data already.
+
+
+   SDL_GetRGB(someDword,MainSurface^.format,r,g,b); //now gimmie the RGB pair of that color
+    somecolor^.r:=byte(^r);
+    somecolor^.g:=byte(^g);
+    somecolor^.b:=byte(^b);
+
+   SDL_SetRenderDrawColor( Renderer, ord(somecolor^.r), ord(somecolor^.g), ord(somecolor^.b), 255 ); 
+   
+end;
+
+procedure setFGColor(r,g,b:byte); overload;
+
+begin
+   SDL_SetRenderDrawColor( Renderer, ord(r), ord(g), ord(b), 255 ); 
+end;
+
+procedure setFGColor(r,g,b,a:byte); overload;
+
+begin
+   SDL_SetRenderDrawColor( Renderer, ord(r), ord(g), ord(b), ord(a)); 
+end;
+
+
+
+//sets background color based on index
+procedure setBGColor(index:byte);
+var
+	colorToSet:PSDL_Color;
+//if we dont store the value- we cant fetch it later on when we need it.
+begin
+
+    if MaxColors=256 then begin
+        colorToSet:=Tpalette256.colors[index];
+        _bgcolor:=Tpalette256.dwords[index]; //set here- fetch later
+	    SDL_SetRenderDrawColor( Renderer, ord(colorToSet^.r), ord(colorToSet^.g), ord(colorToSet^.b), 255 ); 
+	    SDL_RenderClear(Renderer);
+   end else if MaxColors=64 then begin 
+		colorToSet:=Tpalette16.colors[index];
+        _bgcolor:=Tpalette256.dwords[index]; //set here- fetch later
+   	    SDL_SetRenderDrawColor( Renderer, ord(colorToSet^.r), ord(colorToSet^.g), ord(colorToSet^.b), 255 ); 
+   	    SDL_RenderClear(Renderer);
+   end;
+end;
+
+procedure setBGColor(someDword:DWord); overload;
+var
+    r,g,b:PUInt8;
+	somecolor:PSDL_Color;
+
+begin
+
+    SDL_GetRGB(someDword,MainSurface^.format,r,g,b); //now gimmie the RGB pair of that color
+    somecolor^.r:=byte(^r);
+    somecolor^.g:=byte(^g);
+    somecolor^.b:=byte(^b);
+
+   _bgcolor:=someDword; //store the value
+   SDL_SetRenderDrawColor( Renderer, ord(somecolor^.r), ord(somecolor^.g), ord(somecolor^.b), 255 ); 
+   SDL_RenderClear(renderer);
+end;
+
+procedure setBGColor(r,g,b:word); overload;
+
+//bgcolor here and rgba *MAY* not match our palette..be advised.
+
+var
+ color:PSDL_Color;
+
+begin
+   _bgcolor:=SDL_MapRGB(MainSurface^.format,color^.r,color^.g,color^.b);
+   SDL_SetRenderDrawColor( Renderer, ord(color^.r), ord(color^.g), ord(color^.b), 255 ); 
+   SDL_RenderClear(renderer);
+end;
+
+procedure setBGColor(r,g,b,a:word); overload;
+
+var
+  color:PSDL_Color;
+
+begin
+   _bgcolor:=SDL_MapRGBA(MainSurface^.format,color^.r,color^.g,color^.b,color^.a);
+   SDL_SetRenderDrawColor( Renderer, ord(color^.r), ord(color^.g), ord(color^.b), ord(color^.a)); 
+   SDL_RenderClear(renderer);
+end;
+
+
+// ColorNameToNum(ColorName : string) : integer;
+//isnt needed anymore because enums carry a number for the defined "NAME".
+
+
+//remember: _fgcolor and _bgcolor are DWord(s).
+
+function GetFgDWordRGBA:DWord;
+
+var
+  somecolor:PSDL_Color;
+  r,g,b,a:PUint8;
+
+begin
+    if (bpp < 8) then begin
+        //error: not indexed color
+        exit; //rgba not supported
+    end;
+	SDL_GetRenderDrawColor(renderer,r,g,b,a);
+    somecolor^.r:=byte(^r);
+    somecolor^.g:=byte(^g);
+    somecolor^.b:=byte(^b);
+    somecolor^.a:=byte(^a);
+
+    GetFgDWordRGBA:=SDL_MapRGBA(MainSurface^.format,somecolor^.r,somecolor^.g,somecolor^.b,somecolor^.a); //gimmie the DWord instead
+end;
+
+//doesnt make sence w using _bgcolor as a DWord
+//only makes sense if you are using RGB or RGBA "tuples" instead of a Dword but wanted a DWord.
+//has a use but its limited.
+
+function GetBgDWordRGB(r,g,b:byte):DWord;
+
+begin
+//really rare case
+    if (MaxColors<=255) then exit; //use the other function for this
+       if IsConsoleInvoked then begin
+          LogLn('Trying to fetch background color -when we have it- in Paletted mode.');
+          writeln('We have the background color in paletted modes!');
+          exit;
+       end;
+       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'We already have the Background Color in Paletted mode.','OK',NIL);
+
+    GetBgDWordRGB:=SDL_MapRGB(MainSurface^.format,ord(r),ord(g),ord(b));    
+end;
+
+function GetBgDWordRGBA(r,g,b,a:byte):DWord;
+begin
+    GetBgDWordRGBA:=SDL_MapRGBA(MainSurface^.format,ord(r),ord(g),ord(b),ord(a)); //gimmie the DWord instead
+end;
+
+procedure invertColors;
+
+//so you see how to do manual shifting etc.. 
+var
+   r, g, b, a:PUInt8;
+   somecolor:PSDL_Color;
+begin
+
+	SDL_GetRenderDrawColor(renderer, r, g, b, a);
+
+    somecolor^.r:=byte(^r);
+    somecolor^.g:=byte(^g);
+    somecolor^.b:=byte(^b);
+    somecolor^.a:=byte(^a);
+
+	SDL_SetRenderDrawColor(renderer, 255 - somecolor^.r, 255 - somecolor^.g, 255 - somecolor^.b, somecolor^.a); 
+
+end;
+
+
 
 
 {$IFDEF mswindows}
@@ -1597,7 +4444,7 @@ begin
         LogLn('Attempting to clearscreen(index) with non-indexed data.');
         exit;
     end;
-    if MaxColors=16 then
+    if MaxColors=64 then
        somecolor:=Tpalette16.colors[index];
 
     if MaxColors=256 then
@@ -2191,7 +5038,7 @@ begin
 
 		8: begin
 			    if maxColors=256 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX8
-				else if maxColors=16 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX4MSB;
+				else if MaxColors=64 then MainSurface^.format:=SDL_PIXELFORMAT_INDEX4MSB;
 		end;
 		15: MainSurface^.format:=SDL_PIXELFORMAT_RGB555;
 
@@ -2982,7 +5829,7 @@ begin
     case bpp of
 		8: begin
 			    if maxColors=256 then format:=SDL_PIXELFORMAT_INDEX8
-				else if maxColors=16 then format:=SDL_PIXELFORMAT_INDEX4MSB;
+				else if MaxColors=64 then format:=SDL_PIXELFORMAT_INDEX4MSB;
 		end;
 		15: format:=SDL_PIXELFORMAT_RGB555;
 
@@ -2999,7 +5846,7 @@ begin
 
 
     //(we do this backwards....rendered to surface of the size of 1 pixel)
-    if ((MaxColors=256) or (MaxColors=16)) then TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 8, format)
+    if ((MaxColors=256) or (MaxColors=64)) then TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 8, format)
     //its weird...get 4bit indexed colors list in longword format but force me into 256 color mode???
 
     else if (MaxColors>256) then begin
@@ -3062,7 +5909,7 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
         //now take the longword output
 
           //check for the hidden 4bpp modes we made available
-          if MaxColors=16 then begin
+          if MaxColors=64 then begin
              index:=ord(Byte(^p));
              GetPixel:=Tpalette16.Dwords[index];
           end;
@@ -3226,18 +6073,19 @@ begin
 end;
 
 
-//FIXME:dont use Graphics_mode=detect for the moment.
-//(reqd fix for version 1.0)
-
 //we should limit detectGraph calls also and allow quick checks if libGfx is already active.
 
-Function detectGraph:byte; //should return max mode supported(enum value) -but cant be negative
-//called *once* per "graphics init"-which is only called if not active.
+Function detectGraph:byte; 
+//should return max mode supported(enum value) -but cant be negative
+//called *once* per "graphics init"-which is only called "if not active".
 
-//we detected a mode or we didnt. If we failed, exit. (we should have at least one graphics mode)
-//if we succeeeded- get the highest mode.
+//we detected a mode or we didnt. 
+//If we failed, exit. (we should have at least one graphics mode)
+//if we succeeeded- we already have the higest mode supported.
 
-//we only need the entire list (enum) while probing. The DATA is in the initgraph subroutine.
+//use xrandr for this. Its been done in C- lets do it in Pascal.
+
+//(nobody else has done this- much a talk about nothing)
 
 var
 
@@ -3245,69 +6093,627 @@ var
 
 begin
 
-//if InitGraph then...
-//(AND ONLY WHILE INITing....initgraph needs to call us)
+if ((IsGraphicsActive=false) and (InitGraph=true)) then begin//coming up
 
-{
-BAD C detected!
-
-this is the "shove a byte where a boolean goes bug" in C...(boolean words etc..)
-if its zero then its not ok. we dont want any other mode or similar mode...
-in this case-
-    if its 1, we found the mode.
-
-the trick is to prevent SDL from setting "whatever is closest"..we want this mode and only this...
-most people dont usually care but with the BGI -WE DO.
-
-SDL2:
-
-    How do we scan the unknown?
-    1- ask SDL for supported list of Modes supported (solve X by providing it)
-    2- we have to compare it to something. This is the puzzle-to what?
-        we are set higher than the mode we want. (We WANT the unsupported modes and depths)
-
-so- we get the current screen resolution and check if requested mode is smaller-if so, GOOD.
-(if its bigger, then we have a problem. DROP one mode with same color depth.)
+//pull the current mode from xrandr.
+//calls to detect graph ASSUME you want the highest mode available. 
+//(hint: its probly already set- but what is it?)
 
 
-}
 
-{    i:=(Ord(High(Graphics_Modes))-1)
-
-    //CurrentMode:=SDL_GetCurrentMode	
-	repeat
-
-   		testbpp:=SDL_VideoModeOK(modelist.width[i], modelist.height[i], modelist.bpp[i], _initflag); //flags from initgraph
-
-        //if Currentmode=ModeRequested (testbpp=1) then...
-	
-        if (testbpp=1) then begin
-
-            //initGraph just wants the number of the enum value, which we check for
-            DetectGraph:=byte(i);
-            exit;
-    	end;
-		dec(i);
-	until i:=1;
-    //there is still one mode remaining.
-	testbpp:=SDL_VideoModeOK(modelist.width[i], modelist.height[i], modelist.bpp[i], _initflag);		
-	if (testbpp=0) then begin //did we run out of modes?
-        if IsConsoleInvoked then
-            writeln('We ran out of modes to check.');
-            //LogLn('We ran out of modes to check.');
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There are no graphics modes available to set. Bailing..','OK',NIL);
-		CloseGraph;
-	end;
-	DetectGraph:=byte(i);
-
-	//usermode should be within these parameters, however, since that cant be checked for...
-	//why not just remove it(usermode)? [enforce sanity]
-    //otherwise we need to see if its valid data too....or skew up SDL window output and rendering.....
-    //-which is wrong.
-}
+//    DetectGraph:=;
+    exit;
+end else
+    //we already have the highest mode. Pull the stored variable.
+    DetectGraph:=HighestMode;
 
 end; //detectGraph
 
+{
+save/restore video states = saving to RAM, not DISK the current output(2d).
+This can use a BMP image record, etc.
+
+On TP7 this pushes/pops the text mode around init and close graph.
+whatever was on screen before the context switch is stored and reset
+(generally- its the same idea)
+
+
+however- we are in a windowing environment (usually).
+on init we tell that we want a window. Windows have drawables.
+We let GL make us a canvas to work with.
+
+since theres no text mode setup- theres nothing to store and recall
+
+THIS IS NOT TRUE is using framebuffered console output(DOS-ish crt).
+
+NOTE:
+    OSX prevents most users from running as single user-root.
+    Therefore you will NOT have a framebuffered console. This is for other unices.
+    
+
+these are basically the same within SDL code but its hidden from you.
+you need to know the depth in SDL because of bpp fiasco.
+
+what happens is this:
+    you are in 24 or 32bpp native but want a texture/surface with less data.
+    internally its still stored(byte packed as 24/32 bit data)
+    retrieving the data now results in the wrong data- you have to manipulate it back.
+        -this fucks with GetPixel
+
+SDL tries to alleiviate this headache- but inadvertently make more headache w SDL2 Textures.
+   while you can render to Texture(offscreen buffer, subwindow,tile) its often better just to update a BufferedRect. 
+
+}
+
+
+//this only works with RGB8888 mode
+function RGBToHex32(color:SDL_Color):DWord;
+begin
+{$ifndef mswindows}
+//RGBA
+    RGBToHex32 := (color^.r or (color^.g shl 8) or (color^.b shl 16) or (color^.a shl 24));
+{$endif}
+
+{$ifdef mswindows}
+//ABGR
+    RGBToHex32 := (color^.a or (color^.b shl 8) or (color^.g shl 16) or (color^.r shl 24));
+{$endif}
+end;
+
+function Hex32ToRGB(someDWord:DWord):SDL_Color;
+var
+    red,green,blue,alpha:byte;
+    someColor:SDL_Color;
+begin
+
+//RGBA Mask
+
+{$ifdef mswindows}
+//use a color mask and fetch only that data, then put it into a byte.
+   someColor^.r := (colour & 0xFF000000) >> 16;
+   someColor^.g := (colour & 0x00FF0000) >> 16;
+   someColor^.b := (colour & 0x0000FF00) >> 16;
+   someColor^.a := (colour & 0x000000FF) >> 16;
+{$endif}
+
+{$ifdef mswindows}
+   someColor^.r :=   (colour & 0x000000FF) >> 16;
+   someColor^.g := (colour & 0x0000FF00) >> 16;
+   someColor^.b :=  (colour & 0x00FF0000) >> 16;
+   someColor^.a := (colour & 0xFF000000) >> 16;
+
+{$endif}
+
+  Hex32ToRGB:=someColor;
+end;
+
+
+procedure saveVideoState;
+//leaving text mode for graphics mode
+begin
+{$ifndef fallback}
+    LogLn('function not implemented: restoreVideoState. Nothing to save.');
+{$endif}
+
+end;
+
+procedure restoreVideoState;
+//leaving graphics mode for text mode
+begin
+{$ifndef fallback}
+    LogLn('function not implemented: restoreVideoState. Nothing to restore.');
+{$endif}
+
+end;
+
+{
+//CGA is a RPITA- you probly want EGA.
+
+//pallettes h:
+
+var
+    CGAPalette: array [0..3] of palette4; //we have 4 -4bit pallettes
+    
+procedure initCGAPalette0;
+
+begin
+        palette4^.DWords[1]:=
+        palette4^.DWords[2]:=
+        palette4^.DWords[3]:=
+        
+        palette4^.colors[1]^.r:=
+        palette4^.colors[1]^.g:=
+        palette4^.colors[1]^.b:=
+
+        palette4^.colors[2]^.r:=
+        palette4^.colors[2]^.g:=
+        palette4^.colors[2]^.b:=
+
+        palette4^.colors[3]^.r:=
+        palette4^.colors[3]^.g:=
+        palette4^.colors[3]^.b:=
+
+//set OpenGL palette entry 0..3
+
+end;
+
+procedure initCGAPalette1;
+
+begin
+        palette4^.DWords[1]:=
+        palette4^.DWords[2]:=
+        palette4^.DWords[3]:=
+        
+        palette4^.colors[1]^.r:=
+        palette4^.colors[1]^.g:=
+        palette4^.colors[1]^.b:=
+
+        palette4^.colors[2]^.r:=
+        palette4^.colors[2]^.g:=
+        palette4^.colors[2]^.b:=
+
+        palette4^.colors[3]^.r:=
+        palette4^.colors[3]^.g:=
+        palette4^.colors[3]^.b:=
+
+//set OpenGL palette entry 0..3
+
+end;
+
+procedure initCGAPalette2;
+
+begin
+        palette4^.DWords[1]:=
+        palette4^.DWords[2]:=
+        palette4^.DWords[3]:=
+        
+        palette4^.colors[1]^.r:=
+        palette4^.colors[1]^.g:=
+        palette4^.colors[1]^.b:=
+
+        palette4^.colors[2]^.r:=
+        palette4^.colors[2]^.g:=
+        palette4^.colors[2]^.b:=
+
+        palette4^.colors[3]^.r:=
+        palette4^.colors[3]^.g:=
+        palette4^.colors[3]^.b:=
+
+//set OpenGL palette entry 0..3
+
+end;
+
+procedure initCGAPalette3;
+
+begin
+        palette4^.DWords[1]:=
+        palette4^.DWords[2]:=
+        palette4^.DWords[3]:=
+        
+        palette4^.colors[1]^.r:=
+        palette4^.colors[1]^.g:=
+        palette4^.colors[1]^.b:=
+
+        palette4^.colors[2]^.r:=
+        palette4^.colors[2]^.g:=
+        palette4^.colors[2]^.b:=
+
+        palette4^.colors[3]^.r:=
+        palette4^.colors[3]^.g:=
+        palette4^.colors[3]^.b:=
+
+//set OpenGL palette entry 0..3
+
+end;
+
+//initgraph:
+
+    case bpp of:
+        4: case CGAMode of
+                //get the requested resolution
+
+                0: initCGAPalette0;
+                1: initCGAPalette1;
+                2: initCGAPalette2;
+                3: initCGAPalette3;
+          end else begin  
+            LogLn('invalid CGA palette mode-initgraph aborting');
+            exit;
+          end;  
+
+
+var
+    pixels: array [0..( texWidth * texHeight * 4 )] of byte;
+
+}
+
+//B+W=1bit
+
+//1/4 of available palette used:
+//CGA modes=2bit (only 4 colors used out of 16)
+//EGA modes=4bit (only 16 colors used out of 64)
+
+
+//4 and 8 bits modes:
+//we have to get a longword in 24+ bpp color mode - from the "screen context"
+//then pull the "RGB pair" out of the palette somehow
+
+{
+SDL wont support this, but OpenGL will:
+64bit color.
+
+RGBA64 =record
+        R, G, B, A :Word; 
+end;
+
+}
+
+function RGB4FromLongWord(Someword:Longword):SDL_Color;
+
+begin
+var
+    LoColor,color:SDL_Color;
+    index:=byte;
+
+begin
+
+{
+method 1:
+
+fetch DWord, break it apart, check wether it complies with 4bit specs
+its either high or low intensity
+
+ Abit:= (SomeDWord and $ff);
+ if ((Abit and 8)!=0) then 
+    color^.a:=$ff 
+ else 
+    color^.a:=$7f;
+
+ Rbit:= (someword shr 24) mod 255;
+ if ((Rbit and 4)!=0) then 
+    color^.r:=RBit +191; 
+ else 
+    color^.r:=RBit;
+
+ Gbit:= (((someword shr 16) and $ff) mod 255);
+ if ((Gbit and 4)!=0) then 
+    color^.r:=GBit +191; 
+ else 
+    color^.r:=GBit;
+
+ Bbit:= ((someword shr 8 and $ff) mod 255);
+ if ((Bbit and 4)!=0) then 
+    color^.r:=BBit +191; 
+ else 
+    color^.r:=BBit;
+
+Method 2:
+    just check the damn palette Dword entries. (or the on-the-fly converted values thereof)
+}
+
+    if MaxColors =4 then begin
+        x:=0;
+        repeat
+            if  ((RGBToHex32(palette4^.Colors[x])=SomeWord) then begin //we found a match
+                 RGB4FromLongWord:= palette4^.colors[x];
+                 exit;
+            end;
+            inc(x);
+        until x=4;
+        else begin //data invalid
+             color^.r := $00;
+             color^.g:= $00;
+             color^.b:= $00;
+             color^.a:= $00;
+            RGB4FromLongWord:= color;
+            exit;
+        end;
+    end;
+
+    if MaxColors =16 then begin
+        //use the DWord to check the limited pallette for a match. Do not shift splitRGB values.
+        x:=0;
+        repeat
+            if  ((RGBToHex32(palette16^.Colors[x])=SomeWord) then begin //we found a match
+                 RGB4FromLongWord:= color;
+                 exit;
+            end;
+            inc(x);
+        until x=16;
+    end else begin //data invalid
+             color^.r := $00;
+             color^.g:= $00;
+             color^.b:= $00;
+             color^.a:= $00;
+            RGB4FromLongWord:= color;
+            exit;
+    end;
+
+
+end;
+
+function RGB8FromLongWord(Someword:Longword):SDL_Color
+var
+    color:SDL_Color;
+begin
+
+{$ifndef mswindows}
+
+//get the DWord
+    color^.r:= (someword shr 24) mod 255;
+    color^.g:= (((someword shr 16) and $ff) mod 255);
+    color^.b:= ((someword shr 8 and $ff) mod 255);
+    color^.a:= $ff;
+{$endif}
+
+
+{$ifdef mswindows}
+//windows stores it backwards for the GPU
+//get the DWord
+    color^.b:= (someword shr 16) mod 255;
+    color^.g:= (((someword shr 8) and $ff) mod 255);
+    color^.r:= ((someword and $ff) mod 255);
+    color^.a:=$ff;
+
+{$endif}    
+
+    
+//CGA,EGA is 4bit, not 8. That was a SDL hack.
+
+    if MaxColors=256 then begin
+    //to save time - and hell on me- let use the RGB pair from the DWord and compare it to whats in the palette, unshifted.
+        x:=0;
+        repeat
+            if  (palette256^.colors[x]^.r=color^.r) and (palette256^.colors[x]^.g=color^.g) and (palette256^.colors[x]^.b=color^.b) then begin
+                RGB8FromLongWord:= color;
+                exit;
+            end;
+            inc(x);
+        until x=256;
+    end else begin //data invalid
+             color^.r := $00;
+             color^.g:= $00;
+             color^.b:= $00;
+             color^.a:= $00;
+            RGB8FromLongWord:= color;
+    end;
+end;
+
+//if you get hell- you shouldnt- take off the 255 limiter
+
+function RGB5551FromLongWord(Someword:Longword):SDL_Color;
+var
+    HiWord:Word;
+    color:SDL_Color;
+begin
+
+{$ifndef mswindows}
+
+//get the DWord
+    color^.r:= (someword shr 16) mod 255;
+    color^.g:= (((someword shr 8) and $ff) mod 255);
+    color^.b:= ((someword and $ff) mod 255);
+    color^.a:=$ff;
+{$endif}
+
+
+{$ifdef mswindows}
+//windows stores it backwards for the GPU
+//get the DWord
+    color^.b:= (someword shr 16) mod 255;
+    color^.g:= (((someword shr 8) and $ff) mod 255);
+    color^.r:= ((someword and $ff) mod 255);
+    color^.a:=$ff;
+
+{$endif}
+
+//333 mod
+
+    color^.r:= color^.r shr 3;
+    color^.g:= color^.g shr 3;
+    color^.b:= color^.b shr 3;
+
+    RGB5551FromLongWord:=color;
+end;
+
+function RGB565FromLongWord(Someword:Longword):SDL_Color;
+var
+    HiWord:Word;
+    color:SDL_Color;
+begin
+{$ifndef mswindows}
+
+//get the DWord
+    color^.r:= (someword shr 16) mod 255;
+    color^.g:= (((someword shr 8) and $ff) mod 255);
+    color^.b:= ((someword and $ff) mod 255);
+    color^.a:=$ff;
+{$endif}
+
+
+{$ifdef mswindows}
+//windows stores it backwards for the GPU
+//get the DWord
+    color^.b:= (someword shr 16) mod 255;
+    color^.g:= (((someword shr 8) and $ff) mod 255);
+    color^.r:= ((someword and $ff) mod 255);
+    color^.a:=$ff;
+
+{$endif}
+//323 mod
+    color^.r:= color^.r shr 3;
+    color^.g:= color^.g shr 2;
+    color^.b:= color^.b shr 3;
+
+    RGB565FromLongWord:=color;
+end;
+
+//theres no alpha bit here
+function RGBFromLongWord24(SomeDWord:LongWord):SDL_Color;
+
+var
+    color:SDL_Color;
+
+begin
+{$ifndef mswindows}
+
+
+//get the DWord
+    color^.r:= (someword shr 24) mod 255;
+    color^.g:= (((someword shr 16) and $ff) mod 255);
+    color^.b:= ((someword shr 8 and $ff) mod 255);
+    color^.a:= $ff;
+{$endif}
+
+
+{$ifdef mswindows}
+//windows stores it backwards for the GPU
+//get the DWord
+    color^.b:= (someword shr 16) mod 255;
+    color^.g:= (((someword shr 8) and $ff) mod 255);
+    color^.r:= ((someword and $ff) mod 255);
+    color^.a:=$ff;
+
+{$endif}    
+
+    RGBFromLongWord:=color;
+end;
+
+//there IS an alpha bit here
+function RGBAFromLongWord(SomeDWord:LongWord):SDL_Color;
+
+var
+    color:SDL_Color;
+
+begin
+
+{$ifndef mswindows}
+
+    color^.r:= (someword shr 24) mod 255;
+    color^.g:= (((someword shr 16) and $ff) mod 255);
+    color^.b:= ((someword shr 8 and $ff) mod 255);
+    color^.a:= (someword and $ff);
+
+{$endif}
+
+
+{$ifdef mswindows}
+//windows stores it backwards for the GPU
+//get the DWord
+    color^.b:= (someword shr 24) mod 255;
+    color^.g:= (((someword shr 16) and $ff) mod 255);
+    color^.r:= ((someword shr 8 and $ff) mod 255);
+    color^.a:= (someword and $ff);
+
+{$endif}
+    RGBFromLongWord:=color;
+end;
+
+
+
+{
+putpixel (2D coords in a 1d array):
+
+(x+y*pitch)
+
+  case CurrentWriteMode of
+    XORPut:
+      begin
+        pixels[x+y*PTCWidth] := pixels[x+y*PTCWidth] xor CurrentColor;
+      end;
+    OrPut:
+      begin
+        pixels[x+y*PTCWidth] := pixels[x+y*PTCWidth] or CurrentColor;
+      end;
+    AndPut:
+      begin
+        pixels[x+y*PTCWidth] := pixels[x+y*PTCWidth] and CurrentColor;
+      end;
+    NotPut:
+      begin
+        pixels[x+y*PTCWidth] := CurrentColor xor $FFFF; //32: FFFFFFFF
+      end
+  else
+    pixels[x+y*PTCWidth] := CurrentColor;
+  end;
+}
+
+function getPixel(x,y:word):SDL_Color;
+
+begin
+
+    case bpp of:
+
+    //these top two have to fetch exactly our palette definitions
+        4:
+            GetPixel:=RGB4FromLongWord(pixels[x*y*4]);
+        8:
+            GetPixel:=RGB8FromLongWord(pixels[x*y*4]);
+
+    //these dont have palettes, but are limited
+    //5551 or 565?- make sure data is in the right format
+
+        15: 
+            GetPixel:=RGB5551FromLongWord(pixels[x*y*4]);
+        16:
+            GetPixel:=RGB565FromLongWord(pixels[x*y*4]);
+
+    //these two fetch the same, 32bit can have alpha-bit set different then $ff    
+
+        24:
+            GetPixel:=RGBFromLongWord24(pixels[x*y*4]);
+
+        32:
+            GetPixel:=RGBAFromLongWord(pixels[x*y*4]);
+
+    end; //case
+
+end;
+
+}
+
+
+//hex value, not palette number
+function EGAtoVGA(color: LongWord): LongWord;
+begin
+  EGAtoVGA := color shl 2;
+end;
+
+{
+surface/texture locking:
+
+you cant update a surface/texture while rendering to it.
+Generally not a problem w either the backbuffer- or 2D rendering in general
+
+This is only an issue if you update (screen refresh) and dont bother to check if you are currently rendering.
+What you do is set a "Paused or RenderingDone flag" instead and avoid all of the un-necessary "fiasco code".
+
+**boolean FLAGS save your ass every time**
+
+}
+
+//PasPTC uses these for another use- we can use fat pixels or 2x2 scaling (and possible AA smoothing) instead.
+//I dont care if your are in FS or not
+
+//you would be quadupling CGA resolutions- which is why EGA is generally used instead.
+
+//test if these modes are set
+function Double320x200: Boolean;
+begin
+  Double320x200 := ((MaxX=320) and (MaxY=200) and (DoubleSize=true));
+end;
+
+function Double320x240: Boolean;
+begin
+  Double320x240 := ((MaxX=320) and (MaxY=240) and (DoubleSize=true));
+end;
+
+//fpc modified (freed) from Lazarus (G)oop
+procedure FreeAndNil(q:Pointer);
+begin
+  q:= Nil;
+  Dispose(q);
+end;
 
 function getmaxmode:string;
 var
@@ -3322,6 +6728,7 @@ end;
 
 //the only real use for the "driver" setting...
 procedure getmoderange(graphdriver:integer);
+//cga/ega are off now...
 
 begin
 
@@ -3367,7 +6774,7 @@ function cloneSurface(surface1:PSDL_Surface):PSDL_Surface;
 //Lets take the surface to the copy machine...
 
 begin
-    cloneSurface := SDL_ConvertSurface(Surface1, Surface1^.format, Surface1^.flags);
+    cloneSurface := Surface1;
 end;
 
 {viewports-
@@ -3378,6 +6785,34 @@ end;
 this might not be BGI spec- but it makes sense.
 
 }
+
+//create a shrunken viewport within the screen - like your bios boot logo-
+// but set background color to background color(its only black if not changed).
+procedure BGColorBorderViewPort(Rect:SDLRect);
+
+begin
+    setViewport(0,0,MaxX,MaxY);
+    if Rect^.x >0 and Rect^.x >0 and Rect^.w < MaxX and Rect^.h < MaxY then begin
+        glClearColor(_bgcolor^.r,_bgcolor^.g,_bgcolor^.b, $FF);
+        setViewPort(Rect^.x, Rect^.y,Rect^.w, Rect^.h);
+    end else 
+        exit;
+end;
+
+
+//create a shrunken viewport within the screen - like your bios boot logo-
+// but set background color to something other than black.
+procedure ColorBorderViewPort(Rect:SDLRect; color:SDL_Color);
+
+begin
+    setViewport(0,0,MaxX,MaxY);
+    if Rect^.x >0 and Rect^.x >0 and Rect^.w < MaxX and Rect^.h < MaxY then begin
+        glClearColor(color^.r,color^.g,color^.b,color^.a);
+        setViewPort(Rect^.x, Rect^.y,Rect^.w, Rect^.h);
+    end else 
+        exit;
+end;
+
 
 procedure SetViewPort(Rect:PSDL_Rect);
 
@@ -3450,7 +6885,7 @@ end;
 procedure RemoveViewPort(windownumber:byte);
 //the opposite of above...
 //set the last window coords..(we might be trying to write to them)
-//and redraw the prior window as if the new one was not there(not an easy task).
+//and redraw the prior window (from a texture or the camera angle) as if the last window was not there.
 var
   ThisRect,LastRect:PSDL_Rect;
 
@@ -3515,7 +6950,7 @@ end;
 
 
 //compatibility
-//these were hooks to load or unload "driver support code modules" (mostly for DOS)
+
 procedure InstallUserDriver(Name: string; AutoDetectPtr: Pointer);
 begin
     {$ifdef lcl}
@@ -3526,7 +6961,7 @@ begin
 end;
 
 procedure RegisterBGIDriver(driver: pointer);
-
+//the only way possible was for DOS.
 begin
     {$ifdef lcl}
 			ShowMessage('Function No longer supported: RegisterBGIDriver');
@@ -3542,6 +6977,7 @@ function GetMaxColor: word;
 //This gives you the HUMAN READABLE MAX amount of colors available.
 
 begin
+//bpp sets this
       GetMaxColor:=MaxColors+1; // based on an index of zero so add one 255=>256
 end;
 
@@ -3580,13 +7016,15 @@ end;
 //linestyle is: (patten,thickness) "passed together" (QUE)
 //this uses thickness variable only
 
-procedure PlotPixelWNeighbors(x,y:integer);
+procedure PlotPixelWNeighbors(x,y:integer; TurnSmoothingOn:boolean);
 //this makes the bigger Pixels
 
 // (in other words "blocky bullet holes"...)
-// EXPERT topic: smoothing reduces jagged edges
 
 begin
+//if turnsmoothingon then
+// GL_Enable(smooth);
+
    //more efficient to render a Rect.
 
    New(Rect);
@@ -3633,6 +7071,11 @@ begin
 			y:=y+8;
        end;
    end;
+
+//if turnsmoothingon then
+// GL_Disable(smooth);
+
+
 end;
 
 
@@ -3677,8 +7120,7 @@ begin
 end;
 
 
-//note this function is "slow ASS"
-
+//output is a pointer to an array of colors inside given Rect.
 
 function GetPixels(Rect:PSDL_Rect):pointer;
 //this does NOT return a single pixel by default and is written intentionally that way.
@@ -3726,7 +7168,7 @@ begin
     case bpp of
 		8: begin
 			    if maxColors=256 then format:=SDL_PIXELFORMAT_INDEX8
-				else if maxColors=16 then format:=SDL_PIXELFORMAT_INDEX4MSB;
+				else if MaxColors=64 then format:=SDL_PIXELFORMAT_INDEX4MSB;
 		end;
 		15: format:=SDL_PIXELFORMAT_RGB555;
 
@@ -3762,19 +7204,20 @@ begin
 end;
 
 //gotoxy
-   Procedure MoveTo(X,Y: smallint);
-  {********************************************************}
-  { Procedure MoveTo()                                     }
-  {--------------------------------------------------------}
-  { Moves the current pointer in VIEWPORT relative         }
-  { coordinates to the specified X,Y coordinate.           }
-  {********************************************************}
-    Begin
+Procedure MoveTo(X,Y: smallint);
+//precursor to functions that dont explicity use XY. 
+//Rather they assume XY is set before(which is wrong)
+
+//there is no GOTOXY in graphics modes as per BGI spec- and Im not rewriting the spec.
+Begin
      where.X := X;
      where.Y := Y;
-    end;
+end;
 
-//utility function(DWord to float)
+
+//utility functions:
+
+//(DWord to float)
 function DWordToSingle(Data: DWord; EndianSwap: Boolean): Single;
 
 var
@@ -3784,20 +7227,22 @@ begin
    if EndianSwap then
 		SwapEndian(DWord(Data));
 
-   Result := ASingle;
+   DWordToSingle := ASingle;
 end;
 
 begin  //main()
+{$IFDEF debug}
+        Log:=true; //we have output window in DEBUG mode (in windows too!)
+{$ENDIF}
 
 //while I dont like the assumption that all linux apps are console apps- technically its true.
 
 {$IFDEF LCL}
-        Log:=true; //we have output window in DEBUG mode (in windows too!)
 		IsConsoleInvoked:=false; //ui app- NO CONSOLE AVAILABLE
 {$ENDIF}
 
 {$IFDEF mswindows}
-	if (not IsWindowsXP) or (not IsVistaOrGreater) then
+	if ((not IsWindowsXP) or (not IsVistaOrGreater)) then
 		LogLn('OpenGL 2.0+ not detected on Windows or not running in Win32 environment.');
 		LogLn('Try SDL v.1 routines on these platforms.');
 		LogLN('Laz Gfx refusing to run.');
@@ -3809,6 +7254,7 @@ begin  //main()
 
   if (GetEnvironmentVariable('DISPLAY') = '') then begin //init frameBuffer code here
 
+//insert libPTC or fbGFX here
 
 //old behaviour
     LogLN('X11 has not fired. Bailing.');	

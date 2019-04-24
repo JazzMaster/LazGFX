@@ -40,11 +40,11 @@ Default 2D target is OpenGL via freeGLUT
 MAY also use as a fallback(slow):
 
         Framebuffer(No X11)
-        Dos (libPTC)
-        WinAPI (needs a rewrite)
-        libX11 (primitives)
+        WinAPI (needs a rewrite) / libX11 (primitives)
 
 Default 3D target is OpenGL via freeGLUT
+
+GL only allows for software Fallback(slow) -using the CPU only.
 
 
 ### EXTERNAL LIBS warning:
@@ -628,116 +628,5 @@ Seriously...the SDL (and sometime openGL) syntax (in C) isnt that hard to master
 #### Have a "Final Product"??
 
 Remember to "remove debugging code and strip binaries".
-
----		
-	
-## Basic Q and A:
-
-(Please dont complain or file bugs on these basis)
-
-Q: I just dont get it....
-
-A: Scan thru the headers or a PASCAL REFERENCE manual for "UNIT HEADER INVOCATION".
-
-You should only need headers to understand Pascal syntax. 
-The rest is minor details unless you want to sweat those.
-Same for SDL in C. (C is backwards with variables, mind you)
-
-
-Q: I think I found a bug!
-
-A: Report it to me.
-
-DO NOT SPAM. 
-Ive probly discovered the issue already but havent gotten to it.
-I dont want your C.
-
-"As in foo points to variable A" is NOT pseudo-logic. Thats "C in plain english".
-
-"foo is equal to A" 
-
-and 
-
-"if THIS then GO THERE"
-"do while x is false"
-
-"case X of"
-"repeat ....until"
-
--is better.
-
-LEARN PASCAL. 
-Try to learn Lazarus. If not, try Delphi.
-
-
-Q: can you port for game platform (X?)..
-
-A: Not unless its supported by BOTH FPC and OpenGL.
-
-		iPhone , iPad, iWatch..have restricted OBJ-C licenses.
-		FPC is blacklisted for these targets. 
-		
-		Apps are signed- and checked-for compliance- by Apple.
-		I cannot help you.
-
-
-GO Grab a FPC RTL and get hoppin.
-
-I cant help you here, I didnt have much luck with kernel development beyond certain points.
-(This was mostly where the issue came from. )
-
-
-I know how to do it, getting it to work is another matter.
-
-You should have an "engine already made" to use if you want to go this route...
-HAVOK, UNREAL, GEARS of WAR, etc.
-
-UNREAL sources are available- with a login.
-
-
-Q: But this isnt useful...
-
-A: No warrantees of...... yada yada yada...**you didnt read the Licence**.
-Ive your not going to read, then you probably shouldnt be writing code.
-Im not going to beat it into you- I have better things to do.
-
-		LIKE WRITE CODE!
-
-
-Q: Is this all this can accomplish?
-A: Hell No.
-
-I leave most excersies up to the reader- as THIS IS A LIBRARY.
-
-
-Q: Runtime errors..I get these STUPID ERRORS!
-
-A: 
-
-This is WIP- expect the occasional build bug. 
-I might be break-fixing something.
-(Thats life.)
-
-Furthermore- 
-
-        Check for a RELEASED UNIT. 
-
-Check SDL depends for multimedia. 
-(I cant control those..SDL links into them as seperate projects.)
-
-Could be also that you need to recompile Lazarus(point variance I call it-version mismatch) or build some
-or all of the LCL subcomponents. THAT- I CANT help you with.
-
-        -OR HELP ME WRITE CODE.
-
-
-Q: No comprende? 
-
-A: Libtool. (Problema.)	
-
-There exist a way with Qt apps to do MOC (.po) or something. 
-FPC has the "feature" but I dont know how to use it.
-
-It has to do with aclocal and locales.
 
 
