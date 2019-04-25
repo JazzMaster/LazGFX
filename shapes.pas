@@ -1,34 +1,20 @@
 Unit shapes;
 
 {
-FPC graphics original code copywright:
-
- This file is part of the Free Pascal run time library.
-    Copyright (c) 1999-2000 by the Free Pascal development team    
-    
- AUTHORS:                                                                      
-  Gernot Tenchio      - original version              
-  Florian Klaempfl    - major updates                 
-  Pierre Mueller      - major bugfixes                
-  Carl Eric Codere    - complete rewrite              
-  Thomas Schatzl      - optimizations,routines and    
-                           suggestions.                
-  Jonas Maebe         - bugfixes and optimizations    
-  Richard Jasmin	  - SDL /freeGLUT portage
 
   FloodFills are OpenGl defaults, unless specified otherwise.
 
 
  Sources modified from a combination of:
    OpenGL demos and public sources
-   FPC Graphics unit sources
+   FPC Graphics unit sources (modified for OpenGL, subject to copyright- see doc files for details)
+
+FrameRate sources modified from SDL v1 and v2 JEDI sources
 
 Framerate management is old school- you should be using deltas for refresh.
 However, management of such needs to happen-
-	Havoc engine -(Skyrim refresh bugs)- affect playability(in some cases very badly).
+	FOR EX: Havoc engine -(Skyrim refresh bugs)- affect playability(in some cases very badly).
 
-Some code courtesy released sources on disc:
-        OpenGL for Delphi ISBN (w CD)
 
 Object Colors:
     There is a setting for FLAT-shaded(what we want) but also
@@ -209,13 +195,70 @@ This is SOME of what we want.
 SEE STIPPLE DEMO (in C)
 
        case LineStyle of           
-            SolidLn:   Lineinfo.Pattern  := $ff ff;  ( ------- )
-            DashedLn:  Lineinfo.Pattern := $F8 F8;   ( -- -- --)
-            DottedLn:  LineInfo.Pattern := $CC CC;   ( - - - - )
-            CenterLn:  LineInfo.Pattern :=  $FC 78;   ( -- - -- )
-       end;  end case 
+            SolidLn:   Lineinfo.Pattern  := $ff ff;     (--------)
+            DashedLn:  Lineinfo.Pattern := $F8 F8;      (-- -- --)
+            INVDashedLn:  Lineinfo.Pattern := $01 01;   (  -  -  )
+            DottedLn:  LineInfo.Pattern := $CC CC;      (- - - - )
+            INVDottedLn:  LineInfo.Pattern := $05 05;   ( - - - -)
+      end;
+
+THIS IS COMPUTED elsewhere:   CenterLn:  LineInfo.Pattern :=  $FC 78;  (   ---   )
+SEE CRTSTUFF unit for an example
+
+       
 
 }
+var
+    size:GLDouble;
+    DrawSolid:boolean;
+
+{
+ if DrawSolid then 
+    glutSolidSphere(size);
+ else
+    glutWireSphere(size);
+
+ if DrawSolid then 
+    glutSolidCube(size);
+ else
+    glutWireCube(size);
+
+ if DrawSolid then 
+    glutSolidCone(size);
+ else
+    glutWireCone(size);
+
+ if DrawSolid then 
+    glutSolidTorus(size);
+  else
+    glutWireTorus(size);
+
+ if DrawSolid then 
+    glutSolidDodecahedron(size); 
+ else
+    glutWireDodecahedron(size);
+
+ if DrawSolid then 
+    glutSolidOctahedron(size);
+ else
+    glutWireOctahedron(size);
+
+ if DrawSolid then 
+    glutSolidTetrahedron(size); 
+ else 
+    glutWireTetrahedron(size);
+
+ if DrawSolid then 
+    glutSolidIcosahedron(size);
+  else 
+    glutWireIcosahedron(size);
+
+ if DrawSolid then 
+    glutSolidTeapot(size); 
+ else
+    glutWireTeapot (size);
+}
+
 
 //draw one quadrant arc, and mirror the other 4 quadrants
 //this is what we want to accomplish...sort of..

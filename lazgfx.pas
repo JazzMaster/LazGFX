@@ -1855,84 +1855,113 @@ MaxColors is set inside InitGraph's modelist.
 640x200: Black and white only
 
 EGA Palette(full 64):
+(wikipedia has 8x8 palette-with back 8 of the initial 16 at the end.)
+(its supposed to be 16x4)
 
+for each of 16 colors
+ 
+00 00 00
 
+AA 00 00
+00 AA 00
+00 AA AA
+
+AA 00 00
+AA 00 AA
+AA 55 00
+
+AA AA AA
+55 55 55
+
+55 55 ff
+55 ff 55
+55 ff ff
+
+ff 55 55
+ff 55 ff
+ff ff 55
+
+ff ff ff
+
+A=      0, 63, 127 and 255. 
+HEX:    0  3F  7F      FF
 
 }
 
 procedure initPalette16;
+// I swear these are PanTone corrected with "Light GRey 55s" -but Ill go with it.
 
 var
    num,i:integer;
 
 begin  
-//Color Sequence:
-//K HiR HiG HiB HiC HiM HiY HiGR LoGr LoR LoG LoB LoC LoM LoY W
-//these are binary driven FULL ON /FULL OFF
+//Color Sequence(semi- in SDL_Color format):
+//K LoR LoG LoB LoC LoM LoY(Brown) HiGR LoGr HiR HiG HiB HiC HiM HiY W
 
 valuelist16[0]:=$00;
 valuelist16[1]:=$00;
 valuelist16[2]:=$00;
 
-valuelist16[3]:=$7f;
+valuelist16[3]:=$AA;
 valuelist16[4]:=$00;
 valuelist16[5]:=$00;
 
 valuelist16[6]:=$00;
-valuelist16[7]:=$7f;
+valuelist16[7]:=$AA;
 valuelist16[8]:=$00;
 
 valuelist16[9]:=$00;
-valuelist16[10]:=$00;
-valuelist16[11]:=$7f;
+valuelist16[10]:=$AA;
+valuelist16[11]:=$AA;
 
-//yellow
-valuelist16[12]:=$7f;
-valuelist16[13]:=$7f;
+valuelist16[12]:=$AA;
+valuelist16[13]:=$00;
 valuelist16[14]:=$00;
 
-valuelist16[15]:=$7f;
+valuelist16[15]:=$AA;
 valuelist16[16]:=$00;
-valuelist16[17]:=$7f;
+valuelist16[17]:=$AA;
 
-valuelist16[18]:=$00;
-valuelist16[19]:=$7f;
-valuelist16[20]:=$7f;
+//brown- dark yellow
+valuelist16[18]:=$AA;
+valuelist16[19]:=$55;
+valuelist16[20]:=$00;
 
 //2 greys
-valuelist16[21]:=$f0;
-valuelist16[22]:=$f0;
-valuelist16[23]:=$f0;
+valuelist16[21]:=$AA;
+valuelist16[22]:=$AA;
+valuelist16[23]:=$AA;
 
-valuelist16[24]:=$f0;
-valuelist16[25]:=$f0;
-valuelist16[26]:=$f0;
+valuelist16[24]:=$55;
+valuelist16[25]:=$55;
+valuelist16[26]:=$55;
 //end greys
 
-valuelist16[27]:=$ff;
-valuelist16[28]:=$00;
-valuelist16[29]:=$00;
+valuelist16[27]:=$55;
+valuelist16[28]:=$55;
+valuelist16[29]:=$ff;
 
-valuelist16[30]:=$00;
+valuelist16[30]:=$55;
 valuelist16[31]:=$ff;
-valuelist16[32]:=$00;
+valuelist16[32]:=$55;
 
-valuelist16[33]:=$00;
-valuelist16[34]:=$00;
+valuelist16[33]:=$55;
+valuelist16[34]:=$ff;
 valuelist16[35]:=$ff;
 
-valuelist16[36]:=$00;
-valuelist16[37]:=$ff;
-valuelist16[38]:=$ff;
+valuelist16[36]:=$ff;
+valuelist16[37]:=$55;
+valuelist16[38]:=$55;
 
 valuelist16[39]:=$ff;
-valuelist16[40]:=$00;
+valuelist16[40]:=$55;
 valuelist16[41]:=$ff;
 
 //14=Y
-valuelist16[42]:=$7f;
-valuelist16[43]:=$7f;
-valuelist16[44]:=$00;
+valuelist16[42]:=$ff;
+valuelist16[43]:=$ff;
+valuelist16[44]:=$55;
+
 
 //white is specified later(wonky palette)
 
@@ -1942,7 +1971,7 @@ valuelist16[44]:=$00;
       Tpalette16.colors[num]^.r:=valuelist16[i];
       Tpalette16.colors[num]^.g:=valuelist16[i+1];
       Tpalette16.colors[num]^.b:=valuelist16[i+2];
-      Tpalette16.colors[num]^.a:=$ff;
+      Tpalette16.colors[num]^.a:=$7f;
       inc(i,3);
       inc(num); 
   until num=7;
@@ -1953,7 +1982,7 @@ valuelist16[44]:=$00;
       Tpalette16.colors[num]^.r:=valuelist16[i];
       Tpalette16.colors[num]^.g:=valuelist16[i+1];
       Tpalette16.colors[num]^.b:=valuelist16[i+2];
-      Tpalette16.colors[num]^.a:=$7f;
+      Tpalette16.colors[num]^.a:=$ff;
       inc(i,3);
       inc(num); 
   until num=14;
