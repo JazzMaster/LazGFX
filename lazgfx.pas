@@ -117,43 +117,11 @@ Within FP application itself(FP IDE):
 
 ---
 
-Theres confusion in SDL:
-	SDL 1.2 uses Surface ops
-	SDL 2.x builds on Surfaces(you still need them in some cases) and adds 2D compositing support(GL)
-		Most ops will switch to Render calls, but not all.
-		all uses clauses and include files must point to SDL2. You cannot mix 1.2 and 2.x.
-		
-	SDL2 uses ortho 2D quads but adds support(hackish) for 3D OGL.
-		
-	SDL_GPU isnt really an advanced unit- its optimized unit "utilizing the renderer".
-		I inadvertently "half-assed" half the color routines myself.
-
-			Fpc Dev team(more stable codebase based upon Borlands BGI) has the remaining routines.
-				These may not be the most optimal routines- they are the most tested.
-
-	SDL by itself- does NOT do 3D. I dont think it ever will.
-
-How to write good games:
-
-	SDL1.2 (learn to page flip or animate)
-		YES- animation like mickey mouse 1950s flip-books
-
-	SDL2.0 (learn how to use the renderer and "render to textures as surfaces")
-
-	Learn OpenGL or freeGLUT
-	WRITE CODE(DUH)!
-
 You need to know:
 
         event-driven input and rendering loops (forget the console and ReadKEY)
 
 ---
-
-If you need to see SDL in action:
-
-	Postal(1) uses SDL.
-	Hedgewars uses SDL v1.2.
-	Nexiuz and SuperTux uses SDL 2(w OGL?)
 
 CIRCLES vs ELLIPSE:
 
@@ -571,14 +539,21 @@ Rect=record
 	y2:byte;
 end;
 
-//A Ton of code enforces a viewport mandate- that even sans viewports- the screen is one.
-//This is better used with screen shrinking effects
+{
+A Ton of code enforces a viewport mandate- that even sans viewports- the screen is one.
+This is better used with screen shrinking effects
 
 
-//graphdriver is not really used half the time anyways..most people probe.
-//these are range checked numbers internally.
+graphdriver is not really used half the time anyways..most people probe.
 
-	graphics_driver=(DETECT, CGA, VGA,VESA); //cga,vga,vesa,hdmi,hdmi1.2
+Theres only ONE Fatal Flaw in the old code:
+    It presumes use on PC only. Presumption and ASSumptions are BAD.
+
+How do you detect non-PC variants? In this case- you make another unit.
+
+cga,vga,vesa,hdmi,hdmi1.2
+}
+	graphics_driver=(DETECT, CGA, VGA,VESA); 
 
 
 {
@@ -592,10 +567,8 @@ the number is tricky..since we cant setup a variable here...its a "sequential by
 yes we could do it another way...but then we have to pre-call the setup routine and do some other whacky crap.
 
 
-Y not 4K modes?
 1080p is reasonable stopping point until consumers buy better hardware...which takes years...
 most computers support up to 1080p output..it will take some more lotta years for that to change.
-
 
 }
 
@@ -610,17 +583,11 @@ var
 
   windownumber:byte;
   somelineType:thickness;
+
 //you only scroll,etc within a viewport- you cant escape from it without help.
 //you can flip between them, however.
 
 //think minimaps in games like Warcraft and Skyrim
-
-
-//this isnt SDL- so for compatibility reasons- I can define this however I choose.
-//A "Surface" is an "array of pixels"--up to max screen resolution
-
-	PSDL_Surface=^SDL_Surface;
-	SDL_Surface=array [0..MaX,0..MaxY] of SDL_Pixel;
 
 const
    //Analog joystick dead zone 
@@ -631,21 +598,13 @@ var
 
     Xaspect,YAspect:byte;
 
-    palette:PSDL_Palette;
     where:Twhere;
 	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop:boolean;
     nogoautorefresh:boolean;
     X,Y:integer;
     _grResult:grErrortype;
     
-
-    //you want event driven, not input driven-the code seems to be here.
-//    gGameController:PSDL_Joystick;
-
-
-    MainSurface,FontSurface : PSDL_Surface;
-
-    srcR,destR,TextRect:PSDL_Rect;
+    srcR,destR:PSDL_Rect;
 
     filename:String;
     fontpath,iconpath:PChar; // look in: "C:\windows\fonts\" or "/usr/share/fonts/"
@@ -653,26 +612,32 @@ var
 {
 
 Fonts:
+
+GLUT defines the following(bitmap fonts):
+
+    GLUT_BITMAP_8_BY_13 - A variable-width font with every character fitting in a rectangle of 13 pixels high by at most 8 pixels wide.
+    GLUT_BITMAP_9_BY_15 - A variable-width font with every character fitting in a rectangle of 15 pixels high by at most 9 pixels wide.
+
+    GLUT_BITMAP_TIMES_ROMAN_10 - A 10-point variable-width Times Roman font.
+    GLUT_BITMAP_TIMES_ROMAN_24 - A 24-point variable-width Times Roman font.
+    
+    GLUT_BITMAP_HELVETICA_10 - A 10-point variable-width Helvetica font.
+    GLUT_BITMAP_HELVETICA_12 - A 12-point variable-width Helvetica font.
+    GLUT_BITMAP_HELVETICA_18 - A 18-point variable-width Helvetica font.
+
+
 GLUT defines the following(stroked fonts):
 
 
+    GLUT_STROKE_ROMAN - A proportionally-spaced Roman Simplex font
+    GLUT_STROKE_MONO_ROMAN - A fixed-width Roman Simplex font
+
 
 }
 
-    font_size:integer; 
+  
     grErrorStrings: array [0 .. 7] of string; //or typinfo value thereof..
-    AspectRatio:real; //computed from (AspectX mod AspectY)
-
-{
-older modes are not used, so y keep them in the list??
- (M)CGA because well..I think you KNOW WHY Im being called here....
-
- mode13h(320x200x16 or x256) : EXTREMELY COMMON GAME PROGRAMMING
- (we use the more square pixel mode)
-
-Atari modes, etc. were removed. (double the res and we will talk)
-
-}
+    AspectRatio:single; //computed from (AspectX mod AspectY)
 
   MaxColors:LongWord; //positive only!!
   ClipPixels: Boolean=true; //always clip, never an option "not to".
@@ -690,7 +655,6 @@ Atari modes, etc. were removed. (double the res and we will talk)
 
   _fgcolor, _bgcolor:DWord;	
   //use index colors once setup(palette unit)
- 
  
   LIBGRAPHICS_ACTIVE:boolean;
   LIBGRAPHICS_INIT:boolean;
@@ -718,7 +682,6 @@ type
   Pmode=^TMode;
 
 var
-//	GLContext: TSDL_GLContext;
 
 	GLFloat:single;
 	FloatInt:single;
@@ -728,21 +691,9 @@ var
 
 //forward declared defines
 
+//this needs xrandr rewrite. very hard code to find.
 function FetchModeList:Tmodelist;
-
 procedure RoughSteinbergDither(filename,filename2:string);
-
-
-//surfaceOps
-//procedure lock;
-//procedure unlock;
-
-//works around SDL OpenGL bug where Windows got optimzed, but Unices didnt--WRONG BTW! (WRITE UNIVERSAL CODE)
-//procedure Texlock(Tex:PSDL_Texture);
-//procedure TexlockwRect(Tex:PSDL_Texture; Rect:PSDL_Rect);
-//function lockNewTexture:PSDL_Texture;
-//procedure TexUnlock(Tex:PSDL_Texture);
-
 
 procedure clearscreen; 
 procedure clearscreen(index:byte); overload;
@@ -758,17 +709,18 @@ function GetX:word;
 function GetY:word;
 function GetXY:longint; 
 
-//this is like Update_Rect() in SDL v1.
-procedure renderTexture( tex:PSDL_Texture;  ren:PSDL_Renderer;  x,y:integer;  clip:PSDL_Rect);
-
 procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
 function getgraphmode:string; 
+
+//dummy- use closeGraph
 procedure restorecrtmode;
 
 function getmaxX:word;
 function getmaxY:word;
 
 function GetPixel(x,y:integer):DWord;
+function GetPixels(Rect:PSDL_Rect):pointer;
+
 Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
 
 function getdrivername:string;
@@ -784,19 +736,18 @@ procedure RegisterBGIDriver(driver: pointer);
 
 function GetMaxColor: word;
 
+procedure SaveBMPImage(filename:string);
+
+//libSOIL
 procedure LoadImage(filename:PChar; Rect:PSDL_Rect);
 procedure LoadImageStretched(filename:PChar);
 
 function  getDwordFromSDLColor(someColor:PSDL_Color):DWord;
 function  getDwordFromBytes(r,g,b,a:Byte):DWord;
+
 function GetByesfromDWord(someD:DWord):SDL_Color;
 
 procedure PlotPixelWNeighbors(x,y:integer);
-
-procedure SaveBMPImage(filename:string);
-
-//pull a Rect (off the renderer-back to a surface-then kick out a 1D array of SDL_Colors from inside the Rect)
-function GetPixels(Rect:PSDL_Rect):pointer;
 
 
 const
@@ -806,7 +757,6 @@ const
 type
 	//r,g,b,a
 	GL_Color= array [0..3] of float;
-
 
 {
 
@@ -823,58 +773,33 @@ You need RGB data for TRUE color modes.
 'A' bit affects transparency 
 
 The default setting is to ignore it(FF) in 256 color modes.
-	(m)CGA is a touch whacky.
 
 Most bitmap or blitter or renderer or opengl based code uses some sort of shader(or composite image).
-This isnt covered here.
 
-This is for drawing "primitives" on the "surface".....
-"advanced primitives" require alpha bit hacking or TRUE COLOR MODE.
-
--One step at a time.
-
-each 256 SDL_color= r,g,b,a whereas in range of 0-255(FF FF) per color.
-for 16 color modes we use 0-7(0F) and an alpha mask to simulate RGBI mode
- 
-16 color mode is technically a wonky spec(RGB+CMY+WB):
-	officially this is composed of:  RGB plus I(light/dark) modes.
-
-CMYK isnt really a video color standard normally because pixels are RGB. 
-CMYK is for printing. 
-	The reason has to do with color gamut and other huffy-puff.
-
-(Learn photography if you want the color headache)
  
 CGA modes threw us this curveball:
 	4 color , 4 palette hi bit resolution modes that are half ass documented. 
 	Theres no need for those modes anymore.(think t shirt half-tones for screen printing)
 
-this is the best I can implement this data given that specs are all over the place- 
-	and I want this standardized as much as pssible given that we have very high color setings available
-	
 VGA/SVGA (Video gate array / super video gate array) and 
 VESA (video electronic standards association) modes are available now.
 
--of course SDL just simulates all of this (inside a window)
 
-
-we can use SetColor(SkyBlue3); in 256 modes with this- since we know which color index it is.
+we can use 'SetColor(SkyBlue3);' in 256 modes -since we know which color index it is.
 
 this is only for the default palette of course- if you muck with it.....
  and only up to 256 colors....sorry.
 
-}
+blink is a "text attribute" ..a feature...not a color
+ -it was implemented in hardware in early 80s
 
-//blink is a "text attribute" ..a feature...not a color
-// -it was implemented in hardware in early 80s
+write..wait.erase..wait..rewrite..just like the blinking cursor..
 
-//write..wait.erase..wait..rewrite..just like the blinking cursor..
-
-{
 
 colors: 
 
 	MUST be hard defined to set the pallete prior to drawing.
+
 }
 
 type
@@ -884,13 +809,6 @@ type
 //this cuts down on spurious string data and standardizes the palette names a bit also
 
 
-//iirc - its ...RED,BLUE,GREEN... on the ol 8088s...
-// K-R-B-G-C-M-Br Gy-Gyd R-B-G-C-M-Y-W (CGA)
-// vs 
-// K-B-G-C-R-M-Br Gy-Gyd- B-G-C-R-M-Y-W (wikipedia) 
-//the xterm 256 spec reflects this- oddly.
-
-
 //these names CANNOT overlap. If you want to change them, be my guest.
 
 //you cant fuck up the first 16- Borland INC (RIP) made that "the standard"
@@ -898,8 +816,6 @@ TPalette16Names=(BLACK,RED,BLUE,GREEN,CYAN,MAGENTA,BROWN,LTGRAY,GRAY,LTRED,LTBLU
 TPalette16NamesGrey=(gBLACK,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11,g12,g13,g14,gWHITE);
 
 //tfs=two fifty six
-
-//original xterm must have these stored somewhere as string data because parts of "unused holes" and "duplicate data" exist
 
 // I can guarantee you a shade of slateBlue etc.. but not the exact shade.
 //(thank you very much whichever programmer fucked this up for us)
@@ -1507,35 +1423,55 @@ tfsGWhite
 
 //faked "SDL"
 
+{$ifndef mswindows}
+
 SDL_Color=record
 	r,g,b,a:byte;
-end;
-
-//the other include file (palette) has the conversion code
-
-//if LE:
-GL_RGBColor=record
-	r,g,b:single;
 end;
 
 GL_Color=record
 	r,g,b,a:single;
 end;
 
-//else: flip the data value the other way around
+{$endif}
 
+
+{$ifdef mswindows}
+
+SDL_Color=record
+	b,g,r,a:byte;
+end;
+
+
+GL_Color=record
+	b,g,r,a:single;
+end;
+
+{$endif}
 
 //I dunno what I was thinkin here w "TSDLColors"-3-14-2019
+
+TRec4=record
+  
+	colors:array [0..3] of PSDL_COLOR; 
+
+end;
+
 TRec16=record
   
 	colors:array [0..15] of PSDL_COLOR; 
 
 end;
 
+TRec64=record
+  
+	colors:array [0..63] of PSDL_COLOR; 
+
+end;
 
 //this is the XTerm 256 definition...
 
-//palette tricks would then need to use : colors[1].a hacks.
+//palette tricks would then need to use : colors[1]^.a hacks.
 
 //just so you can see the amount of datas were dealing with here.
 //really shouldnt go there..and waay too many palettes out there.
@@ -1552,17 +1488,32 @@ end;
 
 
 var
-//this one is unorthodox due to the totally destructive downsizing and image degredation needed
-//and its "best guess"
-  GreyList16:array [0..48] of byte;
+
+//this is whacky but necessary to automated data filing.
+//individual record entries as split rgb data
+  valuelist4a: array [0..11] of byte;
+  valuelist4b: array [0..11] of byte;
+  valuelist4c: array [0..11] of byte;
+  valuelist4d: array [0..11] of byte;
 
   valuelist16: array [0..48] of byte;
+  valuelist64: array [0..191] of byte;
+
+  GreyList16:array [0..48] of byte;
   valuelist256: array [0..767] of byte;
 
+//sdl contents
+  TPalette4a:TRec4;
+  TPalette4b:TRec4;
+  TPalette4c:TRec4;
+  TPalette4d:TRec4;
+
   TPalette16:TRec16;
-  TPalette16Grey:TRec16;
+  TPalette64:TRec64;
 
   TPalette256:TRec256;
+
+  TPalette16Grey:TRec16;
   TPalette256Grey:TRec256;
 
 
@@ -1570,7 +1521,7 @@ type
 
 	graphics_modes=(
 
-mCGA, 
+CGA1,CGA2,CGA3,CGA4,EGA, 
 VGAMed,vgaMedx256,
 vgaHi,VGAHix256,VGAHix32k,VGAHix64k,
 m800x600x16,m800x600x256,m800x600x32k,m800x800x64k,
@@ -1580,7 +1531,7 @@ m1280x1024x256,m1280x1024x32k,m1280x1024x64k,m1280x1024xMil,
 m1366x768x256,m1366x768x32k,m1366x768x64k,m1366x768xMil,
 m1920x1080x256,m1920x1080x32k,m1920x1080x64k,m1920x1080xMil);
 
-//data is in the main unit Init routines.
+//data is in InitGraph
 
 Tmode=record
 //non-negative and some values are yuuge
@@ -1596,12 +1547,12 @@ Tmode=record
 end; //record
 
 
-
 //color conversion procs etc...taking up waay too much room in here...
+
+//no more DWords! YAAAAY!
 
 function GetRGBfromIndex(index:byte):PSDL_Color; 
 function GetDWordfromIndex(index:byte):DWord; 
-
 
 function GetFgRGB:PSDL_Color;
 function GetFgRGBA:PSDL_Color;
@@ -1613,24 +1564,18 @@ function GetBGColorIndex:byte;
 function GetFGColorIndex:byte;
 
 procedure setFGColor(color:byte);
-procedure setFGColor(someDword:dword); overload;
 procedure setFGColor(r,g,b:word); overload;
 procedure setFGColor(r,g,b,a:word); overload;
+
 procedure setBGColor(index:byte);
-procedure setBGColor(someDword:DWord); overload;
 procedure setBGColor(r,g,b:word); overload;
 procedure setBGColor(r,g,b,a:word); overload;
-
-function GetFgDWordRGBA:DWord;
-function GetBgDWordRGB(r,g,b:byte):DWord;
-function GetBgDWordRGBA(r,g,b,a:byte):DWord;
 
 procedure invertColors;
 
 
-
 implementation
-
+//some of these functions are not exported.
 
 //you could use normal GL coords and cap at floatMax of 1.0
 // (but the coords are whacky-weird.)
@@ -1666,23 +1611,19 @@ the hardspec is here as a default setting, much like most 8x8 font sometimes are
 by default in graphics modes source code.
 
 these are zero based colors. for 16 color modes- 88 or even 80 is not correct, 70 or 7f is.
-the 256 hex color data was pulled from xterm (and CGA) specs.
+ALL data set here was pulled from references to IBM specs.
 
-
-the only guaranteed perfect palette code is (m)CGA -tweaked by me, and Greyscale 256.
 (greyscale mCGA is a hackish guess based on rough math, given 14 colors, and also black and white)
-256 should mimic xterm colors IF the endianess is correct and I dont need DWord hex math ops
 
 Float to byte routine are optional-
 	added because loads of OpenGL examples use floats (but YOU dont need to).
 
 Since I went thru all the effort of using SDL bytes- 
  	Im going to BYTE YOU- instead of floating the boat(he he he).
-}
 
-//SDL to GL value conversion-and back- (I dont see this anywhere)
 
-{
+SDL to GL value conversion-and back- (I dont see this anywhere)
+
 What we need to do here is step from 0 to 1.0 (100) in about 2.55 (255) increments.
 In this manner= each HEX byte value has a float corresponding value. 
  
@@ -1690,7 +1631,6 @@ dividing by 1k gives us 400 or so colors- we want about half of that
       
 }
 
-//aux routines need to imported from an aux unit. You might need them for something else.
 
 //we need these as GL is funky.
 procedure ByteToFloat(hexColor:Byte):single;
@@ -1722,9 +1662,10 @@ theres one flaw here:
     you need an initial setup before doing anything in low color modes
     if you like you can change values on-the-fly(these are SDL_Color "tuple"(24bit) bytes-alpha bit is skipped)
         **PLEASE dont change these HERE unless theres something wrong.**
+        Change it in your code by using the GLPaletteColor command. You can always save your palette.
 
-        and theres no way for me to know what the new color data is- im plugging vars blind here
-    -at least until you reset the palette.
+        Theres no way for me to know what the new color data is- im plugging vars blind here
+        -at least until you reset the palette.
 
     This is accepted behaviour.
 }
@@ -1831,7 +1772,7 @@ end;
 Thers a RUB here:
     CGA uses 4 colors from 16 possible but in higher depths-there is no way to tell what the color is set to.
         Ideally you would restrict to "nearest colors" using some algorithm.
-        RGB is a sane, reasonable value for a CGA palette. Its just not "historically accurate".
+        RGBK or CMYK is a sane, reasonable value for a CGA palette. Its just not "historically accurate".
         (I cant stop you- but Id start with THESE defaults)
 
     Same with EGA. EGA and above were programmable.
@@ -1842,51 +1783,203 @@ Thers a RUB here:
     (There is a small box, a medium box, and a YUGE box of crayons here.)
 
 CGA Palette:
-MaxColors is set inside InitGraph's modelist.
 
 160x100: full 16 available
+(Char 221 and 222 hacks not needed)
 
-320x200: one of these (modes 0,1,2)
+320x200: use ONE of these (modes 0,1,2) palettes
 
-0: red, yellow, green, black
-1: cyan, magenta, white, black
-2: white, red, cyan, black (greyscale)
+Black, as well as all of the other colors- are programmable- 
+although most old apps did not change them. 
+This applies to anything above 160x100.
 
-640x200: Black and white only
+    0: black,red, yellow, green
+    1: black,cyan, magenta, white
+    2: black,cyan,red,white (greyscale)
 
-EGA Palette(full 64):
-(wikipedia has 8x8 palette-with back 8 of the initial 16 at the end.)
-(its supposed to be 16x4)
-
-for each of 16 colors
- 
-00 00 00
-
-AA 00 00
-00 AA 00
-00 AA AA
-
-AA 00 00
-AA 00 AA
-AA 55 00
-
-AA AA AA
-55 55 55
-
-55 55 ff
-55 ff 55
-55 ff ff
-
-ff 55 55
-ff 55 ff
-ff ff 55
-
-ff ff ff
-
-A=      0, 63, 127 and 255. 
-HEX:    0  3F  7F      FF
+640x200: "Black" and "white" only
 
 }
+
+procedure initCGAPalette0;
+
+var
+   num,i:integer;
+
+begin  
+
+valuelist4a[0]:=$00;
+valuelist4a[1]:=$00;
+valuelist4a[2]:=$00;
+
+valuelist4a[3]:=$55;
+valuelist4a[4]:=$ff;
+valuelist4a[5]:=$55;
+
+valuelist4a[6]:=$ff;
+valuelist4a[7]:=$55;
+valuelist4a[8]:=$55;
+
+valuelist4a[9]:=$ff;
+valuelist4a[10]:=$ff;
+valuelist4a[11]:=$55;
+
+
+if HalfShadeCGA then begin
+   i:=0;
+   num:=0; 
+   repeat 
+      Tpalette4a.colors[num]^.r:=valuelist4a[i];
+      Tpalette4a.colors[num]^.g:=valuelist4a[i+1];
+      Tpalette4a.colors[num]^.b:=valuelist4a[i+2];
+      Tpalette4a.colors[num]^.a:=$7f;
+      inc(i,3);
+      inc(num); 
+  until num=3;
+
+end else begin
+   i:=0;
+   num:=0; 
+   repeat 
+      Tpalette4a.colors[num]^.r:=valuelist4a[i];
+      Tpalette4a.colors[num]^.g:=valuelist4a[i+1];
+      Tpalette4a.colors[num]^.b:=valuelist4a[i+2];
+      Tpalette4a.colors[num]^.a:=$ff;
+      inc(i,3);
+      inc(num); 
+  until num=3;
+          CanChangePalette:=true;
+end;
+
+procedure initCGAPalette1;
+var
+   num,i:integer;
+//remember these are dropped to half-intense if requested, so you need the "full color".
+begin  
+
+valuelist4b[00]:=$00;
+valuelist4b[01]:=$00;
+valuelist4b[02]:=$00;
+
+valuelist4b[03]:=$55;
+valuelist4b[04]:=$ff;
+valuelist4b[05]:=$ff;
+
+valuelist4b[06]:=$ff;
+valuelist4b[07]:=$55;
+valuelist4b[08]:=$ff;
+
+valuelist4b[09]:=$ff;
+valuelist4b[10]:=$ff;
+valuelist4b[11]:=$ff;
+
+
+if HalfShadeCGA then begin
+   i:=0;
+   num:=0; 
+   repeat 
+      Tpalette4b.colors[num]^.r:=valuelist4b[i];
+      Tpalette4b.colors[num]^.g:=valuelist4b[i+1];
+      Tpalette4b.colors[num]^.b:=valuelist4b[i+2];
+      Tpalette4b.colors[num]^.a:=$7f;
+      inc(i,3);
+      inc(num); 
+  until num=3;
+
+end else begin
+   i:=0;
+   num:=0; 
+   repeat 
+      Tpalette4b.colors[num]^.r:=valuelist4b[i];
+      Tpalette4b.colors[num]^.g:=valuelist4b[i+1];
+      Tpalette4b.colors[num]^.b:=valuelist4b[i+2];
+      Tpalette4b.colors[num]^.a:=$ff;
+      inc(i,3);
+      inc(num); 
+  until num=3;
+          CanChangePalette:=true;
+
+end;
+
+//Hackish- reserved for greyscale
+procedure initCGAPalette2;
+var
+   num,i:integer;
+
+begin
+
+valuelist4c[00]:=$00;
+valuelist4c[01]:=$00;
+valuelist4c[02]:=$00;
+
+valuelist4c[03]:=$3f;
+valuelist4c[04]:=$3f;
+valuelist4c[05]:=$3f;
+
+valuelist4c[06]:=$7f;
+valuelist4c[07]:=$7f;
+valuelist4c[08]:=$7f;
+
+valuelist4c[09]:=$ff;
+valuelist4c[10]:=$ff;
+valuelist4c[11]:=$ff;
+
+if HalfShadeCGA then begin
+   i:=0;
+   num:=0; 
+   repeat 
+      Tpalette4c.colors[num]^.r:=valuelist4c[i];
+      Tpalette4c.colors[num]^.g:=valuelist4c[i+1];
+      Tpalette4c.colors[num]^.b:=valuelist4c[i+2];
+      Tpalette4c.colors[num]^.a:=$7f;
+      inc(i,3);
+      inc(num); 
+  until num=3;
+
+end else begin
+   i:=0;
+   num:=0; 
+   repeat 
+      Tpalette4c.colors[num]^.r:=valuelist4c[i];
+      Tpalette4c.colors[num]^.g:=valuelist4c[i+1];
+      Tpalette4c.colors[num]^.b:=valuelist4c[i+2];
+      Tpalette4c.colors[num]^.a:=$ff;
+      inc(i,3);
+      inc(num); 
+  until num=3;
+          CanChangePalette:=true;
+
+end;
+
+//Mode6 of original spec
+procedure initCGAPalette3;
+var
+   num,i:integer;
+
+begin
+
+    valuelist4d[00]:=$00;
+    valuelist4d[01]:=$00;
+    valuelist4d[02]:=$00;
+
+    valuelist4d[03]:=$ff;
+    valuelist4d[04]:=$ff;
+    valuelist4d[05]:=$ff;
+
+    Tpalette4d.colors[num]^.r:=valuelist4d[i];
+    Tpalette4d.colors[num]^.g:=valuelist4d[i+1];
+    Tpalette4d.colors[num]^.b:=valuelist4d[i+2];
+    Tpalette4d.colors[num]^.a:=$ff;
+
+    Tpalette4d.colors[num]^.r:=valuelist4d[i];
+    Tpalette4d.colors[num]^.g:=valuelist4d[i+1];
+    Tpalette4d.colors[num]^.b:=valuelist4d[i+2];
+    Tpalette4d.colors[num]^.a:=$ff;
+
+    CanChangePalette:=true;
+
+end;
+
 
 procedure initPalette16;
 // I swear these are PanTone corrected with "Light GRey 55s" -but Ill go with it.
@@ -1991,10 +2084,125 @@ valuelist16[44]:=$55;
       Tpalette16.colors[15]^.g:=$ff;
       Tpalette16.colors[15]^.b:=$ff;
       Tpalette16.colors[15]^.a:=$ff;
-  
-
+      CanChangePalette:=false; //dont change this-youll break the spec
 end;
 
+
+procedure initPalette64;
+// I swear these are PanTone corrected with "Light GRey 55s" -but Ill go with it.
+//set to initial 16- programmable- as long as MaxY=200.
+
+{
+This is the easiest way to do EGA colors:
+
+for each of 16 colors
+ 
+A=      0, 63, 127 and 255. 
+HEXA:   0  3F  7F      FF
+
+}
+
+
+var
+   num,i:integer;
+
+begin  
+
+valuelist64[0]:=$00;
+valuelist64[1]:=$00;
+valuelist64[2]:=$00;
+
+valuelist64[3]:=$AA;
+valuelist64[4]:=$00;
+valuelist64[5]:=$00;
+
+valuelist64[6]:=$00;
+valuelist64[7]:=$AA;
+valuelist64[8]:=$00;
+
+valuelist64[9]:=$00;
+valuelist64[10]:=$AA;
+valuelist64[11]:=$AA;
+
+valuelist64[12]:=$AA;
+valuelist64[13]:=$00;
+valuelist64[14]:=$00;
+
+valuelist64[15]:=$AA;
+valuelist64[16]:=$00;
+valuelist64[17]:=$AA;
+
+//brown- dark yellow
+valuelist64[18]:=$AA;
+valuelist64[19]:=$55;
+valuelist64[20]:=$00;
+
+valuelist64[21]:=$AA;
+valuelist64[22]:=$AA;
+valuelist64[23]:=$AA;
+
+valuelist64[24]:=$55;
+valuelist64[25]:=$55;
+valuelist64[26]:=$55;
+
+valuelist64[27]:=$55;
+valuelist64[28]:=$55;
+valuelist64[29]:=$ff;
+
+valuelist64[30]:=$55;
+valuelist64[31]:=$ff;
+valuelist64[32]:=$55;
+
+valuelist64[33]:=$55;
+valuelist64[34]:=$ff;
+valuelist64[35]:=$ff;
+
+valuelist64[36]:=$ff;
+valuelist64[37]:=$55;
+valuelist64[38]:=$55;
+
+valuelist64[39]:=$ff;
+valuelist64[40]:=$55;
+valuelist64[41]:=$ff;
+
+//14=Y
+valuelist64[42]:=$ff;
+valuelist64[43]:=$ff;
+valuelist64[44]:=$55;
+
+valuelist64[45]:=$ff;
+valuelist64[46]:=$ff;
+valuelist64[47]:=$ff;
+
+
+   i:=0;
+   num:=0; 
+   repeat 
+      Tpalette64.colors[num]^.r:=valuelist64[i];
+      Tpalette64.colors[num]^.g:=valuelist64[i+1];
+      Tpalette64.colors[num]^.b:=valuelist64[i+2];
+      Tpalette64.colors[num]^.a:=$7f;
+      inc(i,3);
+      inc(num); 
+  until num=7;
+
+   i:=25;
+   num:=8; 
+   repeat 
+      Tpalette64.colors[num]^.r:=valuelist64[i];
+      Tpalette64.colors[num]^.g:=valuelist64[i+1];
+      Tpalette64.colors[num]^.b:=valuelist64[i+2];
+      Tpalette64.colors[num]^.a:=$ff;
+      inc(i,3);
+      inc(num); 
+  until num=15;
+      if MaxY=200 then //HEY! I didnt write the spec...
+          CanChangePalette:=true;
+      else
+          CanChangePalette:=false;
+end;
+
+//you can use these for EGA also- same sized data.
 
 procedure Save16Palette(filename:string);
 
@@ -4690,6 +4898,61 @@ end;
 
 //NEW: do you want fullscreen or not?
 procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
+
+{
+GraphDriver:
+
+
+PC
+    if Def mswindows
+
+    endif
+
+    if Def Darwin(OSX)
+        if Def fallback:
+            use X11 core routines- but only if X11.app (installed in default location) present
+        else:
+            use CoreGL routines in a window (figure this out in C , first) /GLUT for input and modeswitching 
+    endif
+
+    if Def DOS (PTC can help with this)
+        int 10 functs go here:
+            (Mode switching primarily-- int 10: 3f02 .......)
+
+        Dos and Palette init isnt needed: thats implemented in hardware.
+        (This code is designed to mimic the hardware)
+
+        -INPUT needs a looped RING buffer- OSX, X11 and Windows give us one.
+    endif
+
+    (else)
+
+    if Def Unix
+        if def fallback:
+            use X11 core routines
+        else:
+            use GLUT for input and mode switching
+    endif
+
+//no other such PC OS
+
+Android
+
+MBed
+
+    if Def Raspi(or bananaPi)
+
+    endif
+
+    if Def BeageBoard
+
+    endif
+
+    if Def GameDuino(heaven forbid)
+
+    endif
+
+}
 
 var
 	bpp,i:integer;
