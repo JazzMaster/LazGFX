@@ -1730,15 +1730,15 @@ valuelist16[47]:=$ff;
    i:=0;
    num:=0; 
    repeat 
-      Tpalette16.colors[num]^.r:=valuelist16[i];
-      Tpalette16.colors[num]^.g:=valuelist16[i+1];
-      Tpalette16.colors[num]^.b:=valuelist16[i+2];
-      Tpalette16.colors[num]^.a:=$ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
+      Tpalette16Grey.colors[num]^.r:=valuelist16[i];
+      Tpalette16Grey.colors[num]^.g:=valuelist16[i+1];
+      Tpalette16Grey.colors[num]^.b:=valuelist16[i+2];
+      Tpalette16Grey.colors[num]^.a:=$ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
       inc(i,3);
       inc(num); 
   until num=15;
 
-//we dont need no stinkin DWORDS!
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 16, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette16Grey);
 
 end;
 
@@ -1764,7 +1764,7 @@ begin
       inc(i); //notice the difference <-HERE ..where RGB are the same values
   until i=255;
 
-	
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 256, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette256Grey);
 
 end;
 
@@ -1849,6 +1849,8 @@ end else begin
       inc(num); 
   until num=3;
           CanChangePalette:=true;
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 4, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette4a);
+
 end;
 
 procedure initCGAPalette1;
@@ -1898,6 +1900,7 @@ end else begin
       inc(num); 
   until num=3;
           CanChangePalette:=true;
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 4, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette4b);
 
 end;
 
@@ -1948,6 +1951,7 @@ end else begin
       inc(num); 
   until num=3;
           CanChangePalette:=true;
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 4, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette4c);
 
 end;
 
@@ -1977,6 +1981,7 @@ begin
     Tpalette4d.colors[num]^.a:=$ff;
 
     CanChangePalette:=true;
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 4, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette4d);
 
 end;
 
@@ -2085,6 +2090,8 @@ valuelist16[44]:=$55;
       Tpalette16.colors[15]^.b:=$ff;
       Tpalette16.colors[15]^.a:=$ff;
       CanChangePalette:=false; //dont change this-youll break the spec
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 16, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette16);
+
 end;
 
 
@@ -2200,6 +2207,8 @@ valuelist64[47]:=$ff;
           CanChangePalette:=true;
       else
           CanChangePalette:=false;
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 64, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette64);
+
 end;
 
 //you can use these for EGA also- same sized data.
@@ -2242,9 +2251,10 @@ Begin
 		Read(palette16File, TPalette16GRey); 
 	    
 	Close(palette16File);
-
-//TODO: now fill the palette (GL)
-
+    if ReadColorFile =true then
+        glColorTable(GL_COLOR_TABLE, GL_RGBA8, 16, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette16);
+    else
+        glColorTable(GL_COLOR_TABLE, GL_RGBA8, 16, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette16GRey);
 
 end;
 
@@ -3130,6 +3140,7 @@ valuelist256[767]:=$ee;
       inc(i,3);
       inc(num); 
   until num=767;
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 256, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette256);
 
 	
 end;
@@ -3174,16 +3185,13 @@ Begin
 
 	Read(palette256File, TPalette256); 
 	Close(palette256File);	
-	
-//TODO: set palette (GL)	
+    if ReadColorFile =true then
+        glColorTable(GL_COLOR_TABLE, GL_RGBA8, 256, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette256);
+    else
+    glColorTable(GL_COLOR_TABLE, GL_RGBA8, 256, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette256Grey);
 
 end;
 
-//initgraph
-//setgraphmide
-//detectGraphicsModes
-
-//etc go here.
 
 {
 
@@ -3202,84 +3210,58 @@ end;
 
 PSDL_Color =array [0..3] of PUInt8; //(BytePtr)
 
-{
-r:=PSDL_Color^
-g:=PSDL_Color^[1]
-b:=PSDL_Color^[2]
-a:=PSDL_Color^[3]
+
+    r:=PSDL_Color^
+    g:=PSDL_Color^[1]
+    b:=PSDL_Color^[2]
+    a:=PSDL_Color^[3]
 
 (its a c-like hack that works)
 
 
 24 bit and awkward modes:
 Tuples (just RGB values) dont exist in Pascal(or C).Its a Python Thing.
-*FIXED : 3/8/19  
+-Further, non ^of2 byte packing isnt supported by OpenGL. It creates speed hiccups with unaligned data.
+
+SO- align the data.(DUH)
+
+*FIXED : 4/26/19  
 
 
 Colors:
 
 (try not to confuse BIT with BYTE here)
 
-4bit(16 color) has to be mapped into RGB 8-bit colors(limited palette, not full)
-ByteMask of 0f/f0 is traditionally used in the past because RGBA color modes didnt exist yet.
-
-Alpha:(this is weird implementation but it works)
 
 ff means use full color output
-7f can be used as half-shading-giving us RGBI siulation
-00 means "dont write the color"
+7f can be used as half-shading -giving us RGBI simulation
+00 means  "extremely weak" blending- very transparent color
 
 
-8bit-(256 color) is paletted RGB mode (1:1:1)
+8bit-(256 color) is paletted RGB mode
 	-this is the last paletted mode
 
-JPEG format uses a 256 color palette(even a modified one).
-Jpeg2000 uses 12bit
 
 ---
 4bit(16)->8bit(256):
 
 NO CHANGE, just switch palettes.
 
-
-	just use the first 16 colors of the palette and add more colors to it
+EGA modes:
+	just use the first 16 colors of the palette and change them as you need.
 	its easier to not do 4bit conversion, but use 8bit color and convert that.
 
 	- is it possible the original 16 colors can point elsewhere- yes, 
-	but that would de-standardize "upscaling the colors"
+	but that would de-standardize "upscaling the colors" from 16-> 256 modes.
 
 Downsizing bits:
 
 -you cant put whats not there- you can only "dither down" or "fake it" by using "odd patterns".
 what this is -is tricking your eyes with "almost similar pixel data".
 
-
-32bit to 16bit RGB 565:
-//drop the LSB
-
-NewR: = R shr 3;
-NewG: = G shr 2;
-NewB: = B shr 3;
-NewA:=$ff;
-
-16bit(565) can also be 15bit color(5551):
-
-mode 5551: 
- 	ff or 7f for the last byte(not bit)
-	we still have 32K colors, just two sets -light and dark-like 16 color mode but with more colors
-
-RGB16->32:
-
-NewR: =R shl 3;
-NewG: =G shl 2;
-NewB: =B shl 3 ;
-NewA:=A;
-
 }
 
-
 //semi-generic color functions
-
 
 function GetRGBfromIndex(index:byte):PSDL_Color; 
 //if its indexed- we have the rgb definition already!!
@@ -3304,62 +3286,32 @@ begin
   end;
 end;
 
-function GetDWordfromIndex(index:byte):DWord; 
-//if its indexed- we have the rgb definition already!!
 
+//get the last color (that we already) set
+
+function GetFgRGB:SDL_Color;
 var
-   somecolor:DWord;
-   
-begin
-  if bpp=8 then begin
-    if MaxColors =16 then
-	      somecolor:=Tpalette16.DWords[index] //literally get the DWord from the index
-    else if MaxColors=256 then
-	      somecolor:=Tpalette256.DWords[index]; 
-    
-   GetDWordFromIndex:=somecolor;
-  end else begin
-      if IsConsoleInvoked then
-	    	writeln('Attempt to fetch indexed DWord from non-indexed color');
-      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to fetch indexed DWord from non-indexed color','OK',NIL); 
-      exit;
-
-  end;
-end;
-
-
-//get the last color set
-
-function GetFgRGB:PSDL_Color;
-var
-  color:PSDL_Color;
-  r,g,b,a:PUInt8;
-
+  color:SDL_Color;
 
 begin
-	SDL_GetRenderDrawColor(renderer,r,g,b,a);
-    color^.r:=byte(^r);
-    color^.g:=byte(^g);
-    color^.b:=byte(^b);
+    color^.r:=_bgcolor^.r;
+    color^.g:=_bgcolor^.g;
+    color^.b:=_bgcolor^.b;
     color^.a:= $ff;
     GetFgRGB:=color; 
 end;
 
-function GetFgRGBA:PSDL_Color;
+function GetFgRGBA:SDL_Color;
 
 var
   color:PSDL_Color;
-  r,g,b,a:PUInt8;
-
 
 begin
-	SDL_GetRenderDrawColor(renderer,r,g,b,a);
-    color^.r:=byte(^r);
-    color^.g:=byte(^g);
-    color^.b:=byte(^b);
-    color^.a:= byte(^a);
+    color^.r:=_bgcolor^.r;
+    color^.g:=_bgcolor^.g;
+    color^.b:=_bgcolor^.b;
+    color^.a:=_bgcolor^.a;
     GetFgRGBA:=color; 
-
 end;
 
 //give me the name(string) of the current fg or bg color (paletted modes only) from the screen
@@ -3381,7 +3333,7 @@ begin
    end;
    i:=0;
    i:=GetFGColorIndex;
-
+//not good enough. FIXME.
    if MaxColors=256 then begin
 	      GetFGName:=GEtEnumName(typeinfo(TPalette256Names),ord(i));
 		  exit;

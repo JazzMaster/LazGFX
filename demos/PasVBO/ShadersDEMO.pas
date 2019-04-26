@@ -9,12 +9,17 @@ const
                                             1.0, -1.0, 0.0,
                                             0.0,  1.0, 0.0  );
 
+type
+    extentionsP=^Glint;
+
+
 var
-    i: Word;
+   OutPutList: TStringList;
+
+    i: integer;
+    superlongstring:String;
     VertexArrayID: GLuint;
-    paletteIndex:integer;
     triangleVBO: GLuint;
- 
     VertexShaderID: GLuint;
     VertexShaderCode: PGLchar;
     FragmentShaderID: GLuint;
@@ -22,6 +27,7 @@ var
     ShaderCode: TStringList;
     ProgramID: GLuint;
     compilationResult: GLint = GL_FALSE;
+
     InfoLogLength: GLint;
     ErrorMessageArray: array of GLChar;
  
@@ -53,69 +59,92 @@ begin
   glClearColor( 0.0, 0.0, 0.0, 1.0 );
   glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT);
   glutSwapBuffers;
+
+glMatrixMode(GL_PROJECTION); // Projection transformation
+glLoadIdentity(); // We initialize the projection matrix as identity
+gluPerspective(45.0,1,1.0,1000.0);
+
+//green to blue
   for i := 0 to 255 do
   begin
+
     glClearColor( 0.0, 1.0-i/255, 0.0+i/255, 1.0 );
     glClear( GL_COLOR_BUFFER_BIT );
-    glPushMatrix;
     glEnableVertexAttribArray( 0 );
         glBindBuffer( GL_ARRAY_BUFFER, triangleVBO );
         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nil );
-
         glDrawArrays( GL_TRIANGLES, 0, 3 );
+        
     glDisableVertexAttribArray( 0 );
-    glPopMatrix; 
+
+    glutSwapBuffers;
+   end;
+//blue to green
+  for i := 0 to 255 do
+  begin
 
     glClearColor( 0.0, 0.0+i/255, 1.0-i/255, 1.0 );
     glClear( GL_COLOR_BUFFER_BIT );
-    glPushMatrix;
     glEnableVertexAttribArray( 0 );
         glBindBuffer( GL_ARRAY_BUFFER, triangleVBO );
         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nil );
-
         glDrawArrays( GL_TRIANGLES, 0, 3 );
     glDisableVertexAttribArray( 0 );
-    glPopMatrix; 
     glutSwapBuffers;
 
   end;
+//inter-fade (green to red)
   for i := 0 to 255 do
   begin
 
-     glClearColor( 0.0, 0.0+i/255, 1.0-i/255, 1.0 );
+    glClearColor( 0.0+i/255, 1.0-i/255, 0.0, 1.0 );
     glClear( GL_COLOR_BUFFER_BIT );
-    glPushMatrix;
     glEnableVertexAttribArray( 0 );
         glBindBuffer( GL_ARRAY_BUFFER, triangleVBO );
         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nil );
-
         glDrawArrays( GL_TRIANGLES, 0, 3 );
     glDisableVertexAttribArray( 0 );
-    glPopMatrix; 
+    glutSwapBuffers;
 
+  end;
+//red to green
+  for i := 0 to 255 do
+  begin
+
+    glClearColor( 1.0-i/255, 0.0+i/255, 0.0, 1.0 );
+    glClear( GL_COLOR_BUFFER_BIT );
+    glEnableVertexAttribArray( 0 );
+        glBindBuffer( GL_ARRAY_BUFFER, triangleVBO );
+        glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nil );
+        glDrawArrays( GL_TRIANGLES, 0, 3 );
+    glDisableVertexAttribArray( 0 );
+    glutSwapBuffers;
+
+  end;
+
+//green to blue
+  for i := 0 to 255 do
+  begin
 
     glClearColor( 0.0, 1.0-i/255, 0.0+i/255, 1.0 );
     glClear( GL_COLOR_BUFFER_BIT );
-    glPushMatrix;
     glEnableVertexAttribArray( 0 );
         glBindBuffer( GL_ARRAY_BUFFER, triangleVBO );
         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nil );
-
         glDrawArrays( GL_TRIANGLES, 0, 3 );
+        
     glDisableVertexAttribArray( 0 );
-    glPopMatrix; 
 
     glutSwapBuffers;
-  end;
-  
- 
+   end;
+
+  halt(0);
 end;
 
 
 procedure processKeys(key:byte; xx,yy:longint); cdecl;
 begin
 	if Key = 27 then begin
-        moon:=true;
         glutLeaveMainLoop;
    end;
 end;
@@ -135,16 +164,35 @@ begin
   glutInit(@CmdCount, @Cmd);
 end;
 
+procedure Split(Delimiter: Char; Str: string; ListOfStrings: TStrings) ;
+begin
+   ListOfStrings.Clear;
+   ListOfStrings.Delimiter       := Delimiter;
+   ListOfStrings.StrictDelimiter := True; // Requires D2006 or newer.
+   ListOfStrings.DelimitedText   := Str;
+end;
 
 begin
 
 //  GLUT initialization
 	glutInitPascal(false);
-	glutInitDisplayMode(GLUT_DEPTH or GLUT_DOUBLE or GLUT_RGBA);
 
+//bgi unit needs 2,1
+    glutInitContextVersion (3,3);
+
+//return for this example- so we can clean up.
+    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
+
+//need this for the BGI unit
+    glutInitContextProfile (GLUT_COMPATIBILITY_PROFILE);
+
+//optional
+    glutInitContextFlags (GLUT_DEBUG);
+
+	glutInitDisplayMode(GLUT_DEPTH or GLUT_DOUBLE or GLUT_RGBA);
 	glutInitWindowPosition(100,100);
 	glutInitWindowSize(512,512);
-	glutCreateWindow('Lighthouse3D - Simple Shader Demo');
+	glutCreateWindow('Lighthouse3D - Simple Shader -FADER- Demo');
 
 //	glutIdleFunc(@processKeys);
     glutDisplayFunc(@renderscene); 
@@ -154,21 +202,34 @@ begin
   //print out OpenGL vendor, version and shader version
   writeln( 'Vendor: ' , glGetString( GL_VENDOR ) );
   writeln( 'OpenGL Version: ' , glGetString( GL_VERSION ) );
+  writeln('Supported OpenGL extensions: ');
+
+  superlongstring:=glGetString(GL_EXTENSIONS);
+
+   OutPutList := TStringList.Create;
+     Split(' ', superlongstring, OutPutList) ;
+     Writeln(OutPutList.Text);
+     
+     OutPutList.Free;
+
+
   writeln( 'Shader Version: ' , glGetString( GL_SHADING_LANGUAGE_VERSION ) );
   writeln ('GLSL: ' , glGetString (GL_SHADING_LANGUAGE_VERSION));
+  writeln ('Renderer: ' ,glGetString(GL_RENDERER));
 
-
+//this is fine if compat profile is enabled.
 
   //init OpenGL and load extensions
   if Load_GL_VERSION_4_0 = false then
     if Load_GL_VERSION_3_3 = false then
       if Load_GL_VERSION_3_2 = false then
         if Load_GL_VERSION_3_0 = false then
-        begin
-          writeln(' ERROR: OpenGL 3.0 or higher needed. '); readln;
-          HALT;
-        end;
+            if Load_GL_VERSION_2_1 = false then
 
+        begin
+          writeln(' ERROR: OpenGL 2.1 or higher needed. ');
+          HALT(-1);
+        end;
 
 
   //create Vertex Array Object (VAO)
@@ -245,6 +306,7 @@ begin
     for i := 0 to InfoLogLength do write( String( ErrorMessageArray[i] ) );
     halt;
   end else writeln( 'success' );
+    
     glUseProgram( ProgramID ); 
 
 	//  GLUT main loop

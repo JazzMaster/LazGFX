@@ -3,7 +3,12 @@ Program Models;
 {
 This is how you get those fancy looking Teapots..or Bunnies...etc.
 
-You put a Texture (flat) onto a (wireframe) mesh.
+
+A texture is what it sounds like. 
+Its "wallpaper/colored (or patterened) vynil" (2D) or "the walls themselves" (3D)
+
+YOu are "skinning" a "mesh", basically.
+
 Make sure Shaders and "Light sources"(TnL) are enabled.
 
 This does not use GLScene - but does use GL 3D.
@@ -14,7 +19,7 @@ Uses 3D (x,y,z) coordinates system.
 First:
     You need a teapot or something
 Then:
-    you need a SKIN.
+    you need a SKIN/texture.
 
 }
 
