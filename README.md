@@ -8,7 +8,7 @@ Its a GRAPHICS MODE "Canvas", not unlike TCanvas.
 -You draw with it. 
 2D and 3D modes are supported.
 
-Scene Rendering support is limited. 
+"Scene Rendering" is limited. 
 Try "Castle Engine".
 
 TL;DR?? 
@@ -19,11 +19,14 @@ I WILL HOLD YOU TO THIS TEXT.
 
 ### LEGAL-ese
 
-Since I am starting to see changes in NASA/JPL and other demos out in the wild-
+Since I am starting to see changes in NASA/JPL and other demos out in the wild-<br>
 **LEGAL DEFINITIONS and MUMBO-JUMBO MUST BE ADHERED TO**.
 
-Licensed under Apache License, Version 2.0.
-This statement applies to all code enclosed herein:
+Licensed under Apache License, Version 2.0.<br>
+(compatible with Mozilla)<br>
+
+This statement applies to ALL CODE enclosed herein:<br>
+(SDL headers havent been rewritten for the new licence- it falls under LGPL for the time being)
 
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,16 +38,16 @@ This statement applies to all code enclosed herein:
 
 ### Render-Targets
 
-Default 2D target is OpenGL via freeGLUT
+Default 2D target is OpenGL -via freeGLUT
 
 MAY also use as a fallback(slow):
 
         Framebuffer(No X11)
         WinAPI (needs a rewrite) / libX11 (primitives)
 
-Default 3D target is OpenGL via freeGLUT
+Default 3D target is OpenGL -via freeGLUT
 
-GL only allows for software Fallback(slow) -using the CPU only.
+        Mesa is OpenGL software Fallback(slow) -using the CPU.
 
 
 ### EXTERNAL LIBS warning:
@@ -56,21 +59,23 @@ This UNIT API uses several external libs-
 The location of which on Windows is completely unknown.
 (they could be anywhere-even missing-)
 
+As soon as Unice code is working- both windows and OSX code will see an overhaul.
+
 
 ### Why is SDL here?
 
 SDL 1 and 2  "unified sources" included- for your pleasure programming.
 
-SDL2_AUDIO is encountering a random Pointer bug after failing somewhere .
+SDL2_AUDIO is encountering a random Pointer bug after failing somewhere .<br>
 (Im assuming it cant find the soundcard device. PortAudio/uos doesnt seem to have that problem.)
 
-I have found that SDL is scattered to the winds, and that developing for it -is hard- because of that.
-But its good code to get started with.
+I have found that SDL is scattered to the winds, and that developing for it -is hard- because of that.<br>
+But its good code to get started with.<Br>
 It will give you a basic idea what - and how- things work.
 
 OpenGL and SDL (in 3d) dont mix very well.
 
-You dont need SDL for input. 
+You dont need SDL for input. <br>
 freeGLUT/OGL gives it to you.
 
 
@@ -84,17 +89,17 @@ WIN32:
 MAC:
 
 		My Mac mini has XCode- and I have a VM (or three).
-        Im looking to the needed libs right now.
+        
 
 Ubuntu:
 
 		has a serious FPC/Lazarus distribution flaw. 
 
-		DO NOT INSTALL FPC or Lazarus from the OS repository!!!!
+		DO NOT INSTALL FPC or Lazarus from the OS repository for UBU 14 or 16.
 		(You have three "bleeding edge" svn packages to install instead.)
 
-Castle /sceneGraph engine will install just fine.
 
+Castle /sceneGraph engine will install just fine.
 
 ## Ports
 
@@ -104,13 +109,14 @@ This unit (LazGraphics) SHOULD be ported to use the following languages:
 		VB(gambas/VB.Net)
 		C/VC/C sharp (backport at your own peril- NO C HERE.)
 		ADA
+        Fortran(If you feel the urge)
 		
 -Hooks are present w freeGLUT/GL- 
 
 		Ada 
 		FORTRAN 
 		python (pyGL/pg)
-		Gambas(via SDL-and GL libs)
+		FreeBasic\Gambas(via SDL-and GL libs)
 		
 -DONT ASK about assembler. The compiler does this for you.
 Assembler -in flight- does not guarantee optimized code.
@@ -122,12 +128,13 @@ So if performance is lacking(usually in math areas)-
 				Use better compile time optimizations
 		Second-
 				Use more efficient Logic methods
+                Like turning off "state tracking" until absolutely required to turn it on
 		Third-
 				Try another method of implementation like OGL/DirectX vs WinAPI/Xlib
 
 
 Ive tried to do the second for you- as best possible.
-Math is not my strong-suit.(GL is riddled w Matrice Math)
+Math is not my strong-suit.(GL is riddled w Matrice Math).
 
 Try to keep the ports HERE- DO NOT FORK unnecessarily.
 I will be happy to import code.
@@ -136,17 +143,25 @@ I will be happy to import code.
 
 ### Build status:
 
-(Travis CL doesnt work with Pascal sources. You wont see the nice pretty graphbar.)
+(Travis CL (the colored pill) doesnt work with Pascal sources. You wont see the nice pretty graphbar.)
 
-state:  RELEASE freeze at .80 (SUCCESS)
+RELEASE freeze at .80 (BUILD SUCCESS- SDL subsystem)<br>
+RELEASE freeze upcoming for v2.0(sources not ready yet).
+
 master branch: code is unstable WIP. May or may not build.
 
-I have a SHITTON of rewrites with the "OGL switch" pending.
-(This may take some time to get something that compiles.)
-
+2305 more lines to convert to the new OpenGL spec-<br>
+(most of this is probly in initGraph)
 
 to Fake: detectGraph()
 (resolutions used are too low)
+
+FULL CGA, EGA, and VGA palletted modes should work properly.<br>
+Checks for windows(but not PowerPC-BE- arch) have been added.
+
+FrameBuffer support code needs some help-<br>
+Im going to have to merge this back in. <br>
+I lost the Dotfiles git leaves behind, somehow, on the local copy.
 
 ---
 
