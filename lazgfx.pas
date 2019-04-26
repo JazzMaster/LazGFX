@@ -3280,7 +3280,7 @@ begin
   end else begin
     if IsConsoleInvoked then
 		writeln('Attempt to fetch RGB from non-Indexed color.Wrong routine called.');
-   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to fetch RGB from non-Indexed color.Wrong routine called.','OK',NIL); 
+   ShowMessage(SDL_MESSAGEBOX_ERROR,'Attempt to fetch RGB from non-Indexed color.Wrong routine called.','OK',NIL); 
    
     exit;
   end;
@@ -3328,7 +3328,7 @@ begin
 
       If IsConsoleInvoked then
 			Writeln('Cant Get color name from an RGB mode colors.');
-	  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get color name from an RGB mode colors.','OK',NIL);
+	  ShowMessage('Cant Get color name from an RGB mode colors.');
 	  exit;
    end;
    i:=0;
@@ -3357,7 +3357,7 @@ begin
 
       If IsConsoleInvoked then
 			Writeln('Cant Get color name from an RGB mode colors.');
-	  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get color name from an RGB mode colors.','OK',NIL);
+	  ShowMessage(SDL_MESSAGEBOX_ERROR,'Cant Get color name from an RGB mode colors.','OK',NIL);
 	  exit;
    end;
    i:=0;
@@ -3408,7 +3408,7 @@ begin
 	 end else begin
 		If IsConsoleInvoked then
 			Writeln('Cant Get index from an RGB mode (or non-palette) colors.');
-	    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get index from an RGB mode (or non-palette) colors.','OK',NIL);
+	    ShowMessage(SDL_MESSAGEBOX_ERROR,'Cant Get index from an RGB mode (or non-palette) colors.','OK',NIL);
 		exit;
 	 end;
 end;
@@ -3453,7 +3453,7 @@ begin
 		If IsConsoleInvoked then
 			Writeln('Cant Get index from an RGB mode colors.');
 
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get index from an RGB mode colors.','OK',NIL);
+		ShowMessage(SDL_MESSAGEBOX_ERROR,'Cant Get index from an RGB mode colors.','OK',NIL);
 		exit;
 	 end;
 end;
@@ -3487,9 +3487,6 @@ Create a "clickable canvas".
 
 PenDown is DownMouseButton[x]
 PenUp is UpMouseButton[x]
-
-- (you are drawing with the mouse, not the keyboard.)
-- this demo has been done.
 
 (easily catchable in the event handler)
 
@@ -3610,77 +3607,14 @@ begin
    SDL_RenderClear(renderer);
 end;
 
-
-// ColorNameToNum(ColorName : string) : integer;
-//isnt needed anymore because enums carry a number for the defined "NAME".
-
-
-//remember: _fgcolor and _bgcolor are DWord(s).
-
-function GetFgDWordRGBA:DWord;
-
-var
-  somecolor:PSDL_Color;
-  r,g,b,a:PUint8;
-
-begin
-    if (bpp < 8) then begin
-        //error: not indexed color
-        exit; //rgba not supported
-    end;
-	SDL_GetRenderDrawColor(renderer,r,g,b,a);
-    somecolor^.r:=byte(^r);
-    somecolor^.g:=byte(^g);
-    somecolor^.b:=byte(^b);
-    somecolor^.a:=byte(^a);
-
-    GetFgDWordRGBA:=SDL_MapRGBA(MainSurface^.format,somecolor^.r,somecolor^.g,somecolor^.b,somecolor^.a); //gimmie the DWord instead
-end;
-
-//doesnt make sence w using _bgcolor as a DWord
-//only makes sense if you are using RGB or RGBA "tuples" instead of a Dword but wanted a DWord.
-//has a use but its limited.
-
-function GetBgDWordRGB(r,g,b:byte):DWord;
-
-begin
-//really rare case
-    if (MaxColors<=255) then exit; //use the other function for this
-       if IsConsoleInvoked then begin
-          LogLn('Trying to fetch background color -when we have it- in Paletted mode.');
-          writeln('We have the background color in paletted modes!');
-          exit;
-       end;
-       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'We already have the Background Color in Paletted mode.','OK',NIL);
-
-    GetBgDWordRGB:=SDL_MapRGB(MainSurface^.format,ord(r),ord(g),ord(b));    
-end;
-
-function GetBgDWordRGBA(r,g,b,a:byte):DWord;
-begin
-    GetBgDWordRGBA:=SDL_MapRGBA(MainSurface^.format,ord(r),ord(g),ord(b),ord(a)); //gimmie the DWord instead
-end;
-
 procedure invertColors;
 
 //so you see how to do manual shifting etc.. 
-var
-   r, g, b, a:PUInt8;
-   somecolor:PSDL_Color;
 begin
-
-	SDL_GetRenderDrawColor(renderer, r, g, b, a);
-
-    somecolor^.r:=byte(^r);
-    somecolor^.g:=byte(^g);
-    somecolor^.b:=byte(^b);
-    somecolor^.a:=byte(^a);
-
-	SDL_SetRenderDrawColor(renderer, 255 - somecolor^.r, 255 - somecolor^.g, 255 - somecolor^.b, somecolor^.a); 
-
+	_bgcolor^.r:=(255 - _bgcolor^.r);
+    _bgcolor^.g:=(255 - _bgcolor^.g);
+    _bgcolor^.b:=(255 - _bgcolor^.b);
 end;
-
-
 
 
 {$IFDEF mswindows}
@@ -3700,11 +3634,10 @@ end;
 {$endif}
 
 
-
 //returns the floatValue of the current "RGB (BYTE) quad"
 //to be useful - or do math ops- we need the byte values.
 
-function GetColor:single;
+function GetFGColor:single;
 var
 	GotColor:float;
 
@@ -3713,7 +3646,7 @@ begin
     GetColor:=GotColor;
 end;
 
-function GetColor:Byte;
+function GetFGColor:Byte;
 var
 	GotByte:byte;
 	GotColor:float;
@@ -3722,43 +3655,12 @@ begin
 	GetColor:=Float2Byte(GotColor);
 end;
 
-{
+{ 
 
-//16 (candles) colors:
-
-//background color(and clear):
-glClearColor(0.0, 0.0, 0.0, 0.0);
-glClear(GL_COLOR_BUFFER_BIT);
-
-//foreground color
-glColor4b(color^.r,color^.b,color^.g,255);
-
-//three-quarter tone
-glColor4b(color^.r,color^.b,color^.g,192);
-
-//half-tone
-glColor4b(color^.r,color^.b,color^.g,127);
-
-//quarter-tone
-glColor4b(color^.r,color^.b,color^.g,63);
-
-
-//set size of the pixel(draw w neighbors)
-glPointSize(1);
-
-//FAT lines, anyone?
-glLineWidth(4);
-
-//Dashed(stippled lines!!!!
-//FAT and stippled can be combined
-
-glEnable(GL_LINE_STIPPLE);
-glLineStipple(1, 0x3F07);
-
+app devs need to use these:
 
 procedure MouseButton(button, state, x, y:integer);
 begin
-//REM OUT
   // Respond to mouse button presses.
   // If button1 pressed, mark this state so we know in motion function.
 
@@ -3768,7 +3670,7 @@ begin
 		state := GLUT_DOWN;
       else
 		state:=GLUT_UP;
-      g_yClick := y - (3 * g_fViewDistance);
+//      g_yClick := y - (3 * g_fViewDistance);
     end;
 
 end;
@@ -3783,65 +3685,138 @@ begin
       g_fViewDistance := (y - g_yClick) / 3.0;
       if (g_fViewDistance < VIEWING_DISTANCE_MIN) then
          g_fViewDistance := VIEWING_DISTANCE_MIN;
-      glutPostRedisplay();
+      glutPostRedisplay(); 
     end;
 
 end;
 
 }
 
+
+type
+    pmypixels:^mypixels;
+
+    pmyshortpixels:^myshortPixels;
+
 var
-  PixelData,mypixels:array [MaxX,MaxY] of SDL_Color; //4byte array (pixel) for sizeof(screen)
-  pixels15,pixels16:array [MaxX,MaxY] of word; //Word=2bytes(16 bits) of data
+  mypixels:array [0..MaxX,0..MaxY] of SDL_Color; //4byte array (pixel) for sizeof(screen)
+  myshortPixels: array [0..MaxX,0..MaxY] of Word; //GLshort
+  
   maxTextureSize:integer;
 
 //bytes are too small for screen co-ords
 procedure DrawGLRect(x1,y1,x2,y2:Word);
-	glRecti(x1, y1, x2,y2);
+	glRects(x1, y1, x2,y2); //GLuShort=Word
 end;
 
 procedure DrawGLRect(Rect:PSDL_Rect); overload;
-	glRecti(Rect^.x1, Rect^.y1, Rect^.x2,Rect^.y2);
+	glRects(Rect^.x1, Rect^.y1, Rect^.x2,Rect^.y2);
 end;
 
 
-//similar to SDL_GetPixels
+//similar to SDL_GetPixels- we read a Rect from a Texture.
 
-//put the WHAT out of GetPixels(SDL):
-
-function readpixels:(x,y,width,height:integer; Texture:textureID):somePixelData;
+function readpixels1516Tex(x,y,width,height:integer; Texture:textureID):PmyShortPixels;
 //fucked C output- so lets un-fuck it.
+
+var
+    PointedPixels:pointer;    
+
+begin
+  case (bpp) of:
+
+//these are 16bit values(words, not DWords)
+//so unpack, then repack it.
+
+	15: begin
+  			glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+            glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1, pixels15);
+  			glPixelStorei(GL_PACK_ALIGNMENT, 4);
+    end;
+	16: begin
+  			glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+            glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, pixels16);
+  			glPixelStorei(GL_PACK_ALIGNMENT, 4);
+    end;
+
+  end else begin
+        //wrong routine called!!
+
+  end;
+    PointedPixels:^myshortpixels;
+    readpixelsTex:=PointedPixels;
+end;
+
+
+function readpixelsTex(x,y,width,height:integer; Texture:textureID):Pmypixels;
+//fucked C output- so lets un-fuck it.
+
+var
+    PointedPixels:pointer;    
+
 begin
   case (bpp) of:
 
     //palettized (faked) 24bit
-	4: glReadPixels(0, 0, width, height, GL_RGB, GL_BYTE, mypixels);
-	8: glReadPixels(0, 0, width, height, GL_RGB, GL_BYTE, mypixels);
 
-//pad w zeros??
-	15:glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1, pixels15);
-	16: glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, pixels16);
+    //if this fails- put GL_BYTE where UNSIGNED is.
+	4: glReadPixels(0, 0, width, height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, mypixels);
+	8: glReadPixels(0, 0, width, height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, mypixels);
 
-	//No upconversion.Settle for 32bit data(24+pad data).
-	24: begin
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, mypixels);
-
-		end;
+	//No upconversion. Settle for 32bit data(24+pad data). I made this weird.
+	24: glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, mypixels);
     32: glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, mypixels);
+  end else begin
+    //wrong routine called!
+
   end;
-//  readpixels:=mypixels;
+    PointedPixels:^mypixels;
+    readpixelsTex:=PointedPixels;
 end;
+
+//read from Screen(framebuffer)?
+
 
 //co-ordinates: update texture, update rect, or update screen?
 
+procedure UpdateRect1516(x,y,width,height:integer; Texture:textureID; pixels:pmyshortpixels);
+//remember SDlv1 updateRect? This is it - in OpenGL.
+//only update modified pixels
 
-procedure UpdateRect(x,y,width,height:integer; Texture:textureID; pixels:PixelData);
+begin
+     if pixels=Nil then
+        exit;
+
+    //check for rubbish
+    if (height <=0) or (width <=0) then begin
+		LogLn('Invalid HxW data given for Texture update');
+		exit;
+    end;
+    if (x <0) or (y <0) then begin
+		LogLn('Invalid XxY data given for Texture update');
+		exit;
+    end;
+
+  glBindTexture(GL_TEXTURE_2D, texture);    //A texture you have already created storage for
+
+  case (bpp) of:
+
+	15: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1, pmyshortpixels);
+	16: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB,  GL_UNSIGNED_SHORT_5_6_5, pmyshortpixels);
+
+   end; //case
+end;
+
+
+procedure UpdateRect(x,y,width,height:integer; Texture:textureID; pixels:pmypixels);
 //remember SDlv1 updateRect? This is it - in OpenGL.
 //only update modified pixels
 
 
 begin
+     if pixels=Nil then
+        exit;
+
     //check for rubbish
     if (height <=0) or (width <=0) then begin
 		LogLn('Invalid HxW data given for Texture update');
@@ -3856,22 +3831,17 @@ begin
 
   case (bpp) of:
     //faked RGB modes(24bits colors) w palettes
-	4: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_BYTE, pixels);
-	8: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_BYTE, pixels);
-
-//hacked 16bit support wo alpha
-
-	15: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1, pixels15);
-	16: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB565,  GL_UNSIGNED_SHORT_5_6_5, pixels16);
+	4: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_BYTE, pmypixels);
+	8: glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_BYTE, pmypixels);
 
 //the tuple...
-	24:	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+	24:	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, pmypixels);
 
 	32: begin
 			{$ifdef mswindows}
-				glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+				glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pmypixels);
 			{$else}
-				glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_ARGB, GL_UNSIGNED_BYTE, pixels);
+				glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_ARGB, GL_UNSIGNED_BYTE, pmypixels);
 			{$endif}
 		end;
    end; //case
@@ -3885,64 +3855,56 @@ end;
 
 //"textures may not contain the color mode set"....(SDL)
 
-//15bit is 5551 but the alpha bit is ignored/dropped. (OGL sanity fix)
-}
-type
-
-	PRGB=^TRGB;
-	TRGB=record
-		r,g,b:Byte;
-	end;
-
-//4bit=8bit but less colors.
-//4 and 8bit routines(palette) -and look up tables- have been written already.
-
-// for 32-> 15/16 routines, drop the A bit completely. Then run one of these.
+// for 32-> 15/16 routines, the A bit=FF. Then run one of these.
 
 
 //(24bit RGB->15bits hex):
-procedure RGB24To15bit(in:TRGB; out:PRGB);
+function RGB24To15bit(incolor:SDL_Color):SDL_Color;
 begin
-        out^.r := in.r * (2 shl 5) / (2 shl 8);
-        out^.g := in.g * (2 shl 5) / (2 shl 8);
-        out^.b := in.b * (2 shl 5) / (2 shl 8);
+        outcolor^.r := incolor.r * (2 shl 5) mod (2 shl 8);
+        outcolor^.g := incolor.g * (2 shl 5) mod (2 shl 8);
+        outcolor^.b := incolor.b * (2 shl 5) mod (2 shl 8);
 end;
 
-procedure RGB24To16bit(in:TRGB; out:PRGB);
+procedure RGB24To16bit(incolor:SDL_Color):SDL_Color;
 begin
-        out^.r := in.r * (2 shl 5) / (2 shl 8);
-        out^.g := in.g * (2 shl 6) / (2 shl 8);
-        out^.b := in.b * (2 shl 5) / (2 shl 8);
+        outcolor^.r := incolor.r * (2 shl 5) mod (2 shl 8);
+        outcolor^.g := incolor.g * (2 shl 6) mod (2 shl 8);
+        outcolor^.b := incolor.b * (2 shl 5) mod (2 shl 8);
 end;
-
-
 
 
 //Convert an array of four bytes into a 32-bit DWord/LongWord.
+//rarely used now.
 
 function  getDwordFromSDLColor(someColor:PSDL_Color):DWord;
 
 begin
 //array of 4 bytes or dword
-//(theres a simpler way to do endian flappening)
 
-//LE
+{$ifndef mswindows}
     getDwordFromBytes:= (somecolor.^r) or (somecolor.^g shl 8) or (somecolor.^b shl 16) or (somecolor.^a shl 24);
-//BE
-  // getDwordFromBytes:= (somecolor.^a) or (somecolor.^b shl 8) or (somecolor.^g shl 16) or (somecolor.^r shl 24);
+{$endif}
+
+{$ifdef mswindows}
+    getDwordFromBytes:= (somecolor.^a) or (somecolor.^b shl 8) or (somecolor.^g shl 16) or (somecolor.^r shl 24);
+{$endif}
 end;
 
 //in case we didnt use the SDL Color array--WHY?
 function  getDwordFromBytes(r,g,b,a:Byte):DWord;
 
 begin
-//LE
+{$ifndef mswindows}
     getDwordFromBytes:= (r) or (g shl 8) or (b shl 16) or (a shl 24);
-//BE
-  // getDwordFromBytes:= (a) or (b shl 8) or (g shl 16) or (r shl 24);
+{$endif}
+{$ifdef mswindows}
+   getDwordFromBytes:= (a) or (b shl 8) or (g shl 16) or (r shl 24);
+{$endif}
+
 end;
 
-//where do the bytes go? into a record. (the data goes out-to where?--we dont care...)
+//where do the bytes go? into a record. 
 function GetByesfromDWord(someD:DWord):SDL_Color;
 
 var
@@ -3952,28 +3914,32 @@ var
 begin
     someDPtr:=Nil;
     someDPtr:^someD;
-//LE
+
+{$ifndef mswindows}
 	r:=someDPtr^;
 	g:=someDPtr^[1];
 	b:=someDPtr^[2];
 	a:=someDPtr^[3];
+{$endif}
 
-{
-//BE
+{$ifdef mswindows}
 	a:=someDPtr^;
-	r:=someDPtr^[1];
+	b:=someDPtr^[1];
 	g:=someDPtr^[2];
-	b:=someDPtr^[3];
-}
+	r:=someDPtr^[3];
+{$endif}
+
    somecolor^.r:=byte(^r);
    somecolor^.g:=byte(^g);
    somecolor^.b:=byte(^b);
    somecolor^.a:=byte(^a);
 
+   GetByesfromDWord:=somecolor;
 end;
 
 // SDL FIXME: 50 million functs to do something!
 //these two redraw after enable/disable
+
 procedure EnableAAMode;
 
 begin
@@ -4023,8 +3989,19 @@ begin
 	PutPixelXY(x,y);
 end;
 
+type
+    PPoints=^points;
+    PolyPts= record
+        x:word;
+        y:word;
+    end;
 
-procedure DrawPoly(Points:array [0..64] of PolyPts; num:byte);	
+//arent dynamic arrays fun?
+
+var
+   Points:array of PolyPts;
+
+procedure DrawPoly(GiveMePoints:Points);	
 //use predefind objects or tessellate if you have need of more surface "curvature"
 
 begin	
@@ -4035,28 +4012,32 @@ begin
 	else
 		//dont draw solids:
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	glBegin(GL_POLYGON);
 		repeat
-			glVertex2s(Points[num]^.x,Points[num]^.y);	
+			glVertex2s(GiveMePoints[num]^.x,GiveMePoints[num]^.y);	
 			dec(num);
-		until num=1;
+		until sizeof(GiveMePoints);
 	glEnd;
+
 	glFlush;
 end;
 
+
 procedure CreateNewTexture;
 var
-   tex:GLuint;
+   tex:GLuint; //LongWord
 
 begin
+
 	glGenTextures(1, tex);
 	glBindTexture(GL_TEXTURE_2D, tex);
 
 	//keep coord sane between 0 and 1
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); //X
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); //Y
+
 	if not drawAA then begin
-	
 		//pixely -lookig mode
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -4067,53 +4048,85 @@ begin
 	
 end;
 
+type
+    pixelsP=^pixels;
+    TexturePixels= array of Byte;
+
 var
-	pixelArray:array [0..MaxX,0..MaxY] of PSDL_Color;
+    texture:LongWord;
+    pixelData:Texturepixels;
 
 //RenderTexture then glFlush/RenderPresent/PageFlip)
 
-//copy pixels provided to the current Texture.
-procedure RenderToTexture
-begin
-	case bpp of:
-
-		4,8,24: RenderTextureRGB;
-	//	15,16: RendereTextureInt;
-		32: RenderTextureRGBA;
-	end;
-end;
-
-procedure RenderTextureRGB(pixels:pixelArray);
+procedure RenderTargetWord15;
 
 begin
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT,pixelArray );
+    glTexImage2D(GL_TEXTURE_2D, 0, x,y, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1, texture);
 end;
 
+procedure RenderTargetWord16;
+
+begin
+    glTexImage2D(GL_TEXTURE_2D, 0, x,y, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, texture);
+end;
+
+procedure RenderTargetRGB;
+
+begin
+    glTexImage2D(GL_TEXTURE_2D, 0, x,y, width, height, GL_RGB, GL_UNSIGNED_BYTE, texture);
+end;
+
+
+procedure RenderTargetRGBA;
+
+begin
+    glTexImage2D(GL_TEXTURE_2D, 0, x,y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, texture);
+end;
 
 
 //libSOIL
-procedure Load_Image
+procedure Load_ImageRGB
 
 var
 	width, height:integer;
-    image:PChar;
 
 begin
   image:=SOIL_load_image("img.png", width, height, 0, SOIL_LOAD_RGB); //load image
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image); //copyTex
+  glTexImage2D(GL_TEXTURE_2D, 0, x,y,width, height,GL_RGB, GL_UNSIGNED_BYTE, pmypixels); //copyTex
+  
+end;
+
+procedure Load_ImageRGBA
+
+var
+	width, height:integer;
+
+begin
+  image:=SOIL_load_image("img.png", width, height, 0, SOIL_LOAD_RGBA); //load image
+  glTexImage2D(GL_TEXTURE_2D, 0, x,y,width, height,GL_RGBA, GL_UNSIGNED_BYTE, pmypixels); //copyTex
+  
+end;
+
+
+procedure Load_ImageScaledRGB(scaleX,ScaleY:integer);
+
+begin
+  image:=SOIL_load_image("img.png", width, height, 0, SOIL_LOAD_RGB); //load image
+
+  //I dont think this is how its done...GL is weird in whacky ways...
+
+  glTexImage2D(GL_TEXTURE_2D, 0, x,y, ScaleX, ScaleY, 0, GL_RGB, GL_UNSIGNED_BYTE, pmypixels); //copyTex
 
 end;
 
-procedure Load_ImageScaled(scaleX,ScaleY:integer);
-
-var
-    image:PChar;
+procedure Load_ImageScaledRGB(scaleX,ScaleY:integer);
 
 begin
-  image:=SOIL_load_image("img.png", width, height, 0, SOIL_LOAD_RGB); //load image
+  image:=SOIL_load_image("img.png", width, height, 0, SOIL_LOAD_RGBA); //load image
+
   //I dont think this is how its done...GL is weird in whacky ways...
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ScaleX, ScaleY, 0, GL_RGB, GL_UNSIGNED_BYTE, image); //copyTex
+  glTexImage2D(GL_TEXTURE_2D, 0, x,y, ScaleX, ScaleY, 0, GL_RGBA, GL_UNSIGNED_BYTE, pmypixels); //copyTex
 
 end;
 
@@ -4133,8 +4146,6 @@ NET:
 	init and teardown need to be added here- I havent gotten to that.
 	(I was trying to find viable non-C,non-SDL Net code)
 
-CLipping:
-	we always clip.  PERIOD.
 }
 
 
@@ -4168,7 +4179,7 @@ Begin
   ViewWidth :=  X2-X1;
   ViewHeight:=  Y2-Y1;
 
-  //add viewport array code so we can remove screen 'contents' later on
+  //FIXME: add viewport array code so we can remove screen 'contents' later on
 
 end;
 
@@ -4180,87 +4191,72 @@ begin
   ViewPort.Y2 := ViewHeight + StartYViewPort;
 end;
 
-
-  procedure SetAspectRatio(Xasp, Yasp : word);
-  begin
+//change
+procedure SetAspectRatio(Xasp, Yasp : word);
+begin
     Xaspect:= XAsp;
     YAspect:= YAsp;
-    //fix the SDL/freeglut variables for display output,then...
+    glViewport(0, 0, Width, Height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45.0, XAsp mod YAsp, 0.1, 100.0);
+    glflush;
+end;
 
-    //redraw the screen(or wait)
-  end;
 
-
-  procedure SetWriteMode(WriteMode : smallint);
+procedure SetWriteMode(WriteMode : word);
   // TP sets the writemodes according to the following scheme (Jonas Maebe)
-   begin
+
+{
+Word    Function        CPU BOOLEAN Instruction
+
+0       CopyPut         MOV (to new buffer)
+
+Blend Modes:
+1       XORPut          XOR (XOR color)
+2       ORPut           OR  (or color)
+3       AndPut          AND (and color)
+
+4       NotPut          NOT (dont put it- move XY pointer instead)
+
+}
+
+begin
      Case writemode of
        //for each pixel in surface.^pixels do:
        //put pixel according to mode, update surface
+       0: begin
+            CurrentWriteMode := CopyPut;
 
-       xorput, andput: CurrentWriteMode := XorPut;
-       orput, copyput: CurrentWriteMode := CopyPut;
-       //'Not' is atypical for unixes. (not properly implemented)
-       //1- inverted color ((MaxColors mod 2) -1)
-       //2- background color instead of fore color(erase mode)
-       notput: CurrentWriteMode := NotPut;
-     End;
-     //until reset- use the mode given.
-   end;
+       end;
+       1: begin
+            CurrentWriteMode := XorPut;
 
+       end; 
+       2:  begin
+            CurrentWriteMode := orPut;
 
-//this was ported from (SDL) C-
-//https://stackoverflow.com/questions/37978149/sdl1-sdl2-resolution-list-building-with-a-custom-screen-mode-class
-
-function FetchModeList:Tmodelist;
-var
-    mode_index,modes_count ,display_index,display_count:integer;
-    i:integer;
-
-
-begin
-   display_count := SDL_GetNumVideoDisplays; //1->display0
-   LogLn('Number of displays: '+ intTOstr(display_count));
-   display_index := 0;
-
-//for each monitor do..
-while  (display_index <= display_count) do begin
-    LogLn('Display: '+intTOstr(display_index));
-
-    modes_count := SDL_GetNumDisplayModes(display_index); //max number of supported modes
-    mode_index:= 0;
-    i:=0;
-
-    //do for each mode in the number of possible modes
-    while ( mode_index <= modes_count ) do begin
-
-        SDLmodePointer^.format:= SDL_PIXELFORMAT_UNKNOWN;
-        SDLmodePointer^.w:= 0;
-        SDLmodePointer^.h:= 0;
-        SDLmodePointer^.refresh_rate:= 0;
-        SDLmodePointer^.driverdata:= Nil;
-
-
-        if (SDL_GetDisplayMode(display_index, mode_index, SDLmodePointer) = 0) then begin //mode supported
-
-            //Log: pixelFormat(bpp)MaxX,MaXy,refrsh_rate
-            LogLn(IntToStr(SDL_BITSPERPIXEL(SDLmodePointer^.format))+' bpp'+ IntToStr(SDLmodePointer^.w)+ ' x '+IntToStr(SDLmodePointer^.h)+ '@ '+IntToStr(SDLmodePointer^.refresh_rate)+' Hz ');
-
-            //store data in a modeList array
-
-                SDLmodeArray[i].format:=SDL_BITSPERPIXEL(SDLmodePointer^.format);
-                SDLmodeArray[i].w:=SDLmodePointer^.w;
-                SDLmodeArray[i].h:=SDLmodePointer^.h;
-                SDLmodeArray[i].refresh_rate:=SDLmodePointer^.refresh_rate;
-                SDLmodeArray[i].driverdata:=SDLmodePointer^.driverdata;
+       end;
+       3:  begin
+            CurrentWriteMode := AndPut;
 
         end;
-        inc(i);
-        inc(mode_index);
-    end;
-    inc(display_index);
+       //'Not' is atypical for unixes. (not implemented)
 
+       //either your putting the color- or your NOT--according to boolean logic.
+       //so therefore: a NOTPut means this: draw with the background color
+       5: begin
+            CurrentWriteMode := NotPut;
+            _fgcolor:=_bgcolor;
+       end;
+End;
+     
 end;
+
+//FIXME: needs a rewrite
+function FetchModeList:Tmodelist;
+
+begin
 
 end;
 
@@ -4278,27 +4274,18 @@ I was THIS mode, and none other- it had better be supported (but is it?)
 (try or fail)
 
 
-Although generally in SDL(and on hardware) smaller windows and color depths are supported(emulation),
-SDL -by itself- might not support that mode.
-
-
-Do we care- as mostly we are setting windows sizes? Not usually.
-WE could care less if the data is scaled on fullsceen-since we arent responsible for the scaling
-
+Although generally in SDL(and on hardware) smaller windows and color depths are supported(emulation).
+Fullscreen modes need to pull up or use "FatPixel modes" to correct for the lack of resolution.
 (whether things look good- is another matter)
 
-A TON of old code was written when pixels were actually visible. NOT THE CASE, anymore.
+A TON of old code was written when pixels were actually visible. 
+NOT THE CASE, anymore.
 
 
 DetectGraph is here more for compatibility than anything else.
 It seems to be used as often as DEFINED modes.
 
 -Custom modes are usually hackish and were removed.
-
-Interrupt handling:
-
-The reason this is remmed out is bc I want YOu to do this.
-The code is however-reasonable- but untested.
 
 }
 
@@ -4313,12 +4300,11 @@ begin
 //log any errors
 end;
 
-//you pass the array, or direct co ordinates in.
+
 function WindowPos_IsUndefined(WindowData:PSDL_Rect): boolean;
 //basically these settings violate bounds.
 begin
-	WindowPos_IsUndefined:=((WindowData^.x<1) or (WindowData^.y<1) or (WindowData^.h<1) or (WindowData^.h>MaxY) or (WindowData^.w<1) or (WindowData^.w>MaxX)
-	or (WindowData.x=Nil) or (WindowData.y=Nil) or (WindowData.h=Nil) or (WindowData.w=Nil));
+	WindowPos_IsUndefined:=((WindowData^.x<0) or (WindowData^.y<0) or (WindowData^.h<1) or (WindowData^.h>MaxY) or (WindowData^.w<1) or (WindowData^.w>MaxX) or (WindowData.x=Nil) or (WindowData.y=Nil) or (WindowData.h=Nil) or (WindowData.w=Nil));
 end;
 
 //I actually compute this for text positioning, inside the window.
@@ -4328,99 +4314,13 @@ begin
   WindowPos_IsCentered := (((WindowData.x mod 2)=MaxX mod 2) and ((WindowData.y mod 2)=MaxY mod 2));
 end;
 
+//Locking Textures is a good idea. It ensures that we want to render there- 
+// and that nothing can interupt us when doing so- like a sephamore or spinlock.
 
-//accellerated rendering requires locked surfaces? Lets see.
-function SDL_MUSTLOCK(Const S:PSDL_Surface):Boolean;
-begin
-  SDL_MUSTLOCK := ((S^.flags and SDL_RLEACCEL) <> 0);
-  if SDL_MUSTLOCK:=true then logLn('need to lock surface');
-end;
-
-procedure IntHandler;
-//This is a dummy routine.
-
-//I want you- Users/programmers to override this routine and DO THINGS RIGHT.
-
-//with freeGLUT - we may not have to fork. It knows to call us. AND kill us.
-var
-   MoonOrange:boolean;
-
-begin
-  EventThread:=fpfork;
-
-  if (EventThread=0) then begin //we didnt fpfork....
-     if IsConsoleInvoked then begin
-        Logln('EPIC FAILURE: SDL requires multiprocessing. I cant seem to fpfork. ');
-        closegraph;
-     end;
-       {$ifdef lcl}
-			ShowMessage('EPIC FAILURE: Cant fork. I need to. CRITICAL ERROR.');
-	   {$endif}
-      closegraph;
-  end;
-
-    MoonOrange:=false;
-    repeat
-      delay(1000);
-
-{
-this is how to do it-
-//FIXME: needs freeGLUT mod
-
-var
-      kbhit,GetString,quit,echo:boolean;
-      GetChar,c:char;
-      event:SDL_Event;
-	  somestring:string;
-      i:integer;
-
-//Readkey,KeyPressedm and ReadString combo with one handler.
-
-	if ((SDL_PollEvent( event ) <> Nil) and (event^._type = SDL_KEYDOWN))) then begin
-        SDL_PushEvent(event);
-	    kbhit:=true;
-
-	  case( event.type ) of
-	  SDL_KEYDOWN:
-	    c=event.key.keysym.sym;
-	    if (isprint(c)) then begin
-	      i:=0;
-          if GetString=true then begin
-              repeat
-                somestring[i]:=c;
-                inc(i);
-              until (c=SDLK_RETURN) or (i=len(somestring));
-          end else begin
-             GetChar:=c;
-          end;
-        end; //Is printable char
-
-	    exit;
-      end;
-	  SDL_ACTIVEEVENT:
-	//    if ((event.active.state = SDL_APPINPUTFOCUS) and event.active.gain) then
-	      //resume
-	    break;
-	  SDL_QUIT:
-	    MoonOrange := true;
-	    exit;
-	  else:
-	    //SDL_PushEvent(event); or
-		//SDL_WaitEVent(0);
-	    exit;
-	  end else begin
-	    SDL_WaitEvent(0);
-	  end;
-    end;
-
-}
-
-    until MoonOrange=true;
-    //exit gracefully.
-end;
 
 // from wikipedia(untested)
 procedure RoughSteinbergDither(filename,filename2:string);
+//assumes 24 or 32 bit image
 
 var
 	pixel:array[0..1280,0..1024] of DWord;
@@ -4470,186 +4370,34 @@ for example:
 
 
 {
-Create a new texture for most ops-or DO NOT call RenderCopy(or unlock),meaning that rendering is NOT done yet.
+Create a new texture for most ops-
+DO NOT call RenderCopy(or unlock),meaning that rendering is NOT done yet.
 
-RenderPresent is being called automatically at minimum (screen_refresh) as an interval.
-Refresh is fine if data is in the backbuffer. Until its copied into the main buffer- its never displayed.
+Rendering is being called automatically at minimum (screen_refresh) as an interval.
+Refresh is fine if data is in the backbuffer. 
 
-DO NOT use TextureLocking functions/procs if using Render based ops- they may do this automagically.
-(Texture is only a context if using "surface opertions on a Texture" )
+Until its copied into the main buffer- its never displayed.
 
 
 which surface/texture do we lock/unlock??
-solve for X -by providing it. dont beat your own brains out nuking the problem.
+solve for X -by providing it. Dont beat your own brains out nuking the problem.
 
-unfortunately- a texture -based SDL2 only solution "nukes the problem".
-Methinks it twas an intermediary drawing method for those routines not converted to Render calls.
+dont render Present(page_Flip) while a surface is locked for operations.(PAUSE rendering)
 
-Therefore surface ops-need to be added back in(or still used)
+we could be presented with a situation that causes an issue where locked surfaces are forced onto the screen
+with potentially no way to unlock them.
+This may create a "double free error"-or the like.
 
 }
 
-//dont render Present(page_Flip) while a surface is locked for operations.(PAUSE rendering)
-//we could be presented with a situation that causes an issue where locked surfaces are forced onto the screen
-// with potentially no way to unlock them.
-//This may create a "double free error"-or the like.
+//"Texture locking thru OGL on Unices is unpredictable." -SDL DEv team. NICE JOKE.
+//what you mean was glBindTexture's "second call to Nil", right?
 
-procedure lock;
-begin
-    if SDL_MustLock(MainSurface)=true then
-        SDL_LockSurface(Mainsurface);
-    //else exit: no locking needed
-    paused:=true;
-end;
-
-
-procedure unlock;
-begin
-    if SDL_MustLock(MainSurface)=true then
-           SDL_UnlockSurface(Mainsurface);
-    //else exit: no UNlocking needed
-    paused:=false;
-end;
-
-//depending if "MainSurface" isnt what you want.
-procedure lock(someSurface:PSDL_Surface); overload;
-begin
-    if SDL_MustLock(someSurface)=true then
-        SDL_LockSurface(someSurface);
-    //else exit: no locking needed
-    paused:=true;
-end;
-
-
-procedure unlock(someSurface:PSDL_Surface); overload;
-begin
-    if SDL_MustLock(someSurface)=true then
-           SDL_UnlockSurface(someSurface);
-    //else exit: no UNlocking needed
-    paused:=false;
-end;
-
-//Texture locking thru OGL on Unices is unpredictable.
-//Use "direct Render ops" or SDL 1.2 methods instead.
-procedure Texlock(Tex:PSDL_Texture);
-
-var
-  w,h:PInt;
-  pitch:integer;
-  pixels:^longword;
-
-begin
-  pixels:=Nil;
-  pitch:=0;
-  if (LIBGRAPHICS_ACTIVE=false) then begin
-    Logln('I cant lock a Texture if we are not active: Call initgraph first');
-    exit;
-  end;
-  if (Tex = Nil) then begin
-     if IsConsoleInvoked then
-        LogLn('Cant Lock unassigned Texture');
-     {$ifdef lcl}
-			ShowMessage('Cannot Lock an unassigned Texture.');
-	 {$endif}
-     exit;
-  end;
-  paused:=true;
-//  SDL_QueryTexture(tex, format, Nil, w, h);
-  SDL_SetRenderTarget(renderer, tex);
-
-{$IFDEF mswindows}
-  SDL_LockTexture(tex,Nil,pixels,pitch);
-{$ENDIF}
-
-end;
-
-procedure TexlockwRect(Tex:PSDL_Texture; Rect:PSDL_Rect);
-
-var
-  w,h,pitch:integer;
-  pixels:^longword;
-
-begin
-  if (LIBGRAPHICS_ACTIVE=false) then begin
-    Logln('I cant lock a Texture if we are not active: Call initgraph first');
-    exit;
-  end;
-  if (Tex = Nil) then begin
-     if IsConsoleInvoked then
-        LogLn('Cant Lock unassigned Texture');
-     {$ifdef lcl}
-			ShowMessage('Cannot Lock an unassigned Texture.');
-	 {$endif}
-     exit;
-  end;
-  paused:=true;
-//  SDL_QueryTexture(tex, format, rect, w, h);
-  SDL_SetRenderTarget(renderer, tex);
-{$IFDEF mswindows}
-  SDL_LockTexture(tex,Nil,pixels,pitch);
-{$ENDIF}
-end;
-
-function lockNewTexture:PSDL_Texture;
-
-var
-  tex:PSDL_Texture;
-
-begin
-  if (LIBGRAPHICS_ACTIVE=false) then begin
-    Logln('I cant lock a Texture if we are not active: Call initgraph first');
-    exit;
-  end;
-//case bpp of... sets PixelFormat(forcibly)
-  Paused:=true;
-  tex:=Nil; //if we dont clear it before calling, results are unpredictable.
-  tex:= SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_TARGET, MaxX, MaxY);
-  if (tex = Nil) then begin
-     if IsConsoleInvoked then
-		
-        LogLn('Cant Allocate Texture');
-     {$ifdef lcl}
-			ShowMessage('Cannot Allocate Texture.');
-	 {$endif}
-
-     exit;
-  end;
-//  SDL_QueryTexture(tex, format, Nil, w, h);
-  SDL_SetRenderTarget(renderer, tex);
-{$IFDEF mswindows}
-  SDL_LockTexture(tex,Nil,pixels,pitch);
-{$ENDIF}
-  lockNewTexture:=Tex; //kick it back
-end;
-
-//call when done drawing pixels
-procedure TexUnlock(Tex:PSDL_Texture);
-
-begin
-
-  if (LIBGRAPHICS_ACTIVE=false) then begin
-    Logln('I cant unlock a Texture if we are not active: Call initgraph first');
-    exit;
-  end;
-{$IFDEF mswindows}
-    //we are done playing with pixels so....
-    SDL_UnLockTexture(tex);
-{$ENDIF}
-
-//get stuff ready for the renderer and render.
-  SDL_SetRenderTarget(renderer, NiL);
-  SDL_RenderCopy(renderer, tex, NiL, NiL);
-  SDL_DestroyTexture(tex);
-  Paused:=false;
-end;
-
-//BGI spec
 procedure clearDevice;
 
 begin
     if LIBGRAPHICS_ACTIVE=true then
-		SDL_RenderClear(renderer);		
-		// if Render3d then GL_Clear;
+		GL_Clear;
 end;
 
 procedure clearscreen;
@@ -4662,6 +4410,7 @@ begin
         clrscr;
 end;
 
+//clear with color
 procedure clearscreen(index:byte); overload;
 
 var
@@ -4678,105 +4427,84 @@ begin
         LogLn('Attempting to clearscreen(index) with non-indexed data.');
         exit;
     end;
-    if MaxColors=64 then
+
+    if MaxColors=16 then
        somecolor:=Tpalette16.colors[index];
+
+    if MaxColors=64 then
+       somecolor:=Tpalette64.colors[index];
 
     if MaxColors=256 then
        somecolor:=Tpalette256.colors[index];
-
-
-    SDL_SetRenderDrawColor(Renderer,ord(somecolor^.r),ord(somecolor^.g),ord(somecolor^.b),255);
-	SDL_RenderClear(renderer);
 end;
 
+{
 
-procedure clearscreen(color:Dword); overload;
+//only works in 2D
+
+type
+    objectStyle=(dotted, dashed, complete);
 
 var
-    somecolor:PSDL_Color;
-    someDword:DWord;
-    r,g,b:PUInt8;
-    i:integer;
+//need a unique variable name that makes sense
+   VTX : array of TVertex2f ;  // array of XY coordinates
+
+    
+procedure circle;
 
 begin
-    if LIBGRAPHICS_ACTIVE=true then begin
+//points of the circle are used. so ~180 is good.
+//these can be programmed in sin/cos fashion...I already have THAT code.
 
-//the only easy way is thru paletted mode due "to the renderer"
-//we might just need the pixel format type....
 
-	if bpp =4 then begin
-	    //get index from DWord- if it matches
-        i:=0;
-        repeat
-            if color=Tpalette16.DWords[i] then begin;
-                somecolor:=Tpalette16.colors[i];
-                exit;
-            end;
-            inc(i);
-        until i=15;		
-	end else
-	if bpp =8 then begin
-	    //get index from DWord- if it matches
-        i:=0;
-        repeat
-            if color=Tpalette256.DWords[i] then begin;
-                somecolor:=Tpalette256.colors[i];
-                exit;
-            end;
-            inc(i);
-        until i=255;		
-	end;
-	
-	case bpp of
-        15,16,24,32: begin
-        //mainSurface will be set upon initGraph invocation
-	    	SDL_GetRGB(color,MainSurface^.format,r,g,b);
-	    	somecolor^.r:=byte(^r);
-	    	somecolor^.g:=byte(^g);
-		    somecolor^.b:=byte(^b);	
-	    end;
-    end;
-    SDL_SetRenderDrawColor(Renderer,ord(somecolor^.r),ord(somecolor^.g),ord(somecolor^.b),255);
-	SDL_RenderClear(renderer);
-	end;
+//dotted object
+
+   // Draw Pixels
+   glPointSize ( lineSize ) ;  // dots diameter 5 pixels.
+   glColor3f ( 0.0 , 0.0 , 1.0 ) ;  // blue
+
+//for each XY vertex(point) starting with the first(0)- draw the vertexPoint in manner described above.
+
+   glDrawArrays ( GL_POINTS , 0 , Length ( VTX )) ;
+
+//dashed object
+
+   // Draw LINES
+   glLineWidth ( lineSize ) ;  // line 3 pixels wide.
+   glColor3f ( 1.0 , 1.0 , 0.0 ) ;  // yellow
+   glDrawArrays ( GL_LINES , 0 , Length ( VTX )) ;
+
+//complete object(circle)
+
+   // Draw A closed loop of lines
+   glLineWidth ( lineSize ) ;  // line 6 pixels wide.
+   glColor3f ( 0.0 , 1.0 , 0.0 ) ;  // green
+   glDrawArrays ( GL_LINE_LOOP , 0 , Length ( VTX )) ;
+
 end;
+
+}
+
 
 //these two dont need conversion of the data(24 and 32 bpp)
 procedure clearscreen(r,g,b:byte); overload;
 
 
 begin
-	SDL_SetRenderDrawColor(Renderer,ord(r),ord(g),ord(b),255);
-	SDL_RenderClear(renderer);
+	glColor3b(ord(r),ord(g),ord(b),255);
 end;
 
 
 procedure clearscreen(r,g,b,a:byte); overload;
 
 begin
-	SDL_SetRenderDrawColor(Renderer,ord(r),ord(g),ord(b),ord(a));
-	SDL_RenderClear(renderer);
+	glColor3b(ord(r),ord(g),ord(b),ord(a));
 end;
 
 
-//USE:
-
-// (freeGLUT string types limited.)
-//RenderStringF(0.0f, 0.0f, GLUT_BITMAP_TIMES_ROMAN_24, "Hello", someGLColor);
 //RenderStringB(15, 15, GLUT_BITMAP_TIMES_ROMAN_24, "Hello", someSDLColor);
 
-//float color input(GL)
-procedure RenderStringF(x, y:Word; font:Pointer; string:PChar; rgb:GL_Color);
-
-begin
-
-  glColor3f(rgb^.r, rgb^.g, rgb^.b);
-  glRasterPos2f(x, y);
-
-  glutBitmapString(font, string);
-end;
-
-//Byte color input(SDL)
+//Byte color input(like SDL)
 procedure RenderStringB(x, y:Word; font:Pointer; string:PChar; rgb:SDL_Color);
 
 begin
@@ -4790,7 +4518,7 @@ end;
 
 //uses current color set with glColor
 
-procedure PutPixel(x,y:GLShort);
+procedure PutPixel(x,y:Word);
 
 //GL_SHORT is 2 bytes(a Word)
 //create a 2D vertex(point) using "normal values" instead of floats.
@@ -4807,8 +4535,8 @@ begin
 	glFlush; //swoosh!
 end;
 
-//this is for dividing up the screen or dialogs (in game or in app)
 
+//this is for dividing up the screen or dialogs (in game or in app)
 //TP spec says clear the last one assigned
 procedure clearviewport;
 
@@ -4822,31 +4550,9 @@ begin
    viewport^.Y:= texBounds[windownumber]^.y;
    viewport^.W:= texBounds[windownumber]^.w;
    viewport^.H:= texBounds[windownumber]^.h;
-   SDL_RenderFillRect(Renderer, viewport);
+   glClear;
 end;
 
-//at each 60hz/75hz cycle--attempt to update the screen--if not paused.
-
-Procedure videoCallback;
-//you really shouldnt use this- you should give and take TimerTicks
-//when rendering instead.
-
-var
-	refresh:single; //float
-begin
-	//if "fetch refresh data" = failed then
-//		refresh:=1000 / 60;
-
-	//else
-	//refresh:=GotRefresh;
-
-   if (not Paused) then begin //if paused then ignore screen updates
-	  if TimerTicks(Now) / refresh then //only at minimal 60hz refresh
-   //interval will be one of:
-   //	60,72,75,90(VR),120
-		glutSwapBuffers;
-   end;
-end;
 
 //NEW: do you want fullscreen or not?
 procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
@@ -5491,7 +5197,7 @@ $F-
     if AudioSystemCheck <> 0 then begin
         if IsConsoleInvoked then
                 LogLn('There is no audio. Mixer did not init.')
-        else  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There is no audio. Mixer did not init.','OK',NIL);
+        else  ShowMessage(SDL_MESSAGEBOX_ERROR,'There is no audio. Mixer did not init.','OK',NIL);
     end;
 
   end;
@@ -7163,7 +6869,7 @@ begin
 
 
    SDL_RenderSetViewport( Renderer, Rect );
-   //clearviewport(_fgcoor);
+   clearviewport(_fgcolor);
 
    //"Clipping" is a joke- we always clip.
    //The trick is: do we zoom out? In Most cases- NO. We zoom IN.
@@ -7213,7 +6919,8 @@ begin
 
 		SDL_RenderSetViewport( Renderer, LastRect );
         dec(windownumber);
-//unfreeze movement
+        //unfreeze movement
+        Paused:=False;
         exit;
    end;
    //else: last window remaining
@@ -7234,8 +6941,8 @@ begin
    dec(windownumber);
 
    //unfreeze movement
+   Paused:=False;
 end;
-
 
 
 //compatibility
@@ -7271,35 +6978,40 @@ begin
 end;
 
 
-
-//AllocMem a new texture and flap data onto screen (or scrape data off of it) into a file.
-
+//Allocate a new texture and flap data onto screen (or scrape data off of it) into a file.
 
 //yes we can do other than BMP.
 
-procedure LoadImage(filename:PChar; Rect:PSDL_Rect);
+
+type
+    PImage=^Image;
+    Image=array of Byte;
+
+//these two have a syntax bug in someone else code. Use Kronos spec.
+
+procedure LoadImageTexture(filename:PChar; Rect:PSDL_Rect);
 //Rect: I need to know what size you want the imported image, and where you want it.
 
 var
-  tex:PSDL_Texture;
-
+  tex:TextureID;
+  
 begin
-
-    tex:= NiL;
-    Tex:=IMG_LoadTexture(renderer,filename);
-    SDL_RenderCopy(renderer, tex, Nil, rect); //PutImage at x,y but only for size of WxH
+   Pimage:=SOIL_load_image(filename, Rect^.w, Rect^.h, 0, SOIL_LOAD_RGB);
+//Rect^.x,Rect^.y
+//   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+   SOIL_free_image_data(image);
 end;
 
-procedure LoadImageStretched(filename:PChar);
+procedure LoadImageBackground(filename:PChar);
 
 var
   tex:PSDL_Texture;
 
 begin
-
-    tex:= NiL;
-    Tex:=IMG_LoadTexture(renderer,filename);
-    SDL_RenderCopy(renderer, tex, Nil, Nil); //scales image to output window size(size of undefined Rect)
+   Pimage:=SOIL_load_image(filename, MaxX, MaxY, 0, SOIL_LOAD_RGB);
+//0,0 to MaxX,MaxY
+//   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+   SOIL_free_image_data(image);
 end;
 
 //linestyle is: (patten,thickness) "passed together" (QUE)
@@ -7311,8 +7023,8 @@ procedure PlotPixelWNeighbors(x,y:integer; TurnSmoothingOn:boolean);
 // (in other words "blocky bullet holes"...)
 
 begin
-//if turnsmoothingon then
-// GL_Enable(smooth);
+  if turnsmoothingon then
+  GL_Enable(smooth);
 
    //more efficient to render a Rect.
 
@@ -7337,9 +7049,8 @@ begin
 			 Rect^.h:=8;
        end;
    end;
-   SDL_RenderFillRect(renderer, rect);
-// limit calls to "render present"
-//   SDL_RenderPresent(renderer);
+   //ensure fills are on
+   GL_Rects(Rect^.x,Rect^.y,Rect^.w,Rect^.h);
    dispose(Rect);
    //now restore x and y
    case Thick of
@@ -7361,153 +7072,33 @@ begin
        end;
    end;
 
-//if turnsmoothingon then
-// GL_Disable(smooth);
-
+if turnsmoothingon then
+   GL_Disable(smooth);
 
 end;
 
-
-
+//FIXME: libSOIL
 procedure SaveBMPImage(filename:string);
-//hmmm stuck with this for time being
-var
-  ScreenData:Pointer;
-  infosurface,savesurface:PSDL_Surface;
 
 begin
-//the downside is that upon ea sdl init for our app/game..this resets.
-
-  filename:='screenshot'+intTostr(screenshots)+'.bmp';
-  //screenshotXXXXX.BMP
-  saveSurface := NiL;
-  infosurface:=Nil;
-  ScreenData:=Nil;
-  ScreenData:=GetPixels(Nil);
-
-  infoSurface := SDL_GetWindowSurface(Window);
-  saveSurface := SDL_CreateRGBSurfaceWithFormatFrom(ScreenData, infoSurface^.w, infoSurface^.h, infoSurface^.format^.BitsPerPixel, (infoSurface^.w * infoSurface^.format^.BytesPerPixel), longword(infoSurface^.format));
-
-  if (saveSurface = NiL) then begin
-    {$ifdef lcl}
-			ShowMessage('Couldnt create SDL_Surface from renderer pixel data');
-    {$endif}
-
-      if IsConsoleInvoked then begin
-          LogLn('Couldnt create SDL_Surface from renderer pixel data');
-          LogLn(SDL_GetError);
-      end;
-      exit;
-
-  end;
-  SDL_SaveBMP(saveSurface, filename);
-  SDL_FreeSurface(saveSurface);
-  saveSurface := NiL;
-  infosurface:=Nil;
-  ScreenData:=Nil;
-  inc(Screenshots);
 end;
 
-
-//output is a pointer to an array of colors inside given Rect.
-
-function GetPixels(Rect:PSDL_Rect):pointer;
-//this does NOT return a single pixel by default and is written intentionally that way.
-//GetPixel checks also the output pointer length and fudges it into a single "SDL_Color".
-
-//this routine expects YOU to handle the array of data
-//SDL_Color SDL_Color SDL_Color .....
-
-var
-
-  pitch:integer;
-  pixels:pointer; //^array [0..x*y] of SDL_Color
-
-{
-  the array size is dependant on current screen resoluton- I can only give MAXIMUM defaults if I set this value.
-  This is an SDL_Color limitation. If it were me, Id just copy the array in 2D, not 1D.
-  Yes, technically, even kernel write to screen are stored in VRAM(or buffers) as:
-		[X,Y,RGBColor] however...SDL treats it as a 1D array.
-
-  I didnt design SDL, sorry. Maybe thats why its SLOW???
-  src: VGA graphics 101 - address A000, 386+ VRAM (and LFB) access.
-  NOTE:
-     You probly CANNOT directly write here.. (blame X11 or Windows or Apple)
-     (Because youre staring at the array right now, reading this.)
-}
-
-  AttemptRead:integer;
-
-begin
-   if ((Rect^.w=1) or (Rect^.h=1)) then begin
-     if IsConsoleInvoked then begin
-        LogLn('USE GetPixel. This routine FETCHES MORE THAN ONE');
-     end;
-    {$ifdef lcl}
-			ShowMessage('USE GetPixel. This routine FETCHES MORE THAN ONE');
-    {$endif}
-
-     exit;
-   end;
-
-   pixels:=Nil;
-   pitch:=0;
-
-
-    case bpp of
-		8: begin
-			    if maxColors=256 then format:=SDL_PIXELFORMAT_INDEX8
-				else if MaxColors=64 then format:=SDL_PIXELFORMAT_INDEX4MSB;
-		end;
-		15: format:=SDL_PIXELFORMAT_RGB555;
-
-//we assume on 16bit that we are in 565 not 5551, we should not assume
-		16: begin
-			
-			format:=SDL_PIXELFORMAT_RGB565;
-
-        end;
-		24: format:=SDL_PIXELFORMAT_RGB888;
-		32: format:=SDL_PIXELFORMAT_RGBA8888;
-
-    end;
-//format and rect we already can derive
-//pixels and pitch will be returned for the given rect in SDL_Color format given by our set definition
-//rect is Nil to copy the entire rendering target
-
-   AttemptRead:= SDL_RenderReadPixels( renderer, rect, format, pixels, pitch);
-
-   //pitch at this point could be 2,3,4,etc.. and must otherwise be taken into account.
-   if (AttemptRead<0) then begin
-    {$ifdef lcl}
-			ShowMessage('Attempt to read pixel data failed.');
-    {$endif}
-
-      if IsConsoleInvoked then begin
-          LogLn('Attempt to read pixel data failed.');
-          LogLn(SDL_GetError);
-      end;
-     exit;
-   end;
-   GetPixels:=pixels;
-end;
 
 //gotoxy
-Procedure MoveTo(X,Y: smallint);
+Procedure MoveTo(X,Y: Word);
 //precursor to functions that dont explicity use XY. 
-//Rather they assume XY is set before(which is wrong)
+//Rather they assume XY is set before an operation.
 
 //there is no GOTOXY in graphics modes as per BGI spec- and Im not rewriting the spec.
+//its called: Moveto 
 Begin
-     where.X := X;
-     where.Y := Y;
+  glRasterPos2s(x, y);
 end;
 
 
 //utility functions:
 
-//(DWord to float)
-function DWordToSingle(Data: DWord; EndianSwap: Boolean): Single;
+function DWordToFloat(Data: DWord; EndianSwap: Boolean): Single;
 
 var
    ASingle: Single absolute Data;
@@ -7543,9 +7134,9 @@ begin  //main()
 
   if (GetEnvironmentVariable('DISPLAY') = '') then begin //init frameBuffer code here
 
-//insert libPTC or fbGFX here
+       //insert libPTC or fbGFX here
 
-//old behaviour
+    //old behaviour
     LogLN('X11 has not fired. Bailing.');	
     halt(0);
 

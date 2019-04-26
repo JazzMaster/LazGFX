@@ -45,22 +45,67 @@ add animation
 
 //we can have lots of layers but lets not make this too complex.
 
-//Get Active ScreenResolution, first.
+//Get Active ScreenResolution, first, from xrandr
 
 var
-    ScreenResolution: LongWord;
-    FeltLayers: array [0..32] of ScreenResolution;
+//as with ViewPorts- we need Quads AND a datstore
 
-//lets get fuzzy. Take a Vynil looking layer. Returns FELT.
-function FeltLayer(Texture:GLTexture):GLTexture;
+    pFeltLayer:^FeltLayer;
+    FeltLayer= record
+        pixels:array [0..MaX,0..MaxY] of SDL_Color;
+    end;
+    pTextures:^Textures;
+    pAllFelt:^AllFelt;
+    Textures,AllFelt: array [0..33] of FeltLayer;
+    x,y,z:Single;
+
+//lets get fuzzy. Takes a "Vynil looking layer". Returns FELT.
+//What color Should I Make?
+
+function FeltMakeMachine(Texture:GLTexture; r,g,b:byte; Layer:Byte):GLTexture;
+
 begin
-    //with TExture do begin
-        //add noise
-        //add 1MM worth of depth to z-buffer
-    //end;
+    if Layer:=0 then
+        Layer:=1;
+    else
+
+    glClear;
+    //rePaint all Layers- and push everything back 1mm
+
+    //reUse textures in use- if any    
+    i:=0;
+    repeat
+        AllFelt[i]:=Texture[i];
+        glVertex3f(1.0,1.0,(0.04/ i)); //push back
+        inc(i);
+    until (i= Layer);
+    inc(Layer);
+   
+  //1.0f is the full viewing area. DO NOT BACK UP.
+  //put this one ON TOP.
+
+  //add 1MM worth of depth to z-buffer (approx + or - 0.04 PER LAYER of FELT)
+  //ONE ASSUMPTION: 1:1 mapping and 1 "cubic space" = ~3feet or 1 Meter(1M3)
+
+  glVertex3f(1.0,1.0,(0.04*Layer));
+            
+  glColor3b(r,g,b,$ff);
+  //fuzz it
+  with AllFelt[i+1] do begin
+
+//      pixels[x,y]:=(0.0,0.0,0.0,1.0);
+
+  end;
+
+  //save Texture - for next run
+  Texture[i+1]:=AllFelt[i+1];
+  
+  FeltMakeMachine:=Texture[i+1];
 end;
 
 begin
+  //Top Down view  
+  glOrtho();
 
 end.
 
