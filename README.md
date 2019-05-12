@@ -103,20 +103,10 @@ Castle /sceneGraph engine will install just fine.
 
 ## Ports
 
-This unit (LazGraphics) SHOULD be ported to use the following languages:
+This unit (LazGraphics) SHOULD be ported to the same Languages that OpenGl supports, listed here:
 
-		Basic(FreeBasic(FBC)/QB64)
-		VB(gambas/VB.Net)
-		C/VC/C sharp (backport at your own peril- NO C HERE.)
-		ADA
-        Fortran(If you feel the urge)
+(OpenGL Languages)[https://www.khronos.org/opengl/wiki/Language_bindings#Delphi.2FFree_Pascal_.28Object_Pascal.29]
 		
--Hooks are present w freeGLUT/GL- 
-
-		Ada 
-		FORTRAN 
-		python (pyGL/pg)
-		FreeBasic\Gambas(via SDL-and GL libs)
 		
 -DONT ASK about assembler. The compiler does this for you.
 Assembler -in flight- does not guarantee optimized code.

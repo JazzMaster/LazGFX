@@ -1,4 +1,6 @@
 Program PasFBgfx;
+//DO NOT COMPILE THIS ON WINDOWS!!!!
+
 //the header must match the filename
 
 //We need to open the TTY(POSIX: everything is a file, remember??)
@@ -8,9 +10,7 @@ Program PasFBgfx;
 // http://betteros.org/tut/graphics1.php
 
 uses
-{$IFDEF unix}
 	cthreads,cmem,baseunix,sysutils,
-{$ENDIF}
     ctypes,strings,math,crt,keyboard;
     //signals,fb,vt??
 
@@ -50,6 +50,9 @@ TContext=record
   fb_file_desc:integer;
 end;
 
+Var
+  K : TKeyEvent;
+  moon:boolean;
 
 //FontMaps....and Glyphs are oldschool methods...
 //TTF fonts need to be used instead.
@@ -108,8 +111,36 @@ begin
     end;
 end;
 
+//this gets forked.
+
+procedure KeyHandler;
+//quasi-keyboard handler(REQUIRED):
+
+begin
+  while moon=true do begin
+    K:=PollKeyEvent;
+    KeyPressed:=false;
+    If k<>0 then begin //while keypressed
+          K:=GetKeyEvent;
+          K:=TranslateKeyEvent(K);
+            {$ifdef debug}
+                  writeln;
+                  Writeln('Got key : ',KeyEventToString(K));
+            {$endif}
+          someString:= KeyEventToString(K);
+          someChar:=somestring[1];
+          KeyPressed:=true;
+    end;
+    if moon:=false then //we were asked to end- or were killed
+        exit;
+  end;
+end.
+
+
+
 //main()
 begin
+  InitKeyBoard;
     
     runflag:= 1;
 
@@ -150,6 +181,7 @@ begin
 
 //do graphics ops        
         clear_context(context);
+
         draw_image(0, 0, scaledBackgroundImage, context);
         
         draw_rect(-100, -100, 200, 200, context, $FF0000);
@@ -157,15 +189,15 @@ begin
         draw_rect(context^.width - 100, -100, 200, 200, context, $00FF00);
         draw_rect(-100, context^.height - 100, 200, 200, context, $0000FF);
         draw_rect(context^.width / 2 - 200, context^.height / 2 - 200, 400, 400, context, $00FFFF);
-        draw_string(200, 200, "Hello, World!", fontmap, context);      
+
+        draw_string(20, 20, 'Hello, World!', fontmap, context);      
+
+        draw_string(200, 200, 'Press any key to exit.', fontmap, context);      
 
 //main event input loop
-        //no-its not "event driven"..then again...do we care?
-        if keypressed then runflag:=0;
-
-        repeat
-            sleep(1);
-        until runflag=0;
+        fpfork(KeyHandler);
+        if KeyPressed then
+            moon:=false; //exit KeyHandler
 
         image_free(jpegImage);
         image_free(scaledBackgroundImage);
@@ -177,6 +209,6 @@ begin
     close(ttyfd);
   
     writeln('Shutdown successful.');
-
+    DoneKeyBoard;
 end.
 

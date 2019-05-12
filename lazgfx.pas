@@ -1,6 +1,8 @@
 Unit LazGFX;
+//exception handling requires oop- despite no oop or objects in use.
+//classes unit may also require this
 
-//now officially "a MESS v4...." DONT EVEN ASK ABOUT COMPILING while SDL code is here.
+{$mode objfpc}
 
 //Range and overflow checks =ON
 {$Q+}
@@ -21,8 +23,8 @@ SEMI-"Borland compatible" w modifications.
 Lazarus graphics unit is severely lacking...use this instead.
 
 
-Only OPEN/free units and code will ever be used or linked to here.
-Only cross-platform methods will be used.
+Only OPEN/free units and code will ever be here.
+Only cross-platform methods will be used. Specific platforms should be IFDEFd
 
 IN NO WAY SHAPE OR FORM are proprietary functions to be added here.
 	You may use them if you wish- but the result is non-portable. (more headache for ewe)
@@ -38,7 +40,7 @@ DO NOT CLAIM THIS CODE AS YOUR OWN and you MAY NOT remove this notice.
 Although designed "for games programming"..the integration involved by the USE, ABUSE, and REUSE-
 of SDL and X11Core/WinAPI(GDI)/Cairo(GTK/GDK)/OpenGL/DirectX highlights so many OS internals its not even funny.
 
-GL by itself doesnt require X11- but it does require some X11 code for "input processing".
+GL by itself doesnt require X11- but (GLX?) does require some X11 code for "input processing".
 This is moot point with libPTC.
 
 -It is Linux that is the complex BEAST that needs taming.
@@ -247,7 +249,7 @@ Palettes:
    Max colors in a palette are always 256, CGA modes 16, EGA (16 of 64).
    EGA is commonly mistaken for CGA due to the higher resolution.
 
-  Data is a packed Record (4 byte aligned)
+   GL Data is a packed Record (4 byte aligned)
 
   Note "the holes" can be used for overlay areas onscreen when stacking layers.
   The holes are standardized to xterm specs. I think theres like 5 (for VGA mode).
@@ -273,6 +275,19 @@ TODO:
 	
 }
 
+//dont remove this (it enables windows units to work as-is)
+
+{$MACRO on}
+{$ifdef mswindows}
+	{$DEFINE extdecl:= stdcall}
+{$ELSE}
+	{$DEFINE extdecl:= cdecl}	
+{$ENDIF}
+
+//use:
+// procedure exes(why:iduuno):exes; extdecl;
+
+//extern; is different...
 
 uses
 
@@ -501,27 +516,27 @@ type
 //yes you can represent via pointer but the conversion gets hairy, fast.
 
 LongString=array [0..1] of string;
-StringTuple,Striplet=array [0..2] of string;
+Striplet=array [0..2] of string;
 QuadString=array [0..3] of string;
 //You could go up to screen height-sizeOfStringOnScreen(24-48) depending on font size (10-12)
 
 //0..7=8 = byte(stored in hex)
-Bibble, Biplet=array [0..1] of boolean;
-Tribble, Triblet=array [0..2] of boolean;
-Quibble, Quiblet=array [0..3] of boolean;
-Pibble, Piblet=array [0..4] of boolean;
-Xibble, Hexlet=array [0..5] of boolean;
-Hibble, Heptlet=array [0..6] of boolean;
+Bibble=array [0..1] of boolean;
+Tribble=array [0..2] of boolean;
+Quibble=array [0..3] of boolean;
+Pibble=array [0..4] of boolean;
+Xibble=array [0..5] of boolean;
+Hibble=array [0..6] of boolean;
 
 
 //Word = 2bytes
 //24bits storage hack(r,g,b) -in binary form
-ByteTuple,Biplet=array [0..2] of Byte;
+Biplet=array [0..2] of Byte;
 //DWord=4 bytes
 
 //DWord=2words
 //TriWord technically..
-WordTuple,Wiplet=array [0..2] of Word;
+Wiplet=array [0..2] of Word;
 //Quad=4words
 
 //2 quads
@@ -531,7 +546,9 @@ LongQuad=array [0..3] of QWord; //256bits
 
 //sort of -SDL_Rect implementation
 
+PSDL_Rect=^Rect;
 PRect=^Rect;
+
 Rect=record
 	x1:byte;
 	y1:byte;
@@ -572,22 +589,30 @@ most computers support up to 1080p output..it will take some more lotta years fo
 
 }
 
+Vertex=record
+	x:Word;
+	y:Word;
+end;
+
+Vertex3d=record
+   x:Word;
+   y:Word;
+   z:Word;
+end;
+
+//usully goes around clock-wise
+Quad=array [0..3] of Vertex;
 
 var
-  thick:thickness;
 
-//This is for updating sections or "viewports".
-//I doubt we need much more than 4 viewports. Dialogs are handled seperately(and then removed)
-  texBounds: array [0..4] of PSDL_Rect;
-  textures: array [0..4] of PSDL_Texture;
+//OpenGL - its a little fuzzy on definitions.
 
+  Vec3:Vertex3d;
+  Vec4:Quad;
+
+  texBounds: array [0..4] of Vertex;
   windownumber:byte;
-  somelineType:thickness;
-
-//you only scroll,etc within a viewport- you cant escape from it without help.
-//you can flip between them, however.
-
-//think minimaps in games like Warcraft and Skyrim
+  lineType:thickness;
 
 const
    //Analog joystick dead zone 
@@ -597,11 +622,10 @@ const
 var
 
     Xaspect,YAspect:byte;
-
+    CanChangePalette,HalfShadeCGA:boolean;
     where:Twhere;
 	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop:boolean;
     nogoautorefresh:boolean;
-    X,Y:integer;
     _grResult:grErrortype;
     
     srcR,destR:PSDL_Rect;
@@ -685,8 +709,56 @@ var
 
 	GLFloat:single;
 	FloatInt:single;
-
+    Float:single;
     modePointer:Pmode;
+
+type
+
+	graphics_modes=(
+
+CGA1,CGA2,CGA3,CGA4,EGA, 
+VGAMed,vgaMedx256,
+vgaHi,VGAHix256,VGAHix32k,VGAHix64k,
+m800x600x16,m800x600x256,m800x600x32k,m800x800x64k,
+m1024x768x256,m1024x768x32k,m1024x768x64k,m1024x768xMil,
+m1280x720x256,m1280x720x32k,m1280x720x64k,m1280x720xMil,
+m1280x1024x256,m1280x1024x32k,m1280x1024x64k,m1280x1024xMil,
+m1366x768x256,m1366x768x32k,m1366x768x64k,m1366x768xMil,
+m1920x1080x256,m1920x1080x32k,m1920x1080x64k,m1920x1080xMil);
+
+const
+   maxMode=Ord(High(Graphics_Modes));
+
+type
+//faked "SDL"
+
+{$ifndef mswindows}
+
+PSDL_Color=^SDL_Color;
+SDL_Color=record
+	r,g,b,a:byte;
+end;
+
+GL_Color=record
+	r,g,b,a:single;
+end;
+
+{$endif}
+
+
+{$ifdef mswindows}
+PSDL_Color=^SDL_Color;
+SDL_Color=record
+	b,g,r,a:byte;
+end;
+
+
+GL_Color=record
+	b,g,r,a:single;
+end;
+
+{$endif}
+
 
 
 //forward declared defines
@@ -721,8 +793,6 @@ function getmaxY:word;
 function GetPixel(x,y:integer):DWord;
 function GetPixels(Rect:PSDL_Rect):pointer;
 
-Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
-
 function getdrivername:string;
 Function detectGraph:byte;
 function getmaxmode:string;
@@ -748,15 +818,6 @@ function  getDwordFromBytes(r,g,b,a:Byte):DWord;
 function GetByesfromDWord(someD:DWord):SDL_Color;
 
 procedure PlotPixelWNeighbors(x,y:integer);
-
-
-const
-   maxMode=Ord(High(Graphics_Modes));
-
-
-type
-	//r,g,b,a
-	GL_Color= array [0..3] of float;
 
 {
 
@@ -1421,33 +1482,6 @@ tfsGWhite
 
 );
 
-//faked "SDL"
-
-{$ifndef mswindows}
-
-SDL_Color=record
-	r,g,b,a:byte;
-end;
-
-GL_Color=record
-	r,g,b,a:single;
-end;
-
-{$endif}
-
-
-{$ifdef mswindows}
-
-SDL_Color=record
-	b,g,r,a:byte;
-end;
-
-
-GL_Color=record
-	b,g,r,a:single;
-end;
-
-{$endif}
 
 //I dunno what I was thinkin here w "TSDLColors"-3-14-2019
 
@@ -1482,7 +1516,7 @@ end;
 
 TRec256=record
 
-  colors:array [0..255] of PSDL_COLOR; ; //this is setup later on. 
+  colors:array [0..255] of PSDL_COLOR; //this is setup later on. 
 
 end;
 
@@ -1502,34 +1536,34 @@ var
   GreyList16:array [0..48] of byte;
   valuelist256: array [0..767] of byte;
 
-//sdl contents
+//note: use type defines if this doesnt work like it should.
   TPalette4a:TRec4;
   TPalette4b:TRec4;
   TPalette4c:TRec4;
   TPalette4d:TRec4;
 
+  PPalette4a:^TRec4;
+  PPalette4b:^TRec4;
+  PPalette4c:^TRec4;
+  PPalette4d:^TRec4;
+
+  PPalette16:^TRec16;
   TPalette16:TRec16;
+
+  PPalette64:^TRec64;
   TPalette64:TRec64;
 
+  PPalette256:^TRec256;
   TPalette256:TRec256;
 
+  PPalette16Grey:^TRec16;
   TPalette16Grey:TRec16;
+
+  PPalette256Grey:^TRec256;
   TPalette256Grey:TRec256;
 
 
 type
-
-	graphics_modes=(
-
-CGA1,CGA2,CGA3,CGA4,EGA, 
-VGAMed,vgaMedx256,
-vgaHi,VGAHix256,VGAHix32k,VGAHix64k,
-m800x600x16,m800x600x256,m800x600x32k,m800x800x64k,
-m1024x768x256,m1024x768x32k,m1024x768x64k,m1024x768xMil,
-m1280x720x256,m1280x720x32k,m1280x720x64k,m1280x720xMil,
-m1280x1024x256,m1280x1024x32k,m1280x1024x64k,m1280x1024xMil,
-m1366x768x256,m1366x768x32k,m1366x768x64k,m1366x768xMil,
-m1920x1080x256,m1920x1080x32k,m1920x1080x64k,m1920x1080xMil);
 
 //data is in InitGraph
 
@@ -1582,10 +1616,12 @@ implementation
 
 
 //Horizontal line: use x, not y
+//FIXME: center isnt defined properly nor used
 
 procedure CenteredHLine(x,x2,y:Word);
+begin
 	//where is the center??
-	center:= (((x mod 2)) - ((x-x2) mod 2),(y mod 2));
+//	center:= ( (x mod 2) - (x-x2 mod 2),(y mod 2) );
 	//from center : draw line from here
 	HLIne(x,y,x2);
 end;
@@ -1593,8 +1629,9 @@ end;
 //verticle line: use y, not x
 
 procedure CenteredVLine(x,y,y2:Word);
+begin
 	//where is the center??
-	center:= ((x mod 2),((y mod 2)) - ((y-y2) mod 2));
+//	center:= ( (x mod 2),(y mod 2 - y-y2) mod 2) );
 	//from center : draw line from here
 	VLIne(x,y,y2);
 end;
@@ -1633,7 +1670,7 @@ dividing by 1k gives us 400 or so colors- we want about half of that
 
 
 //we need these as GL is funky.
-procedure ByteToFloat(hexColor:Byte):single;
+function ByteToFloat(hexColor:Byte):single;
 
 var
 	i:single;
@@ -1650,7 +1687,7 @@ end;
 
 
 //For GLFloats with max value of 1.0
-function GLFloatToByte(someFloat:single):byte
+function GLFloatToByte(someFloat:single):byte;
 begin
    if (someFloat > 1.0) then 
 		exit;
@@ -1674,7 +1711,6 @@ procedure initPaletteGrey16;
 
 var
    i,num:integer;
-
 
 begin  
 
@@ -1738,7 +1774,7 @@ valuelist16[47]:=$ff;
       inc(num); 
   until num=15;
 
-  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 16, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette16Grey);
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 16, GL_RGBA, GL_UNSIGNED_BYTE, Ppalette16Grey);
 
 end;
 
@@ -1764,7 +1800,7 @@ begin
       inc(i); //notice the difference <-HERE ..where RGB are the same values
   until i=255;
 
-  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 256, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette256Grey);
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 256, GL_RGBA, GL_UNSIGNED_BYTE, Ppalette256Grey);
 
 end;
 
@@ -1849,8 +1885,9 @@ end else begin
       inc(num); 
   until num=3;
           CanChangePalette:=true;
-  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 4, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette4a);
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 4, GL_RGBA, GL_UNSIGNED_BYTE, Ppalette4a);
 
+end;
 end;
 
 procedure initCGAPalette1;
@@ -1900,8 +1937,9 @@ end else begin
       inc(num); 
   until num=3;
           CanChangePalette:=true;
-  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 4, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette4b);
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 4, GL_RGBA, GL_UNSIGNED_BYTE, Ppalette4b);
 
+end;
 end;
 
 //Hackish- reserved for greyscale
@@ -1951,8 +1989,9 @@ end else begin
       inc(num); 
   until num=3;
           CanChangePalette:=true;
-  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 4, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette4c);
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 4, GL_RGBA, GL_UNSIGNED_BYTE, Ppalette4c);
 
+end;
 end;
 
 //Mode6 of original spec
@@ -1981,7 +2020,7 @@ begin
     Tpalette4d.colors[num]^.a:=$ff;
 
     CanChangePalette:=true;
-  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 4, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette4d);
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 4, GL_RGBA, GL_UNSIGNED_BYTE, Ppalette4d);
 
 end;
 
@@ -2090,7 +2129,7 @@ valuelist16[44]:=$55;
       Tpalette16.colors[15]^.b:=$ff;
       Tpalette16.colors[15]^.a:=$ff;
       CanChangePalette:=false; //dont change this-youll break the spec
-  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 16, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette16);
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 16, GL_RGBA, GL_UNSIGNED_BYTE, Ppalette16);
 
 end;
 
@@ -2204,12 +2243,12 @@ valuelist64[47]:=$ff;
       inc(num); 
   until num=15;
       if MaxY=200 then //HEY! I didnt write the spec...
-          CanChangePalette:=true;
+          CanChangePalette:=true
       else
           CanChangePalette:=false;
-  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 64, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette64);
-
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 64, GL_RGBA, GL_UNSIGNED_BYTE, Ppalette64);
 end;
+
 
 //you can use these for EGA also- same sized data.
 
@@ -2239,7 +2278,7 @@ procedure Read16Palette(filename:string; ReadColorFile:boolean);
 Var
 	palette16File  : File of TRec16;
 	i,num            : integer;
-    palette:PSDL_Palette;
+    
 
 Begin
 	Assign(palette16File, filename);
@@ -2252,9 +2291,9 @@ Begin
 	    
 	Close(palette16File);
     if ReadColorFile =true then
-        glColorTable(GL_COLOR_TABLE, GL_RGBA8, 16, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette16);
+        glColorTable(GL_COLOR_TABLE, GL_RGBA8, 16, GL_RGBA, GL_UNSIGNED_BYTE, Ppalette16)
     else
-        glColorTable(GL_COLOR_TABLE, GL_RGBA8, 16, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette16GRey);
+        glColorTable(GL_COLOR_TABLE, GL_RGBA8, 16, GL_RGBA, GL_UNSIGNED_BYTE, Ppalette16GRey);
 
 end;
 
@@ -3140,7 +3179,7 @@ valuelist256[767]:=$ee;
       inc(i,3);
       inc(num); 
   until num=767;
-  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 256, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette256);
+  glColorTable(GL_COLOR_TABLE, GL_RGBA8, 256, GL_RGBA, GL_UNSIGNED_BYTE, Ppalette256);
 
 	
 end;
@@ -3176,7 +3215,6 @@ procedure Read256Palette(filename:string; ReadColorFile:boolean);
 Var
 	palette256File  : File of TRec256;
 	i,num            : integer;
-    palette: PSDL_Palette;
 
 Begin
 	Assign(palette256File, filename);
@@ -3186,9 +3224,9 @@ Begin
 	Read(palette256File, TPalette256); 
 	Close(palette256File);	
     if ReadColorFile =true then
-        glColorTable(GL_COLOR_TABLE, GL_RGBA8, 256, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette256);
+        glColorTable(GL_COLOR_TABLE, GL_RGBA8, 256, GL_RGBA, GL_UNSIGNED_BYTE, Ppalette256)
     else
-    glColorTable(GL_COLOR_TABLE, GL_RGBA8, 256, GL_RGBA, GL_UNSIGNED_BYTE, Tpalette256Grey);
+    glColorTable(GL_COLOR_TABLE, GL_RGBA8, 256, GL_RGBA, GL_UNSIGNED_BYTE, Ppalette256Grey);
 
 end;
 
@@ -3196,17 +3234,6 @@ end;
 {
 
 Colors are bit banged to hell and back.
-
-type
-
-SDL_Color=record (internal definition)
-
-	r:byte; //UInt8 in C
-	g:byte;
-	b:byte;
-	a:byte; 
-
-end;
 
 PSDL_Color =array [0..3] of PUInt8; //(BytePtr)
 
@@ -3291,7 +3318,7 @@ end;
 
 function GetFgRGB:SDL_Color;
 var
-  color:SDL_Color;
+  color:PSDL_Color;
 
 begin
     color^.r:=_bgcolor^.r;
@@ -3492,6 +3519,9 @@ PenUp is UpMouseButton[x]
 
 }
 
+//FIXME: too damn tired  there is no SDL...there is no SDL....
+
+
 
 //"overloading" make things so much easier for us....
 
@@ -3555,7 +3585,7 @@ begin
 
     if MaxColors=256 then begin
         colorToSet:=Tpalette256.colors[index];
-        _bgcolor:=Tpalette256.dwords[index]; //set here- fetch later
+        _bgcolor:=Tpalette256.colors[index]; //set here- fetch later
 	    SDL_SetRenderDrawColor( Renderer, ord(colorToSet^.r), ord(colorToSet^.g), ord(colorToSet^.b), 255 ); 
 	    SDL_RenderClear(Renderer);
    end else if MaxColors=64 then begin 
@@ -6858,7 +6888,7 @@ begin
 
   end;
 
-   Textures[windownumber]:=SDL_CreateTextureFromSurface(renderer,saveSurface);
+   Textures[windownumber]:=SubTex2d(saveSurface);
 
    //free data
    SDL_FreeSurface(saveSurface);

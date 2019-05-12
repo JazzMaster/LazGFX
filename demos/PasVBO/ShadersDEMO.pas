@@ -1,7 +1,7 @@
 	
-program chap10_SDL2;
+program ShadersDEMO;
 uses Classes, SysUtils, GL,GLU, GLext,GLUT,freeglut;
- 
+// uses X,xlib,GLX; 
 const
   vertexShaderFile = 'VertexShader.txt';
   fragmentShaderFile = 'FragShader.txt';
@@ -17,7 +17,7 @@ var
    OutPutList: TStringList;
 
     i: integer;
-    superlongstring:String;
+    superlongstring,superlongstring2:ANsiString;
     VertexArrayID: GLuint;
     triangleVBO: GLuint;
     VertexShaderID: GLuint;
@@ -172,6 +172,10 @@ begin
    ListOfStrings.DelimitedText   := Str;
 end;
 
+var
+
+    DisplayPtr:^Display;
+
 begin
 
 //  GLUT initialization
@@ -192,7 +196,7 @@ begin
 	glutInitDisplayMode(GLUT_DEPTH or GLUT_DOUBLE or GLUT_RGBA);
 	glutInitWindowPosition(100,100);
 	glutInitWindowSize(512,512);
-	glutCreateWindow('Lighthouse3D - Simple Shader -FADER- Demo');
+	glutCreateWindow('LightHouse3D FADER Demo');
 
 //	glutIdleFunc(@processKeys);
     glutDisplayFunc(@renderscene); 
@@ -211,13 +215,24 @@ begin
      Writeln(OutPutList.Text);
      
      OutPutList.Free;
+{
+//not compat w freeGLUT/GLEW?
+  writeln('Supported GLX extensions: ');
+  displayptr:=XOpenDisplay(0);
+  superlongstring2:= glXQueryExtensionsString(displayptr, DefaultScreen(displayptr));
 
-
+   OutPutList := TStringList.Create;
+     Split(' ', superlongstring2, OutPutList) ;
+     Writeln(OutPutList.Text);}
+     
+     OutPutList.Free;
   writeln( 'Shader Version: ' , glGetString( GL_SHADING_LANGUAGE_VERSION ) );
   writeln ('GLSL: ' , glGetString (GL_SHADING_LANGUAGE_VERSION));
   writeln ('Renderer: ' ,glGetString(GL_RENDERER));
 
+
 //this is fine if compat profile is enabled.
+//error class is not caught yet-
 
   //init OpenGL and load extensions
   if Load_GL_VERSION_4_0 = false then
