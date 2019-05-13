@@ -1,7 +1,0 @@
-These are GL Demos.
-xrandr can be used within FPC.
-
-uses
-	xrandr;
-
-(see ptc)

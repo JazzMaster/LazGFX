@@ -1,1 +1,2 @@
 *.inc linguist-language=Pascal
+*.o linguist-language=Pascal
