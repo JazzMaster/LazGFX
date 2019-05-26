@@ -1,3 +1,6 @@
+**This file was generated on a Samsung v4 AMD notebook by xrandr code in C-
+AND WILL BE REMOVED eventually**
+
 Screen 0: minimum 320 x 200, current 1366 x 768, maximum 16384 x 16384
 DisplayPort-0 disconnected primary (normal left inverted right x axis y axis)
 DisplayPort-1 disconnected (normal left inverted right x axis y axis)
