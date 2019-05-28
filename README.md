@@ -62,7 +62,7 @@ The location of which on Windows is completely unknown.
 As soon as Unice code is working- both windows and OSX code will see an overhaul.
 
 
-### Why is SDL here?
+### Why is SDL here? (it will get moved)
 
 SDL 1 and 2  "unified sources" included- for your pleasure programming.
 
@@ -133,25 +133,21 @@ I will be happy to import code.
 
 ### Build status:
 
-(Travis CL (the colored pill) doesnt work with Pascal sources. You wont see the nice pretty graphbar.)
+RELEASE freeze at v.80 (BUILD SUCCESS- SDL subsystem)<br>
+RELEASE freeze at v2.0 May 27th 2019 (BUILD SUCCESS- OpenGL subsystem-core API only).
 
-RELEASE freeze at .80 (BUILD SUCCESS- SDL subsystem)<br>
-RELEASE freeze upcoming for v2.0(sources not ready yet).
+master branch: code may or may not build -but is more likely to- after OpenGL switch.
 
-master branch: code is unstable WIP. May or may not build.
+There are some routines not yet ported, and some completely untested.<br>
+libSOIL routines are disabled at this time(image support).
 
-2305 more lines to convert to the new OpenGL spec-<br>
-(most of this is probly in initGraph)
-
-to Fake: detectGraph()
-(resolutions used are too low)
+Version 2.0 is starting the BETA testing cycle.<br>
+(a lot of what you need, however, is in the aux units)
 
 FULL CGA, EGA, and VGA palletted modes should work properly.<br>
 Checks for windows(but not PowerPC-BE- arch) have been added.
 
-FrameBuffer support code needs some help-<br>
-Im going to have to merge this back in. <br>
-I lost the Dotfiles git leaves behind, somehow, on the local copy.
+FrameBuffer support (no X11/tty) code needs some help.<br>
 
 ---
 
