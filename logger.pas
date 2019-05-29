@@ -4,7 +4,7 @@ unit logger;
 interface
 
 uses
-    sysutils;
+    crt,sysutils;
 
 
 const
@@ -13,15 +13,15 @@ const
   warning='WARNING: ';
 
 var
-   output: Textfile; 
+   outputfile: Textfile; 
    logging,donelogging:boolean;
    MyTime: TDateTime;
    IsConsoleInvoked:boolean; external;
 
 function Long2String(l: longint): string;
 Procedure LogLn(s: string);
-procedure StopLogging; //finalization
-
+procedure StopLogging; 
+procedure StartLogging;
 
 implementation
 {
@@ -55,7 +55,7 @@ end;
 
 //usually you want to write a line.
 
-//use me unless you need other variables added to the output.
+//use me unless you need other variables added to the outputfile.
 
 procedure LogGLFloat(data:single);
 var
@@ -64,7 +64,7 @@ var
 begin
 		write(data:4:2);
 		stringdata:=FloatToStr(data);
-  	    Write(output,stringdata);
+  	    Write(outputfile,stringdata);
 end;
 
 
@@ -75,7 +75,7 @@ var
 begin
 		writeln(data:4:2);
 		stringdata:=FloatToStr(data);
-  	    Writeln(output,stringdata);
+  	    Writeln(outputfile,stringdata);
 end;
 
 
@@ -83,19 +83,26 @@ Procedure LogLn(s: string);
 var
     v:string;
 Begin
-  Write((DateTimeToStr(MyTime)),' : ');
-  v:=((DateTimeToStr(MyTime))+' : '+s);
-  Writeln(output,v);
-  Writeln(v); //to the debugging output console first, then file.
- 
+
+  writeln( DateTimeToStr(MyTime),' : ',s); //to the debugging outputfile console first, then file.
+  v:=( (DateTimeToStr(MyTime))+' : '+s);
+  Writeln(outputfile,v);
 End;
+
+procedure StartLogging; 
+begin
+    assign(outputfile,'lazgfx-debug.log');
+    rewrite(outputfile);
+    logging:=true;
+    donelogging:=false;
+end;
 
 procedure StopLogging; //finalization
 
 begin
     donelogging:=true;
     logging:=false;
-    
+    close(outputfile);
 end;
 
 

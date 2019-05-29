@@ -1668,7 +1668,8 @@ function EGAtoVGA(color: LongWord): LongWord;
 function Double320x200: Boolean;
 function Double320x240: Boolean;
 procedure FreeAndNil(q:Pointer);
-procedure RenderSomething; cdecl;
+procedure RenderSomething; cdecl; 
+
 function getmaxmode:string;
 procedure getmoderange(graphdriver:integer);
 procedure BGColorBorderViewPort(Rect:SDLRect);
@@ -3874,7 +3875,9 @@ end;
 
 
 //co-ordinates: update texture, update rect, or update screen?
-//to update- you must have.
+
+//notice the use of -SUB- here-
+
 procedure UpdateRect1516(x,y,width,height:integer; Texture:Longword; pixels:pmyshortpixels);
 //remember SDlv1 updateRect? This is it - in OpenGL.
 //only update modified pixels
@@ -5172,20 +5175,19 @@ begin
 	
   end;{case}
 
-//once is enough with this list...its more of a nightmare than you know.
-//(its assigned before entries are checked)
-
 
    //"usermode" must match available resolutions etc etc etc
    //this is why I removed all of that code..."define what exactly"??
 
+//list off/LOG all OGL supported routines
+
 
   if (graphdriver = DETECT) then begin
 	//probe for it, dumbass...NEVER ASSUME.
-
+        LogLn('Graphics detection not available at this time.');
        //temporarily not available
 	   {$ifdef lcl}
-			ShowMessage('Graphics detrection not available at this time.');
+			ShowMessage('Graphics detection not available at this time.');
    	   {$endif}
 
 //    Fetchgraphmode := DetectGraph; //need to kick back the higest supported mode...
@@ -5194,35 +5196,6 @@ begin
   NoGoAutoRefresh:=false;
   LIBGRAPHICS_INIT:=true;
   LIBGRAPHICS_ACTIVE:=false;
-
-//force a safe shutdown.
-//if the app crashes we could be in an unknown state-which is bad.
- AddExitProc(@CloseGraph);
-
-{
-atexit handling:
-basically it prevents random exits- all exits must do whatever is in the routine.
-
-
-FPC:  AddExitProc(CloseGraph);
-
-TP: use the olschool method:
-
- OldExitProc := ExitProc;                - save previous exit proc -cpu: push exit()
- ExitProc := @MyExitProc;               - insert our exit proc in chain
-
-$F+
-procedure MyExitProc;
-begin
-  //shut everything down
-  ExitProc := OldExitProc;  Restore exit procedure address -cpu: pop exit()
-  CloseGraph;               Shut down the graphics system
-end;
-$F-
-
-}
-
-
 
 {
 
@@ -5246,11 +5219,11 @@ if not possible (or nil or 0 or....)
 //(so dont worry if the video hardware doesnt support it)
 
 
-		glutInitPascal;
+
 		if Render3d then //we use DEPTH(3D) instead of 2D QUADS
 			glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH);
 		
-		glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB);	
+//		glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB);	
 
 		case(bpp) of //with chosen resolutions bpp do
 		//always use double buffering(pageFLipping)
@@ -5264,7 +5237,7 @@ if not possible (or nil or 0 or....)
 			24:GLMode:='rgb double';
 			32:	GLMode:='rgba double';
 		end; //case
-//		glutInitDisplayString(GLMode);
+		glutInitDisplayString(GLMode);
 
 		if WantFullScreen then begin
 				glutGameModeString(FSMode);
@@ -5272,12 +5245,13 @@ if not possible (or nil or 0 or....)
 				glutSetCursor(GLUT_CURSOR_NONE);
 		end else begin //windowed
 			
-			glutInitWindowSize(MaxX, MaxY );
-writeln('MaxX: ',maxX,' MaxY: ',maxY,' Depth: ',bpp);
+			//glutInitWindowSize(MaxX, MaxY );
+
+writeln('MaxX: ',maxX ,' MaxY: ',maxY,' Depth: ',bpp);
 
 			//divide -but throw away remainder
 			glutInitWindowPosition((MaxX mod 2), (MaxY mod 2));
-			glutCreateWindow('Lazarus Graphics Application');
+		//	glutCreateWindow('Lazarus Graphics Application');
 		
 		end;
 logln('window up');
@@ -5299,7 +5273,7 @@ logln('window up');
 
 		//set callbacks-you need to override- or define these
 		//external declarations.
-		glutDisplayFunc(@RenderSomething);
+	//	glutDisplayFunc(@RenderSomething);
 		glutReshapeFunc(@ReSize);
 		glutKeyboardFunc(@GLKeyboard);
 //		glutMouseFunc(@GLMouse);
@@ -5330,7 +5304,7 @@ logln('set up');
       initPaletteGrey256
     else if ((bpp=8) and  (UseGrey=false)) then
       InitPalette256;
-    logln('palette setup');
+    logln('palette loaded');
 
 
 //assign the palette given the SDL_color array to OGL for use.
@@ -5441,7 +5415,7 @@ logln('set up');
   where.Y:=0;
 
 	//the event handler
-	GlutMainLoop;
+//	GlutMainLoop;
     {
     when we exit- closegraph will get triggered. 
         we leave:
@@ -5451,11 +5425,11 @@ logln('set up');
     }
 
    //mainloopExits:
-   closegraph;
+//   closegraph;
 
 end; //initgraph
 
-//use only if already setup--this may not work outside of the main init routine...
+
 procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean);
 var
     x:integer;
@@ -5484,17 +5458,15 @@ exit;
 	end else begin
 		glDisable(GL_DEPTH_TEST);
 		
-//		glEnable(GL_TEXTURE_2D); // Enable 2D Textures
-//		glEnable(GL_PROGRAM_POINT_SIZE); //enables fat pixels(linestyles);
+		glEnable(GL_PROGRAM_POINT_SIZE); //enables fat pixels(linestyles);
 
 		//makes no sence in 3D realms to not have a Z axis(depth).
 		//we want pixels to override each other by default (unless blending)
 
     end;	
 
-		//set callbacks-you need to override- or define these
-		//external declarations.
-//		glutDisplayFunc(@RenderSomething);
+		//set callbacks
+		glutDisplayFunc(@RenderSomething);
 		glutReshapeFunc(@ReSize);
 		glutKeyboardFunc(@GLKeyboard);
 //		glutMouseFunc(@GLMouse);
@@ -5522,8 +5494,6 @@ exit;
       InitPalette256;
 
 
-//assign the palette given the SDL_color array to OGL for use.
-	
 //assign the palette given the SDL_color array to OGL for use.
 	if (bpp<=8) then begin
         x:=0;
@@ -5555,11 +5525,6 @@ end;
 
 
 procedure closegraph;
-var
-  x:integer;
-
-
-//free only what is Allocated, nothing more- then make sure pointers are empty.
 
 begin
        
@@ -5580,13 +5545,9 @@ mixer and LAN will go in here once tested
 
 
 
-
-//for some reason the logfile is already closed for us.
-
 //framebuffer, xconsole, or tty
-         clrscr; //text clearscreen
-         writeln;
-
+  
+  writeln;
   halt(0); //nothing special, just bail gracefully.
 
 end;            	
@@ -5613,6 +5574,9 @@ begin
     SetLength(Cmd, CmdCount);
     Cmd[0] := PChar(ParamStr(0));
     glutInit(@CmdCount, @Cmd);
+
+    startlogging;
+    logln('glutInitPascal');
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,GLUT_ACTION_CONTINUE_EXECUTION);
 end;
 
@@ -5641,7 +5605,8 @@ begin
 
 end;
 
-procedure RenderSomething; cdecl;
+procedure RenderSomething; cdecl; 
+
 begin
     if Render3d then
 		glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
@@ -5651,26 +5616,29 @@ begin
     end;
 	 //black
   	 glClearColor( 0.0, 0.0, 0.0, 1.0 );
+
 	 glutSwapBuffers;
 end;
+
 
 //isnt this easy?
 procedure GLKeyboard(Key: Byte; X, Y: Longint); cdecl;
 begin
-  if Key = 27 then begin//ESC
-    LIBGRAPHICS_ACTIVE:=false; //refuse to do anything further(rendering wise)
-//free textures used
+  if Key = 27 then begin //ESC
+    
+  stoplogging;
+
+{  //free textures used
   glGetIntegerv(GL_TEXTURE_BINDING_2D, whichID);
-  if whichID^>1 then begin
-      repeat
-      //effectively Nil each Texture as we are done with all of them.
-          glDeleteTextures(1, @whichID);
-          dec (whichID);
-      until whichID^=0;
+
+  //effectively Nil each Texture as we are done with all of them.
+  glDeleteTextures(whichID^, @whichID);
+}
+  LIBGRAPHICS_ACTIVE:=false; //refuse to do anything further(rendering wise)
+  closegraph;
+  
   end;
 
-    GlutLeaveMainloop; //manually kill the mainloop - and exit.
-  end;
 end;
 
 //idle callback
