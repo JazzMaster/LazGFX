@@ -1,4 +1,5 @@
 unit logger;
+{$mode objfpc}
 
 interface
 
@@ -12,7 +13,7 @@ const
   warning='WARNING: ';
 
 var
-   output: Text; //untyped text
+   output: Textfile; 
    logging,donelogging:boolean;
    MyTime: TDateTime;
    IsConsoleInvoked:boolean; external;
@@ -24,7 +25,7 @@ procedure StopLogging; //finalization
 
 implementation
 {
-followng code is from FPC graphics unit(mostly sane code)
+The aux routines here are copywright FPC/FPK Dev Team
 
 AUTHORS:                                              
    Gernot Tenchio      - original version              
@@ -34,12 +35,10 @@ AUTHORS:
    Thomas Schatzl      - optimizations,routines and    
                            suggestions.                
    Jonas Maebe         - bugfixes and optimizations    
-
 }
 
 
 //more advanced debugging requires everything be converted to a string
-
 //byte, word 2string, real2string,int2string
 
 function Long2String(l: longint): string;
@@ -52,19 +51,18 @@ end;
 
 //end FPC code - the rest has been modified "for an EXPLICIT PURPOSE"
 
+
+
 //usually you want to write a line.
 
 //use me unless you need other variables added to the output.
-//remember- files WRAP at odd points, depending on the width of the viewing application and output monitor.
 
 procedure LogGLFloat(data:single);
 var
 	stringdata:string;
 
 begin
-	if IsConsoleInvoked then
-		write(data:4:2)
-	else
+		write(data:4:2);
 		stringdata:=FloatToStr(data);
   	    Write(output,stringdata);
 end;
@@ -75,38 +73,34 @@ var
 	stringdata:string;
 
 begin
-	if IsConsoleInvoked then
-		writeln(data:4:2)
-	else
+		writeln(data:4:2);
 		stringdata:=FloatToStr(data);
   	    Writeln(output,stringdata);
 end;
 
 
 Procedure LogLn(s: string);
-
+var
+    v:string;
 Begin
   Write((DateTimeToStr(MyTime)),' : ');
-  Writeln(s); //to the debugging output console first, then file.
-  Writeln(output,s);
+  v:=((DateTimeToStr(MyTime))+' : '+s);
+  Writeln(output,v);
+  Writeln(v); //to the debugging output console first, then file.
+ 
 End;
 
 procedure StopLogging; //finalization
-//call just before SDL_Quit
+
 begin
     donelogging:=true;
     logging:=false;
-    Close(output);
+    
 end;
 
 
-begin //init - main()
+begin 
 
-    MyTime:= Now;
-    Assign(output,'lazgfx-debug.log'); 
-    Append(output); //do not re-write or re-set.
-    Logging:=true;
-    donelogging:=false;
 end.
  
 
