@@ -59,3 +59,8 @@ begin
     SDL_RenderPresent( renderer );
 
 end;
+
+---
+
+
+I will have to backport my SDL half-assed library. I may yet need it.

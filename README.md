@@ -78,6 +78,8 @@ OpenGL and SDL (in 3d) dont mix very well.
 You dont need SDL for input. <br>
 freeGLUT/OGL gives it to you.
 
+I may revive SDL ports-OpenGl is proving "excessively inconsistent implementation".
+(Spinning cubes are missing sides, etc-this didnt happen w SDL.)
 
 ### Portage status
 

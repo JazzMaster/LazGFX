@@ -9,6 +9,24 @@ with the assistance of others.
 This code **should** port or crossplatform build, but no guarantees.
 SEMI-"Borland compatible" w modifications.
 
+
+***** WARNING ******
+
+This code may be "irreprebly fucked". GL is refusing to chainload via library-as SDL/SDLv2 does.
+Further-
+    output is inconsistent.
+
+Rendered cubes are missing sides, etc. Vertexes being off is due to changes in the code-
+    but as of yet-
+        doesnt produce this problem.
+
+Several other SDL issues were noted since then. These are major bugs w SDL/GL.
+VENDORS DO NOT CARE ENOUGH to fix "GL in the drivers".
+
+So how things are working right now- I have NO IDEA.
+
+*******************
+
 Lazarus graphics unit is severely lacking(provides TCanvas instead)...use this instead.
 
 THIS IS NOT A GAME ENGINE. 
@@ -5400,13 +5418,14 @@ logln('set up');
     glMatrixMode(GL_PROJECTION);
     glLoadIDentity;
 
-    glOrtho(0, MaxX, MaxY, 0.0, 0.0, 1000.0);
 
     // Setup the BGI-to-view matrix(Allegro uses similar)
     //(flip the X axis)
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity;
-
+    if not Render3d then begin
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0.0f, windowWidth, windowHeight, 0.0, 0.0, 1.0);
+    end;
     glTranslatef(-HALF_WIDTH, HALF_HEIGHT, 0.0);
     glScalef(1.0, -1.0, 1.0);
  
@@ -5428,6 +5447,16 @@ logln('set up');
 //   closegraph;
 
 end; //initgraph
+
+//use this with line and pixel drawing instead of linestyle method.
+procedure SetPixelSize();
+
+begin
+  // Set width of point to one unit 
+    glPointSize(1.0); 
+    glMatrixMode(GL_PROJECTION); 
+    glLoadIdentity(); 
+end;
 
 
 procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean);

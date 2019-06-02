@@ -1,17 +1,16 @@
 Unit OPGlut;
 
-// This is Object Pascal - derived from OBJ C- implementation of: freeGLUT core routines
+//this is so you Laz(y) folks can import/help rewrite the rest of the new  routines.
 
-//this is so you Laz folks can import/help rewrite the rest of the new  routines.
-
-
-//not compile tested- logic tested only
 //"class instantiated" OBJECT PASCAL(for LAZARUS/DELPHI)
 
-//TODO: add the logger code in here
-
+//This is still barebones framework but more examples are out for Laz(and VC/objC/CSharp) then fpc-style.
 
 // -J
+
+uses
+	strings, GL, OpenGLContext;
+
 
 interface
  
@@ -38,8 +37,7 @@ ContextInfo=record;
 end;
  
 //windowInfo.h
-uses
-	strings;
+
  
 WindowInfo=record
     name:string;
@@ -71,6 +69,29 @@ end;
 
 implementation
 
+ 
+var
+  TextureId: GLuint;
+  TextureData: Pointer; 
+  OpenGLControl1: TOpenGLControl;
+  Render3d:boolean; 
+
+procedure InitGL;
+begin
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity;
+  glOrtho(0, OpenGLControl1.Width, OpenGLControl1.Height, 0, 0, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity;
+  if not Render3d then begin
+      glDisable(GL_DEPTH_TEST);
+      glViewport(0, 0, OpenGLControl1.Width, OpenGLControl1.Height);
+      glGenTextures(1, @TextureId);
+      glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); 
+  end;
+end;
+ 
+
 //PGD demo code has the pascal for this...
 procedure Init.Init_GLEW;
 var
@@ -90,30 +111,19 @@ begin
 end;
 
 procedure glutInitPascal; 
-var
-	myargc:integer;
-	myargv: PChar;
-begin
-	//dummy this- seems to fire with or without data, according to C devs.
-	myargc:=1;
-	myargv:='LazGFX';
-	glutInit(myargc, myargv); 
 end;
 
 procedure Init.Init_GLUT(window:^WindowInfo; context:^ContextInfo; framebuffer:^FramebufferInfo);
 
 begin
 
- glutInitPascal(false);
+ glutInitPascal;
  
-
   if assigned (contextInfo^.core) then begin
-  
         glutInitContextVersion(contextInfo^.major_version, contextInfo^.minor_version);
         glutInitContextProfile(GLUT_CORE_PROFILE);
   end
   else begin
-  
        //version doesn't matter in Compatibility mode
        glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
   end;
@@ -126,7 +136,7 @@ begin
   glutCreateWindow(window^.name^.c_str);
   LogLN('GLUT:initialized');
 
-//user level
+
   glutIdleFunc(@idleCallback);
   glutCloseFunc(@closeCallback);
   glutDisplayFunc(@displayCallback);
@@ -165,9 +175,11 @@ end;
  
 procedure Init_GLUT.displayCallback;
 begin
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   glClearColor(0.0, 0.0, 0.0, 1);
-   glutSwapBuffers();
+//   glutSwapBuffers();
+
+   //do nothing, just update the screen
+   glutPostRedisplay();
+
 end;
  
 //same as other fpc routine
@@ -179,9 +191,10 @@ end;
 
 procedure Init_GLUT.closeCallback;
 begin
-  close;
+  Init_GLUT.close;
 end;
  
+//theres waaay more to this...
 procedure Init_GLUT.enterFullscreen;
 begin
   glutFullScreen;
@@ -239,4 +252,5 @@ begin
      if (msaa) then
         flags :=flags or GLUT_MULTISAMPLE;
 }
+
 end.

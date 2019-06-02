@@ -127,7 +127,7 @@ glTRANSLATEf(0.0, 0.0, -2.0);
     if ( not Minimized ) then begin //draw when not minimized and no events firing
 //render here
 
-glROTATEf(3, 0.0, 1.0, 0.0);
+
 
 glCLEAR(GL_COLOR_BUFFER_BIT );
 
