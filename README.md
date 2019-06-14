@@ -1,17 +1,18 @@
-## Laz GFX- 
+# Laz GFX- 
 
-Copywright (c) 2018-2019 Richard Jasmin et al
+Copywright (c) 2018-2019 Richard Jasmin et al<br>
+A UNIVERSAL replacement of the "Borland Graphics Interface" (BGI) For Lazarus/FPC/GNU? Pascal
 
-A UNIVERSAL replacement of the "Borland Graphics Interface" (BGI)
-(For Lazarus/FPC/Pascal)
 
-Its a GRAPHICS MODE "Canvas", not unlike TCanvas. 
+Ports are available HERE (or soon will be) for GAMBAS/Basic/VB(3/.NET)/Python/Fortran/Ada
 
--You draw with it. 
-2D and 3D modes are supported.
+Its a GRAPHICS MODE "Canvas", like TCanvas- only better.<br>
+-You draw with it. <br>
+2D and 3D modes are supported.<br>
+AUDIO and Networking are also supported.
 
-"Scene Rendering" is limited. 
-Try "Castle Engine".
+3D "Scene Rendering" is limited. <br>
+Try "Castle Engine" -for something more complete.
 
 
 ### LEGAL-ese
