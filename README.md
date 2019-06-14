@@ -107,7 +107,11 @@ The location of which on Windows is completely unknown.
 As soon as Unice code is working- both windows and OSX code will see an overhaul.
 
 
-### Why is SDL here? (it will get moved)
+### Why is SDL here? 
+
+Because OpenGL is BUGGED. <br>
+(I am missing sides of a cube for no reason.)
+
 
 SDL 1 and 2  "unified sources" included- for your pleasure programming.
 
@@ -123,10 +127,8 @@ OpenGL and SDL (in 3d) dont mix very well.
 You dont need SDL for input. <br>
 freeGLUT/OGL gives it to you.
 
-I may revive SDL ports-OpenGl is proving "excessively inconsistent implementation".
-(Spinning cubes are missing sides, etc-this didnt happen w SDL.)
 
-### Portage status
+### Port status
 
 WIN32:
 
@@ -135,7 +137,16 @@ WIN32:
 
 MAC:
 
-		My Mac mini has XCode- and I have a VM (or three).
+		How small of a rendering context do we have?? (16MB? less?)
+		
+		Seting up XCode is proving to be a R-PITA. 
+		Lazarus is now available (it wasnt before) for Tiger+ versions of OSX
+		64/32 and Intel/PPC (quad binary) can be produced if compiled correctly
+		
+		OS9:
+			The Routines seem to be like an old version of DirectX
+			We need CodeWarrior setup correctly. 
+			Files are getting impossible to find.
         
 
 Ubuntu:
@@ -145,10 +156,15 @@ Ubuntu:
 		DO NOT INSTALL FPC or Lazarus from the OS repository for UBU 14 or 16.
 		(You have three "bleeding edge" svn packages to install instead.)
 
+		X11:
+		
+			This is "CoreLibX11Primitives"- like WinAPI- but for unices.
+			This is not (overcomplicated) XGL
 
-Castle /sceneGraph engine will install just fine.
 
-## Ports
+Castle /sceneGraph engine will install just fine from the repos for those interested.
+With exception to OSX (or GNU Pascal)- gcc is not needed to be installed--but it wouldnt hurt.
+
 
 This unit (LazGraphics) SHOULD be ported to the same Languages that OpenGl supports, listed here:
 
@@ -166,12 +182,15 @@ So if performance is lacking(usually in math areas)-
 		Second-
 				Use more efficient Logic methods
                 Like turning off "state tracking" until absolutely required to turn it on
+		
 		Third-
 				Try another method of implementation like OGL/DirectX vs WinAPI/Xlib
 
+		Fourth-
+				Your computer is tto slow. Try a faster one.
 
 Ive tried to do the second for you- as best possible.
-Math is not my strong-suit.(GL is riddled w Matrice Math).
+Math is not my strong-suit.(GL is riddled w 3D Matrice Math).
 
 Try to keep the ports HERE- DO NOT FORK unnecessarily.
 I will be happy to import code.
@@ -188,23 +207,21 @@ master branch: code may or may not build -but is more likely to- after OpenGL sw
 There are some routines not yet ported, and some completely untested.<br>
 libSOIL routines are disabled at this time(image support).
 
-Version 2.0 is starting the BETA testing cycle.<br>
-(a lot of what you need, however, is in the aux units)
 
-FULL CGA, EGA, and VGA palletted modes should work properly.<br>
+FULL CGA, EGA, and VGA palletted modes should work properly. **FAILS under OpenGL**<br>
 Checks for windows(but not PowerPC-BE- arch) have been added.
 
-FrameBuffer support (no X11/tty) code needs some help.<br>
+FrameBuffer support (no X11/tty) code needs some help and more thourough testing.<br>
 
 ---
 
 ### Why does this project exist?
 
-Some outdated code needed to be brought up to speed.
-
-You will need **this Library** if you write strictly for graphics modes or wish to.
-
+Some outdated code needed to be brought up to speed.<br>
+You will need **this Library** if you write strictly for graphics modes or wish to.<br>
 I will try to provide further demos where possible.
+
+Lazarus will not support older modes, more than 20 colors on the screen...etc etc.
 
 
 ### Technobabble
@@ -332,7 +349,7 @@ You should be able to compile this once you GIT (or Download) sources to your co
 Lazarus is installed.
 
 This code doesnt call the LCL- but yours might. 
-LCL errors are up to you to fix.
+LCL errors are **up to you to fix**.
 
 OGL/SDL "Pointer issues" and mem-alloc/free issues- need to be worked out by you.
 Im having a hard time debugging them myself- and SDL doesnt want to co operate.
@@ -387,8 +404,8 @@ SDL doesnt do enough- however- it points us to a common codebase and UNIVERsalIT
 
 If you call an SDL function- you call it the same way 
 
-		in other languages
-		on other platforms or OSes
+	in other languages
+	on other platforms or OSes
 
 The developers dont care to fix problems.
         
@@ -396,14 +413,14 @@ The developers dont care to fix problems.
 
 Shoving people into SDL and saying "good luck"-
 		
-		When theres 50 ways to do things...IS WRONG.
+	When theres 50 ways to do things...IS WRONG.
 
 
 Need Graphics libraries for DOS/FreeDOS??
 
-		Try the original BGI written by Borland, INC.
-		The BGI has been 256 color extended - I have the patch.
-        HDMIx (and SDL) MAY work- and then again, so might PTC unit.
+	Try the original BGI written by Borland, INC.
+	The BGI has been 256 color extended - I have the patch.
+        HDMIx loader (and SDL) MAY work- and then again, so might PTC unit.
 
 
 ### Dependencies (INSTALL ME FIRST!!):
