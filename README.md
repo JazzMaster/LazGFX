@@ -1,5 +1,7 @@
 ## Laz GFX- 
 
+Copywright (c) 2018-2019 Richard Jasmin et al
+
 A UNIVERSAL replacement of the "Borland Graphics Interface" (BGI)
 (For Lazarus/FPC/Pascal)
 
@@ -11,11 +13,6 @@ Its a GRAPHICS MODE "Canvas", not unlike TCanvas.
 "Scene Rendering" is limited. 
 Try "Castle Engine".
 
-TL;DR?? 
-TOO BAD. 
-READ. 
-I WILL HOLD YOU TO THIS TEXT.
-
 
 ### LEGAL-ese
 
@@ -26,14 +23,62 @@ Licensed under Apache License, Version 2.0.<br>
 (compatible with Mozilla)<br>
 
 This statement applies to ALL CODE enclosed herein:<br>
-(SDL headers havent been rewritten for the new licence- it falls under LGPL for the time being)
 
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
         WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-        See the License FILE for the specific language governing permissions AND
-        LIMITATIONS under the License.
+OpenGL Pascal code herein is NOT LGPL LICENSED. -Only the SDL code is.<br>
+YOU MAY NOT ATTEMPT to bypass GitHUB versioning -to circumvent this license change.
+
+This is is a original (in some places composite) BLACK-BOX work.<br>
+Code was reverse engineered- solely from existing documentation.
+
+No original Borland (or other companies code) was used during this units "manufacture".<br>
+Some parts are based upon "public C sources" or "Distributed Materials" with books purchased.<br>
+Said books are listed in the bibliography of "the documentation of sources".
+
+Plagarism cannot be claimed:
+
+        Over 90% of the written code is Original based upon "source code function-header documentation".
+
+Reasons for License Changes:
+
+        1- Source code redistribution of derivative works is no longer forced (GPL/LGPL licenses force it)
+            You are required,however, to notify others of where to find THIS "ORIGINAL" SOURCE.
+
+            While **extremely encouraged**, code merging(post forking) is NOT required. 
+            I can be CCed changes (centralization) without other forks of this work being CCed, as well.
+                    -This I prefer.
+
+        2- I have the right to reject "Forked Code" for any reason.
+        3- YOU can still (otherwise) use the code as you please. 
+
+Examples:
+
+        for-profit use
+        business use
+        proprietary use
+        embedded use
+
+Use of this source code assumes you accept the terms of this License agreement.
+
+**This code is Copywrighted**. 
+
+Removing ANY Copywright notices constitutes THEFT( of Intellectual Property).<br>
+I/WE (FPC Dev team) reserves the right to sue under Intellectual Property laws -if Copywright notices are removed.
+
+(Standard Attribution rules apply)
+
+While you may not remove such notices- you may edit them to better serve a purpose:
+
+        Shortening changelogs
+        Beautifying code
+
+YOU **MAY** use this code to serve any need- given the above named restrictions.<br>
+A copy of The Apache v2 license is hereby attached and legally binding.
+
+---
 
 
 ### Render-Targets
