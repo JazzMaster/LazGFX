@@ -162,7 +162,7 @@ Ubuntu:
 			This is not (overcomplicated) XGL
 
 
-Castle /sceneGraph engine will install just fine from the repos for those interested.
+Castle /sceneGraph engine will install just fine from the repos for those interested.<br>
 With exception to OSX (or GNU Pascal)- gcc is not needed to be installed--but it wouldnt hurt.
 
 
@@ -171,7 +171,7 @@ This unit (LazGraphics) SHOULD be ported to the same Languages that OpenGl suppo
 (OpenGL Languages)[https://www.khronos.org/opengl/wiki/Language_bindings#Delphi.2FFree_Pascal_.28Object_Pascal.29]
 		
 		
--DONT ASK about assembler. The compiler does this for you.
+-DONT ASK about assembler. The compiler does this for you.<br>
 Assembler -in flight- does not guarantee optimized code.
 
 
@@ -189,10 +189,10 @@ So if performance is lacking(usually in math areas)-
 		Fourth-
 				Your computer is tto slow. Try a faster one.
 
-Ive tried to do the second for you- as best possible.
+Ive tried to do the second for you- as best possible.<br>
 Math is not my strong-suit.(GL is riddled w 3D Matrice Math).
 
-Try to keep the ports HERE- DO NOT FORK unnecessarily.
+Try to keep the ports HERE- DO NOT FORK unnecessarily.<br>
 I will be happy to import code.
 
 ---
