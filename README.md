@@ -1,8 +1,7 @@
 # Laz GFX- 
 
-Copywright (c) 2018-2019 Richard Jasmin et al<br>
-A UNIVERSAL replacement of the "Borland Graphics Interface" (BGI) For Lazarus/FPC/GNU? Pascal
-
+A UNIVERSAL replacement of the "Borland Graphics Interface" (BGI) For Lazarus/FPC/GNU? Pascal<br>
+Copywright (c) 2018-2019 Richard Jasmin et al
 
 Ports are available HERE (or soon will be) for GAMBAS/Basic/VB(3/.NET)/Python/Fortran/Ada
 
