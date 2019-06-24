@@ -14,6 +14,7 @@ AUDIO and Networking are also supported.
 3D "Scene Rendering" is limited. <br>
 Try "Castle Engine" -for something more complete.
 
+Modified "JEDI Headers" are used here. They appear to also be abandoned.
 
 ### LEGAL-ese
 
@@ -200,7 +201,7 @@ I will be happy to import code.
 
 ### Build status:
 
-RELEASE freeze at v.80 (BUILD SUCCESS- SDL subsystem)<br>
+RELEASE freeze at v.83 (BUILD SUCCESS- SDL subsystem)<br>
 RELEASE freeze at v2.0 May 27th 2019 (BUILD SUCCESS- OpenGL subsystem-core API only).
 
 master branch: code may or may not build -but is more likely to- after OpenGL switch.
@@ -604,10 +605,10 @@ Even "nil pointing" "PathToDriver" still leaves us in a window.
 
 The pyramid(tetrahedron) demo has been SDL v2 patched and now utilizes event based input alongside OGL.
 
-		There is no text (OutText) functions in OGL right now.
-		(those are -not currently implemented- freeGLUT functions)
-
-SDL OutText routines DO NOT WORK with OGL/freeGLUT. THEY MUST BE REWRITTEN.
+		There is no text (OutText) functions in any of the OGL demos right now.
+	
+SDL OutText routines DO NOT WORK when combined with OGL/freeGLUT. THEY MUST BE REWRITTEN.
+With SDL/SDL2- by itself--this works as intended.
 
 
 #### Library DEMO output
@@ -694,5 +695,3 @@ Seriously...the SDL (and sometime openGL) syntax (in C) isnt that hard to master
 #### Have a "Final Product"??
 
 Remember to "remove debugging code and strip binaries".
-
-

@@ -1,4 +1,5 @@
 Unit LazGFX; 
+{$mode objfpc}
 
 {
 A "fully creative rewrite" of the "Borland Graphic Interface" in SDL(and maybe libSVGA) (c) 2017-18 (and beyond) Richard Jasmin
@@ -737,85 +738,48 @@ The code is however-reasonable- but untested.
 
 procedure IntHandler;
 //This is a dummy routine.
-//This variable must mach-and doesnt on purpose- closegraph "fpfork killer" exit status.
 
 //I want you- Users/programmers to override this routine and DO THINGS RIGHT.
 
-var
-   MoonOrange:boolean;
-
 begin
-  EventThread:=fpfork; 
-  
-  if (EventThread=0) then begin //we didnt fpfork....
-     if IsConsoleInvoked then begin
-        writeln('EPIC FAILURE: SDL requires multiprocessing. I cant seem to fpfork. ');
-        writeln('EPIC FAILURE: SDL requires multiprocessing. I cant seem to fpfork.');
-        closegraph;
-     end;
-      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'EPIC FAILURE: Cant fpfork. I need to. CRITICAL ERROR.','BYE..',NIL);
-      closegraph;
-  end;
 
-    MoonOrange:=false;
-    repeat
-      delay(1000);
+  while true do begin //mainloop -should never exit
 
-{ 
-this is how to do it- 
-is there a faster way once the input handler is reassigned?
-we shall see..
+  if (SDL_PollEvent(event) = 1) then begin
+      
+      case event^.type_ of
+ 
+               //keyboard events
+        SDL_KEYDOWN: begin
+        end;
 
-var
-      kbhit,GetString,quit,echo:boolean;
-      GetChar,c:char;
-      event:SDL_Event;
-	  somestring:string;
-      i:integer;
+	    SDL_MOUSEBUTTONDOWN: begin
+	    end;
+        
+        SDL_WINDOWEVENT: begin
+                           
+                           case event^.window.event of
+                             SDL_WINDOWEVENT_MINIMIZED: minimized:=true; //pause
+                             SDL_WINDOWEVENT_MAXIMIZED: minimized:=false; //resume
+                             SDL_WINDOWEVENT_ENTER: begin
+                                    continue;
+                             end; 
+                             SDL_WINDOWEVENT_LEAVE: begin
+                                   continue;
+                             end;
+                             SDL_WINDOWEVENT_CLOSE: begin
+                                quit:=true;                                
+                                break;
+                             end;
+                           end; //case
+        end; //subcase
+                    
+      end;  //case
 
-//Readkey,KeyPressedm and ReadString combo with one handler.
-
-	if ((SDL_PollEvent( event ) <> Nil) and (event^.type = SDL_KEYDOWN))) then begin
-        SDL_PushEvent(event);
-	    kbhit:=true;
-
-	  case( event.type ) of
-	  SDL_KEYDOWN:
-	    c=event.key.keysym.sym;
-	    if (isprint(c)) then begin  
-	      i:=0;
-          if GetString=true then begin
-              repeat 
-                somestring[i]:=c;
-                inc(i);
-              until (c=SDLK_RETURN) or (i=len(somestring));
-          end else begin
-             GetChar:=c;    
-          end;
-        end; //Is printable char
-            
-	    exit;
-      end;
-	  SDL_ACTIVEEVENT:
-	//    if ((event.active.state = SDL_APPINPUTFOCUS) and event.active.gain) then
-	      //resume
-	    break;
-	  SDL_QUIT:
-	    MoonOrange := true;
-	    exit;
-	  else:
-	    //SDL_PushEvent(event); or
-		//SDL_WaitEVent(0);
-	    exit;
-	  end else begin
-	    SDL_WaitEvent(0);
-	  end;
-    end;
-
-}
-
-    until MoonOrange=true;
-    //exit gracefully.
+   end; //input loop
+   // writeln('event handled: ',event^.type_);
+  end; //mainloop
+  closegraph;
 end;
 
 // from wikipedia(untested)
@@ -1194,20 +1158,22 @@ function videoCallback(interval: Uint32; param: pointer): Uint32; cdecl;
 //we dont always need the input params, nor the interval- its already assigned before we are called.
 //(but it has to be given to us)
 
+var
+    TimerTicks:Longword;
+
 begin
    param:=Nil; //not used
-
+   
    if (not Paused) then begin //if paused then ignore screen updates
-
-//      if (TimerTicks mod interval) then 
            SDL_RenderPresent(Renderer);
    end;
-   SDL_CondBroadcast(eventWait);
-   videoCallback := 0; //we have to return something-the what, WE should be defining.
+  
+   videoCallback := interval; //we have to return something-the what, WE should be defining.
 end;
 
+
 //NEW: do you want fullscreen or not?
-procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
+function initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean):PSDL_renderer;
 
 {
 
@@ -1217,12 +1183,12 @@ Logic size allows upscaling of smaller resolutions on our behalf.
 
 }
 var
-	bpp,i:integer;
+	i:integer;
 	_initflag,_imgflags:longword; //PSDL_Flags?? no such beast 
     iconpath:string;
     imagesON,FetchGraphMode:integer;
 	mode:PSDL_DisplayMode;
-    AudioSystemCheck:integer;
+  //  AudioSystemCheck:integer;
 
 begin
 
@@ -1695,7 +1661,8 @@ now- how do we check if sdl2 is supported- and fall back, given uses clauses can
 
 //sets up mode- then clears it in standard "BGI" fashion.
   SetGraphMode(Graphmode,wantFullScreen);
-
+ 
+  
 //no atexit handler needed, just call CloseGraph
 //that was a nasty SDL surprise...
 
@@ -1719,45 +1686,11 @@ $F-
 
 }
 
-//If we got here- YAY!
-
-//fpfork the event handler
-  IntHandler;
-
-//if we fpforked- we should come right back. 
-
-//events and callbacks seem to flow from interrupt code in C..
-//a BIG PITA- and VERY SPECIFIC CODE.
-
-//this data seems to hidden in all the lines of C and barely made reference to.
-//also needs to be checked for SDLv2 compliance.
-
-   eventLock:= nil;
-   eventWait:= nil;
-
-  eventLock := SDL_CreateMutex;
-   if eventLock = nil then
-   begin
-      if IsConsoleInvoked then
-          writeln('Error: cant create a mutex');
-          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'cant create a mutex','OK',NIL);
-      closegraph;
-   end;
-
-   eventWait := SDL_CreateCond;
-   if eventWait = nil then
-   begin
-      if IsConsoleInvoked then
-          writeln('Error: cant create a condition variable.');
-          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'cant create a condition variable.','OK',NIL);
-      closegraph;
-   end;
-
-
+  
 //lets get the current refresh rate and set a screen timer to it.
 // we cant fetch this from X11? sure we can.
+{
 
-  
   mode^.format := SDL_PIXELFORMAT_UNKNOWN;
   mode^.w:=0;
   mode^.h:=0;
@@ -1766,12 +1699,13 @@ $F-
   //for physical screen 0 do..
   
   //The SDl equivalent error of: attempting to probe VideoModeInfo block when (VESA) isnt initd results in issues....
-  
-  if(SDL_GetCurrentDisplayMode(0, mode) <> 0) then begin
+
+  if(SDL_GetDisplayMode(0,0, mode) <> 0) then begin
     if IsConsoleInvoked then
 			writeln('Cant get current video mode info. Non-critical error.');
 //    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL cant get the data for the current mode.','OK',NIL);
   end;
+
 
   //dont refresh faster than the screen.
   if (mode^.refresh_rate > 0)  then 
@@ -1779,6 +1713,7 @@ $F-
      flip_timer_ms := longint(mode^.refresh_rate)
   else
      flip_timer_ms := 17; 
+
 
   video_timer_id := SDL_AddTimer(flip_timer_ms, @videoCallback, nil);
   if video_timer_id=0 then begin
@@ -1789,7 +1724,7 @@ $F-
 //    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL cant set video callback timer.Manually update surface.','OK',NIL);
     NoGoAutoRefresh:=true; //Now we can call Initgraph and check, even if quietly(game) If we need to issue RenderPresent calls.
   end;
-
+}
   
   CantDoAudio:=false;
     //prepare mixer
@@ -1825,8 +1760,6 @@ $F-
   someLineType:= NormalWidth; 
 
 
-  new(Event);
-
   LIBGRAPHICS_ACTIVE:=true;  //We are fully operational now.
   paused:=false;
 
@@ -1835,8 +1768,6 @@ $F-
   where.X:=0;
   where.Y:=0;
 
-  //Hide, mouse.
-//  SDL_ShowCursor(SDL_DISABLE);
 
 //set some sensible input specs
   //SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
@@ -1865,6 +1796,11 @@ $F-
         noJoy:=false;
     end; 
   end; //Joypad 
+
+ // writeln(longword(@renderer));
+
+
+  InitGraph:=renderer;
 end; //initgraph
 
 
@@ -2049,7 +1985,7 @@ begin
   repeat
 	if (Textures[x]<>Nil) then
 		SDL_DestroyTexture(Textures[x]);
-		Textures[x]:=Nil;
+	Textures[x]:=Nil;
     dec(x);
   until x=0;
   
@@ -2072,9 +2008,6 @@ begin
   	SDL_DestroyWindow ( Window );
   end;	
 
-  SDL_Quit; 
-
-
   if IsConsoleInvoked then begin
      
          textcolor(7); //..reset standards...
@@ -2084,7 +2017,9 @@ begin
   //unless you want to mimic the last doom screen here...usually were done....  
   //Yes you can override this function- if you need a shareware screen on exit..Hackish, but it works.
   //"@ExitProc rerouting routines" (and checks) go here
-  
+
+  SDL_Quit; 
+ 
   halt(0); //nothing special, just bail gracefully.
 end;            	 
 
@@ -2147,7 +2082,7 @@ var
     surface1:PSDL_Surface;
     FSNotPossible:boolean;
     thismode:string;
-    mode:PSDL_DisplayMode;
+  
 
 begin
 //we can do fullscreen, but dont force it...
@@ -2169,15 +2104,12 @@ begin
 	    exit;
 end
 else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //initgraph called us
+    writeln('MaxX: ',MaxX);
+    writeln('MaxY: ',MaxY);
+    writeln('bpp: ',bpp);
+//    writeln('Full screen requested: ',wantfullscreen);
 
-    window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
-    renderer := SDL_CreateRenderer(window, -1, (SDL_RENDERER_ACCELERATED or SDL_RENDERER_PRESENTVSYNC));
-
-	RendedWindow := SDL_CreateWindowAndRenderer(MaxX, MaxY,0, @window,@renderer);
-
-	if ( RendedWindow <>0 ) then begin
-    //No hardware renderer....
-    
+   
          //posX,PosY,sizeX,sizeY,flags
          window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
     	 if (window = Nil) then begin
@@ -2185,34 +2117,30 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 	    	   	writeln('Something Fishy. No hardware render support and cant create a window.');
 	    	   	writeln('SDL reports: '+' '+ SDL_GetError);      
 	    	end;
-	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy. No hardware render support and cant create a window.','BYE..',NIL);
+	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy','I cant make a window. BYE..',NIL);
 			
 			_grResult:=GenError;
 	    	closegraph;
          end;
+        writeln('initgraph: Window is online.');
 
-        //we have a window but are forced into SW rendering(why?)
-    	renderer := SDL_CreateSoftwareRenderer(Mainsurface);
+  
+    	renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
 		if (renderer = Nil ) then begin
  			if IsConsoleInvoked then begin
 	    	   	writeln('Something Fishy. No hardware render support and cant setup a software one.');
 	    	   	writeln('SDL reports: '+' '+ SDL_GetError);      
 	    	end;
-	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy. No hardware render support and cant setup a software one.','BYE..',NIL);
+	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy.',' No hardware render support. BYE..',NIL);
 	    	_grResult:=GEnError;
 	    	closegraph;
 		end;
         // SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
-
-   end; //software renderer
-
-   surface1:=SDL_LoadBMP(iconpath);
-
-   // The icon is attached to the window pointer
-   SDL_SetWindowIcon(window, surface1);
-
-   // ...and the surface containing the icon pixel data is no longer required.
-   SDL_FreeSurface(surface1);
+    writeln('rendering online');
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+     SDL_RenderPresent(renderer); 
 
  // SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
    if wantFullscreen then begin
@@ -2229,7 +2157,10 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 //phones: SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"); 
 
 	   IsThere:=SDL_SetWindowFullscreen(window, flags);
-       thisMode:=getgraphmode;
+       //Hide, mouse.
+       SDL_ShowCursor(SDL_DISABLE);
+
+       //thisMode:=getgraphmode;
   	   if ( IsThere < 0 ) then begin
     	      if IsConsoleInvoked then begin
     	         writeln('Unable to set FS: ');
@@ -2250,33 +2181,17 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
     end; 
 
 
-    //we can create a surface down to 1bpp, but we CANNOT SetVideoMode <8 bpp
-    //I think this is a HW limitation in X11,etc.
-
-    //Renderer says nothing about DEPTH, plenty about SIZE of output...
-
-    //syntax: flags, w,h,bpp,rmask,gmask,bmask,amask
-
-   
-    Mainsurface := SDL_CreateRGBSurface(0, MaxX, MaxY, bpp, 0, 0, 0, 0);
-    if (Mainsurface = NiL) then begin //cant create a surface
-        writeln('SDL_CreateRGBSurface failed');
-        writeln(SDL_GetError);
-        _grresult:=GenError; //probly out of vram
-        //we can exit w failure codes, if we check for them
-        closegraph;
-    end;
-
+    //4 and 8 bits get an empty palette where >8 need mask set.
+ 
 
     if (bpp<=8) then begin
-      if MaxColors=16 then
+   
+   if MaxColors=16 then
             SDL_SetPaletteColors(palette,TPalette16.colors,0,16)
 	  else if MaxColors=256 then
             SDL_SetPaletteColors(palette,TPalette256.colors,0,256);
     end;
 
-    SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
-    SDL_RenderClear(Renderer);
 
      LIBGRAPHICS_ACTIVE:=true;
      exit; //back to initgraph we go.
@@ -2316,7 +2231,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
             end;
 			exit;
         end;
-    //either way we should have a window and renderer by now...   
+
    if wantFullscreen then begin
        //I dont know about double buffers yet but this looks yuumy..
        //SDL_SetVideoMode(MaxX, MaxY, bpp, SDL_DOUBLEBUF|SDL_FULLSCREEN);
@@ -2333,8 +2248,10 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
        end;
 
 	   IsThere:=SDL_SetWindowFullscreen(window, flags);
+      //Hide, mouse.
+       SDL_ShowCursor(SDL_DISABLE);
 
-  	   thisMode:=getgraphmode;
+  	 //  thisMode:=getgraphmode;
   	   if ( IsThere < 0 ) then begin
     	      if IsConsoleInvoked then begin
     	         writeln('Unable to set FS: ');
@@ -2367,8 +2284,6 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 	  else if MaxColors=256 then
             SDL_SetPaletteColors(palette,TPalette256.colors,0,256);
     end;
-    SDL_SetRenderDrawColor(renderer, $00, $00, $00, $FF); 
-    SDL_RenderClear(Renderer);
 
   end; 
 
@@ -3061,7 +2976,7 @@ end;
 //linestyle is: (patten,thickness) "passed together" (QUE)
 //this uses thickness variable only
 
-procedure PlotPixelWNeighbors(x,y:integer);
+procedure PlotPixelWithNeighbors(Thick:thickness; x,y:integer);
 //this makes the bigger Pixels
  
 // (in other words "blocky bullet holes"...)  
@@ -3092,9 +3007,8 @@ begin
        end;
    end;
    SDL_RenderFillRect(renderer, rect);
-// limit calls to "render present"
-//   SDL_RenderPresent(renderer);
-   Free(Rect);
+
+   Dispose(Rect);
    //now restore x and y
    case Thick of
 		NormalWidth:begin

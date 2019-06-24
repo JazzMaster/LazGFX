@@ -13,6 +13,6 @@ begin
         Initgraph(vga,VGAHix32k,'',false);
 		PutPixel(renderer,3,3);
 		PutPixel(renderer,7,7);
-        while true do; //sit here
+        sdl_delay(5000);
 	closegraph;
 end.

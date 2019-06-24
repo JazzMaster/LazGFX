@@ -9229,7 +9229,7 @@ const
   SDL_LASTEVENT    = $FFFF;
 
 type
-
+  PSDL_EventType =^TSDL_EventType;
   TSDL_EventType = Word;
 
   {**

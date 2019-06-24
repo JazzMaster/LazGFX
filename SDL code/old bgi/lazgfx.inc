@@ -85,6 +85,8 @@ most computers support up to 1080p output..it will take some more lotta years fo
 
 var
   thick:thickness;
+  bpp:integer; //byte
+  mode:PSDL_DisplayMode;
 
 //This is for updating sections or "viewports".
 //I doubt we need much more than 4 viewports. Dialogs are handled seperately(and then removed)
@@ -160,7 +162,7 @@ var
     //you want event driven, not input driven-the code seems to be here.
     gGameController:PSDL_Joystick;
 
-    Renderer:PSDL_Renderer;
+    Renderer:PSDL_Renderer; export;
     MainSurface,FontSurface : PSDL_Surface; //TnL mostly at this point, and for hacks
     window:PSDL_Window; //A window... heh..."windows" he he...
 
@@ -230,7 +232,6 @@ Atari modes, etc. were removed. (double the res and we will talk)
   CenterText:boolean=false; //see crtstuff unit for the trick
   
   MaxX,MaxY:word;
-  bpp:byte;
 
   _fgcolor, _bgcolor:DWord;	//this is modified due to hi and true color support.
   //do not use old school index numbers. FETCH the index based DWord instead.  
@@ -360,7 +361,7 @@ function GetX:word;
 function GetY:word;
 function GetXY:longint; 
 
-procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
+function initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean):PSDL_Renderer;
 procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
 
 
@@ -394,7 +395,7 @@ procedure LoadImage(filename:PChar; Rect:PSDL_Rect);
 procedure LoadImageStretched(filename:PChar);
 }
 
-procedure PlotPixelWNeighbors(x,y:integer);
+procedure PlotPixelWithNeighbors(thick:thickness; x,y:integer);
 
 procedure SaveBMPImage(filename:string);
 

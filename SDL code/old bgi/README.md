@@ -1,17 +1,9 @@
 This is the old SDL port.
-Licensed GPL v2.
+Licence changed "for your programming pleaseure".
 
 ---		
 
-state:  RELEASE .83
-
----
-
-This unit uses **modified** JEDI headers.
-
-While the "C Syntax" is correct when utilizing SDL, the PASCAL needed some adjustment.
-It makes more sense to use similar syntax, if possible.
-Why this wasnt corrected and the patches released is beyond me- 
+state:  RELEASE .84
 
 ---
 
@@ -39,10 +31,16 @@ Do not depend on the units sitting here(made under x64bit unix- my flavor of the
 **You will probably need to recompile these units.**
 
 type: 'fpc lazgfx.pas'
-It wil lexit cleanly unless I broke something. 
-THEN go and write an application based on "this" code.
+It will exit cleanly -unless I broke something. 
 
-I will work the SDL issues out- so everything works.
+-THEN go and write an application based on "this" code.
+
+The CRUX of the BITCH of the problem is that "Graphics contexts" are not passed between subroutines.
+Once you fix this- the application now has the handles--and subroutines--to do what you need the app to do.
+
+SDL: You cant render (or take input) on a different thread than the one you started with.
+BULLSHIT.
+
 
 
 #### COPYLEFT
