@@ -1,2 +1,4 @@
 *.inc linguist-language=Pascal
 *.o linguist-language=Pascal
+*.ppu linguist-language=Pascal
+*.pas linguist-language=Pascal
