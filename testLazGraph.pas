@@ -3,11 +3,6 @@ program testLazGraph;
 {
 so far this is testing (free)GLUT (inadvertently) while testing "core GL routines".
 
-The main issue is not OpenGL- its either the translation matrix/view being "off"
--or-
-
-calling conventions creating headache between (free)GLUT - the main unit, and this routine.
-IT APPEARS AS IF GLUT prevents the main unit from passing around GLUT routines(which is what we need).
 
 GLUT- by itself is mostly used for windoing events, etc.
 Lazarus has a working (OBJECTIVE PASCAL) routine for those--
@@ -16,7 +11,8 @@ so Im not sweating THAT--
 
 immeadate rendering seems to be limited to QUADS?
 
-The entire reason for writing the Quasi-BGI was to make things easier- not to "create issues".
+Can we GEt to OpenGL 3D? YES.
+Can we render correctly? NO.
 
 }
 

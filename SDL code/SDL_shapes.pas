@@ -1,6 +1,8 @@
 Unit shapes;
 
 //to be clear: "shaped objects" not "window shapes"
+//SDL GFX rewrite (in Pascal)
+
 
 //FIXME: needs full rewrite for OpenGL
 
@@ -11,7 +13,6 @@ Unit shapes;
    FPC Graphics unit sources
 
 
-SDLUtils/_GFX/_GPU:
 "Roto-zooming" is a late 90s "thing" with games like:
 		Final Fantasy 7,SonicCD (temporal teleportation) 
         or TV series like: stargate SG:1,	etc.
@@ -128,17 +129,14 @@ var
 
 procedure bar3d ( Rect:PSDL_Rect);
 
-procedure Line(renderer1:PSDL_Renderer; X1, Y1, X2, Y2: word; LineStyle:Linestyles);
 
 //fills are with _fgcolor unless specified otherwise
 
-procedure Rectangle(x,y,w,h:integer);
 procedure FilledRectangle(x,y,w,h:integer);
 
 procedure GetArcCoords(var ArcCoords: ArcCoordsType);
 
 procedure DrawEllipse(renderer:PSDL_Renderer; radiusX,radiusY:integer);
-procedure DrawPoints(points:point; num:integer);
 
 
 Const
