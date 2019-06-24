@@ -7,6 +7,7 @@ Ports are available HERE (or soon will be) for GAMBAS/Basic/VB(3/.NET)/Python/Fo
 
 Its a GRAPHICS MODE "Canvas", like TCanvas- only better.<br>
 -You draw with it. <br>
+
 2D and 3D modes are supported.<br>
 AUDIO and Networking are also supported.
 
@@ -28,10 +29,10 @@ This statement applies to ALL CODE enclosed herein:<br>
         distributed under the License is distributed on an "AS IS" BASIS,
         WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-OpenGL Pascal code herein is NOT LGPL LICENSED. -Only the SDL code is.<br>
+The code herein is NOT LGPL LICENSED.<br>
 YOU MAY NOT ATTEMPT to bypass GitHUB versioning -to circumvent this license change.
 
-This is is a original (in some places composite) BLACK-BOX work.<br>
+This is an original (in some places composite) BLACK-BOX work.<br>
 Code was reverse engineered- solely from existing documentation.
 
 No original Borland (or other companies code) was used during this units "manufacture".<br>
@@ -66,7 +67,7 @@ Use of this source code assumes you accept the terms of this License agreement.
 **This code is Copywrighted**. 
 
 Removing ANY Copywright notices constitutes THEFT( of Intellectual Property).<br>
-I/WE (FPC Dev team) reserves the right to sue under Intellectual Property laws -if Copywright notices are removed.
+Code Authors reserve the right to sue under Intellectual Property laws -if Copywright notices are removed.
 
 (Standard Attribution rules apply)
 
