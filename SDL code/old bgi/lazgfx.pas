@@ -1,6 +1,16 @@
 Unit LazGFX; 
 {$mode objfpc}
 
+//Range and overflow checks =ON
+{$Q+}
+{$R+}
+
+{$IFDEF debug}
+//memory tracing, along with heap.
+	{$S+}
+{$ENDIF}
+
+
 {
 A "fully creative rewrite" of the "Borland Graphic Interface" in SDL(and maybe libSVGA) (c) 2017-18 (and beyond) Richard Jasmin
 -with the assistance of others.
@@ -416,7 +426,15 @@ uses
 //if we need to use one or the other- 
 //  we will use CThreads. 
 
-    cthreads,cmem,ctypes,sysUtils,{$IFDEF unix}baseunix,{$ENDIF}
+    cthreads,cmem,ctypes,classes,
+
+{$IFDEF unix}
+    sysUtils,baseunix,
+ {$IFDEF fallback} 
+	 X, XLib,	//X11CorePrimitives
+ {$ENDIF}
+
+{$ENDIF}
 
 //ctypes: cint,uint,PTRUint,PTR-USINT,sint...etc.
 
@@ -424,19 +442,31 @@ uses
 // A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust "console" logging...
 
 {$IFDEF MSWINDOWS} //as if theres a non-MS WINDOWS?
-      MMsystem, //audio subsystem
+    Windows,MMsystem, //audio subsystem
+
+	 {$IFDEF fallback}
+		WinGraph, //WinAPI-needs rework
+	 {$endif}
+
 {$ENDIF}
 
+{$IFDEF LCL}
+	{$IFDEF LCLGTK2}
+		gtk2,
+	{$ENDIF}
 
-  {$IFDEF LCL}
+	{$IFDEF LCLQT}
+		qtwidgets,
+	{$ENDIF}
+
+	  //works on Linux+Qt but not windows??? I have WINE and a VM- lets figure it out.
+      LazUtils,  Interfaces, Dialogs, LCLType,Forms,Controls, 
     {$IFDEF MSWINDOWS}
+       //we will check if this is set later.
       {$DEFINE NOCONSOLE }
-       //cant use crtstuff if theres no crt units available.
-
     {$ENDIF}
-    //LCL is linked in but we are not in windows. Not critical. If you want output, set it up.
-      LazUtils,  
-  {$ENDIF}
+
+{$ENDIF}
 
 
 //its possible to have a Windows "console app" thru FPC,
@@ -466,7 +496,9 @@ uses
 
 
 //FPC generic units(OS independent)
-  SDL2,SDL2_TTF,strings,typinfo,SDL2_Image
+  SDL2,SDL2_TTF,strings,typinfo,SDL2_Image,uos,logger
+
+//Logger was the unit "throwing EIO errors" all over...FNF- I reset instead of reWrote...
 
 {for 3d:
 
@@ -475,7 +507,20 @@ GL may be overkill for what you want.
 
 I still need to fix some "rendering bugs" with OGL.
 
+
+
+STIPPLE(borrowed from GL):
+-- -- -- -- -- -- (and lines like that)
+
+    when drawing a line- this is supposed to dictate if the line is dashed or not
+    AND how thick it is. We can fake by isolating chunk percentages (not drawing)-
+    -or-
+    what we can do is: modify the new demo code with the "pixelled line" in it ...
+
+dotted and dashed lines are stipple, center uses other math
+
 }
+
 
 
 //SDL2_gfx is untested as of yet. functions start with GPU_ not SDL_. 

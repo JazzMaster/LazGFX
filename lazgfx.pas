@@ -12,25 +12,30 @@ SEMI-"Borland compatible" w modifications.
 
 ***** WARNING ******
 
-This code may be "irreprebly fucked". GL is refusing to chainload via library-as SDL/SDLv2 does.
+This code may be "irreprebly fucked". 
+
+PATCHED:
+    GL is refusing to chainload via library (solution: export the graphics context pointer)
+    
+
 Further-
     output is inconsistent.
 
-Rendered cubes are missing sides, etc. Vertexes being off is due to changes in the code-
+Rendered cubes are missing sides, etc. 
+
+Vertexes being off is due to changes in the code-
     but as of yet-
         doesnt produce this problem.
 
-Several other SDL issues were noted since then. These are major bugs w SDL/GL.
 VENDORS DO NOT CARE ENOUGH to fix "GL in the drivers".
-
-So how things are working right now- I have NO IDEA.
+So how things are working right now- for others- I have NO IDEA.
 
 *******************
 
 Lazarus graphics unit is severely lacking(provides TCanvas instead)...use this instead.
 
 THIS IS NOT A GAME ENGINE. 
-Then engine stacks between this and your code.
+This code stacks between "graphics routine filth" and your code.
 
 Only OPEN/free units and code will ever be here.
 Only cross-platform methods will be used. 
@@ -42,14 +47,16 @@ IN NO WAY SHAPE OR FORM are proprietary functions to be added here.
 
 I dont care what you use the source code for.
 
-	I would prefer- however-
-		THAT YOU STICK TO FPC/LAZARUS. My support for other programming languages is LIMITED.
+I would prefer- however-
+		THAT YOU STICK TO FPC/LAZARUS. 
+My support for other programming languages is LIMITED.
 
 You must cite original authors and sub authors, as appropriate(standard attribution rules) when modifying this code.
 DO NOT CLAIM THIS CODE AS YOUR OWN and you MAY NOT remove this notice.
 
 Notice that you use this unit-(or have modified it) and where to find the original sources (in your code) would be nice.
 It is not required, however.
+
 
 }
 
@@ -63,7 +70,6 @@ It is not required, however.
 {$R+}
 
 {$IFDEF debug}
-//memory tracing only.
 	{$S+}
 {$ENDIF}
 
@@ -87,8 +93,7 @@ The differences in code are where the surface(Canvas) operations point to and co
 Although designed "for games programming"..the integration involved by the USE, ABUSE, and REUSE-
 of SDL and X11Core/WinAPI(GDI)/Cairo(GTK/GDK)/OpenGL/DirectX highlights so many OS internals its not even funny.
 
-GL by itself doesnt require X11- but (GLX?) does require some X11 code for "input processing".
-***GLX is broken. DONT USE IT. ***
+GL -by itself(ES)- doesnt require X11- but (GLX?) does require some X11 code for "input processing".
 
 -It is Linux that is the complex BEAST that needs taming.
 	Everyone seems to be writing in proprietary windowsGL, DirectX,etc. these days.
@@ -102,8 +107,7 @@ interface
 This is not -and never will be- your program. Sorry, Jim.
 RELEASES are stable builds and nothing else is guaranteed.
 
-We output to Surface/Texture (buffer/video buffer) usually via memcopy operations.
-
+We output thru Surface->Texture (buffer/video buffer) usually via memcopy operations.
 
 For framebuffer(tty access):
 	
@@ -112,7 +116,7 @@ For now- we settle for a Doom like experience.
 		We switch to graphics mode and do something (catch all crashes)
 	We drop back to text mode
 
-(framebuffer -FBO- is also a part of openGL--that I skip over)
+(FBO- is a part of openGL--I skip over this mess- for now)
 
 
 Macintosh:
@@ -246,10 +250,11 @@ LOGS:
 
 Some idiot wrote the logging  code wrong and it needs to be updated for FILE STREAM IO.
 I havent done this yet.
+
 (Call me lazy or just not up "streaming Lazarus")
 
 	You should log something.
-
+    You should log everything.
 
 animations:
 	to animate-
@@ -286,7 +291,6 @@ Palettes:
 WONTFIX:
 
 "Rendering onto more than one window (or renderer) can cause issues"
-"You must render in the same window that handles input"
 
 ("depth" in OGL is considered cubic depth (think layers of felt) , not bpp)
 
@@ -297,23 +301,13 @@ WONTFIX:
 
 TODO:
 
-	Get some framebuffer fallback code working and put it here.	
+	Get some framebuffer fallback code working and put it here.	(DAMN YOU- and your changes, Linus!)
 	
 }
 
-//dont remove this (it enables windows units to work as-is)
+//this will not work "for callbacks":
+//ifdef mswindows: cdecl-> stdcall
 
-{$MACRO on}
-{$ifdef mswindows}
-	{$DEFINE extdecl:= stdcall}
-{$ELSE}
-	{$DEFINE extdecl:= cdecl}	
-{$ENDIF}
-
-//use:
-// procedure exes(why:iduuno):exes; extdecl;
-
-//extern; is different...
 
 uses
 
@@ -536,7 +530,6 @@ type
 //sort of -SDL_Rect implementation
 
 PSDL_Rect=^Rect;
-PRect=^Rect;
 SDLRect=record
 	x:byte;
 	y:byte;
@@ -544,12 +537,6 @@ SDLRect=record
 	w:byte;
 end;
 
-Rect=record
-	x:byte;
-	y:byte;
-	h:byte;
-	w:byte;
-end;
 
 {
 A Ton of code enforces a viewport mandate- that even sans viewports- the screen is one.
@@ -561,10 +548,10 @@ graphdriver is not really used half the time anyways..most people probe.
 Theres only ONE Fatal Flaw in the old code:
     It presumes use on PC only. Presumption and ASSumptions are BAD.
 
-How do you detect non-PC variants? In this case- you make another unit.
+How do you detect non-PC variants? In this case- you make another unit for that platform.
 
 }
-	graphics_driver=(DETECT, FakeCGA, VGA,VESA); 
+	graphics_driver=(DETECT, CGA,EGA, VGA,VESA); 
 
 
 {
@@ -594,6 +581,7 @@ Vertex3d=record
    z:Word;
 end;
 
+
 //usully goes around clock-wise
 Quad=array [0..3] of Vertex;
 
@@ -602,11 +590,13 @@ Quad=array [0..3] of Vertex;
 
 {$ifndef mswindows}
 
+//bytes
 PSDL_Color=^SDL_Color;
 SDL_Color=record
 	r,g,b,a:byte;
 end;
 
+//floats
 GL_Color=record
 	r,g,b,a:single;
 end;
@@ -672,6 +662,8 @@ end; //record
 //you cant fuck up the first 16- Borland INC (RIP) made that "the standard"
 TPalette16Names=(BLACK,RED,BLUE,GREEN,CYAN,MAGENTA,BROWN,LTGRAY,GRAY,LTRED,LTBLUE,LTGREEN,LTCYAN,LTMAGENTA,YELLOW,WHITE);
 
+
+//not pulled from specs yet
 TPalette64Names=(
 BLACK64,
 RED64,
