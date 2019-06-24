@@ -482,7 +482,7 @@ const
       {$IFDEF FPC}
         SDL_LibName = 'libSDL2.so';
       {$ELSE}
-        SDL_LibName = 'libSDL2.so.0';
+        SDL_LibName = 'libSDL2.so';
       {$ENDIF}
     {$ENDIF}
   {$ENDIF}

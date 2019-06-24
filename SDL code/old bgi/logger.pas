@@ -1,9 +1,10 @@
 unit logger;
+{$mode objfpc}
 
 interface
 
 uses
-    sysutils;
+    crt,sysutils;
 
 
 const
@@ -12,19 +13,19 @@ const
   warning='WARNING: ';
 
 var
-   output: Text; //untyped text
+   outputfile: Textfile; 
    logging,donelogging:boolean;
    MyTime: TDateTime;
-
+   IsConsoleInvoked:boolean; external;
 
 function Long2String(l: longint): string;
 Procedure LogLn(s: string);
-procedure StopLogging; //finalization
-
+procedure StopLogging; 
+procedure StartLogging;
 
 implementation
 {
-followng code is from FPC graphics unit(mostly sane code)
+The aux routines here are copywright FPC/FPK Dev Team
 
 AUTHORS:                                              
    Gernot Tenchio      - original version              
@@ -34,13 +35,10 @@ AUTHORS:
    Thomas Schatzl      - optimizations,routines and    
                            suggestions.                
    Jonas Maebe         - bugfixes and optimizations    
-
 }
 
 
 //more advanced debugging requires everything be converted to a string
-//SDL_GetError for example may spit out other crud...
-
 //byte, word 2string, real2string,int2string
 
 function Long2String(l: longint): string;
@@ -53,34 +51,63 @@ end;
 
 //end FPC code - the rest has been modified "for an EXPLICIT PURPOSE"
 
+
+
 //usually you want to write a line.
 
-//use me unless you need other variables added to the output.
-//remember- files WRAP at odd points, depending on the width of the viewing application and output monitor.
-Procedure LogLn(s: string);
+//use me unless you need other variables added to the outputfile.
 
-Begin
-  Write((DateTimeToStr(MyTime)),' : ');
-  Writeln(s); //to the debugging output console first, then file.
-  Writeln(output,s);
-End;
+procedure LogGLFloat(data:single);
+var
+	stringdata:string;
 
-procedure StopLogging; //finalization
-//call just before SDL_Quit
 begin
-    donelogging:=true;
-    logging:=false;
-    Close(output);
+		write(data:4:2);
+		stringdata:=FloatToStr(data);
+  	    Write(outputfile,stringdata);
 end;
 
 
-begin //init - main()
+procedure LogGLFloatLn(data:single);
+var
+	stringdata:string;
 
-    MyTime:= Now;
-    Assign(output,'lazgfx-debug.log'); 
-    Append(output); //do not re-write or re-set.
-    Logging:=true;
+begin
+		writeln(data:4:2);
+		stringdata:=FloatToStr(data);
+  	    Writeln(outputfile,stringdata);
+end;
+
+
+Procedure LogLn(s: string);
+var
+    v:string;
+Begin
+
+  writeln( DateTimeToStr(MyTime),' : ',s); //to the debugging outputfile console first, then file.
+  v:=( (DateTimeToStr(MyTime))+' : '+s);
+  Writeln(outputfile,v);
+End;
+
+procedure StartLogging; 
+begin
+    assign(outputfile,'lazgfx-debug.log');
+    rewrite(outputfile);
+    logging:=true;
     donelogging:=false;
+end;
+
+procedure StopLogging; //finalization
+
+begin
+    donelogging:=true;
+    logging:=false;
+    close(outputfile);
+end;
+
+
+begin 
+
 end.
  
 

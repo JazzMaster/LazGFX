@@ -22,4 +22,6 @@ function GetFgDWordRGBA:DWord;
 function GetBgDWordRGB(r,g,b:byte):DWord;
 function GetBgDWordRGBA(r,g,b,a:byte):DWord;
 procedure invertColors;
+function DWordToRGBA(someword:DWord):PSDL_Color;
+function RGBAToDWord(somecolor:PSDL_Color):DWord;
 

@@ -1,8 +1,8 @@
 You need Lazarus to build this in Windows.
-For C apps: you need MingGW/Centeniial+Bash/MSVC installed
+For C apps: you need MingGW installed or Centeniial+Bash installed or MSVC installed
 
 If using the Linux terminal avilable in  Sin10 PLEN-TEN-IAL edition, you may find it easier to keep up with me.
-If you arent, you are missing "Linux in Windows".
+If you arent, you are missing "Linux in Windows". MingGW helps.
 
 You need FPC to build, Lazarus is optional.
 Keep everything in one folder for now.
@@ -19,4 +19,5 @@ Portaudio(uos support):
 -TOO BIG for GH-
 http://www.portaudio.com/download.html
 
-
+MSVC(and test examples) will be added here shortly.
+It appears that my files are a touch of a mess right now. Im working on this.

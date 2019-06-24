@@ -89,7 +89,7 @@ begin
   
        if IsConsoleInvoked then begin
              writeln('Wrong routine called. Try: TrueColorGetRGBfromHex');
-             writeln('Wrong routine called. Try: TrueColorGetRGBfromHex');
+             LogLn('Wrong routine called. Try: TrueColorGetRGBfromHex');
        end;
        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Wrong routine called. Try: TrueColorGetRGBfromHex','OK',NIL); 
  end;
@@ -627,7 +627,7 @@ begin
 //really rare case
     if (MaxColors<=255) then exit; //use the other function for this
        if IsConsoleInvoked then begin
-          writeln('Trying to fetch background color -when we have it- in Paletted mode.');
+          LogLn('Trying to fetch background color -when we have it- in Paletted mode.');
           writeln('We have the background color in paletted modes!');
           exit;
        end;

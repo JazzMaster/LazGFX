@@ -128,7 +128,7 @@ begin
 
  // make smaller:  glScalef(0.7, 0.7, 0.7);
    
-    
+//This seems to be either a GL or a vertex issue...I am debugging(HOW?)    
 glBegin( GL_quadS );
 
 

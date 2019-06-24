@@ -651,12 +651,12 @@ var
 
 begin
    display_count := SDL_GetNumVideoDisplays; //1->display0
-   writeln('Number of displays: '+ intTOstr(display_count));
+   LogLn('Number of displays: '+ intTOstr(display_count));
    display_index := 0;
 
 //for each monitor do..
 while  (display_index <= display_count) do begin
-    writeln('Display: '+intTOstr(display_index));
+    LogLn('Display: '+intTOstr(display_index));
 
     modes_count := SDL_GetNumDisplayModes(display_index); //max number of supported modes
     mode_index:= 0;
@@ -675,7 +675,7 @@ while  (display_index <= display_count) do begin
         if (SDL_GetDisplayMode(display_index, mode_index, SDLmodePointer) = 0) then begin //mode supported
 
             //Log: pixelFormat(bpp)MaxX,MaXy,refrsh_rate            
-            writeln(IntToStr(SDL_BITSPERPIXEL(SDLmodePointer^.format))+' bpp'+ IntToStr(SDLmodePointer^.w)+ ' x '+IntToStr(SDLmodePointer^.h)+ '@ '+IntToStr(SDLmodePointer^.refresh_rate)+' Hz ');
+            LogLn(IntToStr(SDL_BITSPERPIXEL(SDLmodePointer^.format))+' bpp'+ IntToStr(SDLmodePointer^.w)+ ' x '+IntToStr(SDLmodePointer^.h)+ '@ '+IntToStr(SDLmodePointer^.refresh_rate)+' Hz ');
 
             //store data in a modeList array
 
@@ -750,7 +750,7 @@ begin
   if (EventThread=0) then begin //we didnt fpfork....
      if IsConsoleInvoked then begin
         writeln('EPIC FAILURE: SDL requires multiprocessing. I cant seem to fpfork. ');
-        writeln('EPIC FAILURE: SDL requires multiprocessing. I cant seem to fpfork.');
+        LogLn('EPIC FAILURE: SDL requires multiprocessing. I cant seem to fpfork.');
         closegraph;
      end;
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'EPIC FAILURE: Cant fpfork. I need to. CRITICAL ERROR.','BYE..',NIL);
@@ -968,7 +968,7 @@ begin
   if (Tex = Nil) then begin
      if IsConsoleInvoked then
 		writeln('Cannot Lock unassigned Texture.');
-        writeln('Cant Lock unassigned Texture');
+        LogLn('Cant Lock unassigned Texture');
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Lock an unassigned Texture.','OK',NIL);
      exit;
   end;
@@ -995,7 +995,7 @@ begin
   if (Tex = Nil) then begin
      if IsConsoleInvoked then
 		writeln('Cannot Lock unassigned Texture.');
-        writeln('Cant Lock unassigned Texture');
+        LogLn('Cant Lock unassigned Texture');
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Lock an unassigned Texture.','OK',NIL);
      exit;
   end;
@@ -1023,7 +1023,7 @@ begin
   if (tex = Nil) then begin
      if IsConsoleInvoked then
 		writeln('Cannot Alloc Texture.');
-        writeln('Cant Alloc Texture');
+        LogLn('Cant Alloc Texture');
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Alloc Texture.','OK',NIL);
      exit;
   end;
@@ -1086,7 +1086,7 @@ begin
         if IsConsoleInvoked then
            writeln('ERROR: i cant do that. not indexed.');
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempting to clearscreen(index) with non-indexed data.','OK',NIL);   
-        writeln('Attempting to clearscreen(index) with non-indexed data.');           
+        LogLn('Attempting to clearscreen(index) with non-indexed data.');           
         exit; 
     end;
     if MaxColors=16 then
@@ -1228,7 +1228,7 @@ begin
 
   if LIBGRAPHICS_ACTIVE then begin
     if ISConsoleInvoked then begin
-        writeln('Graphics already active.');
+        LogLn('Graphics already active.');
     end;
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Initgraph: Graphics already active.','OK',NIL);	
     exit;
@@ -1642,8 +1642,8 @@ begin
      //we cant speak- write something down.
 
      if ISConsoleInvoked then begin
-        writeln('Critical ERROR: Cant Init SDL for some reason.');
-        writeln(SDL_GetError);
+        Logln('Critical ERROR: Cant Init SDL for some reason.');
+        Logln(SDL_GetError);
      end;
      //if we cant init- dont bother with dialogs.
 
@@ -1661,8 +1661,8 @@ begin
     //not critical, as we have bmp support but now are limping very very bad...
     if((imagesON and _imgflags) <> _imgflags) then begin
        if IsConsoleInvoked then begin
-		 writeln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
-		 writeln(IMG_GetError);
+		 Logln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
+		 LogLn(IMG_GetError);
 	   end;
 	   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'IMG_Init: Failed to init required JPG, PNG, and TIFF support','OK',NIL);	
     end;
@@ -1739,7 +1739,7 @@ $F-
    if eventLock = nil then
    begin
       if IsConsoleInvoked then
-          writeln('Error: cant create a mutex');
+          Logln('Error: cant create a mutex');
           SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'cant create a mutex','OK',NIL);
       closegraph;
    end;
@@ -1748,7 +1748,7 @@ $F-
    if eventWait = nil then
    begin
       if IsConsoleInvoked then
-          writeln('Error: cant create a condition variable.');
+          Logln('Error: cant create a condition variable.');
           SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'cant create a condition variable.','OK',NIL);
       closegraph;
    end;
@@ -1769,7 +1769,7 @@ $F-
   
   if(SDL_GetCurrentDisplayMode(0, mode) <> 0) then begin
     if IsConsoleInvoked then
-			writeln('Cant get current video mode info. Non-critical error.');
+			Logln('Cant get current video mode info. Non-critical error.');
 //    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL cant get the data for the current mode.','OK',NIL);
   end;
 
@@ -1783,8 +1783,8 @@ $F-
   video_timer_id := SDL_AddTimer(flip_timer_ms, @videoCallback, nil);
   if video_timer_id=0 then begin
     if IsConsoleInvoked then begin
-		writeln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
-		writeln('you will have to manually update surfaces and the renderer.');
+		Logln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
+		Logln('you will have to manually update surfaces and the renderer.');
     end;
 //    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL cant set video callback timer.Manually update surface.','OK',NIL);
     NoGoAutoRefresh:=true; //Now we can call Initgraph and check, even if quietly(game) If we need to issue RenderPresent calls.
@@ -1801,7 +1801,7 @@ $F-
     //(slower systems use smaller chunks and degraded quality.)
     if AudioSystemCheck <> 0 then begin
         if IsConsoleInvoked then
-                writeln('There is no audio. Mixer did not init.')
+                LogLn('There is no audio. Mixer did not init.')
         else  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There is no audio. Mixer did not init.','OK',NIL);
     end;
 
@@ -1811,7 +1811,7 @@ $F-
   if TTF_Init = -1 then begin
     
     if IsConsoleInvoked then begin
-        writeln('I cant engage the font engine, sirs.');
+        Logln('I cant engage the font engine, sirs.');
     end;
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: I cant engage the font engine, sirs. ','OK',NIL);
 		
@@ -1847,7 +1847,7 @@ $F-
  
     if( SDL_NumJoysticks < 1 ) then begin
         if IsConsoleInvoked then
-			writeln( 'Warning: No joysticks connected!' ); 
+			Logln( 'Warning: No joysticks connected!' ); 
         
   		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: No joysticks connected!','OK',NIL);
         
@@ -1856,8 +1856,8 @@ $F-
     
         if( gGameController = NiL ) then begin  
 	        if IsConsoleInvoked then begin
-		    	writeln( 'Warning: Unable to open game controller! SDL Error: '+ SDL_GetError); 
-                writeln(SDL_GetError);
+		    	Logln( 'Warning: Unable to open game controller! SDL Error: '+ SDL_GetError); 
+                LogLn(SDL_GetError);
             end;
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: Unable to open game controller!','OK',NIL);
             noJoy:=true;
@@ -2164,7 +2164,7 @@ if (LIBGRAPHICS_INIT=false) then
 
 begin
 		
-		if IsConsoleInvoked then writeln('Call initgraph before calling setGraphMode.') 
+		if IsConsoleInvoked then Logln('Call initgraph before calling setGraphMode.') 
 		else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'setGraphMode called too early. Call InitGraph first.','OK',NIL);
 	    exit;
 end
@@ -2182,8 +2182,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
          window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
     	 if (window = Nil) then begin
  			if IsConsoleInvoked then begin
-	    	   	writeln('Something Fishy. No hardware render support and cant create a window.');
-	    	   	writeln('SDL reports: '+' '+ SDL_GetError);      
+	    	   	Logln('Something Fishy. No hardware render support and cant create a window.');
+	    	   	Logln('SDL reports: '+' '+ SDL_GetError);      
 	    	end;
 	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy. No hardware render support and cant create a window.','BYE..',NIL);
 			
@@ -2195,8 +2195,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
     	renderer := SDL_CreateSoftwareRenderer(Mainsurface);
 		if (renderer = Nil ) then begin
  			if IsConsoleInvoked then begin
-	    	   	writeln('Something Fishy. No hardware render support and cant setup a software one.');
-	    	   	writeln('SDL reports: '+' '+ SDL_GetError);      
+	    	   	Logln('Something Fishy. No hardware render support and cant setup a software one.');
+	    	   	Logln('SDL reports: '+' '+ SDL_GetError);      
 	    	end;
 	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy. No hardware render support and cant setup a software one.','BYE..',NIL);
 	    	_grResult:=GEnError;
@@ -2232,8 +2232,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
        thisMode:=getgraphmode;
   	   if ( IsThere < 0 ) then begin
     	      if IsConsoleInvoked then begin
-    	         writeln('Unable to set FS: ');
-    	         writeln('SDL reports: '+' '+ SDL_GetError);      
+    	         Logln('Unable to set FS: ');
+    	         Logln('SDL reports: '+' '+ SDL_GetError);      
      	      end;
 
               FSNotPossible:=true;      
@@ -2242,8 +2242,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
          SDL_SetWindowSize(window, MaxX, MaxY);
          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
          if IsconsoleInvoked then begin
-            writeln('ERROR: SDL cannot set FS.');
-            writeln(SDL_GetError);
+            LogLn('ERROR: SDL cannot set FS.');
+            LogLn(SDL_GetError);
          end;
        end;
 
@@ -2260,8 +2260,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
    
     Mainsurface := SDL_CreateRGBSurface(0, MaxX, MaxY, bpp, 0, 0, 0, 0);
     if (Mainsurface = NiL) then begin //cant create a surface
-        writeln('SDL_CreateRGBSurface failed');
-        writeln(SDL_GetError);
+        LogLn('SDL_CreateRGBSurface failed');
+        LogLn(SDL_GetError);
         _grresult:=GenError; //probly out of vram
         //we can exit w failure codes, if we check for them
         closegraph;
@@ -2311,8 +2311,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
         if (success <> 0) then begin 
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set DisplayMode.','OK',NIL);
 	        if IsConsoleInvoked then begin
-                writeln('ERROR: SDL cannot set DisplayMode.');		
-                writeln(SDL_GetError);
+                LogLn('ERROR: SDL cannot set DisplayMode.');		
+                LogLn(SDL_GetError);
             end;
 			exit;
         end;
@@ -2337,8 +2337,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
   	   thisMode:=getgraphmode;
   	   if ( IsThere < 0 ) then begin
     	      if IsConsoleInvoked then begin
-    	         writeln('Unable to set FS: ');
-    	         writeln('SDL reports: '+' '+ SDL_GetError);      
+    	         LogLn('Unable to set FS: ');
+    	         LogLn('SDL reports: '+' '+ SDL_GetError);      
      	      end;
               FSNotPossible:=true;      
        
@@ -2346,8 +2346,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
           SDL_SetWindowSize(window, MaxX, MaxY);
           SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
           if IsConsoleInvoked then begin            
-            writeln('ERROR: SDL cannot set FS.');
-            writeln(SDL_GetError);
+            LogLn('ERROR: SDL cannot set FS.');
+            LogLn(SDL_GetError);
           end;
           exit;
        end;
@@ -2403,7 +2403,7 @@ begin
 			inc(x);
 		end;
         if IsConsoleInvoked then begin
-            writeln('Cant find current mode in modelist.');
+            LogLN('Cant find current mode in modelist.');
         end;
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: Cant find current mode in modelist.','OK',NIL);        
    end;   
@@ -2414,7 +2414,7 @@ begin
   if (not LIBGRAPHICS_ACTIVE) then begin //if not in use, then dont call me...
 
 	if IsConsoleInvoked then 
-        writeln('you didnt call initGraph yet...try again?') 
+        LogLn('you didnt call initGraph yet...try again?') 
     else
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Restore WHAT exactly?','Clarify the Stupid',NIL);
   end;
@@ -2560,7 +2560,7 @@ begin
 			else begin
 				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Wrong bpp given to get a pixel. I dont how you did this.','OK',NIL);
 				 if IsConsoleInvoked then
-                writeln('Wrong bpp given to get a pixel. I dont how you did this.');
+                LogLn('Wrong bpp given to get a pixel. I dont how you did this.');
 			end;
 
 		end;
@@ -2688,7 +2688,7 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
       else
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get Pixel values...','OK',NIL);
          if IsConsoleInvoked then
-                writeln('Cant Put Pixel values...');
+                LogLn('Cant Put Pixel values...');
     end; //case
 
     SDL_FreeSurface(Tempsurface);
@@ -2706,7 +2706,7 @@ begin
   begin
     		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Put Pixel values...','OK',NIL);
             if IsConsoleInvoked then
-                writeln('Cant Put Pixel values...');
+                LogLn('Cant Put Pixel values...');
 			exit;
   end;
   SDL_RenderDrawPoint( Renderer, X, Y );
@@ -2796,7 +2796,7 @@ so- we get the current screen resolution and check if requested mode is smaller-
 	if (testbpp=0) then begin //did we run out of modes?
         if IsConsoleInvoked then
             writeln('We ran out of modes to check.');
-            //writeln('We ran out of modes to check.');
+            //LogLn('We ran out of modes to check.');
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There are no graphics modes available to set. Bailing..','OK',NIL);
 		CloseGraph; 
 	end;
@@ -2852,7 +2852,7 @@ begin
 	    	lomode:= ord(mCGA); //no less than this.
 		end else begin
 			if IsConsoleInvoked then
-				writeln('Unknown graphdriver setting.');
+				Logln('Unknown graphdriver setting.');
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Unknown graphdriver setting.','ok',NIL);
 		end;
 	end;
@@ -2890,7 +2890,7 @@ begin
    if windownumber=8 then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to create too many viewports.','OK',NIL);
       if IsConsoleInvoked then
-        writeln('Attempt to create too many viewports.');
+        LogLn('Attempt to create too many viewports.');
       exit;
    end;
    //get viewport size and put into LastRect
@@ -2913,8 +2913,8 @@ begin
 
   if (saveSurface = NiL) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt create SDL_Surface from renderer pixel data','OK',NIL);
-      writeln('Couldnt create SDL_Surface from renderer pixel data. ');
-      writeln(SDL_GetError);
+      LogLn('Couldnt create SDL_Surface from renderer pixel data. ');
+      LogLn(SDL_GetError);
       exit;
                     
   end;
@@ -2951,7 +2951,7 @@ begin
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to remove non-existant viewport.','UH oh.',NIL);
   
     if IsConsoleInvoked then
-        writeln('Attempt to remove non-existant viewport.');
+        LogLn('Attempt to remove non-existant viewport.');
     exit; 
    end;
    if windownumber > 1 then begin
@@ -3007,14 +3007,14 @@ end;
 procedure InstallUserDriver(Name: string; AutoDetectPtr: Pointer);
 begin
    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Function No longer supported: InstallUserDriver','OK',NIL);
-   writeln('Function No longer supported: InstallUserDriver');
+   LogLn('Function No longer supported: InstallUserDriver');
 end;
 
 procedure RegisterBGIDriver(driver: pointer);
 
 begin
    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Function No longer supported: RegisterBGIDriver','OK',NIL);
-   writeln('Function No longer supported: RegisterBGIDriver');
+   LogLn('Function No longer supported: RegisterBGIDriver');
 end;
 
 
@@ -3139,8 +3139,8 @@ begin
   if (saveSurface = NiL) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt create SDL_Surface from renderer pixel data','OK',NIL);
       if IsConsoleInvoked then begin
-          writeln('Couldnt create SDL_Surface from renderer pixel data');      
-          writeln(SDL_GetError);
+          LogLn('Couldnt create SDL_Surface from renderer pixel data');      
+          LogLn(SDL_GetError);
       end;
       exit;
                     
@@ -3187,7 +3187,7 @@ var
 begin
    if ((Rect^.w=1) or (Rect^.h=1)) then begin    
      if IsConsoleInvoked then begin       
-        writeln('USE GetPixel. This routine FETCHES MORE THAN ONE');
+        LogLn('USE GetPixel. This routine FETCHES MORE THAN ONE');
      end;  
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'USE GetPixel. This routine FETCHES MORE THAN ONE','OK',NIL);
      exit;
@@ -3224,8 +3224,8 @@ begin
    if (AttemptRead<0) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to read pixel data failed.','OK',NIL);
       if IsConsoleInvoked then begin
-          writeln('Attempt to read pixel data failed.');
-          writeln(SDL_GetError);
+          LogLn('Attempt to read pixel data failed.');
+          LogLn(SDL_GetError);
       end;
      exit;
    end;

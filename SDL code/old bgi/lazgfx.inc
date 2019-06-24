@@ -141,9 +141,7 @@ const
    //joysticks seem to be slow to respond in some games....
 
 var
-
-    chunk: PMix_Chunk; 
-    music: PMix_Music;
+    _graphresult:integer;
     Xaspect,YAspect:byte;
     eventLock: PSDL_Mutex;
     eventWait: PSDL_Cond;
@@ -391,10 +389,10 @@ procedure InstallUserDriver(Name: string; AutoDetectPtr: Pointer);
 procedure RegisterBGIDriver(driver: pointer);
 
 function GetMaxColor: word;
-
+{
 procedure LoadImage(filename:PChar; Rect:PSDL_Rect);
 procedure LoadImageStretched(filename:PChar);
-
+}
 
 procedure PlotPixelWNeighbors(x,y:integer);
 
