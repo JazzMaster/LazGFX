@@ -423,21 +423,18 @@ uses
 //Threads requires baseunix unit
 //cthreads has to be the first unit in this case-it so happens to support the C version.
 
-//if we need to use one or the other- 
-//  we will use CThreads. 
-
-    cthreads,cmem,ctypes,classes,
-
-{$IFDEF unix}
-    sysUtils,baseunix,
+{$IFDEF UNIX}
+      cthreads,cmem,sysUtils,baseunix,
+    
  {$IFDEF fallback} 
 	 X, XLib,	//X11CorePrimitives
  {$ENDIF}
 
 {$ENDIF}
 
-//ctypes: cint,uint,PTRUint,PTR-USINT,sint...etc.
+    ctypes,classes,
 
+//ctypes: cint,uint,PTRUint,PTR-USINT,sint...etc.
 
 // A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust "console" logging...
 

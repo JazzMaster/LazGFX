@@ -1,12 +1,13 @@
 Unit grText;
-//graphics text functions-not fully implemented, just the basics.
-
-//**this unit has not been compile tested yet**
-// setFont and init and stop functions work(at least with SDL by itself-pre abstraction)
+// setFont and init and stop functions work
+{$mode objfpc}
 
 interface 
 uses
 	SDL2,SDL2_TTF,strings;
+
+//sub units will not work until the main unit is abstrated.
+//im holding off on this- as the main units have a lot of rewrite at the moment.
 				
 {$I lazgfx.inc}
 
@@ -23,10 +24,10 @@ type
 var
     fontdata:PSDL_FontInfo;
     IsJapanese:boolean;
+    PasFont: TFreeTypeFont;
 
 procedure backspace( Font:^SDL_FontInfo, ch:char);
 
-//string to pchar??
 procedure OutText(text:PChar);
 procedure outtextXY(x,y:integer; textstring:PChar);
 
@@ -57,11 +58,9 @@ BGI:
   ('DefaultFont', 'TriplexFont', 'SmallFont', 'SansSerifFont', 'GothicFont');
 
 
-MOD: SDL, not BGI .CHR files which is where most code comes from.
-(SDL uses TTF Fonts)
+MOD: TTF, not BGI .CHR files which is where most code comes from.
 
 font_size: some number in px =12,18, etc
-path: (varies by OS) to font we want....
 
 style is one of: 
 		TTF_STYLE_NORMAL
@@ -72,11 +71,11 @@ style is one of:
 		TTF_STYLE_UNDERLINE
 		TTF_STYLE_STRIKETHROUGH
 
-
-outline: make it an outline (instead of drawn "stroked", the font is drawn inverted-hollow)
+outline: make it an outline, instead of "Stroked"
 
 fontpath: MUST BE SPECIFIED - you will crash TTF routines(and possibly SDL and everything on top of it- if you dont)
 -code is like a stack of cards in that way.
+
 }
 
 begin
@@ -136,6 +135,7 @@ procedure Grblink(Text:string);
 //write..erase(redraw)..write..erase..
 //yes this is how my kernel console code works -just implemented differently.
 begin
+//threads(sub-process), not fork(new app instance)
     
     BlinkPID:=fpfork; //fpfork(): this has to occur wo stopping while other ops are going on usually
 	blink:=true; //this wont kill itself, naturally. 
@@ -184,8 +184,7 @@ var
   Tex:PSDL_Texture;
 	
 begin
-//because we use the renderer- we need to convert back to a surface
-
+//surface??
 
 //do ops
   Where.x:=(Where.x -(Font^.CharPos[ofs+1]-Font^.CharPos[ofs]));
@@ -269,6 +268,7 @@ begin
 
 {
 FIXME: japanese style not done
+
 push each char/pchar and check for rendering offscreen..if it would be, go to the next (Y+textsize) line and keep going.
 iff off the screen, stop.
 
@@ -393,14 +393,11 @@ begin
 
   if textsize<1 then textsize=4;
   if textsize >70 then textsize=70;
+  //ttf_openFont
   SDL_SetFont(fontname,ord(direction),textsize); 
 end;
 
 
-//Im noticing that a ton of the font routines use .CHR (old school fonts)
-//although we *could* support them, this is very ancient tech. Id rather use TTF straight-up.
-
-{
 procedure SetTextJustify(direction:directions);
 //write one letter at a time if verticle, ignore and write normally if horizontal
 
@@ -409,11 +406,10 @@ begin
         IsJapanese:=true 
     else
         IsJapanese:=false;
-    SDL_SetFont(fontname,direction,textsize); 
+    SDL_SetFont(fontname,ord(direction),textsize); 
         
 end;
 
-}
 
 
 end.

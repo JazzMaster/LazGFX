@@ -1,12 +1,11 @@
 Unit grText;
 //graphics text functions.
-
-//**this unit has not been tested yet**
-// setFont and init and destroy functions work(at least with SDL by itself-pre abstraction)
+//This uses Lazarus Freetype instead of SDL2TTF routines- should yield the same result.
+{$mode objfpc}
 
 interface 
 uses
-	SDL2,SDL2_TTF,strings;
+	EasyLazFreeType, LazFreeTypeFontCollection,strings;
 				
 {$I lazgfx.inc}
 
@@ -15,15 +14,17 @@ type
   str256=string(256);
   directions=(horizontal,verticle); //ord(horizontal)
   textinfo=record
-        font      : PSDL_FontInfo;
+//        font      : PSDL_FontInfo;
         direction : directions;
         charsize  : integer; 
   end;
 
 var
-    fontdata:PSDL_FontInfo;
+//    fontdata:PSDL_FontInfo;
     IsJapanese:boolean; //text that goes down-matrix style- not sideways
+    PasFont: TFreeTypeFont;
 
+//this code has not been gone thru/edited..it doesnt work as-is.
 procedure backspace( Font:^SDL_FontInfo, ch:char);
 
 //string to pchar??

@@ -1,19 +1,17 @@
 Unit OPGlut;
+{$mode objfpc}
 
-//this is so you Laz(y) folks can import/help rewrite the rest of the new  routines.
-
+//This is GLUt- not Lazarus GL method(differs)
 //"class instantiated" OBJECT PASCAL(for LAZARUS/DELPHI)
-
-//This is still barebones framework but more examples are out for Laz(and VC/objC/CSharp) then fpc-style.
 
 // -J
 
-uses
-	strings, GL, OpenGLContext;
-
-
 interface
+uses
+	Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,strings, GL, GLext, GLU,OpenGLContext;
+
  
+PFrameBuffer=^FrameBufferInfo;
 FramebufferInfo=record
  
     flags:longword;
@@ -29,16 +27,14 @@ Init_GLEW=class
 end;
 
 //ContextInfo.h
- 
+PContextInfo:^ContextInfo;
 ContextInfo=record;
-  
     major_version, minor_version:integer;
-    core:boolean;
+    core:boolean; //coreGL or compat profile?
 end;
  
 //windowInfo.h
-
- 
+PWindow:^WindowInfo; 
 WindowInfo=record
     name:string;
     width, height:integer;
@@ -50,14 +46,14 @@ Init=class
  
       public             
 		 procedure Init.Init_GLEW;
-         procedure InitGLUT (window:^WindowInfo; context:^ContextInfo; framebuffer:^FramebufferInfo);
+         procedure InitGLUT (window:PWindow; context:^ContextInfo; framebuffer:PFramebuffer);
 	     procedure run;
 	     procedure close;
 		 procedure enterFullscreen;
          procedure exitFullscreen;
  
          //used to print info about GL
-         procedure printOpenGLInfo(window:^WindowInfo; GLcontext:^ContextInfo);
+         procedure printOpenGLInfo(window:PWindow; GLcontext:PContextInfo);
 
       private
          procedure idleCallback;
@@ -92,7 +88,6 @@ begin
 end;
  
 
-//PGD demo code has the pascal for this...
 procedure Init.Init_GLEW;
 var
    glewExperimental :boolean;
@@ -104,13 +99,40 @@ begin
     LogLN('GLEW: Initialize');
  
   if (glewIsSupported('GL_VERSION_4_5')) then 
-    LogLN('GLEW GL_VERSION is 4.5');
-  
-  else
-    LogLN('GLEW GL_VERSION 4.5 not supported');
+    LogLN('GL VERSION is 4.5');
+  else begin
+  if (glewIsSupported('GL_VERSION_4_0')) = false then
+    LogLN('GL VERSION is 4.0');
+    if (glewIsSupported('GL_VERSION_3_3')) = false then
+
+//no vendor support below here- using linux default open src libs
+    LogLN('GL VERSION is 3.3-MESA');
+
+      if (glewIsSupported('GL_VERSION_3_2')) = false then
+    LogLN('GL VERSION is 3.2');
+        if (glewIsSupported('GL_VERSION_3_0'))= false then
+    LogLN('GL VERSION is 3.0');
+           if (glewIsSupported('GL_VERSION_2_1'))= false then
+                begin
+                    writeln(' ERROR: OpenGL 2.1 or higher needed. ');
+                      HALT(-1);
+                end;
+  end;
 end;
 
-procedure glutInitPascal; 
+procedure glutInitPascal(ParseCmdLine: Boolean); 
+var
+  Cmd: array of string;
+  CmdCount, I: Integer;
+begin
+  if ParseCmdLine then
+    CmdCount := ParamCount + 1
+  else
+    CmdCount := 1;
+  SetLength(Cmd, CmdCount);
+  for I := 0 to CmdCount - 1 do
+    Cmd[I] := ParamStr(I);
+  glutInit(@CmdCount, @Cmd);
 end;
 
 procedure Init.Init_GLUT(window:^WindowInfo; context:^ContextInfo; framebuffer:^FramebufferInfo);
@@ -170,7 +192,7 @@ end;
 procedure Init_GLUT.idleCallback;
 begin
    //do nothing, just update the screen
-   glutPostRedisplay();
+   sleep(2);
 end;
  
 procedure Init_GLUT.displayCallback;
@@ -206,11 +228,11 @@ begin
 end;
 
 
-procedure Init_GLUT.printOpenGLInfo(WindowInfo:^window; contextInfo:^GLContext);
+procedure Init_GLUT.printOpenGLInfo(WindowInfo:PWindow; contextInfo:PContextInfo);
 
 var
  
- renderer,vendro,version:PChar;                               
+ renderer,vendor,version:PChar;                               
                                 
 begin
  renderer := glGetString(GL_RENDERER);
@@ -225,32 +247,5 @@ begin
 
 end;
 
-{
-//this should be defined in the running application- not here
-//The C is a bit dodgy in class and record cloning and defines.
-
-begin
-
-      WindowInfo^.name := 'OpenGL tutorial';
-      WindowInfo^.width := 800; 
-      WindowInfo^.height := 600;
-      WindowInfo^.position_x := 300;
-      WindowInfo^.position_y := 300;
-      WindowInfo^.isReshapable := true;
-
-      ContextInfo^.major_version := 3;
-      ContextInfo^.minor_version := 3;
-      ContextInfo^.core := true;
-
-      FramebufferInfo^.flags := GLUT_DOUBLE; //this is a must
-      if (color) then
-        flags :=flags or GLUT_RGBA or GLUT_ALPHA;
-     if (depth) then
-        flags := flags or GLUT_DEPTH;
-     if (stencil) then
-        flags :=flags or GLUT_STENCIL;
-     if (msaa) then
-        flags :=flags or GLUT_MULTISAMPLE;
-}
 
 end.

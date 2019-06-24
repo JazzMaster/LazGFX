@@ -321,42 +321,68 @@ cthreads has to be the first unit -in this case-
 
 }
 
-//this Logic is weirdly (prove a negative) here.
-//while you cant prove a negative- you can "not prove" a positive
-
 //cthreads and cmem have to be first.
-{$IFDEF unix}
-	cthreads,cmem,baseunix, X, XLib,sysUtils,
 
 //sysutils: IntToStr()
 
 //you need to tell me- if you need fallback APIs.
 //in most cases, you wont need them.
 
+
+{$IFDEF UNIX}
+      cthreads,cmem,sysUtils,baseunix,Classes,
+
 	 {$IFNDEF fallback} //fallback uses FrameBuffer only code(slow), otherwise keep loading libs
-		Classes,GL,GLext, GLU,GLUT,FreeGlut,
+		GL,GLext, GLU,GLUT,FreeGlut,
 		//both free and not-so-free GLUT are REQUIRED! Use GLFW or something else if you dont like this!
         //probly cairo and pango too at this point.
 	 {$ENDIF}
-{$ENDIF}
+    
+ {$IFDEF fallback} 
+	 X, XLib,	//X11CorePrimitives
+ {$ENDIF}
 
-//ctypes: cint,uint,PTRUint,PTR-usINT,sint...etc.
-//unless you want to rewrite someone elses C, use this.
+{$ENDIF}
 
     ctypes,
 
-   {$IFNDEF LCL} //conio apps only
-		crt,crtstuff,
-   {$ENDIF}
+//ctypes: cint,uint,PTRUint,PTR-USINT,sint...etc.
 
-//This logic is normal
+// A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust "console" logging...
+
 {$IFDEF MSWINDOWS} //as if theres a non-MS WINDOWS?
-     Windows,
-//delphiGL
+    Windows,MMsystem, //audio subsystem
+
 	 {$IFDEF fallback}
 		WinGraph, //WinAPI-needs rework
 	 {$endif}
 
+{$ENDIF}
+
+{$IFDEF LCL}
+	{$IFDEF LCLGTK2}
+		gtk2,
+	{$ENDIF}
+
+	{$IFDEF LCLQT}
+		qtwidgets,
+	{$ENDIF}
+
+	  //works on Linux+Qt but not windows??? I have WINE and a VM- lets figure it out.
+      LazUtils,  Interfaces, Dialogs, LCLType,Forms,Controls, 
+    {$IFDEF MSWINDOWS}
+       //we will check if this is set later.
+      {$DEFINE NOCONSOLE }
+    {$ENDIF}
+
+{$ENDIF}
+
+
+//its possible to have a Windows "console app" thru FPC,
+//just not thru Lazarus. Debugging thru console environment, however, IS supported on windows.
+
+{$IFNDEF NOCONSOLE}
+    crt,crtstuff,
 {$ENDIF}
 
 // A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust.
@@ -431,8 +457,6 @@ To build without the LCL(in Lazarus):
 // as a side-effect: CDROM Audio playback(CDDA) is added back
 
 
-{$IFDEF debug} ,heaptrc {$ENDIF}
-
 {
 OpenGL requires Quartz, which prevents building below OSX 10.2.
 
@@ -441,27 +465,31 @@ Cocoa (OBJ-C) is the new API
 }
 
 
+//lets be fair to the compiler..
+{$IFDEF debug} ,heaptrc {$ENDIF} 
+
+//Carbon is OS 8 and 9 to OSX API
+{$IFDEF mac} 
+  ,MacOSAll
+{$ENDIF}
+
+//Cocoa (OBJ-C) is the new API
+//OSX 10.5+
 {$IFDEF darwin}
 	{$linkframework Cocoa}
-	{$linkframework OpenGL}
-	{$linkframework GLUT}
+    {$linklib SDLimg}
+    {$linklib SDLttf}
+    {$linklib SDLnet}
+	{$linklib SDLmain}
+	{$linklib gcc}
 
-
-//you have to install fpc thru XCode and build a demo -to patch the above includes.
-
-//	{$linklib gcc} -REAL pascal doesnt use C. There is a dialect that does.
-// apparently some programmers see C as a religion...they want to convert everyone to it.
-
-//also requires:
-//mode objpas + classes uses clause (in every pascal unit)
-//modeswitch objectivec2
+{$modeswitch objectivec2}
 
 //iFruits, iTVs, etc:
 // {linkframework CocoaTouch} -- but go kick apple in the ass for not letting us link to it.
 // not legally, anyway....
 
 {$ENDIF}
-
 
 //Altogether- we are talking PCs running OSX, Windows(down to XP), and most unices.
 //and Some android and RasPi ( thru GL-ES)
