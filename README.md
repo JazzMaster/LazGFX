@@ -1,6 +1,6 @@
 # Laz GFX- 
 
-A UNIVERSAL replacement of the "Borland Graphics Interface" (BGI) For Lazarus/FPC/GNU? Pascal<br>
+A "UNIVERSAL replacement" of the "Borland Graphics Interface" (BGI) For Lazarus/FPC/GNU? Pascal<br>
 Copywright (c) 2018-2019 Richard Jasmin et al
 
 Ports are available HERE (or soon will be) for GAMBAS/Basic/VB(3/.NET)/Python/Fortran/Ada
@@ -15,6 +15,11 @@ AUDIO and Networking are also supported.
 Try "Castle Engine" -for something more complete.
 
 Modified "JEDI Headers" are used here. They appear to also be abandoned.
+
+Makefiles removed- they werent needed.<br>
+Lazarus programmers can open the lpr file and "get to work" now. <br>
+(GREAT- THANK YOU to GLContext programmer  Sebastian Hütter for fixing a "major Lazarus PITA")
+
 
 ### LEGAL-ese
 

@@ -11,9 +11,9 @@ program SDL_RenderDemo;
 uses
     sdl2,sdl2_ttf,crt;
 var
-	quit,minimized:boolean;
+    paused,quit,minimized:boolean;
     X,y:integer;
-	e:PSDL_Event;
+	event:PSDL_Event;
     
     Renderer:PSDL_Renderer;
     screen,screen2,FontSurface : PSDL_Surface; //main drawing screen
@@ -111,7 +111,7 @@ procedure QuitRoutine;
 begin
 //say goodbye to everyone (one at a time) in french....
   TTF_Quit;
-  Dispose(e);
+  Dispose(event);
   dispose( Rect1 );
 //  SDL_DestroyTexture(texture2);
 
@@ -161,8 +161,11 @@ begin
 
   //rendering of the texture
   SDL_RenderCopy( Renderer, Texture3, Nil,Where ); //put tex into render-er
-
+//SDL_RenderPresent(Renderer);
   Y:=newY;
+  dispose(where);
+  dispose(high);
+  dispose(wide);
 
 end;
 
@@ -239,6 +242,7 @@ begin
    
    texture1:=SDL_CreateTextureFromSurface(Renderer, screen2);
    SDL_RenderCopy(Renderer, texture1, Nil,Nil);
+  // SDL_RenderPresent(Renderer);
 
    SDL_FreeSurface(screen2);
    SDL_DestroyTexture(texture1);
@@ -266,7 +270,7 @@ begin
         SDL_WINDOWPOS_CENTERED,           // initial y position
         320,                               // width, in pixels
         240,                               // height, in pixels
-        SDL_WINDOW_OPENGL                  // windowflags
+        SDL_WINDOW_OPENGL       // windowflags
   );
 
   if ( window = Nil ) then begin
@@ -282,7 +286,7 @@ begin
   end;
    
 
-  Renderer := SDL_CreateRenderer( Window, -1, SDL_RENDERER_ACCELERATED ); //this windows and driver(OGL) and accel if possible
+  Renderer := SDL_CreateRenderer( Window, 0, SDL_RENDERER_ACCELERATED or SDL_RENDERER_PRESENTVSYNC ); //this windows and driver(OGL) and accel if possible
   if ( Renderer = Nil ) then begin
     {if IsConsoleInvoked then begin
        writeln('Unable to draw ');
@@ -295,63 +299,20 @@ begin
     quitroutine;
   end;
 
+
   	 //Clear screen -there is a slight unavoidable delay with repainting the screen.
      //should only be limited to primitives such as these. 
 		 SDL_SetRenderDrawColor( Renderer, $FF, $FF, $FF, $FF ); 
 		 SDL_RenderClear( Renderer ); 
     //update screen
-         SDL_RenderPresent(Renderer);
+   SDL_RenderPresent(Renderer);
+  SDL_RenderPresent(Renderer);
+
    SetupFont;
-   New(e);
 
-  while true do begin //mainloop -should never exit
+//do this "the first time"
 
-  if (SDL_PollEvent(e) = 1) then begin
-      
-      case e^.type_ of
- 
-               //keyboard events
-        SDL_KEYDOWN: begin
-                       outText( 'Key pressed: ');
-                       //print scancode
-        end;
-
-	    SDL_MOUSEBUTTONDOWN: exit; //outText( 'Mouse button pressed: '+ chr(e^.button.button) );
-        
-        SDL_WINDOWEVENT: begin
-                           
-                           case e^.window.event of
-                             SDL_WINDOWEVENT_MINIMIZED: minimized:=true; //pause
-                             SDL_WINDOWEVENT_MAXIMIZED: minimized:=false; //resume
-                             SDL_WINDOWEVENT_ENTER: begin
-                                    //resume input and restore
-                                    SDL_EventState( SDL_MOUSEMOTION, SDL_ENABLE ); 
-                                    SDL_EventState( SDL_TEXTINPUT, SDL_ENABLE );
-                                    SDL_SetRenderDrawColor( Renderer, $FF, $FF, $FF, $FF ); 
-		                            SDL_RenderClear( Renderer ); 
-                           //         SDL_RenderPresent(renderer);
-                             end; 
-                             SDL_WINDOWEVENT_LEAVE: begin
-                                   //ignore input and fade out
-                                    SDL_EventState( SDL_MOUSEMOTION, SDL_IGNORE );
-                                    SDL_EventState( SDL_TEXTINPUT,SDL_IGNORE );
-                                    SDL_SetRenderDrawColor( Renderer, $77, $77, $77, $FF ); 
-		                            SDL_RenderClear( Renderer ); 
-                         //           SDL_RenderPresent(renderer);
-                             end;
-                             SDL_WINDOWEVENT_CLOSE: begin
-                                quit:=true;                                
-                                QuitRoutine;
-                             end;
-                           end; //case
-        end; //subcase
-                    
-      end;  //case
-   end; //input loop
-
-    if ( not Minimized ) then begin //draw when not minimized and no events firing
-    //code above flip-flops the background, then we redraw the frame...
-
+          //I moved the code here- to update the window(ONCE)--not repeatedly.
     	 //Draw dots
          SDL_SetRenderDrawColor( Renderer, ord($FF), ord($00), ord($00), ord($FF) ); 
 		 SDL_RenderDrawPoint( Renderer, 5, 5 );
@@ -370,7 +331,7 @@ begin
 
         SDL_SetRenderDrawColor( Renderer, 0, 255, 0, 255 );
         SDL_RenderDrawRect( Renderer, Rect1 );
-      
+        dispose(Rect1);      
 
   	    PlotPixelWNeighbors(25,25);
         PlotPixelWNeighbors(35,35);
@@ -383,12 +344,94 @@ begin
 y:=15;
         OutText('This is Ubuntu Sans Regular.');
         OutText('Did the mouse leave us?');
+SDL_RenderPresent(renderer);
 
 
-        SDL_RenderPresent(Renderer);
+   New(event);
+  while true do begin //mainloop -should never exit
+        
 
-  	end; //notminimized
-    SDL_Delay(10);
+  if (SDL_PollEvent(event) = 1) then begin
+      
+      case event^.type_ of
+ 
+               //keyboard events
+        SDL_KEYDOWN: begin
+                       outText( 'Key pressed: ');
+                       //print scancode
+        end;
+
+	    SDL_MOUSEBUTTONDOWN: exit; //outText( 'Mouse button pressed: '+ chr(e^.button.button) );
+        
+        SDL_WINDOWEVENT: begin
+                           
+                           case event^.window.event of
+                             SDL_WINDOWEVENT_MINIMIZED: minimized:=true; //pause
+                             SDL_WINDOWEVENT_MAXIMIZED: minimized:=false; //resume
+                             SDL_WINDOWEVENT_ENTER: begin
+                                    //resume input and restore
+                                    SDL_EventState( SDL_MOUSEMOTION, SDL_ENABLE ); 
+                                    SDL_EventState( SDL_TEXTINPUT, SDL_ENABLE );
+                                    SDL_SetRenderDrawColor( Renderer, $FF, $FF, $FF, $FF ); 
+		                            SDL_RenderClear( Renderer ); 
+                                    SDL_RenderPresent(renderer);
+                                     SDL_RenderPresent(renderer);
+                                    paused:=false;
+
+          //I moved the code here- to update the window(ONCE)--not repeatedly.
+    	 //Draw dots
+         SDL_SetRenderDrawColor( Renderer, ord($FF), ord($00), ord($00), ord($FF) ); 
+		 SDL_RenderDrawPoint( Renderer, 5, 5 );
+		 SDL_RenderDrawPoint( Renderer, 8, 8 );
+		 SDL_RenderDrawPoint( Renderer, 12, 12 );
+         SDL_RenderDrawPoint( Renderer, 15, 15 );
+		 SDL_RenderDrawPoint( Renderer, 20, 20 );
+
+        //draw rectangle
+
+        new( Rect1 );
+        Rect1^.x := 10; 
+        Rect1^.y := 10; 
+        Rect1^.w := 120; 
+        Rect1^.h := 120;
+
+        SDL_SetRenderDrawColor( Renderer, 0, 255, 0, 255 );
+        SDL_RenderDrawRect( Renderer, Rect1 );
+        dispose(Rect1);      
+
+  	    PlotPixelWNeighbors(25,25);
+        PlotPixelWNeighbors(35,35);
+
+
+//issue is that we are called within a loop.
+//therefore the text will quickly run off of the screen.
+
+//alternative is to gotoXY during repaint(loop) and keep resetting X and Y.
+y:=15;
+        OutText('This is Ubuntu Sans Regular.');
+        OutText('Did the mouse leave us?');
+SDL_RenderPresent(renderer);
+                             end; 
+                             SDL_WINDOWEVENT_LEAVE: begin
+                                   //ignore input and fade out
+                                    SDL_EventState( SDL_MOUSEMOTION, SDL_IGNORE );
+                                    SDL_EventState( SDL_TEXTINPUT,SDL_IGNORE );
+                                    SDL_SetRenderDrawColor( Renderer, $77, $77, $77, $FF ); 
+		                            SDL_RenderClear( Renderer ); 
+                                    SDL_RenderPresent(renderer);
+                                    Paused:=true;
+                             end;
+                             SDL_WINDOWEVENT_CLOSE: begin
+                                quit:=true;                                
+                                QuitRoutine;
+                             end;
+                           end; //case
+        end; //subcase
+                    
+      end;  //case
+   end; //input loop
+
+    SDL_Delay(3);
     
   
    end; //mainloop

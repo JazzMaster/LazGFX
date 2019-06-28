@@ -37,6 +37,7 @@ unit sdl2_image;
 {$DEFINE SDL_IMAGE}
 
 
+
 {$IFNDEF FPC}
   {$IFDEF Debug}
     {$F+,D+,Q-,L+,R+,I-,S+,Y+,A+}
@@ -517,7 +518,6 @@ unit sdl2_image;
     {$DEFINE IA32}
   {$ENDIF}
 {$ENDIF}
-
 
 interface
 

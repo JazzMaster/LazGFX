@@ -1,2 +1,1 @@
-The files here are the add-on units.<br>
-The sources ehre are from FPC installation on Linux- they are here for reference.
+X11 is here for reference. Some files are had to find. If you recompile these- you will get "depends hell".
