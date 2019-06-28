@@ -36,15 +36,15 @@ the only problems I see are ^.type needs a new variable define- its a reserved p
 
 uses
 
-    Xlib,Xutil,Xos;
+    Xlib,Xutil,baseunix,sysutils;
 
 // include the X library headers 
 
 var
 
-    dis:^Display;
+    dis:PDisplay;
     screen,x,y:integer;
-    win:^Window;
+    win:PWindow;
     callback:GC;
 
 	event:XEvent;		// the XEvent declaration 
