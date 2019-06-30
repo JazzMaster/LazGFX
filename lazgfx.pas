@@ -9,30 +9,41 @@ with the assistance of others.
 This code **should** port or crossplatform build, but no guarantees.
 SEMI-"Borland compatible" w modifications.
 
+This is the GL port- not the SDL one.
+
 
 ***** WARNING ******
+GLUT (and similar) code may be "irreprebly fucked".
+****  WARNING ****
 
-This code may be "irreprebly fucked". 
+Lazarus/ Typhon IDEs can use the LazGL FPContext demo as a base.
+(You may be able to CHEAT and use this setup in "console mode"- but you may have issues with "class instantiation" and exceptions-
+which were really made for graphics apps. DEBUGGING MAY BECOME a HEADACHE.)
 
-PATCHED:
+Since these IDEs "run Units"(wrong- you run applications) we might be able to just "include" this code.
+ 
+Ultimately- Lazarus UI apps are the goal- however, embedded systems (think LCARS) like the Pi-
+may not have an XWindow up. This is sort of where libPTC (and GLES) come in.
+
+libPTC "cheats with X11". XAPI and Input handling are already available(much like with WIn32 API).
+
+We should not have to care what is below the vFB(framebuffer)- as long as we can get a graphical context atop of it.
+(Its not really (DPMI) DOS- its DOS-like -UNIX- tty/console/terminal)
+
+
+
+FIXED:
     GL is refusing to chainload via library (solution: export the graphics context pointer)
-    
+(FContext-done for us)
 
-Further-
-    output is inconsistent.
+FIXME:
+      Below 32bpp is now unavailable. Depth can be changed, but not app bpp.
+      NO- you cant "GTK CHEAT" and change it later on.
 
-Rendered cubes are missing sides, etc. 
+(We need Textures and/or FBO for this-Textures may still yet be 32bpp internally)
 
-Vertexes being off is due to changes in the code-
-    but as of yet-
-        doesnt produce this problem.
 
-VENDORS DO NOT CARE ENOUGH to fix "GL in the drivers".
-So how things are working right now- for others- I have NO IDEA.
-
-*******************
-
-Lazarus graphics unit is severely lacking(provides TCanvas instead)...use this instead.
+Lazarus graphics unit is severely lacking(provides TCanvas)...use this instead.
 
 THIS IS NOT A GAME ENGINE. 
 This code stacks between "graphics routine filth" and your code.
@@ -609,6 +620,41 @@ Vertex3d=record
    z:Word;
 end;
 
+{
+This is a "buffer copy" of all written string to the screen.
+As long as we have this- we can print, and we can copy screen contents.
+
+Another "hackish trick":
+
+
+(allow for space between 'font chars' )
+-Now take one char off both axis.
+
+MaxFontChars:=(Screen/viewportwidth / FontWidth *1.5)  - FontWidth;
+MaxFontLines:=(Screen/viewportHeight / FontHeight *1.5) - FontHeight;
+
+ScreenTextBuffer: array [0..MaxFontChars,0..MaxFontLines]of char;
+ScreenLineBuffer: array [0..MaxFontChars]of char;
+
+MOD:
+-OutText writes one char here until full- goes onto next line.
+-OutTextLine just writes the whole array
+
+-array is copied into the buffer- adjusted if scrolling is enabled- otherwise reset -when end of screen reached.
+If we didnt reset- our charPtr would be off of the screen- with no way to see anything else written.
+
+(This was the old DOS way)
+
+-All of this- of Course- is also maintained with the "TextSurface".
+
+GL just has no clue how to "draw the fonts". 
+
+CHR code (FPC team) may help in that regards- but CHR files DO NOT SCALE WELL(>size 12).
+(Its been done- but not with GL- at least like SDL does it in 2D)
+
+Think of Text (in GL) like a "Transparent Label" or "clear sticker".
+
+}
 
 //usully goes around clock-wise
 Quad=array [0..3] of Vertex;
@@ -4712,43 +4758,20 @@ begin
 end;
 }
 
-//NEW: do you want fullscreen or not?
-procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
+{
+I know.. I Know...
+I removed initgraph because Laz GL has no way at all get things working.
+I dont want you dicking around with "code that doesnt work".
+ 
+If bychance I can get this working- I will re-add init and closeGraph
+Window modes are easy. FS modes will depend. Are we using GLFW, GLUT, what?
+ 
+Net and sound and ... init routines will be added to the Laz Demo.
+Screen probing-
+	we can start with current resolution, pulled from xrandr(xrender) unit.
+	generally- we are already too big than "these old modes".
 
-var
-	bpp,i:integer;
-    iconpath:PChar;
-    FetchGraphMode:integer;
-	Half_Width:single;
-	Half_Height:single;
-    rate:integer; //screen refresh rate in ms, not Hz
-    FSNotPossible:boolean;
-    GLmode:PChar;
-    x:integer;
-
-begin
-
-  if LIBGRAPHICS_ACTIVE then begin
-    if ISConsoleInvoked then begin
-        LogLn('Graphics already active.');
-    end;
-		 {$ifdef lcl}
-			ShowMessage('Initgraph: Graphics already active.');
-		 {$endif}
-
-    exit;
-  end;
-
-  pathToDriver:='';  //unused- code compatibility
-  iconpath:='./lazgfx.bmp'; //sdl2.0 doesnt use this.
-
-  case(graphmode) of
-//you need to alter the aspect ratio(adjust the projection matrix for these resolutions)
-
-//expanding the viewable area , however is advised. Another Chapter for another day.
-//See: Doom issues: https://doom.fandom.com/wiki/Aspect_ratio
-
-//AHHH: theres no cube-root of 10!
+I may leave the specs for you.
 
 	     CGALo:begin
 			MaxX:=160;
@@ -4838,7 +4861,7 @@ begin
             YAspect:=3;
 		end;
 
-{        //ModeQ (cubed)
+        //ModeQ (cubed)
         //word addressed in the past (x=lo, y=hi byte) with a 256 pallette index
 		VGAMed:begin
             MaxX:=256;
@@ -4850,7 +4873,7 @@ begin
             XAspect:=4;
             YAspect:=3;
 		end;
-}
+
 		//spec breaks here for Borlands VGA support(not much of a specification thx to SDL...)
 		//this is the "default VGA minimum".....since your not running below it, dont ask to set FS in it...
 
@@ -5211,395 +5234,26 @@ begin
 
 		end;
 	
-  end;{case}
-
-
-   //"usermode" must match available resolutions etc etc etc
-   //this is why I removed all of that code..."define what exactly"??
-
-//list off/LOG all OGL supported routines
-
-
-  if (graphdriver = DETECT) then begin
-	//probe for it, dumbass...NEVER ASSUME.
-        LogLn('Graphics detection not available at this time.');
-       //temporarily not available
-	   {$ifdef lcl}
-			ShowMessage('Graphics detection not available at this time.');
-   	   {$endif}
-
-//    Fetchgraphmode := DetectGraph; //need to kick back the higest supported mode...
   end;
-
-  NoGoAutoRefresh:=false;
-  LIBGRAPHICS_INIT:=true;
-  LIBGRAPHICS_ACTIVE:=false;
-
-{
-
-//lets get the current refresh rate and set a screen timer to it.
-// we cant fetch this from X11? sure we can.
-
-if not possible (or nil or 0 or....)
-
-  //Tell GLUT to call update again in 17 milliseconds(~60Hz)
-  glutTimerFunc(17, update, 0);
-
 }
 
-  rate:=60; 
-  //*glut is a BITCH!!* - yes, you have to assemble a string for fullscreen modes
-  FSMode:=PChar(Chr(Hi(MaxX)) + Chr(Lo(MaxX))+'x'+Chr(Hi(MaxY)) + Chr(Lo(MaxY))+':'+IntTostr(bpp)+'@'+IntTostr(rate)+#0); //build the string
-
-
-//we can do fullscreen, but dont force it...
-//"upscale the small resolutions" is done with fullscreen.
-//(so dont worry if the video hardware doesnt support it)
-
-
-
-		if Render3d then //we use DEPTH(3D) instead of 2D QUADS
-			glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH);
-		
-//		glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB);	
-
-		case(bpp) of //with chosen resolutions bpp do
-		//always use double buffering(pageFLipping)
-		//force a compatible 555 15bit depth		
-		//force a compatible 565 16bit depth
-			2:GLMode:='index double';
-			4:GLMode:='index double';
-			8:GLMode:='index double';
-			15:GLMode:='rgb depth=15 double';
-			16:GLMode:='red=5 green=6 blue=5 depth=16 double';
-			24:GLMode:='rgb double';
-			32:	GLMode:='rgba double';
-		end; //case
-		glutInitDisplayString(GLMode);
-
-		if WantFullScreen then begin
-				glutGameModeString(FSMode);
-				glutEnterGameMode;
-				glutSetCursor(GLUT_CURSOR_NONE);
-		end else begin //windowed
-			
-			//glutInitWindowSize(MaxX, MaxY );
-
-writeln('MaxX: ',maxX ,' MaxY: ',maxY,' Depth: ',bpp);
-
-			//divide -but throw away remainder
-			glutInitWindowPosition((MaxX mod 2), (MaxY mod 2));
-		//	glutCreateWindow('Lazarus Graphics Application');
-		
-		end;
-logln('window up');
-
-	if Render3d then begin
-        //"depth testing" smacks layers atop one another- instead of overwriting data underneath.
-        //"layers of cheese(felt)" instead of a "flat piece of paper" is the best analogy.
-		glEnable(GL_DEPTH_TEST);
-	end else begin
-		glDisable(GL_DEPTH_TEST);
-
-		glEnable(GL_TEXTURE_2D); // Enable 2D Textures
-		glEnable(GL_PROGRAM_POINT_SIZE); //enables fat pixels(linestyles);
-
-		//makes no sence in 3D realms to not have a Z axis(depth).
-		//we want pixels to override each other by default (unless blending)
-
-    end;	
-
-		//set callbacks-you need to override- or define these
-		//external declarations.
-	//	glutDisplayFunc(@RenderSomething);
-		glutReshapeFunc(@ReSize);
-		glutKeyboardFunc(@GLKeyboard);
-//		glutMouseFunc(@GLMouse);
-		glutIdleFunc(@Idle);
-
-logln('set up');
-
-	glutSetIconTitle(PChar(iconpath));
-
-{
-    if ((bpp=2) and (mode=CGA)) then //mode1
-      InitPalette4a
-    if ((bpp=2) and (mode=CGA2)) then //mode2
-      InitPalette4b
-    if ((bpp=2) and (mode=CGA3)) then //grey4
-      InitPalette4c
-    if ((bpp=2) and (mode=CGA4)) then //bw
-      InitPalette4d
-    else 
-}
-
-//pallette issues?
-    if ((bpp=4) and (MaxColors=16)) then
-      IniTPalette64
-    else if ((bpp=4) and (MaxColors=64)) then
-      InitPalette64     
-    else if ((bpp=8) and  (UseGrey=true)) then
-      initPaletteGrey256
-    else if ((bpp=8) and  (UseGrey=false)) then
-      InitPalette256;
-    logln('palette loaded');
-
-
-//assign the palette given the SDL_color array to OGL for use.
-	if (bpp<=8) then begin
-        x:=0;
-		repeat
-			if MaxColors =2 then
-			    glutSetColor(x,ByteToFloat(Tpalette4d.colors[x]^.r),ByteToFloat(Tpalette4d.colors[x]^.g),ByteToFloat(Tpalette4d.colors[x]^.b));
-{
-			if ((MaxColors =4) and (mode=CGA)) then
-			glutSetColor(x,ByteToFloat(Tpalette4a.colors[x]^.r),ByteToFloat(Tpalette4a.colors[x]^.g),ByteToFloat(Tpalette4a.colors[x]^.b))
-			if ((MaxColors =4) and (mode=CGA2)) then
-			glutSetColor(x,ByteToFloat(Tpalette4b.colors[x]^.r),ByteToFloat(Tpalette4b.colors[x]^.g),ByteToFloat(Tpalette4b.colors[x]^.b))
-			if ((MaxColors =4) and (mode=CGA3)) then
-			glutSetColor(x,ByteToFloat(Tpalette4c.colors[x]^.r),ByteToFloat(Tpalette4c.colors[x]^.g),ByteToFloat(Tpalette4c.colors[x]^.b))
-}
-			if MaxColors =16 then
-			    glutSetColor(x,ByteToFloat(TPalette64.colors[x]^.r),ByteToFloat(TPalette64.colors[x]^.g),ByteToFloat(TPalette64.colors[x]^.b));
-			if MaxColors =64 then
-			    glutSetColor(x,ByteToFloat(Tpalette64.colors[x]^.r),ByteToFloat(Tpalette64.colors[x]^.g),ByteToFloat(Tpalette64.colors[x]^.b))
-
-			else if MaxColors =256 then
-			    glutSetColor(x,ByteToFloat(Tpalette256.colors[x]^.r),ByteToFloat(Tpalette256.colors[x]^.g),ByteToFloat(Tpalette256.colors[x]^.b));
-			inc(x);
-		until x=MaxColors;
-	end;
-
-    logln('palette assigned');
-	LIBGRAPHICS_ACTIVE:=true;
-
-
-
- {
-  CantDoAudio:=false;
-    //prepare mixer
-  if WantsAudioToo then begin
-    AudioSystemCheck:=InitAudio;
-    if AudioSystemCheck <> 0 then begin
-        if IsConsoleInvoked then
-                LogLn('There is no audio. Mixer did not init.')
-        else  ShowMessage(SDL_MESSAGEBOX_ERROR,'There is no audio. Mixer did not init.','OK',NIL);
-    end;
-
-  end;
-
-}
-
-//Default drawing color = white 
-
-  _fgcolor.r:=$ff;	
-  _fgcolor.g:=$ff;
-  _fgcolor.b:=$ff;
-  _fgcolor.a:=$ff;
-
-//default background = black
-  _fgcolor.r:=$00;
-  _fgcolor.g:=$00;
-  _fgcolor.b:=$00;
-  _fgcolor.a:=$ff;
-
-
-  glShadeModel(GL_FLAT);
-  Fancyness:= NormalWidth;
-
-//  linestyle:=solidln; (no stipple)
-//  Fillpattern:=solidfill; (up to GL- solid or gradient fills)
-
-  ClipPixels := TRUE;
-
-// Set initial viewport (this is an old routine)
-  StartXViewPort := 0;
-  StartYViewPort := 0;
-  ViewWidth := MaxX;
-  ViewHeight := MaxY;
-
-  // set default font (8x8)
-
-//  installUserFont('./fonts/code.ttf', 10,TTF_STYLE_NORMAL,false);
-//     CurrentTextInfo.direction:=HorizDir;
-
-
-  LIBGRAPHICS_ACTIVE:=true;  //We are fully operational now.
-  paused:=false;
-
-  _grResult:=OK; //we can just check the dialogs (or text output) now.
-
-//gimmie floats from the word-based coord system
-
-    HALF_WIDTH := longint(MaxX) / 2.0;
-    HALF_HEIGHT := longint(MaxY) / 2.0;
-
-    // Setup the projection matrix
-    glMatrixMode(GL_PROJECTION);
-    glLoadIDentity;
-
-
-    // Setup the BGI-to-view matrix(Allegro uses similar)
-    //(flip the X axis)
-    if not Render3d then begin
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(0.0f, windowWidth, windowHeight, 0.0, 0.0, 1.0);
-    end;
-    glTranslatef(-HALF_WIDTH, HALF_HEIGHT, 0.0);
-    glScalef(1.0, -1.0, 1.0);
- 
-
-  where.X:=0;
-  where.Y:=0;
-
-	//the event handler
-//	GlutMainLoop;
-    {
-    when we exit- closegraph will get triggered. 
-        we leave:
-            on user request (controlled)
-            crash/sigabt/sigsev (uncontrolled)
-            window manager kills us (parachute)
-    }
-
-   //mainloopExits:
-//   closegraph;
-
-end; //initgraph
 
 //use this with line and pixel drawing instead of linestyle method.
-procedure SetPixelSize();
+procedure SetPixelSize(size:single);
 
 begin
   // Set width of point to one unit 
-    glPointSize(1.0); 
+    glPointSize(size); 
     glMatrixMode(GL_PROJECTION); 
     glLoadIdentity(); 
 end;
 
-
+//ReSizeWindow??
 procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean);
-var
-    x:integer;
 
 begin
-exit;
-//fix this mess later.
-    if (LIBGRAPHICS_ACTIVE=true) then begin //good to go
-    //modeChange
-
-		if WantFullScreen then begin
-				glutGameModeString(FSMode);
-				glutEnterGameMode;
-				glutSetCursor(GLUT_CURSOR_NONE);
-		end else begin //windowed
-			
-			glutInitWindowSize(MaxX, MaxY);
-			glutInitWindowPosition((MaxX div 2), (MaxY div 2));
-			
-		end;
-
-	if Render3d then begin
-        //"depth testing" smacks layers atop one another- instead of overwriting data underneath.
-        //"layers of cheese(felt)" instead of a "flat piece of paper" is the best analogy.
-		glEnable(GL_DEPTH_TEST);
-	end else begin
-		glDisable(GL_DEPTH_TEST);
-		
-		glEnable(GL_PROGRAM_POINT_SIZE); //enables fat pixels(linestyles);
-
-		//makes no sence in 3D realms to not have a Z axis(depth).
-		//we want pixels to override each other by default (unless blending)
-
-    end;	
-
-		//set callbacks
-		glutDisplayFunc(@RenderSomething);
-		glutReshapeFunc(@ReSize);
-		glutKeyboardFunc(@GLKeyboard);
-//		glutMouseFunc(@GLMouse);
-		glutIdleFunc(@Idle);
-
-
-    //reset palettes to sane values on "modeswitch"
-{
-    if ((bpp=2) and (mode=CGA)) then //mode1
-      InitPalette4a
-    if ((bpp=2) and (mode=CGA2)) then //mode2
-      InitPalette4b
-    if ((bpp=2) and (mode=CGA3)) then //grey4
-      InitPalette4c
-    if ((bpp=2) and (mode=CGA4)) then //bw
-      InitPalette4d
-}
-    if ((bpp=4) and (MaxColors=16)) then
-      IniTPalette64
-    else if ((bpp=4) and (MaxColors=64)) then
-      InitPalette64     
-    else if ((bpp=8) and not (UseGrey=true)) then
-      initPaletteGrey256
-    else if ((bpp=8) and not (UseGrey=false)) then
-      InitPalette256;
-
-
-//assign the palette given the SDL_color array to OGL for use.
-	if (bpp<=8) then begin
-        x:=0;
-		repeat
-			if MaxColors =2 then
-			    glutSetColor(x,ByteToFloat(Tpalette4d.colors[x]^.r),ByteToFloat(Tpalette4d.colors[x]^.g),ByteToFloat(Tpalette4d.colors[x]^.b));
-{
-			if ((MaxColors =4) and (mode=CGA)) then
-			glutSetColor(x,ByteToFloat(Tpalette4a.colors[x]^.r),ByteToFloat(Tpalette4a.colors[x]^.g),ByteToFloat(Tpalette4a.colors[x]^.b))
-			if ((MaxColors =4) and (mode=CGA2)) then
-			glutSetColor(x,ByteToFloat(Tpalette4b.colors[x]^.r),ByteToFloat(Tpalette4b.colors[x]^.g),ByteToFloat(Tpalette4b.colors[x]^.b))
-			if ((MaxColors =4) and (mode=CGA3)) then
-			glutSetColor(x,ByteToFloat(Tpalette4c.colors[x]^.r),ByteToFloat(Tpalette4c.colors[x]^.g),ByteToFloat(Tpalette4c.colors[x]^.b))
-}
-			if MaxColors =16 then
-			    glutSetColor(x,ByteToFloat(TPalette64.colors[x]^.r),ByteToFloat(TPalette64.colors[x]^.g),ByteToFloat(TPalette64.colors[x]^.b));
-			if MaxColors =64 then
-			    glutSetColor(x,ByteToFloat(Tpalette64.colors[x]^.r),ByteToFloat(Tpalette64.colors[x]^.g),ByteToFloat(Tpalette64.colors[x]^.b))
-
-			else if MaxColors =256 then
-			    glutSetColor(x,ByteToFloat(Tpalette256.colors[x]^.r),ByteToFloat(Tpalette256.colors[x]^.g),ByteToFloat(Tpalette256.colors[x]^.b));
-			inc(x);
-		until x=MaxColors;
-	end; //bpp <=8
-
-  end; //already in gfx mode
-
 end;
 
-
-procedure closegraph;
-
-begin
-       
-{
-mixer and LAN will go in here once tested
-
-  if WantsAudioToo then begin
-    Mix_CloseAudio; //close- even if playing
-
-    if chunk<>Nil then
-        Mix_FreeChunk(chunk);
-    if music<> Nil then
-        Mix_FreeMusic(music);
-
-    Mix_Quit;
-  end;
-}
-
-
-
-//framebuffer, xconsole, or tty
-  
-  writeln;
-  halt(0); //nothing special, just bail gracefully.
-
-end;            	
 
 //state-tracking
 function GetX:word;
@@ -5613,27 +5267,405 @@ begin
 end;
 
 
-procedure glutInitPascal;
-var
-  Cmd: array of PChar;
-  CmdCount, I: Integer;
+//get pallette DWord LUT of index [x]
+//then set GL color with the Dword(unsigned longint)
+
+//FIXME: these two are wrong
+Procedure SetIndexFGColor;
 
 begin
-    CmdCount := 1;
-    SetLength(Cmd, CmdCount);
-    Cmd[0] := PChar(ParamStr(0));
-    glutInit(@CmdCount, @Cmd);
+	glIndexi(color);
+end;
 
-    startlogging;
-    logln('glutInitPascal');
-    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,GLUT_ACTION_CONTINUE_EXECUTION);
+Procedure SetIndexBGColor;
+
+//the value of a byte- never the byte itself
+//Wtf is an unsigned Byte?
+
+begin
+	glIndexb(ord(color));
+	glClear(GL_COLOR_BUFFER_BIT)
+end;
+
+
+
+type
+	PImageData=^ImageData;
+    ImageData= array  of byte; //variable
+    
+var
+	Image:PImageDAta;
+
+//GetPixels/ReadPixels
+
+//32bit is from the framebuffer- not a Texture.
+
+//this is for 15/16/24 bpp
+function ReadPixelsFromTexture:Image;
+
+begin
+	glGetTexLevelParameterfi( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, TextureWidth );
+	glGetTexLevelParameterfi( GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, TextureHeight );
+
+
+	//Fetches RGBA - even if not in RGBA mode.(gl glitch)
+
+	//PASCAL: sizeof(ImageData):= (4 * TextureWidth * TextureHeight);
+
+	//front left..front right...center..rear left....rear right...
+	//Stereo video output is possible(think holo-lens/AR/VR) but not the default. LEFT is.
+
+	//read from the screen
+	glReadBuffer( GL_FRONT );
+	// if reading from content not yet rendered yet:  GL_BACK
+
+	glReadPixels( 0, 0, TextureWidth, TextureHeight, GL_RGBA, GL_UNSIGNED_BYTE, ImageData );
+
+	//ImageData should now contain ALL PIXEL data from OGL Texture
+	//(not necessarily the whole screen)
+	//(in Byte format)
+	ReadPixelsFromTexture:=ImageData;
+end;
+
+
+//Surfaces are in a "software mode" buffer
+
+var
+	Surface: array [0..MaxX,0..MaxY] of SDL_Color;
+
+//we can create differing bpp textures seperately- but the idea was to force bpp with the FBO.
+//these could be forced 32bpp internally at any time
+
+//15bit
+function create_texture15(width, height:longword):GLuint;
+
+var
+	tex:GLuint;
+
+begin
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+
+    // initialize texture to nil 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB5, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NiL);
+
+    // disable mipmapping 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    result:=tex;
+end;
+
+
+//16bit
+function create_texture16(width, height:longword):GLuint;
+
+var
+	tex:GLuint;
+
+begin
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+
+    // initialize texture to nil 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB5_A1, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NiL);
+
+    // disable mipmapping 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    result:=tex;
+end;
+
+//24bit
+function create_texture24(width, height:longword):GLuint;
+
+var
+	tex:GLuint;
+
+begin
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+
+    // initialize texture to nil 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NiL);
+
+    // disable mipmapping 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    result:=tex;
+end;
+
+//32bit
+function create_texture32(width, height:longword):GLuint;
+
+var
+	tex:GLuint;
+
+begin
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+
+    // initialize texture to nil 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NiL);
+
+    // disable mipmapping 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    result:=tex;
+end;
+
+
+//Focus of most ops need to be "24 and 32 bit" - everything else needs to be a conversion subroutine.
+
+
+//GLRenderCopy (put "Surface data" into a Texture)
+
+//24bit
+
+//Update_Rect/Texture
+procedure GLRenderCopy(tex:GLuint; r:SDL_Rect; pixels:surface);
+
+begin
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, r.x, r.h, r.w-r.x, r.y-r.h, GL_RGB, GL_UNSIGNED_BYTE, pixels );
+end;
+
+procedure GLRenderCopyScreen(tex:GLuint; pixels:surface);
+
+begin
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, MaxX, MaxY, GL_RGB, GL_UNSIGNED_BYTE, pixels );
+end;
+
+
+//32bit
+procedure GLRenderCopy(tex:GLuint; r:SDL_Rect; pixels:surface);
+
+begin
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, r.x, r.h, r.w-r.x, r.y-r.h, GL_RGBA, GL_UNSIGNED_BYTE, pixels );
+end;
+
+procedure GLRenderCopyScreen(tex:GLuint; pixels:surface);
+
+begin
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, MaxX, MaxY, GL_RGBA, GL_UNSIGNED_BYTE, pixels );
+end;
+
+{
+
+below 15bpp is a 32bpp LUT in an array.
+(BE SURE we check against it-or restrict users to those colors.)
+32bit colors are natively supported
+
+15/16/24bpp modes need some FBO love
+	
+I dont know that one can do direct GlBegin..glEND ops with this.
+This may be designed soley for the Frag/Vertex shaders- a lot of code is.
+-we may have to settle for Textures instead -to get the desired result.	
+
+}
+
+procedure Setup15bpp;
+
+//2D has no depth , 3D will
+
+var
+	fbo,textue:Longword;
+    draw_buffers:array of GlEnum;
+
+begin
+
+glGenFramebuffers(1, @fbo);
+glBindFramebuffer(GL_FRAMEBUFFER, fbo); 
+
+glGenTextures(1, @texture);
+glBindTexture(GL_TEXTURE_2D, texture);
+
+//assign nil data as the framebuffer will write to us.  
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB5, MaxX, MaxY, 0, GL_RGB, GL_UNSIGNED_BYTE, NiL);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
+
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);  
+
+if(glCheckFramebufferStatus(GL_FRAMEBUFFER) <> GL_FRAMEBUFFER_COMPLETE) then
+	writeln( 'Framebuffer is not complete!');
+
+glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
+
+//draw into our "texture buffer"
+glDrawBuffer(GL_COLOR_ATTACHMENT0);
+ 
+end;  
+
+procedure Setup16bpp;
+
+//2D has no depth , 3D will
+
+var
+	fbo,textue:Longword;
+    draw_buffers:array of GlEnum;
+
+begin
+
+glGenFramebuffers(1, @fbo);
+glBindFramebuffer(GL_FRAMEBUFFER, fbo); 
+
+glGenTextures(1, @texture);
+glBindTexture(GL_TEXTURE_2D, texture);
+
+//assign nil data as the framebuffer will write to us.  
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB5_A1, MaxX, MaxY, 0, GL_RGB, GL_UNSIGNED_BYTE, NiL);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
+
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);  
+
+if(glCheckFramebufferStatus(GL_FRAMEBUFFER) <> GL_FRAMEBUFFER_COMPLETE) then
+	writeln( 'Framebuffer is not complete!');
+
+glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
+
+//draw into our "texture buffer"
+glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+end;  
+
+procedure Setup24bpp;
+
+
+//2D has no depth , 3D will
+
+var
+	fbo,textue:Longword;
+    draw_buffers:array of GlEnum;
+
+begin
+glGenFramebuffers(1, @fbo);
+glBindFramebuffer(GL_FRAMEBUFFER, fbo); 
+
+glGenTextures(1, @texture);
+glBindTexture(GL_TEXTURE_2D, texture);
+
+//assign nil data as the framebuffer will write to us.  
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, MaxX, MaxY, 0, GL_RGB, GL_UNSIGNED_BYTE, NiL);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
+
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);  
+
+if(glCheckFramebufferStatus(GL_FRAMEBUFFER) <> GL_FRAMEBUFFER_COMPLETE) then
+	writeln( 'Framebuffer is not complete!');
+
+glBindFramebuffer(GL_FRAMEBUFFER, fbo);  
+
+//draw into our "texture buffer"
+glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+end;
+
+//32 is missing- NOT GOING TO IMPLEMENT- use the default FB. 
+  
+procedure RenderPresentLessThanNative;
+
+begin  
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+	//swapbuffers;
+end;
+
+function Word16_from_RGB(red,green, blue:byte):Word; //Word=GLShort
+//565 16bit color
+begin
+  red:= red shr 3;
+  green:= green shr 2;
+  blue:=  blue shr 3;
+  alpha:=$ff; //ignored
+  Word16_from_RGB:= (red shl 11) or (green shl 5) or blue;
+end;
+
+function Word15_from_RGB(red,green, blue:byte):Word; //Word=GLShort
+//5551 16bit color
+begin
+  red:= red shr 3;
+  green:= green shr 3;
+  blue:=  blue shr 3;
+  alpha:=$ff; //dropped and ignored
+  Word16_from_RGB:= (red shl 10) or (green shl 4) or blue;
+end;
+
+
+//lets see ellipse code which works better
+
+//x,y,W,H,100
+
+procedure DrawEllipse(cx, cy, rx, ry:single; num_segments:integer);
+var 
+   theta,c,s,t,x,y:single;
+   ii:integer;
+
+begin
+    //2Pi divided by segments
+    theta := 2 * 3.1415926 / num_segments; 
+    c := cosf(theta);//precalculate the sine and cosine
+    s := sinf(theta);
+
+    x := 1;//we start at angle = 0 
+    y := 0; 
+
+    glBegin(GL_LINE_LOOP); 
+    ii:=0;
+    repeat 
+        //apply radius and offset
+        glVertex2f(x * rx + cx, y * ry + cy);//output vertex 
+
+        //apply the rotation matrix
+        t := x;
+        x := c * x - s * y;
+        y := s * t + c * y;
+	inc(ii);
+    until(ii > num_segments;) 
+    glEnd(); 
+end;
+
+//if W+H= then circle, if not- its an ellipse(flattened bubble)
+//n=segments
+
+
+proceedure DrawEllipse(w,h:word; filled:boolean);
+var
+	x,y,z:single;
+	t:word;
+
+//2d Z=0;
+
+begin
+  if  FILLED then
+	glBegin(GL_POLYGON);
+
+  else if (not filled) then
+        glBegin(GL_POINTS); //or  glBegin(GL_LINE_LOOP); 
+
+  t:=0;
+  repeat
+      x := w*sin(t);
+      y := h*cos(t);
+      z := 0;
+      //s=short(word) -use instead of f= float(single)
+      glVertex3s(x,y,z);
+      inc(t);
+  until (t = 360);
+  glEnd();
 end;
 
 procedure RenderPresent(value:integer);
 begin
 if ((Paused=false) and (DoneRendering=true)) then
-//		glutPostRedisplay();  
-        glutSwapBuffers; //glFlush -or- postredisplay()
+//        glutSwapBuffers; //glFlush 
 end;
 
 procedure ReSize(Width, Height: Integer); cdecl;

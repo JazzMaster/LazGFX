@@ -643,10 +643,44 @@ type
 //C style syntax-used to be a function, isnt anymore.
   grErrorType=(OK,NoGrMem,NoFontMem,FontNotFound,InvalidMode,GenError,IoError,InvalidFontType);
 
-//Pascal defines:
-//memAllocError =
-//FNF=error 2
-//IoERROR=
+
+{
+This is a "buffer copy" of all written string to the screen.
+As long as we have this- we can print, and we can copy screen contents.
+
+Another "hackish trick":
+
+
+(allow for space between 'font chars' )
+-Now take one char off both axis.
+
+MaxFontChars:=(Screen/viewportwidth / FontWidth *1.5)  - FontWidth;
+MaxFontLines:=(Screen/viewportHeight / FontHeight *1.5) - FontHeight;
+
+ScreenTextBuffer: array [0..MaxFontChars,0..MaxFontLines]of char;
+ScreenLineBuffer: array [0..MaxFontChars]of char;
+
+MOD:
+-OutText writes one char here until full- goes onto next line.
+-OutTextLine just writes the whole array
+
+-array is copied into the buffer- adjusted if scrolling is enabled- otherwise reset -when end of screen reached.
+If we didnt reset- our charPtr would be off of the screen- with no way to see anything else written.
+
+(This was the old DOS way)
+
+-All of this- of Course- is also maintained with the "TextSurface".
+
+GL just has no clue how to "draw the fonts". 
+
+CHR code (FPC team) may help in that regards- but CHR files DO NOT SCALE WELL(>size 12).
+(Its been done- but not with GL- at least like SDL does it in 2D)
+
+Think of Text (in GL) like a "Transparent Label" or "clear sticker".
+
+}
+
+
 
   TArcCoordsType = record
       x,y : word;
@@ -1862,6 +1896,74 @@ then we should be able to pull it back as a unknown DWord(in theory).
 (SDL_Map and SDL_Get RGB/RGBA are here for this purpose)
 
 }
+
+
+function Word16_from_RGB(red,green, blue:byte):Word; //Word=GLShort
+//565 16bit color
+begin
+  red:= red shr 3;
+  green:= green shr 2;
+  blue:=  blue shr 3;
+  alpha:=$ff; //ignored
+  Word16_from_RGB:= (red shl 11) or (green shl 5) or blue;
+end;
+
+function Word15_from_RGB(red,green, blue:byte):Word; //Word=GLShort
+//5551 16bit color
+begin
+  red:= red shr 3;
+  green:= green shr 3;
+  blue:=  blue shr 3;
+  alpha:=$ff; //dropped and ignored
+  Word16_from_RGB:= (red shl 10) or (green shl 4) or blue;
+end;
+
+//sets "surface" as "texture" and flops back to render preSENT the data
+
+//Suraface uses CPU, Textures use GPU
+
+
+function loadTexture(filename, renderer):PSDL_Texture;
+
+var
+    Texture:PSDL_TExture;
+
+begin
+    texture := IMG_LoadTexture(renderer, filename);
+	if (texture = nil) then begin
+		logLn('Cant load an empty filename to a Texture.');
+	end;
+	result:= texture;
+end;
+
+
+//rect size could be 1px for all we know- or the entire rendering surface...
+//note this function is "slow ASS"
+
+procedure GEtPixels(Rect:^SDL_Rect);
+var
+
+  pitch:integer;
+  pixels:pointer;
+
+begin
+   pixels:=Nil;
+   pitch:=0;
+
+//case format of...
+
+//format and rect we already can derive
+//pixels and pitch will be returned for the given rect in SDL_Color format given by our set definition
+//rect is Nil to copy the entire rendering target
+
+   AttemptRead:= SDL_RenderReadPixels( renderer, rect, format, pixels, pitch)
+   if AttemtRead=Nil then
+     exit;
+
+end;
+
+
+
 procedure initPaletteGrey16;
 
 var
