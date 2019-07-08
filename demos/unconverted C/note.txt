@@ -1,7 +1,9 @@
-These are GL Demos.
+These are Demos.
 xrandr can be used within FPC.
 
 uses
 	xrandr;
 
-(see ptc)
+(see Libptc)
+
+bins are for linux x64(built on ubuntu18)
