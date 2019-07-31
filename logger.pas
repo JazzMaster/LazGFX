@@ -55,8 +55,6 @@ end;
 
 //usually you want to write a line.
 
-//use me unless you need other variables added to the outputfile.
-
 procedure LogGLFloat(data:single);
 var
 	stringdata:string;
@@ -89,13 +87,28 @@ Begin
   Writeln(outputfile,v);
 End;
 
+{$I-}
 procedure StartLogging; 
 begin
     assign(outputfile,'lazgfx-debug.log');
-    rewrite(outputfile);
+
+//Fixed: 7/31/2019
+  try
+    reset(outputfile);
+
+  except
+    // If there was an error the reason can be found here
+    on E: EInOutError do begin
+      writeln('Log File Doesnt Exist, Creating it.);
+      rewrite(outputfile);
+  	
+    end;	
+  end;
+
     logging:=true;
     donelogging:=false;
 end;
+{$I+}
 
 procedure StopLogging; //finalization
 
@@ -110,4 +123,3 @@ begin
 
 end.
  
-

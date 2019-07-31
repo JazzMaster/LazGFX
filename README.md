@@ -87,6 +87,19 @@ A copy of The Apache v2 license is hereby attached and legally binding.
 
 ---
 
+## Early Note
+
+A C dev for RasPi programming makes a point:
+
+	Drawing using the Bresenham's algorithms are faster then "doing it all by hand".
+
+
+An ellipse is just a "squashed circle" in one direction.Rotate as you please.
+
+#### DELAY? 
+
+Im moving apartments and waiting on a color laser printer- so I can tweed the code faster.
+
 
 ### Render-Targets
 
