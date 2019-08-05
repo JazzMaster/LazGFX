@@ -73,3 +73,14 @@ ModeSetting(KMS) or "X11 running" seems to prevent mode (and depth) changes-
 RasPi doesnt seem to have this problem.
 
 
+Adds the following modes (16) to the list(and an 8088 cpu check):
+
+320 x 480
+480 x 320
+800 x 480
+1024 x 600
+
+15/16/24/32 bpp 
+(2/4/8 bpp are emulated anyways)
+
+

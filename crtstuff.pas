@@ -98,7 +98,7 @@ var
    crtcommands:crtcommand;
 
 procedure PressAnyKey;
-procedure Crta (cc:crtcommand);
+procedure Crta (cc:crtcommand; X,Y:Word);
 function Getkey:char;
 procedure addchar(s:str80;  ch:char; maxlen:integer);
 procedure chopchar(s:str80; index:integer);
@@ -121,7 +121,7 @@ begin
 // usually used on error messages on output.
 end;
 
-procedure Crta (cc:crtcommand);
+procedure Crta (cc:crtcommand; X,Y:Word);
 { do crt command }
 
 
@@ -130,18 +130,20 @@ begin
 //mini game engine by itself...think megazeux..if you dont know what that is..go find out.
 
 if scrollEnabled then exit;
+//this was oringinally using DOS-based VT100-ish ANSI commands. 
+//You can actually still use them- I prefer not to.
 
    case cc of
 	   HOME:
-			gotoxy(CurrX,CurrY); //wrong
+			gotoxy(X,Y); //wrong
 	   CLEAR:
 			clrscr;
 	   ERASEOL:
 			clreol;
 	   Up:
-			gotoxy(CurrX,CurrY-1);
+			gotoxy(X,Y-1);
 	   DOWN: 
-			gotoxy(CurrX,CurrY+1);
+			gotoxy(X,Y+1);
 
 {			begin  //lets be OS-"safe" here...otherwise its non portable code.
 				$IFDEF windows
@@ -152,11 +154,21 @@ if scrollEnabled then exit;
 				$ENDIF
 			end; }
 	   LEFT:
-			gotoxy(CurrX-1,CurrY);
+			gotoxy(X-1,Y);
 	   RIGHT:
-			gotoxy(CurrX+1,CurrY);
-	   BEEP:
+			gotoxy(X+1,Y);
+	   BEEP: 
+//Linux:
+
+//if Not FileExists('/usr/bin/beep') then
+    //writeln('please modprobe pcspkr module and ensure the beep application is installed. Thanks.');
+
+//if os.system('lsmod | grep "pcspkr"')=NiL then
+    //writeln('Pcspkr module has not been loaded. No BEEP for EWE.');
+
+//if FileExists('/usr/bin/beep') and os.system('lsmod | grep "pcspkr"')<>NiL then
 			write(chr(7));
+//else exit;
    end
 end;
 
@@ -203,8 +215,8 @@ end;
 procedure Eraseline(row:byte);
 { erase a line on the crt }
 begin
-	gotoxy(1,row);
-	crta(ERASEOL);
+//	gotoxy(1,row);
+	crta(ERASEOL,1,row);
 end;
 
 procedure center (prompt:str80; col,row:byte);
@@ -253,7 +265,7 @@ begin
      end else begin //input not ok
 	     row:=23;
 	     Eraseline(row);
-		 crta(BEEP);
+		 crta(BEEP,0,row);
 		 tempstr:='Please enter Yes or No (Y/N): ';
 		 center(tempstr,15,maxcrtrow);
 	  end
@@ -270,7 +282,7 @@ var
    ch:char ;
 begin
    ystr:=24;
-   crta(BEEP);
+   crta(BEEP,0,0);
 
    tempstr:='Press  <ENTER> to continue ';
 //   textcolor:=textcolor+128; //blink at me!
@@ -301,7 +313,7 @@ begin
    for i:=1 to length(prompt)+1 do
    write('*');
    center(prompt,27,2);
-   crta(RIGHT);
+//   crta(RIGHT);
    write('*');
    gotoxy(26,1);
    write('*');
