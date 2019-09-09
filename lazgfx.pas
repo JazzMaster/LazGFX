@@ -11,10 +11,47 @@ SEMI-"Borland compatible" w modifications.
 
 This is the GL port- not the SDL one.
 
+Do we need this? I dont know yet.
+ -modeswitch AdvancedRecords-
 
-***** WARNING ******
-GLUT (and similar) code may be "irreprebly fucked".
-****  WARNING ****
+--palette patch sep 5, 2019:
+
+I screwed up. 
+This needs to be in const CPU space and copied into variable space like so:
+
+
+type
+//single color
+// Pallette16[x]^.r...
+
+	Palette16Ptr^Palette16
+            Palette16=record
+		r,g,b,a: byte;
+	end;
+
+const
+	SetPalette:=array [0..15] of Pallete16Ptr;
+
+//may never get used- except as set initially—but we never know...
+//most palettes(sans one) are NOT CONSTANTs
+var	
+	FlexPalette:=array [0..15] of Palette16Ptr;
+
+
+//copy values over in a loop-this can be called at the end of pallette init (initgraph)
+//we dont need 50x of this routine.
+//use the FlexedPalette and compare current given color to all data in range, thereafter.
+begin
+	repeat
+		FlexPalette[i]:=SetPallette16[i];
+	until MaxColors;
+end;
+
+//If youre expecting the original palette colors—you have to reset them- or change Active Palettes to match the original colors.
+
+
+--
+
 
 Lazarus/ Typhon IDEs can use the LazGL FPContext demo as a base.
 (You may be able to CHEAT and use this setup in "console mode"- but you may have issues with "class instantiation" and exceptions-

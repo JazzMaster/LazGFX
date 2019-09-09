@@ -8,6 +8,9 @@ Ports are available HERE (or soon will be) for GAMBAS/Basic/VB(3/.NET)/Python/Fo
 Its a GRAPHICS MODE "Canvas", like TCanvas- only better.<br>
 -You draw with it. <br>
 
+You will need **this Library** if you write strictly for graphics modes or wish to.<br>
+I will try to provide further demos where possible.
+
 2D and 3D modes are supported.<br>
 AUDIO and Networking are also supported.
 
@@ -16,9 +19,8 @@ Try "Castle Engine" -for something more complete.
 
 Modified "JEDI Headers" are used here. They appear to also be abandoned.
 
-Makefiles removed- they werent needed.<br>
-Lazarus programmers can open the lpr file and "get to work" now. <br>
-(GREAT- THANK YOU to GLContext programmer  Sebastian Hütter for fixing a "major Lazarus PITA")
+Lazarus programmers can open the lpr (DEMO) file and "get to work" now. <br>
+(MANY THANK YOUs to GLContext programmer Sebastian Hütter for fixing a "major Lazarus PITA")
 
 
 ### LEGAL-ese
@@ -93,26 +95,20 @@ A C dev for RasPi programming makes a point:
 
 	Drawing using the Bresenham's algorithms are faster then "doing it all by hand".
 
-
-An ellipse is just a "squashed circle" in one direction.Rotate as you please.
-
-#### DELAY? 
-
-Im moving apartments and waiting on a color laser printer- so I can tweed the code faster.
+An ellipse is just a "squashed circle" in one direction.
 
 
 ### Render-Targets
 
-Default 2D target is OpenGL -via freeGLUT
+2D can use either GL or SDL.<br>
+3D MUST use OpenGL/GL ES
 
-MAY also use as a fallback(slow):
+MAY also use as a Software fallback(slow):
 
-        Framebuffer(No X11)
+(Errors or very old hardware ONLY should trip this.)
+
+        Framebuffer(No X11/RasPi)
         WinAPI (needs a rewrite) / libX11 (primitives)
-
-Default 3D target is OpenGL -via freeGLUT
-
-        Mesa is OpenGL software Fallback(slow) -using the CPU.
 
 
 ### EXTERNAL LIBS warning:
@@ -131,7 +127,6 @@ As soon as Unice code is working- both windows and OSX code will see an overhaul
 
 Because OpenGL is BUGGED. <br>
 (I am missing sides of a cube for no reason.)
-
 
 SDL 1 and 2  "unified sources" included- for your pleasure programming.
 
@@ -154,21 +149,22 @@ WIN32:
 
 		Win32 port is coming.
 		WinAPI port is lacking in the way X11 is dodgy...hmmmmmm
+        I have DELPHI PASCLA GL book at my disposal.
 
 MAC:
 
 		How small of a rendering context do we have?? (16MB? less?)
 		
 		Seting up XCode is proving to be a R-PITA. 
+
 		Lazarus is now available (it wasnt before) for Tiger+ versions of OSX
-		64/32 and Intel/PPC (quad binary) can be produced if compiled correctly
+		64/32 and Intel/PPC (quad binary) can be produced if compiled correctly (on SNOW LEOPARD)
 		
 		OS9:
 			The Routines seem to be like an old version of DirectX
-			We need CodeWarrior setup correctly. 
-			Files are getting impossible to find.
+			This is a very very hard to find setup. 
+			
         
-
 Ubuntu:
 
 		has a serious FPC/Lazarus distribution flaw. 
@@ -179,12 +175,10 @@ Ubuntu:
 		X11:
 		
 			This is "CoreLibX11Primitives"- like WinAPI- but for unices.
-			This is not (overcomplicated) XGL
-
+			Do not confuse this with XGL
 
 Castle /sceneGraph engine will install just fine from the repos for those interested.<br>
 With exception to OSX (or GNU Pascal)- gcc is not needed to be installed--but it wouldnt hurt.
-
 
 This unit (LazGraphics) SHOULD be ported to the same Languages that OpenGl supports, listed here:
 
@@ -219,29 +213,28 @@ I will be happy to import code.
 
 ### Build status:
 
+INITAL SDL1 RELEASE FREEZE some time in the past.<br>
 RELEASE freeze at v.83 (BUILD SUCCESS- SDL subsystem)<br>
-RELEASE freeze at v2.0 May 27th 2019 (BUILD SUCCESS- OpenGL subsystem-core API only).
+RELEASE freeze at v2.0 May 27th 2019 (OpenGL subsystem-core API only).
 
-master branch: code may or may not build -but is more likely to- after OpenGL switch.
+Current Release can be assumed around 2.2.0- Core GL/SDL2 split and better tested
+
+master branch: code may or may not build
 
 There are some routines not yet ported, and some completely untested.<br>
-libSOIL routines are disabled at this time(image support).
+libSOIL routines are disabled at this time(image support). I will fix this.
 
+FULL CGA, EGA, and VGA palletted modes WILL work properly(2.5 milestone?). 
 
-FULL CGA, EGA, and VGA palletted modes should work properly. **FAILS under OpenGL**<br>
-Checks for windows(but not PowerPC-BE- arch) have been added.
+**Currently FAILS under OpenGL**<br>
+
+Checks for windows(but not PowerPC arch) have been added.<br>
 
 FrameBuffer support (no X11/tty) code needs some help and more thourough testing.<br>
+It does NOT work with newer kernels or X11 past .13 (post the XFREE merge).<br>
+It WILL WORK (accellerated) under RasPi.
 
 ---
-
-### Why does this project exist?
-
-Some outdated code needed to be brought up to speed.<br>
-You will need **this Library** if you write strictly for graphics modes or wish to.<br>
-I will try to provide further demos where possible.
-
-Lazarus will not support older modes, more than 20 colors on the screen...etc etc.
 
 
 ### Technobabble
@@ -365,8 +358,7 @@ Everything is in one folder for a reason.
 (Dont confuse *me* -or the compiler)
 Im working on cleaning this up. (-Fu option - no thats the compiler option, not a joke.)
 
-You should be able to compile this once you GIT (or Download) sources to your computer, so long as FPC and/or
-Lazarus is installed.
+You should be able to compile this once you GIT (or Download) sources to your computer, so long as FPC and/or Lazarus is installed.
 
 This code doesnt call the LCL- but yours might. 
 LCL errors are **up to you to fix**.
@@ -375,81 +367,11 @@ OGL/SDL "Pointer issues" and mem-alloc/free issues- need to be worked out by you
 Im having a hard time debugging them myself- and SDL doesnt want to co operate.
 
 
-
-## Why WHYE ..WHY..
-
-Why freePascal?
-
-		-Full 16, 256, RGB, and RGBA support (256BPP?) up thru 1080p.
-
-		-TCanvas for Laz doesnt quite do the job.
-		-Lazarus jumps from TCanvas(half-assed) to OpenSceneGraph and busted GL.
-		
-		-GVision for Linux (Pascal version of Win311) never took off. 
-		-JEDI doesnt stand for what you think it does- its incomplete, missing, and now depreciated.
-		-Because Delphi is windows only (and non portable)
-		
-		-Castle engine is good, BUT requires OpenGL (and Lazarus) knowhow.
-			(You probly dont- know- the how)
-			
-		-Lazarus is turning into OOP OBJ customized UnFreePascal, much like VC did.
-				Code is either for FPC -- or its not.
-			
-		-This isnt a "class project", its my passion. Im not rushing my work.
-		-Nobody uses Int10 DOS assembler anyore. 
-		-This is 32/64 bits code. I dont write "8bit hacks".
-
-        -FreePascal "Graphics support" is missing (or broken)
-        -Lazarus OGL demos DO NOT work (correctly).
-
-        -Code has been abandoned. 
-        -Code that used to work- suddenly isnt working.
-
-(This appears to be a "shader sequence" or Perspective problem.)
-
-
-There are loads of projects where people cannot revise changes publicly.
-Programmers are making it more difficult with mailing lists (spam) and "private repos".
-
-        This isnt the 1990s. 
-        USE GITHUB. 
-        USE TRAC(or similar). 
-        COLABORATE.
-
-A lot of other code is half-assed or broken.
-People suffer from information overload and cant figure things out.
- 
-For the code to be useful, it must be in library format.
-SDL doesnt do enough- however- it points us to a common codebase and UNIVERsalITY.
-
-If you call an SDL function- you call it the same way 
-
-	in other languages
-	on other platforms or OSes
-
-The developers dont care to fix problems.
-        
-        THIS IS BAD.
-
-Shoving people into SDL and saying "good luck"-
-		
-	When theres 50 ways to do things...IS WRONG.
-
-
-Need Graphics libraries for DOS/FreeDOS??
-
-	Try the original BGI written by Borland, INC.
-	The BGI has been 256 color extended - I have the patch.
-        HDMIx loader (and SDL) MAY work- and then again, so might PTC unit.
-
-
 ### Dependencies (INSTALL ME FIRST!!):
-
-WYE WHY WHY....(quiet)..
 
 NO-
 
-		Im not going to make a slimmed down API using only internal routines.
+		Im not going to make a slimmed down API.
 		If you want to- thats on you. Linux is not designed this way.
 
 		1- im not that much of a genious
@@ -480,7 +402,7 @@ Unices:
 		libMp4  (audio conversion - mp4a)
 		libFaad  (audio conversion -faad)
         libOpen_vr (VR helmet support)
-        Pascal INet and/or Indy libs(Net support)
+        Synapse and/or Indy libs(Net support)
 
 OSX:
 
@@ -620,12 +542,9 @@ ALL ELSE FAILS:
 Be mindful of the initgraph (and other) header change.
 Even "nil pointing" "PathToDriver" still leaves us in a window.
 (If you want fullscreen--I have to ask.)
-
-The pyramid(tetrahedron) demo has been SDL v2 patched and now utilizes event based input alongside OGL.
-
-		There is no text (OutText) functions in any of the OGL demos right now.
 	
-SDL OutText routines DO NOT WORK when combined with OGL/freeGLUT. THEY MUST BE REWRITTEN.
+**GL/SDL OutText routines DO NOT WORK when combined with OGL/freeGLUT. THEY MUST BE REWRITTEN.**
+
 With SDL/SDL2- by itself--this works as intended.
 
 
@@ -713,3 +632,5 @@ Seriously...the SDL (and sometime openGL) syntax (in C) isnt that hard to master
 #### Have a "Final Product"??
 
 Remember to "remove debugging code and strip binaries".
+
+
