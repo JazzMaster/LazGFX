@@ -1,193 +1,126 @@
 unit fills;
-
 //filled polys, rects, etc..
-
-//just use polys instead of lines
-//or dis(en)able filled polys setting in GL.
-
-//to me- the latter is easier.
 
 interface
 
-// SOLID
-// Gradients(random color)
-// Pattern fill- see below
-
 const
+
 {
 Patern Fills:
 
-  //BGI standard (11 patterns, 8 bytes(lines) define the pattern) 
-//		-with an assumed 8x8 font size
+BGI uses HATCH drawing methods and Self-Recursive algorithms which "waste the stack"
+This wont work with larger screens or images.
 
-  //GL specs this as a DWord (BYTE BYTE) of (an array of) binary flags.
-  //what we can do is "modify the stipple" (in flight) and output more than one line.
+HATCHES on GL involves vertex shaders-are a mess..and a PITA to get going.
 
-  //so what are we ultimately after?
 
-  backgroundColor(erase)
-  Normal
-  PacManStipple(--------)
-  Stipple(////////)
-  ThickStipple(////////)
-  Stipple(\\\\\\\\\)
-  ThickStipple(\\\\\\\\)
-  LtHatch/Cross(xxxxxxxx)
-  ThickHatch/Cross(XXXXXXXX)
-  Plus/Interleaving(++++++++)
-
-//mimics ascii 8x8 dot extended char
-  WideSPCDots(. . . . . . . )
-  CloseSPCDots(.. .. .. ..)
-
-//I have the 8x8 CHAR DATA this represents.
 }
 
-//notice these are bytes -and need to be words(for GL).
+type
+    Filltype=(Full,HalfTone,Gradient,Flat,None);
 
-  Patterns : array[0..11] of FillPatternType = (
-  ($AA
-   $55
-   $AA
-   $55
-   $AA 
-   $55
-   $AA
-   $55),
-
-  ($33,
-   $33, 
-   $CC, 
-   $CC, 
-   $33, 
-   $33, 
-   $CC, 
-   $CC),
-  
- ($F0, 
-  $F0, 
-  $F0, 
-  $F0, 
-  $0F, 
-  $0F, 
-  $0F, 
-  $0F),
-
-  (0, 
-  $10, 
-  $28, 
-  $44, 
-  $28, 
-  $10, 
-  0, 
-  0),
-  
- (0, 
-  $70, 
-  $20, 
-  $27, 
-  $25, 
-  $27, 
-  $04, 
-  $04),
-
-  (0, 
-   0, 
-   0, 
-   $18, 
-   $18, 
-   0, 
-   0, 
-   0),
-
-  (0, 
-   0, 
-   $3C, 
-   $3C, 
-   $3C, 
-   $3C, 
-   0, 
-   0),
-  
- (0, 
-  $7E, 
-  $7E, 
-  $7E, 
-  $7E, 
-  $7E, 
-  $7E, 
-  0),
-  
- (0, 
-  0, 
-  $22, 
-  $8, 
-  0, 
-  $22, 
-  $1C, 
-  0),
-
-  ($FF, 
-  $7E, 
-  $3C, 
-  $18, 
-  $18, 
-  $3C, 
-  $7E, 
-  $FF),
-
-  (0, 
-  $10, 
-  $10, 
-  $7C, 
-  $10, 
-  $10, 
-  0, 
-  0),
-  
- (0, 
- $42, 
- $24, 
- $18, 
- $18, 
- $24, 
- $42, 
- 0)
-
- );
+const
+//    STIPPLE FILL:
+        EqualDot=$AA;
+        WideDots=$88;
+        LooseDots=$22;
 
 
-//function max(a, b : Longint) : Longint;
-//function min(a, b : Longint) : Longint;
+var
+    halftone: array [0..16] of GLubyte; //GL unsugned byte
+    LinePattern: GLushort;  //array[0..16] of boolean; (word)
+    PolyStippleEnabled,SmoothShading:boolean;
+
+procedure FillPoly(Phil:FillType);
+
 
 implementation
 
+procedure FillPoly(Phil:FillType);
 
-{ fpc system internals?
-
-function max(a, b : Longint) : Longint;
 begin
-  max := b;
-  if (a > b) then max := a;
+
+   case Phil of
+        Full: begin
+            glPolygonMode(GL_FRONT, GL_FILL);
+        end;
+        HalfTone: begin
+                glEnable(GL_POLYGON_STIPPLE);               
+                PolyStippleEnable:=True;
+                glPolygonStipple(halftone);   
+
+
+                //do the draw operation.
+                //AFTER:
+                // if PolyStippleEnable=true then
+                //   glDisable(GL_POLYGON_STIPPLE);               
+                // glFlush();
+
+        end;
+        Gradient: begin 
+            //now just set each vertex point to a different color
+            glShadeModel(GL_SMOOTH);
+            SmoothShading:=true;
+        end;
+        Flat: begin 
+            //its all one color
+            glShadeModel(GL_FLAT);
+            SmoothShading:=false;
+        end;
+
+        None: begin
+            glPolygonMode(GL_FRONT, GL_LINE);
+        end;
+   end; 
+
 end;
 
-function min(a, b : Longint) : Longint;
+//like: $AA or $55
+procedure StippledLine(Pattern:LinePattern);
+
+
 begin
-  min := b;
-  if (a < b) then min := a;
+   glEnable(GL_LINE_STIPPLE);   
+       glLineStipple(1,Pattern);
+   glDisable(GL_LINE_STIPPLE);   
 end;
 
-function Int2Str(L : LongInt) : string;
- Converts an integer to a string for use with OutText, OutTextXY 
-var
-  S : string;
+
 begin
-  Str(L, S);
-  Int2Str := S;
-end;  Int2Str 
+   glShadeModel(GL_FLAT);
+
+
+//32x32 stipple pattern
+halftone := (
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55,
+    $AA, $AA, $AA, $AA, $55, $55, $55, $55);
+
+{
+
+This is HATCHing (cross hatch) in art:    
+
+        LSlash(\\\\\\\\\)
+        RSlash(/////////)
+        Cross(xxxxxxxx)
+        Plus(++++++++)
+
+In reality- Dithering or Fading(blending) will probably be used
+
 }
 
-//insert stille code here
 
-//insert GL_QUADS code here (filled polys/polys)
 end.﻿

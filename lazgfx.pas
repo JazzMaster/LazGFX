@@ -10,11 +10,20 @@ This code **should** port or crossplatform build, but no guarantees.
 SEMI-"Borland compatible" w modifications.
 
 This is the GL port- not the SDL one.
+Need to unhook FreeGLUT- and use DGL/FContext instead. 
+This code does NOT use the LCL.
 
-Do we need this? I dont know yet.
- -modeswitch AdvancedRecords-
+I think we are going o have a hard time with lesser bpp < 24- sizes are fine, its the depth.
+(This is a GL limitation.)
 
---palette patch sep 5, 2019:
+** USE TIMERS for video draw methods, do not draw with an input loop(blocks input) **
+}
+
+{$modeswitch AdvancedRecords}
+
+{
+--
+palette patch sep 5, 2019:
 
 I screwed up. 
 This needs to be in const CPU space and copied into variable space like so:
@@ -48,6 +57,9 @@ begin
 end;
 
 //If youre expecting the original palette colors—you have to reset them- or change Active Palettes to match the original colors.
+
+
+XRANDR code needs to be ported and shoved in here for "Mode Probing".
 
 
 --

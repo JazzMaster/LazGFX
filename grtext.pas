@@ -1,33 +1,35 @@
 Unit grText;
 //graphics text functions.
 //This uses Lazarus Freetype instead of SDL2TTF routines- should yield the same result.
-{$mode objfpc}
 
 interface 
 uses
+
+//FTGL?? Try Laz Free Type first. May have to port some headers, here.
 	EasyLazFreeType, LazFreeTypeFontCollection,strings;
 				
-{$I lazgfx.inc}
 
 type
   str80=string(80);
   str256=string(256);
   directions=(horizontal,verticle); //ord(horizontal)
   textinfo=record
-//        font      : PSDL_FontInfo;
+        font      : string; //filename
         direction : directions;
         charsize  : integer; 
   end;
 
+FontPtr=^font;
+font=array [0..2] of FTGLfont;
+
 var
-//    fontdata:PSDL_FontInfo;
     IsJapanese:boolean; //text that goes down-matrix style- not sideways
     PasFont: TFreeTypeFont;
+    FontP:FontPtr;
+    FontFile:PChar;
 
-//this code has not been gone thru/edited..it doesnt work as-is.
 procedure backspace( Font:^SDL_FontInfo, ch:char);
 
-//string to pchar??
 procedure OutText(text:PChar);
 procedure outtextXY(x,y:integer; textstring:PChar);
 
@@ -45,15 +47,15 @@ procedure SetTextStyle(font:string; direction : directions; font_size:integer;);
 //style is italic,bold,normal,etc...
 procedure SetFont(fontpath:string; font_size:integer; style:fontflags; outline:boolean);
 
-//canvas rotation (roto) tricks
+//RotoZoom?(These are Texture tricks)
 
 //backwards is flipped(mirrored) - like "english arabic"
 //It would be upside -down otherwise
-procedure MirrorText;
+//procedure MirrorText;
 
 //rotate 90 right=read like Japanese posters
 //rotate 90 left=?? (read it up-ways)
-Procedure SetFontRotation(rotation: uInt32); 
+//Procedure SetFontRotation(rotation: uInt32); 
 
 //write font data to screen AND set color
 
@@ -62,19 +64,7 @@ procedure OutTextColor(r,g,b:byte);
 procedure OutTextColor(r,g,b,a:byte);
 
 
-//redo these
-//writeChar
-Function OutTextColorXY(renderer: PSDL_Renderer; x, y: sInt16; c: Char; colour: uInt32):sInt32; 
-Function OutTextColorXY(renderer: PSDL_Renderer; x, y: sInt16; c: Char; r, g, b, a: uInt8):sInt32; 
-
-procedure OutTextColorLn(color:DWord);
-procedure OutTextColorLn(r,g,b:byte);
-procedure OutTextColorLn(r,g,b,a:byte);
-
-//writeLn
-Function stringColor(renderer: PSDL_Renderer; x, y: sInt16; Const str: PChar; colour: uInt32):sInt32; 
-Function stringRGBA(renderer: PSDL_Renderer; x, y: sInt16; Const syt: PChar; r, g, b, a: uInt8):sInt32; 
-
+//add back text color routines
 
 implementation
 
@@ -89,50 +79,47 @@ BGI:
   ('DefaultFont', 'TriplexFont', 'SmallFont', 'SansSerifFont', 'GothicFont');
 
 
-MOD: SDL, not BGI .CHR files which is where most code comes from.
-(SDL uses TTF Fonts)
-
 font_size: some number in px =12,18, etc
 path: (varies by OS) to font we want....
 
-style is one of: 
-		TTF_STYLE_NORMAL
-		TTF_STYLE_UNDERLINE
-		TTF_STYLE_ITALIC 
-		TTF_STYLE_BOLD
-		TTF_STYLE_ITALIC
-		TTF_STYLE_UNDERLINE
-		TTF_STYLE_STRIKETHROUGH
+FontStyle(Load an alt file-only applies to nonstd fonts): 
+		NORMAL
+		ITALIC 
+		BOLD
+		
+style FX:
+        UNDERLINE		
+		STRIKETHROUGH
 
 
-outline: make it an outline (instead of drawn "stroked", the font is drawn inverted-hollow)
+outline: make it an outline (instead of drawn "stroked", the font is drawn hollow)
 
-fontpath: MUST BE SPECIFIED - you will crash TTF routines(and possibly SDL and everything on top of it- if you dont)
--code is like a stack of cards in that way.
+fontpath: MUST BE SPECIFIED unless you want the default fonts (NORMAL)
 }
 
 begin
   
   end;
-  if FontPath:='' then begin
+  if FontPath:='' then 
 		//use the internal one, LUKE.
 
-//....
+    FontPath:='./'
 
-		_graphResult:=-7; //error 7 or 8....FontNotFound(Nothing)
-		exit;
-  end;
-  ttfFont := TTF_OpenFont( fontpath, font_size ); //should import and make a surface, like bmp loading
-  //fg and bg color should be set for us(or changed by the user in some other procedure)
-  TextFore:=_fgcolor;
-  TextBack:=_bgcolor;
+{
+if FontChoice='' then FontChoice='Gothic.ttf'
 
-  TTF_SetFontStyle( ttfFont, style ); 
-  TTF_SetFontOutline( ttfFont, outline );
-  TTF_SetFontHinting( ttfFont, TTF_HINTING_NORMAL );
-  SetTextColor(TextFore,TextBack);
+ glColor3f(1,1,1);
+
+file = "/usr/share/fonts/truetype/lato/Lato-Bold.ttf";
+font[0] = ftglCreateBitmapFont(file); //extruded, bitmap,pixmap
+    ftglSetFontFaceSize(font[0], fontsize, fontsize);
+    ftglSetFontDepth(font[0], fontsize-2);
+    ftglSetFontOutset(font[0], 0, 3); -??
+    ftglSetFontCharMap(font[0], ft_encoding_unicode);
+
 
   //dont render yet...just set it up.
+}
 
 end;
 
@@ -169,7 +156,7 @@ procedure Grblink(Text:string);
 //yes this is how my kernel console code works -just implemented differently.
 begin
     
-    BlinkPID:=fpfork; //fpfork(): this has to occur wo stopping while other ops are going on usually
+//    BlinkPID:=AddTimer; - this has to occur wo stopping while other ops are going on usually
 	blink:=true; //this wont kill itself, naturally. 
     //I AM INVINCIBLE!! (only external forces can kill me now.)
 
@@ -203,23 +190,21 @@ end;
 
 procedure backspace;
 //get size of char-
-//   go back that and a char space.
-//   rewrite by overwriting both
+//   go back that a 'char' based on fontsize.
+//   blank the space with background color
 //   go back and reset x,y
-// -- this is how crt unit does it, btw.
+//   add the next char
 
+
+{
 var
-  Font:PSDL_FontInfo;  
+//  Font:PSDL_FontInfo;  
   dstrect:PSDL_Rect;
   bufp:string;
   x1,y1,ofs:integer;
-  Tex:PSDL_Texture;
+//  Tex:PSDL_Texture;
 	
 begin
-//because we use the renderer- we need to convert back to a surface
-
-
-//do ops
   Where.x:=(Where.x -(Font^.CharPos[ofs+1]-Font^.CharPos[ofs]));
 
   if (Where.x<0) then Where.x := 0;
@@ -241,63 +226,39 @@ begin
   Where.x:=( ((Font^.CharPos[ofs+2]+Font^.CharPos[ofs+1]) mod 2) -((Font^.CharPos[ofs]+Font^.CharPos[ofs-1]) mod 2) );
   
   //go feed the renderer
-  Tex:= SDL_CreateTextureFromSurface( Renderer, MainSurface );
-  SDL_RenderCopy( Renderer, Tex, Nil,dstrect ); //"SDL_UpdateRect"
 
+//GLCreateTExturewData()
+
+//  Tex:= SDL_CreateTextureFromSurface( Renderer, MainSurface );
+//  SDL_RenderCopy( Renderer, Tex, Nil,dstrect ); //"SDL_UpdateRect"
+}
 end;
 
+//These core routines should work now.
 
-procedure OutText(text:PChar); //write
+procedure OutTextXY(somestring:String; x,y:word); //write
 //you dont this successively, you call writeln instead unless smacking things together.
-var
-  wide:PInt;
-  high:PInt;
-  somestring1,somestring2:string;  
-  oldY,gap,newY:integer;
-  where:SDL_Rect;
 
 begin
-  oldY:=Y;
-
-  New(wide);
-  New(high);
-
-  //rendering a text to a SDL_Surface
-  FontSurface := TTF_RenderText_Solid( ttfFont, text, TextFore^ ); //string w colors becomes surface
-  Texture3 := SDL_CreateTextureFromSurface( Renderer, FontSurface ); //make a texture
-  SDL_QueryTexture(texture3, Nil, Nil, wide, high); //query the actual size of the text, so as NOT to scale it.
-
-  //this isnt practical but it works..shitty documentation.
-  New(Where);
   
-  //where we want this- as in OutTextXY or get currentX and Y- not implemented yet.
-  Where^.X:=X;
-  Where^.Y:=Y;
-  Where^.w:=longint(wide^);
-  Where^.h:=longint(high^);
+  //where we want this  
+  glRasterPos2f(x,y);
+  //rendering of the text
+  ftglRenderFont(font[0], somestring, FTGL_RENDER_ALL);
 
-  //rendering of the texture
-  SDL_RenderCopy( Renderer, Texture3, Nil,Where ); //put tex into render-er
-
-  Y:=newY;
-  
 end;
 
-procedure OutTextLn(text:PChar); //writeLN
+procedure OutTextLn(somestring:string); //writeLN
 //needs sanity checks.
 var
   wide:PInt;
   high:PInt;
-  somestring1,somestring2:string;  
   oldY,gap,newY:integer;
   Where:PSDL_Rect;
 
 begin
   oldY:=Y;
 
-  New(wide);
-  New(high);
-  //rendering a text to a SDL_Surface-push to a Texture
 
 {
 FIXME: japanese style not done
@@ -310,29 +271,14 @@ right now this pushes Y down- assuming theres room and assuming that the text do
 
 }
 
-  FontSurface := TTF_RenderText_Solid( ttfFont, text, TextFore^ ); //string w colors becomes surface
-  Texture3 := SDL_CreateTextureFromSurface( Renderer, FontSurface ); //make a texture
-  SDL_QueryTexture(texture3, Nil, Nil, wide, high); //query the actual size of the text, so as NOT to scale it.
 
 //for a single write call this is ok..for multiple we need to track the last X and Y locations used
 //and adjust accordingly.
 
-  gap:=(high^ mod 8);
-  newY:=(oldY+high^+gap);
-
-  //this isnt practical but it works..shitty documentation.
-  New(Where);
-
-  //where we want this- as in OutTextXY or get currentX and Y- not implemented yet.
-  Where^.X:=X;
-  Where^.Y:=newY;
-  Where^.w:=longint(wide^);
-  Where^.h:=longint(high^);
-
-  //rendering of the texture
-  SDL_RenderCopy( Renderer, Texture3, Nil,Where ); //put tex into render-er
-
-  Y:=newY;
+  gap:=(fontsize mod 8);
+  newY:=(oldY+fontsize^+gap);
+   
+  OutTextXY(somestring,x,newy); //write
 
 end;
 
@@ -349,24 +295,18 @@ begin
       write(c);
   else begin
       current[1]:=c; //hackish but it works.
-      OutText(current);	//draws the last entered char. outtext does same.
+      OutTextXY(current,x,y);	//draws the last entered char. outtext does same.
     end;
 end;
 
 
-procedure outtextXY(x,y:integer; textstring:PChar);
+procedure outtext(textstring:string);
 
-var
-  xbak,ybak:integer;
 begin
   if IsGRAPHICS_ENABLED then begin
-  	xbak :=TP.x;
-  	ybak := TP.y;	//save current text position
-	TP.x := x; 
-	TP.y := y;			//set text position to arguments
-    outText(textstring);
-    TP.x := xbak;
-    TP.y := ybak;		//restore text position
+
+    outTextXY(textstring,x,y);
+
   end;
 end;
 
@@ -376,13 +316,7 @@ var
   xbak,ybak:integer;
 begin
   if IsGRAPHICS_ENABLED then begin
-  	xbak :=TP.x;
-  	ybak := TP.y;	//save current text position
-	TP.x := x; 
-	TP.y := y;			//set text position to arguments
     outTextLn(textstring);
-    TP.x := xbak;
-    TP.y := ybak;		//restore text position
   end;
 end;
 
@@ -390,7 +324,7 @@ end;
 function textheight:integer;
 begin
   if LIBGRAPHICS_ACTIVE then begin
-   	TextHeight:=internalFont.h;
+   	TextHeight:=fontsize;
   end;
 end;
 
@@ -398,7 +332,7 @@ function textwidth:integer;
 begin
 
  if LIBGRAPHICS_ACTIVE then begin
-   TextHeight:=internalFont.w;
+   TextWidth:=fontsize;
  end;
 end;
 
@@ -410,7 +344,7 @@ begin
   textinfo.charsize  := textwidth; //these were intended to be different
 end;
 
-
+{
 procedure settextstyle(fontname:string direction:directions; textsize:integer);
 //backwads compatible with some changes
 begin
@@ -428,11 +362,6 @@ begin
   SDL_SetFont(fontname,ord(direction),textsize); 
 end;
 
-
-//Im noticing that a ton of the font routines use .CHR (old school fonts)
-//although we *could* support them, this is very ancient tech. Id rather use TTF straight-up.
-
-{
 procedure SetTextJustify(direction:directions);
 //write one letter at a time if verticle, ignore and write normally if horizontal
 
