@@ -1,8 +1,0 @@
-shaders suck.
-you cant animate a shader.
-you cant use timing delays when drawing - or it muffs everything up.
-you cant fade or color mix a shader on the fly.
-
-either nothing happens, the shader refuses to compile....etc etc etc 
-
-you are better off in immeadiate mode or SceneGraph.

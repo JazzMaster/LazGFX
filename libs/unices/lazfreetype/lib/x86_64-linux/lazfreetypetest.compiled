@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CONFIG>
-  <Compiler Value="/usr/bin/fpc" Date="1540814642"/>
-  <Params Value=" -MObjFPC -Scaghi -Cg -Cirot -O1 -gw2 -godwarfsets -gl -Xg -l -vewnhibq -Fi/home/me/Desktop/lazfreetype/lib/x86_64-linux -Fu/home/me/.lazarus/lib/units/x86_64-linux/gtk2 -Fu/home/me/.lazarus/lib/LCLBase/units/x86_64-linux -Fu/home/me/.lazarus/lib/LazUtils/lib/x86_64-linux -Fu/home/me/.lazarus/lib/units/x86_64-linux -Fu/home/me/Desktop/lazfreetype/ -FU/home/me/Desktop/lazfreetype/lib/x86_64-linux/ -FE/home/me/Desktop/lazfreetype/ -o/home/me/Desktop/lazfreetype/lazfreetypetest -dLCL -dLCLgtk2 lazfreetypetest.lpr"/>
-</CONFIG>
