@@ -78,8 +78,9 @@ So- Im just not going to do it.
 SDL is an overachiever. PERIOD.<br>
 This is why OS9 was dropped. 
 
-OS9 doesnt support above OpenGL 1.2.1- SDL requires OpenGL version 2 or above.
+#### Mac OS
 
+OS9 doesnt support above OpenGL 1.2.1- SDL requires OpenGL version 2 or above.
 
 Blame APPLE for jumping the bandwagon but OSX does provide memory segmentation and protections.<br>
 While OS9 tries- it can still "BOMB OUT"- it can still crash..sometimes without a solution, otherwise randomly.
@@ -116,6 +117,7 @@ where it isnt.
 
 These libs work. They test ok. <br>
 
+#### DelphiGL Caveat
 
 DGL doesnt allow (GL issue) lower than 24bpp, nor palettes.<br>
 This is a HUGE CHUNK of the API thats being written, Im not going to remove it.
@@ -124,6 +126,8 @@ Lets code around the problem, instead, by limiting these routines to "a viable 2
 (You can limit colors used, but some routines are impossible to implement in 3d)
 
 "IfRender3D" is the Boolean Flag Im using.
+
+#### Down and Dirty DelphiGL Dev -are you?
 
 If you just want modern-day graphics, then focus on 3D API here- <br>
 and look at Game engines like "Castle". (OpenMorrowWind uses assImp/OGRE.)
@@ -138,7 +142,7 @@ The other WineAPIs allow them to "not know" Linux-es, "to CHEAT again" by runnin
 There is no actual "Native Code" running- and these devs DO NOT CARE.<br>
 If the WinAPI is broken for some reason(Blizzard) - you get screwed.
 
-I actually code for Linux. I like the challenge. I will "port" or IFDEF the rest.
+I code for Linux. I like the challenge. I will "port" or IFDEF the rest.
 
 ## Enough said
 
@@ -150,17 +154,12 @@ The app code is for DEMOS "of this library".
 
 ## Primary Build Targets
 
-I will start with X11 and D2D (win7 plus, youre probably running this) -and perhaps Quartz2D(OSX).<br>
-I will add other targets as time goes on-
+I will start with X11 and D2D (win Vista and above, DirectX9+) <br>
+and perhaps Quartz2D(OSX).<br>
 
-I have 
 
-        source code
-        compilers 
+I will add other targets as time goes on.
 
--and plenty of books.
-
-The old code will stay until I get something stable here. I just moved it.
 
 -Jazz
 
