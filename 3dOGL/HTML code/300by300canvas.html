@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+<title>HTML5 Tutorial: Drawing Circles and Arcs</title>
+</head>
+<body>
+<canvas id="mycanvas" width="300" height="300">
+</canvas>
+<script type="text/javascript">
+var canvas = document.getElementById('mycanvas');
+var ctx = canvas.getContext('2d');
+ctx.beginPath();
+ctx.arc(100, 100, 50, 0, 2 * Math.PI, false);
+ctx.fillStyle = "rgb(0, 0, 255)";
+ctx.fill();
+</script>
+</body>
+</html>

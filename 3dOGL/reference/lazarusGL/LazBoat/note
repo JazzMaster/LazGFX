@@ -1,0 +1,39 @@
+this is going to be rewritten for DGL/FContext +Lazarus
+"Direct Rendered":
+
+
+glClearColor3i(r,g,b)
+glClear(COLOR_Buffer_BIT)
+
+glModel(FLAT)
+
+-- ModelView Matrix Mod for 2D -- (looking at side of a cube, head on)
+
+glRect(x,y,w,h) [ocean]
+
+Ship POLY:
+
+glColor3i(r,g,b)
+glbegin(GL_POLYGON)
+
+    glVertex2i(x,y);
+    glVertex2i(x,y);
+    glVertex2i(x,y);
+    glVertex2i(x,y);
+    glVertex2i(x,y);
+    glVertex2i(x,y);
+    glVertex2i(x,y);
+    glVertex2i(x,y);
+
+glEnd()
+
+glColor3i(r,g,b)
+
+..next poly..
+
+You will have halftone hash, more colors, blends, etc. now.
+
+
+
+
+

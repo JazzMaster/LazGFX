@@ -1,0 +1,125 @@
+unit logger;
+{$mode objfpc}
+
+interface
+
+uses
+    crt,sysutils;
+
+
+const
+  critical='CRITICAL ERROR: ';
+  normal='HMM: ';
+  warning='WARNING: ';
+
+var
+   outputfile: Textfile; 
+   logging,donelogging:boolean;
+   MyTime: TDateTime;
+   IsConsoleInvoked:boolean; external;
+
+function Long2String(l: longint): string;
+Procedure LogLn(s: string);
+procedure StopLogging; 
+procedure StartLogging;
+
+implementation
+{
+The aux routines here are copywright FPC/FPK Dev Team
+
+AUTHORS:                                              
+   Gernot Tenchio      - original version              
+   Florian Klaempfl    - major updates                 
+   Pierre Mueller      - major bugfixes                
+   Carl Eric Codere    - complete rewrite              
+   Thomas Schatzl      - optimizations,routines and    
+                           suggestions.                
+   Jonas Maebe         - bugfixes and optimizations    
+}
+
+
+//more advanced debugging requires everything be converted to a string
+//byte, word 2string, real2string,int2string
+
+function Long2String(l: longint): string;
+var
+  strf:string;
+begin
+  str(l, strf);
+  Long2String:=strf;
+end;
+
+//end FPC code - the rest has been modified "for an EXPLICIT PURPOSE"
+
+
+
+//usually you want to write a line.
+
+procedure LogGLFloat(data:single);
+var
+	stringdata:string;
+
+begin
+		write(data:4:2);
+		stringdata:=FloatToStr(data);
+  	    Write(outputfile,stringdata);
+end;
+
+
+procedure LogGLFloatLn(data:single);
+var
+	stringdata:string;
+
+begin
+		writeln(data:4:2);
+		stringdata:=FloatToStr(data);
+  	    Writeln(outputfile,stringdata);
+end;
+
+
+Procedure LogLn(s: string);
+var
+    v:string;
+Begin
+
+  writeln( DateTimeToStr(MyTime),' : ',s); //to the debugging outputfile console first, then file.
+  v:=( (DateTimeToStr(MyTime))+' : '+s);
+  Writeln(outputfile,v);
+End;
+
+{$I-}
+procedure StartLogging; 
+begin
+    assign(outputfile,'lazgfx-debug.log');
+
+//Fixed: 7/31/2019
+  try
+    reset(outputfile);
+
+  except
+    // If there was an error the reason can be found here
+    on E: EInOutError do begin
+      writeln('Log File Doesnt Exist, Creating it.);
+      rewrite(outputfile);
+  	
+    end;	
+  end;
+
+    logging:=true;
+    donelogging:=false;
+end;
+{$I+}
+
+procedure StopLogging; //finalization
+
+begin
+    donelogging:=true;
+    logging:=false;
+    close(outputfile);
+end;
+
+
+begin 
+
+end.
+ 
