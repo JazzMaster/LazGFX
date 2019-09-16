@@ -23,6 +23,7 @@ COLOR is no exception. X11 will "nuke" color ops.
 So far this is about 3 days worth of work- 
 much faster than the old ways I was doing things.
 
+FPC team made this sooo much worse than it needs to be....
 
 }
 
@@ -32,8 +33,8 @@ interface
 {$H+}
 
 uses
-
-    x,Xlib,Xutil,baseunix,sysutils,ctypes,Logger,strings,typinfo;
+//basic math, maybe algebra -geomerty for certain
+    x,Xlib,Xutil,baseunix,sysutils,ctypes,Logger,strings,typinfo,math;
 
 {$IFDEF LCL}
 	{$IFDEF LCLGTK2}
@@ -369,7 +370,9 @@ begin
   DisplayHeight := XDisplayHeight(D, S);
   DefaultVisual := XDefaultVisual(d, S);
   DisplayDepth  := XDefaultDepth(d, S);
-//  DefaultColorMap := XDefaultColorMap(D, S);
+ screen_colormap := DefaultColormap(d, DefaultScreen(d));
+
+//  DefaultColorMap := XDefaultColorMap(D, DefaultScreen(d));
 
 
   { create window }
@@ -394,11 +397,10 @@ begin
 
     XSetWMNormalHints(d, W, @hints);
 
-    XSetWMProperties(d, FWinHandle, nil, nil, nil, 0, nil, Hints, nil);
+    XSetWMProperties(d, w, nil, nil, nil, 0, nil, Hints, nil);
 
 //  XSetStandardProperties(d,w,'Lazarus Graphics Application','',None,NiL,0,NiL);
 
- screen_colormap := DefaultColormap(d, DefaultScreen(d));
 
 {
 //problem with this is we dont know--could be 16K or more used...
@@ -474,6 +476,30 @@ Do we need this if we can set it later on?
   XMapWindow(d, w);
 
 end;
+
+
+//"Pi r squared" non-sence...radius is half the diameter...
+//screen(phys),windows,context, x,y then width,height (ignoring start/end angles)
+
+procedure Circle(diameter, x,y:word);
+//modified Arc
+begin
+  XDrawArc(d, w, context, x-(diameter/2), y-(diameter/2), diameter, diameter, 0, 360*64);
+end;
+
+
+procedure ellipse(diameter, x,y:word);
+//these are rotated circles(- \ | / )
+//they can be squished in either of two directions(stretch out one side)
+begin
+if y>x then //this may be backwards...
+  XDrawArc(d, w, context, x-(diameter/2), y-(diameter/2), diameter, diameter*2, 0, 360*64);
+else if x>y then
+  XDrawArc(d, w, context, x-(diameter/2), y-(diameter/2), diameter*2, diameter, 0, 360*64);
+
+//now you have to rotate the ellipse accordingly....
+end;
+
 
 function ColorToXColor(c: longword): longword;
 
