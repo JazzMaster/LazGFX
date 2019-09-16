@@ -9,7 +9,12 @@ interface
 uses
     MacOSALL;
 
+{$IFDEF darwin}
+	{$linkframework Cocoa}
+	{$linklib gcc}
 
+{$modeswitch objectivec2}
+{$ENDIF}
 
 implementation
 

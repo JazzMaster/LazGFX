@@ -1,12 +1,30 @@
 Unit X11;
-//Core 2DBGI API for Laz GFX for X11
+{
+Core 2DBGI API for Laz GFX (X11)
 
-//some of this is reworked from fpGUI- which uses X11 core(amongst other ports)
-//this code will need some cleaning up- but its a good start.
+some of this is reworked from fpGUI- which uses X11 core(amongst other ports)
 
-//I will pull in the color manipulation parts in a minute(SDL/GL merge).
-//We have XFreetype support- so we should have font capabilities.
+A good chunk of workable code was pulled from fpGUI. 
+There is some question if it works- may be due to the broken widget set w CoreX11 that changed??(unused sections)
 
+The init and destructor routines here, work.
+(So should everything else here)
+
+I may be missing a few variables- I have the code to plug them in from.
+
+I will pull in the color manipulation parts in a minute-from my old code(release v2).
+We have XFreetype support(xft)- so we should have decent font capabilities.
+
+Its not something easily understood- but I get what is here.
+
+keep in mind that X11(and anyone else) can over complicate things(nuke them).
+COLOR is no exception. X11 will "nuke" color ops.
+
+So far this is about 3 days worth of work- 
+much faster than the old ways I was doing things.
+
+
+}
 
 interface
 
@@ -15,10 +33,39 @@ interface
 
 uses
 
-    x,Xlib,Xutil,baseunix,sysutils,ctypes,Logger,strings;
+    x,Xlib,Xutil,baseunix,sysutils,ctypes,Logger,strings,typinfo;
+
+{$IFDEF LCL}
+	{$IFDEF LCLGTK2}
+		gtk2,
+	{$ENDIF}
+
+	{$IFDEF LCLQT}
+		qtwidgets,
+	{$ENDIF}
+
+	  //works on Linux+Qt but not windows??? I have WINE and a VM- lets figure it out.
+      LazUtils,  Interfaces, Dialogs, LCLType,Forms,Controls, 
+    {$IFDEF MSWINDOWS}
+       //we will check if this is set later.
+      {$DEFINE NOCONSOLE }
+    {$ENDIF}
+
+{$ENDIF}
+
+{$IFNDEF NOCONSOLE}
+    crt,crtstuff,
+{$ENDIF}
+
+{$IFDEF debug} ,heaptrc {$ENDIF} 
+
+type
+    PixelPoint=record
+        X,Y:word;
+    end;
 
 var
-
+  APos:PixelPoint;
   d: PDisplay;
   w: TWindow;
   e: TXEvent;
@@ -46,12 +93,62 @@ var
   NewText:PChar;
   xc: TXColor;
 
-
-    procedure InitGraph;
-    procedure CloseGraph;
-    procedure MainLoop;
+procedure ClearViewport;
+procedure ClearViewportwColor(color:TXColor);
+procedure LoadFont9x15(var FontInfo: PXFontStruct);
+function ConvertTo565Pixel(rgb: longword): word;
+function ConvertTo555Pixel(rgb: longword): word;
+function GetFontFaceList: TStringList;
+function X11keycodeToScanCode(akeycode: word): word;
+function  GetScreenWidth: word;
+function  GetScreenHeight: word;
+function  GetPixel(Spot: APos): DWord;
+function  Screen_dpi_x: integer;
+function  Screen_dpi_y: integer;
+function FindValidModeMatching(Xres,Yres,Requestedbpp):boolean;
+procedure InitGraph(Xres,Yres,RequestedBpp:Word; WantsFullscreen:boolean);
+function ColorToXColor(c: longword): longword;
+procedure PutPixel(color:DWord);
+procedure PutPixelXY(TextX, TextY: integer);
+procedure DrawArc(x, y, w, h: word; a1, a2: Extended);
+procedure FillArc(x, y, w, h: word; a1, a2: Extended);
+procedure DrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean);
+procedure SetLineStyle(width: integer; style: LineStyle);
+procedure FillRectangle(x, y, w, h: word);
+procedure XORFillRectangle(col: DWord; x, y, w, h: Word);
+procedure FillTriangle(x1, y1, x2, y2, x3, y3: Word);
+procedure Line(x1, y1, x2, y2: Word);
+procedure Rectangle(x, y, w, h: Word);
+procedure MoveWindow(x,y: Word);
+procedure UpdateWindowPosition;
+procedure BringToFront;
+procedure CreateFontResource(afontdesc: string);
+procedure DestroyFontResource;
+function FontResourceHandleIsValid: boolean;
+function FontResourceGetAscent: integer;
+function FontResourceGetDescent: integer;
+function FontResourceGetHeight: integer;
+procedure CaptureMouse;
+procedure ReleaseMouse;
+procedure SetWindowTitle( ATitle: string);
+procedure SetMouseCursor;
+Procedure MainLoop;
+procedure CloseGraph;
 
 implementation
+
+{
+
+X11 color allocation en mass:
+
+XAllocColorCells/ XAllocColorPlanes
+(To store colors-use for palettes) XStoreColors
+
+You can currently pull "defined colors" into the colormap(required) but to set them- 
+(as with palettes)- requires write access. PseudoColor= Pallette.
+
+
+}
 
 procedure ClearViewport;
 
@@ -67,12 +164,11 @@ begin
     XClearWindow(d, w);
 end;
 
-
+//this is an internal font
 procedure LoadFont9x15(var FontInfo: PXFontStruct);
 const
   FontName: PChar = '9x15';
 begin
-  Writeln('Font Struct:', SizeOf(TXFontStruct));
   FontInfo := XLoadQueryFont(D, FontName);
   if FontInfo = nil then
     begin
@@ -106,40 +202,6 @@ end;
     //xc.flags = DoRed | DoGreen | DoBlue;
 //end;
 
-function ColorToXColor(c: longword): longword;
-
-begin
-
-//the odd circumstance that we are in 15 or 16bpp(strange) and using palettes must be taken into account.
-//older hardware?
-
-  if (dDepth = 24 and notPaletted) then
-    Result   := c and $FFFFFF       { No Alpha channel information }
-  else if (dDepth = 24 and Paletted) then begin //emulated pallette under 24bpp
-        someDWord:=convertFromPalletted(c);
-        Result   := c and $FFFFFF       { No Alpha channel information }
-  end
-  else if (dDepth = 16 and notpaletted) then //need words here
-    Result   := ConvertTo565Pixel(c)
-
-  else if (dDepth = 16 and Paletted) then begin //emulated pallette under 24bpp
-        someDWord:=convertFromPalletted(c);
-        Result   := ConvertTo565Pixel(someDWord)
-  end
-  else if (dDepth = 15 and notPaletted) then
-        Result   := ConvertTo555Pixel(c)
-
-  else if (dDepth = 15 and Paletted) then begin //emulated pallette under 24bpp
-        someDWord:=convertFromPalletted(c);
-        Result   := ConvertTo555Pixel(someDWord)
-
-    xc:=DWordtoSDL_Color(result);
-
-// X11 valid color strings: "rgb:00/ff/00"
-    XAllocColor(d, screen_colormap, @xc); //returns xc - the longword
-    Result := xc.pixel;
-  end;
-end;
 
 function GetFontFaceList: TStringList;
 var
@@ -150,10 +212,10 @@ var
   pc: PChar;
 begin
   // this now even returns non-scaleable fonts which is what we sometimes want.
-  pfs := XftListFonts(Display, DefaultScreen, [0, FC_FAMILY, 0]);
+  pfs := XftListFonts(D, w, [0, FC_FAMILY, 0]);
 
   if pfs = nil then
-    Exit; //==>
+    Exit; 
 
   Result := TStringList.Create;
 
@@ -198,45 +260,44 @@ begin
   end;
 end;
 
-function  .GetScreenWidth: TfpgCoord;
+function  GetScreenWidth: word;
 var
   wa: TXWindowAttributes;
 begin
-  XGetWindowAttributes(FDisplay, FRootWindow, @wa);
+  XGetWindowAttributes(D, W, @wa);
   Result := wa.Width;
 end;
 
-function  .GetScreenHeight: TfpgCoord;
+function  GetScreenHeight: word;
 var
   wa: TXWindowAttributes;
 begin
-  XGetWindowAttributes(FDisplay, FRootWindow, @wa);
+  XGetWindowAttributes(D, W, @wa);
   Result := wa.Height;
 end;
 
-function  .GetScreenPixelColor(APos: TPoint): TfpgColor;
+//assumes 24/32bpp
+function  GetPixel(Spot: APos): DWord;
 var
   Image: PXImage;
   Pixel: Cardinal;
   x_Color: TXColor;
 begin
   Result := 0;
-  Image := XGetImage(Display, FRootWindow, APos.X, APos.Y, 1, 1, $FFFFFFFF, ZPixmap);
+  Image := XGetImage(D, w, Spot.X, Spot.Y, 1, 1, $FFFFFFFF, ZPixmap);
   if Image = nil then
     raise Exception.Create('fpGFX/X11: Invalid XImage');
   try
     Pixel := XGetPixel(Image, 0, 0);
     x_Color.pixel := Pixel;
     XQueryColor(Display, DefaultColorMap, @x_Color);
-    Result := TfpgColor(((x_Color.red and $00FF) shl 16) or
-                       ((x_Color.green and $00FF) shl 8) or
-                        (x_Color.blue and $00FF));
+    Result := DWord( ((x_Color.red and $00FF) shl 16) or ((x_Color.green and $00FF) shl 8) or (x_Color.blue and $00FF) );
   finally
     XDestroyImage(Image);
   end;
 end;
 
-function  .Screen_dpi_x: integer;
+function  Screen_dpi_x: integer;
 var
   mm: integer;
 begin
@@ -249,7 +310,7 @@ begin
     Result := 96; // seems to be a well known default. :-(
 end;
 
-function  .Screen_dpi_y: integer;
+function  Screen_dpi_y: integer;
 var
   mm: integer;
 begin
@@ -262,11 +323,35 @@ begin
     Result := Screen_dpi_x; // same as width
 end;
 
+function FindValidModeMatching(Xres,Yres,Requestedbpp):boolean;
 
-procedure InitGraph;
+begin
+    //right now we check to see if given data matches possible modes, then we see if we can set that mode-
+    //or given a reasonable lower one.
+
+
+//probe:
+    //query xrandr: get the available modes and bpp- see if we are above the requested.
+    //if below - then x,y,bpp must match us or below ONLY. 
+    //cycle thru modes until we find a match
+
+    //if above(or equal)- we can set window or FS mode-we are ok
+    
+
+end;
+
+procedure InitGraph(Xres,Yres,RequestedBpp:Word; WantsFullscreen:boolean);
 
 begin
   
+  //before we even open a window/session we can check resolutions against the current modelist(PC).
+
+  {if not FindValidModeMatching(Xres,Yres,Requestedbpp); then begin
+        LogLn('Invalid Mode Requested.');
+        halt;
+   end;
+  }
+
   { open connection with the server }
   d := XOpenDisplay(nil);
   if (d = nil) then  begin
@@ -288,7 +373,7 @@ begin
 
 
   { create window }
-  w := XCreateSimpleWindow(d, RootWindow(d, s), 10, 10, MaxX, MaxY, 1,  BlackPixel(d, s), WhitePixel(d, s));
+  w := XCreateSimpleWindow(d, RootWindow(d, s), 10, 10, XRes, YRes, 1,  BlackPixel(d, s), WhitePixel(d, s));
 
 //  w := XCreateWindow(d, RootWindow(d,s), FLeft, FTop, FWidth, FHeight, 0, CopyFromParent, InputOutput, DefaultVisual,mask, @attr);
   if w = 0 then
@@ -322,6 +407,7 @@ begin
 This fetches the DWord of the known RGB values
 
   rc := XAllocNamedColor(d, screen_colormap, 'red', @red, @red);
+
   if rc =0  then begin
     LogLn('XAllocNamedColor - failed to allocated red color.');
     exit;
@@ -368,12 +454,14 @@ This fetches the DWord of the known RGB values
   //GetDC(win, GC, FontInfo);
 
 {
-Do weneed this if we can set it later on?
+Do we need this if we can set it later on?
  
    values.foreground := WhitePixel(dpy, screen_num);
 	values.line_width := 1;
 	values.line_style := LineSolid;
 }
+
+//this is what we are after. (All "related ops" in a single context-but you can have more.)
     Context:=XCreateGC(d, w, 0,Values);  
 //    XSetLineAttributes(d, Context, 0, LineSolid, CapNotLast, JoinMiter);
       
@@ -387,29 +475,82 @@ Do weneed this if we can set it later on?
 
 end;
 
+function ColorToXColor(c: longword): longword;
 
+var
+    TempResult:DWord;
 
-procedure TfpgX11Canvas.SetPixel(X, Y: integer; Color: DWord);
 begin
-  SetColor(Color);
-  XDrawPoint(d, w, Fgc, X, Y);
+
+//the odd circumstance that we are in 15 or 16bpp(strange) and using palettes must be taken into account.
+//older hardware?
+
+//assumes ARGB colrspace...(windows default)
+  if bpp = 32  then
+    xc.blue  := (c and $000000FF) shl 8;
+    xc.green := (c and $0000FF00);
+    xc.red   := (c and $00FF0000) shr 8;
+  end; //theres no 32bpp paletted colors(they are all opaque/solid fills)
+
+
+  else if (bpp = 24 and notPaletted) then
+    TempResult   := c and $FFFFFF       { No Alpha channel information }
+  else if (bpp = 24 and Paletted) then begin //emulated pallette under 24bpp
+        someDWord:=convertFromPalletted(c);
+        TempResult   := c and $FFFFFF       { No Alpha channel information }
+  end
+  else if (bpp = 16 and notpaletted) then //need words here
+       TempResult := ConvertTo565Pixel(c)
+
+  else if (bpp = 16 and Paletted) then begin //emulated pallette under 24bpp
+        someDWord:=convertFromPalletted(c);
+       TempResult  := ConvertTo565Pixel(someDWord)
+  end
+  else if (bpp = 15 and notPaletted) then
+        TempResult  := ConvertTo555Pixel(c)
+
+  else if (bpp = 15 and Paletted) then begin //emulated pallette under 24bpp
+        someDWord:=convertFromPalletted(c);
+       TempResult  := ConvertTo555Pixel(someDWord)
+  end;
+
+    // X11 valid color strings: "rgb:00/ff/00"
+    // XColor.pixel is a DWord (converted from input)
+    xc.pixel:=TempResult;
+
+    //we cant use what is not in the "colormap" .. so add the color
+    XAllocColor(d, screen_colormap, @xc); 
+    Result := xc.pixel;
+  end;
 end;
 
 
-procedure TfpgX11Canvas.DoDrawArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure PutPixel(color:DWord);
+
 begin
-  XDrawArc(d, FDrawHandle, Fgc, x, y, w-1, h-1,
-      Trunc(64 * a1), Trunc(64 * a2));
+    XSetForeGround(d, context, ColorToXColor(color));
+    //(if not specified: get X and Y first)
+    PutPixelXY(CurrX,CurrY);
 end;
 
-procedure TfpgX11Canvas.DoFillArc(x, y, w, h: TfpgCoord; a1, a2: Extended);
+procedure PutPixelXY(TextX, TextY: integer);
+
 begin
-  XFillArc(d, FDrawHandle, Fgc, x, y, w, h,
-      Trunc(64 * a1), Trunc(64 * a2));
+  XDrawPoint(d, w, context, TextX, TextY);
 end;
 
-procedure TfpgX11Canvas.DoDrawPolygon(Points: PPoint; NumPts: Integer;
-  Winding: boolean);
+
+procedure DrawArc(x, y, w, h: word; a1, a2: Extended);
+begin
+  XDrawArc(d, w, context, x, y, w-1, h-1, Trunc(64 * a1), Trunc(64 * a2));
+end;
+
+procedure FillArc(x, y, w, h: word; a1, a2: Extended);
+begin
+  XFillArc(d, w, context, x, y, w, h,  Trunc(64 * a1), Trunc(64 * a2));
+end;
+
+procedure DrawPolygon(Points: PPoint; NumPts: Integer; Winding: boolean);
 var
   PointArray: PXPoint;
   i: integer;
@@ -421,70 +562,55 @@ begin
     PointArray[i].x := Points[i].x;
     PointArray[i].y := Points[i].y;
   end;
-  XFillPolygon(d, FDrawHandle, Fgc, PointArray, NumPts, CoordModeOrigin, X.Complex);
+  XFillPolygon(d, w, context, PointArray, NumPts, CoordModeOrigin, X.Complex);
   if PointArray <> nil then
     FreeMem(PointArray);
 end;
 
-procedure TfpgX11Canvas.DoSetColor(cl: TfpgColor);
-begin
-  XSetForeGround(d, Fgc, fpgColorToX(cl));
-end;
 
-procedure TfpgX11Canvas.DoSetLineStyle(awidth: integer; astyle: TfpgLineStyle);
+procedure SetLineStyle(width: integer; style: LineStyle);
 const
   cDot: array[0..1] of Char = #1#1;
   cDash: array[0..1] of Char = #4#2;
   cDashDot: array[0..3] of Char = #4#1#1#1;
   cDashDotDot: array[0..5] of Char = #4#1#1#1#1#1;
-var
-  aCapStyle: Longint;
 begin
-  aCapStyle := CapNotLast;
-  // Is this still needed??  I don't think so
-  //if (awidth > 1) and (astyle = lsSolid) then
-  //  aCapStyle := CapButt;
-  if awidth = 1 then
-    awidth := 0;  // switch to hardware algorithm
 
-  case AStyle of
+  case Style of
     lsDot:
         begin
-          XSetLineAttributes(d, Fgc, awidth,
-            LineOnOffDash, aCapStyle, JoinMiter);
-          XSetDashes(d, Fgc, 0, cDot, 2);
+          XSetLineAttributes(d, context, width, LineOnOffDash, 0, JoinMiter);
+          XSetDashes(d, context, 0, cDot, 2);
         end;
     lsDash:
         begin
-          XSetLineAttributes(d, Fgc, awidth,
-            LineOnOffDash, aCapStyle, JoinMiter);
-          XSetDashes(d, Fgc, 0, cDash, 2);
+          XSetLineAttributes(d, context, width, LineOnOffDash, 0, JoinMiter);
+          XSetDashes(d, context, 0, cDash, 2);
         end;
     lsDashDot:
         begin
-          XSetLineAttributes(d, Fgc, awidth,
-            LineOnOffDash, aCapStyle, JoinMiter);
-          XSetDashes(d, Fgc, 0, cDashDot, 4);
+          XSetLineAttributes(d, context, width, LineOnOffDash, 0, JoinMiter);
+          XSetDashes(d, context, 0, cDashDot, 4);
         end;
     lsDashDotDot:
         begin
-          XSetLineAttributes(d, Fgc, awidth,
-            LineOnOffDash, aCapStyle, JoinMiter);
-          XSetDashes(d, Fgc, 0, cDashDotDot, 6);
+          XSetLineAttributes(d, context, width, LineOnOffDash, 0, JoinMiter);
+          XSetDashes(d, context, 0, cDashDotDot, 6);
         end;
     else  // which includes lsSolid
-      XSetLineAttributes(d, Fgc, awidth,
-        LineSolid, aCapStyle, JoinMiter);
+      XSetLineAttributes(d, context, width, LineSolid, 0, JoinMiter);
   end;  { case }
 end;
 
-procedure TfpgX11Canvas.DoDrawImagePart(x, y: TfpgCoord; img: TfpgImageBase; xi, yi, w, h: integer);
+{
+//subTextureOps - semi used with Blits and Images
+procedure DrawImagePart(x, y: Word; img: TImage; xi, yi, w, h: word);
 var
   msk: TPixmap;
   GcValues: TXGcValues;
 begin
   if img = nil then
-    Exit; //==>
+    Exit; 
 
   if img.Masked then
   begin
@@ -494,41 +620,44 @@ begin
     GcValues.background := 0;
 
     // clear mask
-    context := XCreateGc(d, msk, GCForeground or GCBackground, @GcValues);
+    context1 := XCreateGc(d, msk, GCForeground or GCBackground, @GcValues);
     XSetForeground(d, context, 0);
     XFillRectangle(d, msk, context, 0, 0, w, h);
 
     XSetForeground(d, context, 1);
-    XPutImage(d, msk, context, TfpgX11Image(img).XImageMask, xi, yi, 0, 0, w, h);
+    XPutImage(d, msk, context, TImage(img).XImageMask, xi, yi, 0, 0, w, h);
 
-    context := XCreateGc(d, FDrawHandle, 0, @GcValues);
-    XSetClipMask(d, context, msk);
-    XSetClipOrigin(d, context, x, y);
+    context2 := XCreateGc(d, context, 0, @GcValues);
+    XSetClipMask(d, context1, msk);
+    XSetClipOrigin(d, context1, x, y);
 
-    XPutImage(d, FDrawHandle, context, TfpgX11Image(img).XImage, xi, yi, x, y, w, h);
+    XPutImage(d, context1, context2, TImage(img).XImage, xi, yi, x, y, w, h);
     XFreePixmap(d, msk);
-    XFreeGc(d, context);
-    XFreeGc(d, context);
+    XFreeGc(d, context1);
+    XFreeGc(d, context2);
   end
+
   else
-    XPutImage(d, FDrawHandle, Fgc, TfpgImage(img).XImage, xi, yi, x, y, w, h);
+    XPutImage(d, w, context, TfpgImage(img).XImage, xi, yi, x, y, w, h);
 end;
 
-procedure TfpgX11Canvas.DoFillRectangle(x, y, w, h: TfpgCoord);
+}
+
+procedure FillRectangle(x, y, w, h: word);
 begin
-  XFillRectangle(d, FDrawHandle, Fgc, x, y, w, h);
+  XFillRectangle(d, w, context, x, y, w, h);
 end;
 
-procedure TfpgX11Canvas.DoXORFillRectangle(col: TfpgColor; x, y, w, h: TfpgCoord);
+procedure XORFillRectangle(col: DWord; x, y, w, h: Word);
 begin
-  XSetForeGround(d, Fgc, fpgColorToX(fpgColorToRGB(col)));
-  XSetFunction(d, Fgc, GXxor);
-  XFillRectangle(d, FDrawHandle, Fgc, x, y, w, h);
-  XSetForeGround(d, Fgc, 0);
-  XSetFunction(d, Fgc, GXcopy);
+  XSetForeGround(d, context, ColorToXColor(Col));
+  XSetFunction(d, context, GXxor);
+  XFillRectangle(d, w, context, x, y, w, h);
+  XSetForeGround(d, context, 0);
+  XSetFunction(d, context, GXcopy);
 end;
 
-procedure TfpgX11Canvas.DoFillTriangle(x1, y1, x2, y2, x3, y3: TfpgCoord);
+procedure FillTriangle(x1, y1, x2, y2, x3, y3: Word);
 var
   pts: array[1..3] of TXPoint;
 begin
@@ -536,34 +665,32 @@ begin
   pts[2].x := x2;   pts[2].y := y2;
   pts[3].x := x3;   pts[3].y := y3;
 
-  XFillPolygon(d, FDrawHandle, Fgc, @pts, 3, CoordModeOrigin, X.Complex);
+  XFillPolygon(d, w, context, @pts, 3, CoordModeOrigin, X.Complex);
 end;
 
 
-procedure TfpgX11Canvas.DoDrawLine(x1, y1, x2, y2: TfpgCoord);
+procedure Line(x1, y1, x2, y2: Word);
 begin
   // Same behavior as Windows. See documentation for reason.
-  XDrawLine(d, FDrawHandle, Fgc, x1, y1, x2, y2);
+  XDrawLine(d, w, context, x1, y1, x2, y2);
 end;
 
-procedure TfpgX11Canvas.DoDrawRectangle(x, y, w, h: TfpgCoord);
+procedure Rectangle(x, y, w, h: Word);
 begin
-//  writeln(Format('DoDrawRectangle  x=%d y=%d w=%d h=%d', [x, y, w, h]));
   // Same behavior as Windows. See documentation for reason.
   if (w = 1) and (h = 1) then // a dot
-    DoDrawLine(x, y, x+w, y+w)
+    Line(x, y, x+w, y+w)
   else
-    XDrawRectangle(d, FDrawHandle, Fgc, x, y, w-1, h-1);
+    XDrawRectangle(d, w, context, x, y, w-1, h-1);
 end;
 
-
-procedure TfpgX11Window.DoMoveWindow(const x: TfpgCoord; const y: TfpgCoord);
+procedure MoveWindow(x,y: Word);
 begin
   if HandleIsValid then
-    XMoveWindow(d, FWinHandle, x, y);
+    XMoveWindow(d, w, x, y);
 end;
 
-procedure TfpgX11Window.DoUpdateWindowPosition;
+procedure UpdateWindowPosition;
 var
   w: longword;
   h: longword;
@@ -579,50 +706,51 @@ begin
     else
       h := 1;
 
-    XMoveResizeWindow(d, FWinHandle, FLeft, FTop, w, h);
+    XMoveResizeWindow(d, w, FLeft, FTop, w, h);
   end;
 end;
 
-//if not in front- dont attetmpt to draw, raise first.
-procedure TfpgX11Window.BringToFront;
+//if not in front- dont attemtpt to draw, raise first.
+procedure BringToFront;
 begin
   if HasHandle then
     XRaiseWindow(d, w);
 end;
 
-constructor TfpgX11FontResource.Create(const afontdesc: string);
+procedure CreateFontResource(afontdesc: string);
 begin
-  FFontData := XftFontOpenName(d, xapplication.DefaultScreen, PChar(afontdesc));
+  FFontData := XftFontOpenName(d, w, PChar(afontdesc));
 end;
 
-destructor TfpgX11FontResource.Destroy;
+procedure DestroyFontResource;
 begin
   if HandleIsValid then
     XftFontClose(d, FFontData);
   inherited;
 end;
 
-function TfpgX11FontResource.HandleIsValid: boolean;
+function FontResourceHandleIsValid: boolean;
 begin
   Result := (FFontData <> nil);
 end;
 
-function TfpgX11FontResource.GetAscent: integer;
+function FontResourceGetAscent: integer;
 begin
   Result := FFontData^.ascent;
 end;
 
-function TfpgX11FontResource.GetDescent: integer;
+function FontResourceGetDescent: integer;
 begin
   Result := FFontData^.descent;
 end;
 
-function TfpgX11FontResource.GetHeight: integer;
+function FontResourceGetHeight: integer;
 begin
   Result := FFontData^.Height;
 end;
 
-function TfpgX11FontResource.GetTextWidth(const txt: string): integer;
+{
+function FontResourceGetTextWidth(txt: string): integer;
 begin
   if length(txt) < 1 then
   begin
@@ -636,57 +764,45 @@ begin
   else
     Result := DoGetTextWidthWorkaround(txt);
 end;
+}
 
-
-procedure TfpgX11Window.CaptureMouse;
+procedure CaptureMouse;
 begin
-  XGrabPointer(d, FWinHandle,
-      TBool(False),
-      ButtonPressMask or ButtonReleaseMask or ButtonMotionMask or PointerMotionMask
-        or EnterWindowMask or LeaveWindowMask,
-      GrabModeAsync,
-      GrabModeAsync,
-      None,
-      0,
-      CurrentTime
-      );
+  XGrabPointer(d, w, TBool(False), ButtonPressMask or ButtonReleaseMask or ButtonMotionMask or PointerMotionMask or EnterWindowMask or LeaveWindowMask, GrabModeAsync, GrabModeAsync, None, 0, CurrentTime);
 end;
 
-procedure TfpgX11Window.ReleaseMouse;
+procedure ReleaseMouse;
 begin
   XUngrabPointer(d, CurrentTime);
 end;
 
 
-procedure TfpgX11Window.DoSetWindowTitle(const ATitle: string);
+procedure SetWindowTitle( ATitle: string);
 var
   tp: TXTextProperty;
 begin
-  if FWinHandle <= 0 then
+  if w <= 0 then
     Exit;
-  fpgApplication.netlayer.WindowSetName(FWinHandle, PChar(ATitle));
 
-  // Required for titles to work in IceWM. The above netlayer doesn't do the trick.
   tp.value    := PCUChar(ATitle);
   tp.encoding := XA_WM_NAME;
   tp.format   := 8;
   tp.nitems   := UTF8Length(ATitle);
 
-  XStoreName(d, FWinHandle, PChar(ATitle));
-  XSetIconName(d, FWinHandle, PChar(ATitle));
+  XStoreName(d, w, PChar(ATitle));
+  XSetIconName(d, w, PChar(ATitle));
 end;
 
 
-
-procedure TfpgX11Window.DoSetMouseCursor;
+procedure SetMouseCursor;
 var
-  xc: TCursor;
+  xct: TCursor;
   shape: integer;
 begin
   if not HasHandle then
   begin
     FMouseCursorIsDirty := True;
-    Exit; //==>
+    Exit; 
   end;
 
   case FMouseCursor of
@@ -709,13 +825,12 @@ begin
     shape := XC_left_ptr; //XC_arrow;
   end;
 
-  xc := XCreateFontCursor(d, shape);
-  XDefineCursor(d, FWinHandle, xc);
-  XFreeCursor(d, xc);
+  xct := XCreateFontCursor(d, shape);
+  XDefineCursor(d, w, xct);
+  XFreeCursor(d, xct);
 
   FMouseCursorIsDirty := False;
 end;
-
 
 
 Procedure MainLoop;

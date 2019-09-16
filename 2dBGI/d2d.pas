@@ -12,7 +12,32 @@ uses
   D3DX8,
   Directinput,
   DirectMusic,
-  DirectSound;
+  DirectSound,
+  MMsystem,typinfo; //Core audio subsystem
+
+{$IFDEF LCL}
+	{$IFDEF LCLGTK2}
+		gtk2,
+	{$ENDIF}
+
+	{$IFDEF LCLQT}
+		qtwidgets,
+	{$ENDIF}
+
+	  //works on Linux+Qt but not windows??? I have WINE and a VM- lets figure it out.
+      LazUtils,  Interfaces, Dialogs, LCLType,Forms,Controls, 
+    {$IFDEF MSWINDOWS}
+       //we will check if this is set later.
+      {$DEFINE NOCONSOLE }
+    {$ENDIF}
+
+{$ENDIF}
+
+{$IFNDEF NOCONSOLE}
+    crt,crtstuff,
+{$ENDIF}
+
+{$IFDEF debug} ,heaptrc {$ENDIF} 
 
 implementation
 
