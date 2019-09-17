@@ -1,5 +1,23 @@
 Changelog
 ---------
+v2.4.0, 2019-10-16
+
+Pascal/FPC Port by Richard Jasmin (already in progresss from 2017) with the following added:
+
+ALL EMULATED prior Color palettes(sans ATARI modes) for IBM PC and compatibles
+Pantone 16/256 Color Palettes
+GreyScale 16/256 Color Palettes
+
+Further Color Conversion Routines(mod your images before loading- this is for per-pixel ops)
+
+Libuos hooks for CDDA, tone generation, audio playback (more than WAV)
+Synapse NETWORKING library
+
+Backport to SDL v1 in progress (Mac OS9+DOS) [RETRO]
+
+Graphics "Buffering" is now possible(min 2MB needed)
+Game logic -added in aux libs
+
 
 v. 2.3.0, 2019-08-01
 

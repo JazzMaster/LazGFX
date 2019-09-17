@@ -1,14 +1,16 @@
-// SDL_bgi.c        -*- C -*-
+Unit SDL2_bgi;  //      -*- PASCAL -*-
 
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs
 // and for teaching.
-//
-// By Guido Gonzato, PhD
+
+
+// Updated to FreePascal/Lazarus by Richard Jasmin
+// Original Code By Guido Gonzato, PhD
 // Automatic refresh patch by Marco Diego Aurélio Mesquita
 // August 1, 2019
 
-/*
+{
 
 Copyright (c) 2014-2019 Guido Gonzato, PhD
 
@@ -28,18 +30,383 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 
-*/
+}
 
-#include "SDL_bgi.h"
+interface
 
-// stuff gets drawn here; these variables are available to the programmer.
-// All the rest is hidden.
+uses
+    SDL2,SDL2_TTF,crt,math,strings;
+
+const
+    SDL_BGI_VERSION = 2.3.0;
+    BGI_WINTITLE_LEN =512; // more than enough
+    MAXCOLORS = 15; //only for EGA modes...FIXME
+
+// number of concurrent windows that can be created
+
+    NUM_BGI_WIN =16;
+
+// available visual pages
+
+    VPAGES= 4;
+
+type
+
+Decision= ( NO, YES );
+
+// BGI fonts
+
+// only DEFAULT_FONT (8x8) is implemented, Rest are TTF Loaded
+Fonts= (
+  DEFAULT_FONT, TRIPLEX_FONT, SANSSERIF_FONT,
+  GOTHIC_FONT, SCRIPT_FONT, SIMPLEX_FONT , SERIF_FONT
+);
+
+TextDirection= ( HORIZ_DIR, VERT_DIR );
+
+TextLocation= (
+  LEFT_TEXT, CENTER_TEXT, RIGHT_TEXT,
+  BOTTOM_TEXT = 0, TOP_TEXT = 2
+);
+
+// BGI colours
+
+Palette16Colors= (
+  BLACK, BLUE, GREEN, CYAN, RED, MAGENTA, BROWN,
+  LIGHTGRAY, DARKGRAY, LIGHTBLUE, LIGHTGREEN, LIGHTCYAN,
+  LIGHTRED, LIGHTMAGENTA, YELLOW, WHITE 
+);
+
+// temporary colours
+
+TempColors= ( TMP_FG_COL = 16, TMP_BG_COL = 17, TMP_FILL_COL = 18 );
+
+// line style, thickness, and drawing mode
+
+LineStyle= ( NORM_WIDTH = 1, THICK_WIDTH = 3 );
+
+Thickness= ( SOLID_LINE, DOTTED_LINE, CENTER_LINE, DASHED_LINE, USERBIT_LINE );
+
+DrawMode= ( COPY_PUT, XOR_PUT, OR_PUT, AND_PUT, NOT_PUT );
+
+
+// fill styles
+
+FillType= (
+  EMPTY_FILL, SOLID_FILL, LINE_FILL, LTSLASH_FILL, SLASH_FILL,
+  BKSLASH_FILL, LTBKSLASH_FILL, HATCH_FILL, XHATCH_FILL,
+  INTERLEAVE_FILL, WIDE_DOT_FILL, CLOSE_DOT_FILL, USER_FILL
+);
+
+var
+
+    bgi_window:PSDL_Window ;
+    bgi_renderer:PSDL_Renderer;
+    bgi_texture:PSDL_Texture;
+
+const
+
+// mouse buttons
+
+     WM_LBUTTONDOWN  =SDL_BUTTON_LEFT;
+     WM_MBUTTONDOWN  =SDL_BUTTON_MIDDLE;
+     WM_RBUTTONDOWN  =SDL_BUTTON_RIGHT;
+     WM_WHEEL        =SDL_MOUSEWHEEL;
+     WM_WHEELUP      =SDL_USEREVENT;
+     WM_WHEELDOWN    =SDL_USEREVENT + 1;
+     WM_MOUSEMOVE    =SDL_MOUSEMOTION;
+
+     PALETTE_SIZE    =4096;
+
+--
+** DO NOT COMPILE UNIT PORT IS COMPLETE **
+--
+
+#define KEY_HOME        SDLK_HOME
+#define KEY_LEFT        SDLK_LEFT
+#define KEY_UP          SDLK_UP
+#define KEY_RIGHT       SDLK_RIGHT
+#define KEY_DOWN        SDLK_DOWN
+#define KEY_PGUP        SDLK_PAGEUP
+#define KEY_PGDN        SDLK_PAGEDOWN
+#define KEY_END         SDLK_END
+#define KEY_INSERT      SDLK_INSERT
+#define KEY_DELETE      SDLK_DELETE
+#define KEY_F1          SDLK_F1
+#define KEY_F2          SDLK_F2
+#define KEY_F3          SDLK_F3
+#define KEY_F4          SDLK_F4
+#define KEY_F5          SDLK_F5
+#define KEY_F6          SDLK_F6
+#define KEY_F7          SDLK_F7
+#define KEY_F8          SDLK_F8
+#define KEY_F9          SDLK_F9
+#define KEY_F10         SDLK_F10
+#define KEY_F11         SDLK_F11
+#define KEY_F12         SDLK_F12
+#define KEY_CAPSLOCK    SDLK_CAPSLOCK
+#define KEY_LEFT_CTRL   SDLK_LCTRL
+#define KEY_RIGHT_CTRL  SDLK_RCTRL
+#define KEY_LEFT_SHIFT  SDLK_LSHIFT
+#define KEY_RIGHT_SHIFT SDLK_RSHIFT
+#define KEY_LEFT_ALT    SDLK_LALT
+#define KEY_RIGHT_ALT   SDLK_RALT
+#define KEY_ALT_GR      SDLK_MODE
+#define KEY_LGUI        SDLK_LGUI
+#define KEY_RGUI        SDLK_RGUI
+#define KEY_MENU        SDLK_MENU
+#define KEY_TAB         SDLK_TAB
+#define KEY_BS          SDLK_BACKSPACE
+#define KEY_RET         SDLK_RETURN
+#define KEY_PAUSE       SDLK_PAUSE
+#define KEY_SCR_LOCK    SDLK_SCROLLOCK
+#define KEY_ESC         SDLK_ESCAPE
+
+#define QUIT            SDL_QUIT
+
+// graphics modes. Expanded from the original GRAPHICS.H
+
+enum {
+  DETECT = -1,
+  grOk = 0, SDL = 0,
+  // all modes @ 320x200 
+  SDL_320x200 = 1, SDL_CGALO = 1, CGA = 1, CGAC0 = 1, CGAC1 = 1,
+  CGAC2 = 1, CGAC3 = 1, MCGAC0 = 1, MCGAC1 = 1, MCGAC2 = 1,
+  MCGAC3 = 1, ATT400C0 = 1, ATT400C1 = 1, ATT400C2 = 1, ATT400C3 = 1,
+  // all modes @ 640x200
+  SDL_640x200 = 2, SDL_CGAHI = 2, CGAHI = 2, MCGAMED = 2,
+  EGALO = 2, EGA64LO = 2,
+  // all modes @ 640x350
+  SDL_640x350 = 3, SDL_EGA = 3, EGA = 3, EGAHI = 3,
+  EGA64HI = 3, EGAMONOHI = 3,
+  // all modes @ 640x480
+  SDL_640x480 = 4, SDL_VGA = 4, VGA = 4, MCGAHI = 4, VGAHI = 4,
+  IBM8514LO = 4,
+  // all modes @ 720x348
+  SDL_720x348 = 5, SDL_HERC = 5,
+  // all modes @ 720x350
+  SDL_720x350 = 6, SDL_PC3270 = 6, HERCMONOHI = 6,
+  // all modes @ 800x600
+  SDL_800x600 = 7, SDL_SVGALO = 7, SVGA = 7,
+  // all modes @ 1024x768
+  SDL_1024x768 = 8, SDL_SVGAMED1 = 8,
+  // all modes @ 1152x900
+  SDL_1152x900 = 9, SDL_SVGAMED2 = 9,
+  // all modes @ 1280x1024
+  SDL_1280x1024 = 10, SDL_SVGAHI = 10,
+  // all modes @ 1366x768
+  SDL_1366x768 = 11, SDL_WXGA = 11,
+  // other
+  SDL_USER = 12, SDL_FULLSCREEN = 13
+};
+
+// libXbgi compatibility
+
+#define X11_CGALO       SDL_CGALO
+#define X11_CGAHI       SDL_CGAHI
+#define X11_EGA         SDL_EGA
+#define X11             SDL
+#define X11_VGA         SDL_VGA
+#define X11_640x480     SDL_640x480
+#define X11_HERC        SDL_HERC
+#define X11_PC3270      SDL_PC3270
+#define X11_SVGALO      SDL_SVGALO
+#define X11_800x600     SDL_800x600
+#define X11_SVGAMED1    SDL_SVGAMED1
+#define X11_1024x768    SDL_1024x768
+#define X11_SVGAMED2    SDL_SVGAMED2
+#define X11_1152x900    SDL_1152x900
+#define X11_SVGAHI      SDL_SVGAHI
+#define X11_1280x1024   SDL_1280x1024
+#define X11_WXGA        SDL_WXGA
+#define X11_1366x768    SDL_1366x768
+#define X11_USER        SDL_USER
+#define X11_FULLSCREEN  SDL_FULLSCREEN
+
+// structs
+
+struct arccoordstype {
+  int x;
+  int y;
+  int xstart;
+  int ystart;
+  int xend;
+  int yend;
+};
+
+struct date {
+  int da_year;
+  int da_day;
+  int da_mon;
+};
+
+struct fillsettingstype {
+  int pattern;
+  int color;
+};
+
+struct linesettingstype {
+  int linestyle;
+  unsigned int upattern;
+  int thickness;
+};
+
+struct palettetype {
+  unsigned char size;
+  signed char colors[MAXCOLORS + 1];
+};
+
+struct textsettingstype {
+  int font;
+  int direction;
+  int charsize;
+  int horiz;
+  int vert;
+};
+
+struct viewporttype {
+  int left;
+  int top;
+  int right;
+  int bottom;
+  int clip;
+};
+
+//procs and functions
+
+void arc (int, int, int, int, int);
+void bar3d (int, int, int, int, int, int);
+void bar (int, int, int, int);
+void circle (int, int, int);
+void cleardevice ();
+void clearviewport ();
+void closegraph (void);
+void delay (int msec);
+void detectgraph (int *, int *);
+void drawpoly (int, int *);
+void ellipse (int, int, int, int, int, int);
+void fillellipse (int, int, int, int);
+void fillpoly (int, int *);
+void floodfill (int, int, int);
+int  getactivepage (void);
+void getarccoords (struct arccoordstype *);
+void getaspectratio (int *, int *);
+int  getbkcolor (void);
+int  bgi_getch (void);
+// circumvents Mingw bug
+#define getch bgi_getch
+int  getcolor (void);
+struct palettetype *getdefaultpalette (void);
+char *getdrivername (void);
+void getfillpattern (char *);
+void getfillsettings (struct fillsettingstype *);
+int  getgraphmode (void);
+void getimage (int, int, int, int, void *);
+void getlinesettings (struct linesettingstype *);
+int  getmaxcolor (void);
+int  getmaxmode (void);
+int  getmaxx (void);
+int  getmaxy (void);
+char *getmodename (int);
+void getmoderange (int, int *, int *);
+void getpalette (struct palettetype *);
+int  getpalettesize (struct palettetype *);
+unsigned int getpixel (int, int);
+void gettextsettings (struct textsettingstype *);
+void getviewsettings (struct viewporttype *);
+int  getvisualpage (void);
+int  getx (void);
+int  gety (void);
+void graphdefaults ();
+char *grapherrormsg (int);
+int  graphresult (void);
+unsigned imagesize (int, int, int, int);
+void initgraph (int *, int *, char *);
+int  installuserdriver (char *name, int (*detect)(void));
+int  installuserfont (char *);
+int  kbhit (void);
+void line (int, int, int, int);
+void linerel (int dx, int dy);
+void lineto (int x, int y);
+void moverel (int, int);
+void moveto (int, int);
+void outtext (char *);
+void outtextxy (int, int, char *);
+void pieslice (int, int, int, int, int);
+void putimage (int, int, void *, int);
+void putpixel (int, int, int);
+#define random(range) (rand() % (range))
+void readimagefile (char *, int, int, int, int);
+void rectangle (int, int, int, int);
+int  registerbgidriver (void (*driver)(void));
+int  registerbgifont (void (*font)(void));
+void restorecrtmode (void);
+void sector (int, int, int, int, int, int);
+void setactivepage (int);
+void setallpalette (struct palettetype *);
+void setaspectratio (int, int);
+void setbkcolor (int);
+void setcolor (int);
+void setfillpattern (char *, int);
+void setfillstyle (int, int);
+unsigned setgraphbufsize (unsigned);
+void setgraphmode (int);
+void setlinestyle (int, unsigned, int);
+void setpalette (int, int);
+void settextjustify (int, int);
+void settextstyle (int, int, int);
+void setusercharsize (int, int, int, int);
+void setviewport (int, int, int, int, int);
+void setvisualpage (int);
+void setwritemode (int);
+int  textheight (char *);
+int  textwidth (char *);
+void writeimagefile (char *, int, int, int, int);
+
+// SDL_bgi extensions
+
+int  ALPHA_VALUE (int);
+int  BLUE_VALUE (int);
+void closewindow (int);
+int  COLOR (int, int, int);
+int  event (void);
+int eventtype (void);
+void freeimage (void *);
+int  getcurrentwindow (void);
+int  getevent (void);
+void getmouseclick (int, int *, int *);
+int  GREEN_VALUE (int);
+void initwindow (int, int);
+int  IS_BGI_COLOR (int color);
+int  ismouseclick (int);
+int  IS_RGB_COLOR (int color);
+int  mouseclick (void);
+int  mousex (void);
+int  mousey (void);
+void _putpixel (int, int);
+int  RED_VALUE (int );
+void refresh (void);
+void sdlbgiauto (void);
+void sdlbgifast (void);
+void sdlbgislow (void);
+void setalpha (int, Uint8);
+void setbkrgbcolor (int);
+void setblendmode (int);
+void setcurrentwindow (int);
+void setrgbcolor (int);
+void setrgbpalette (int, int, int, int);
+void setwinoptions (char *, int, int, Uint32);
+void showerrorbox (const char *);
+void swapbuffers (void);
+int  xkbhit (void);
+
+implementation
 
 SDL_Window   *bgi_window;
 SDL_Renderer *bgi_renderer;
 SDL_Texture  *bgi_texture;
 
-// static variables
+//SDL v1: Mainsurface,Surface(x)
 
 static SDL_Window   *bgi_win[NUM_BGI_WIN];
 static SDL_Renderer *bgi_rnd[NUM_BGI_WIN];
@@ -137,14 +504,14 @@ static int
   bgi_maxx,               // screen size
   bgi_maxy,
   bgi_gm,                 // graphics mode
-  bgi_argb_mode = NOPE,   // BGI or ARGB colors
+  bgi_argb_mode = NO,   // BGI or ARGB colors
   bgi_writemode,          // plotting method (COPY_PUT, XOR_PUT...)
   bgi_blendmode =
     SDL_BLENDMODE_BLEND,  // blending mode
   bgi_ap,                 // active page number
   bgi_vp,                 // visual page number
   bgi_np = 0,             // # of actual pages
-  refresh_needed = NOPE,  // update callback should be called
+  refresh_needed = NO,  // update callback should be called
   refresh_rate = 0;       // window refresh rate
 
 // mutex for update timer/thread
@@ -157,9 +524,9 @@ char
 
 // booleans
 static int
-  window_is_hidden = NOPE,
-  key_pressed = NOPE,
-  xkey_pressed = NOPE;
+  window_is_hidden = NO,
+  key_pressed = NO,
+  xkey_pressed = NO;
 
 static float
   bgi_font_mag_x = 1.0,  // font magnification
@@ -797,11 +1164,11 @@ void closegraph (void)
 
   // waits for update callback to finish
 
-  refresh_needed = NOPE;
+  refresh_needed = NO;
   SDL_Delay (500);
 
   for (int i = 0; i < num_windows; i++)
-    if (YEAH == active_windows[i]) {
+    if (YES == active_windows[i]) {
       SDL_DestroyTexture (bgi_txt[i]);
       SDL_DestroyRenderer (bgi_rnd[i]);
       SDL_DestroyWindow (bgi_win[i]);
@@ -823,7 +1190,7 @@ void closewindow (int id)
 {
   // Closes a window.
 
-  if (NOPE == active_windows[id]) {
+  if (NO == active_windows[id]) {
     fprintf (stderr, "Window %d does not exist\n", id);
     return;
   }
@@ -831,7 +1198,7 @@ void closewindow (int id)
   SDL_DestroyTexture (bgi_txt[id]);
   SDL_DestroyRenderer (bgi_rnd[id]);
   SDL_DestroyWindow (bgi_win[id]);
-  active_windows[id] = NOPE;
+  active_windows[id] = NO;
   num_windows--;
 
 } // closegraph ()
@@ -866,9 +1233,9 @@ void delay (int msec)
   do {
 
     if (kbhit ()) // take care of keypresses
-      key_pressed = YEAH;
+      key_pressed = YES;
     if (xkbhit ())
-      xkey_pressed = YEAH;
+      xkey_pressed = YES;
 
   } while (SDL_GetTicks () < stop);
 
@@ -961,7 +1328,7 @@ void ellipse (int x, int y, int stangle, int endangle,
 
 int event (void)
 {
-  // Returns YEAH if an event has occurred.
+  // Returns YES if an event has occurred.
 
   SDL_Event event;
 
@@ -972,10 +1339,10 @@ int event (void)
          (SDL_QUIT == event.type) ) {
       SDL_PushEvent (&event); // don't disrupt the event
       bgi_last_event = event.type;
-      return YEAH;
+      return YES;
     }
   }
-  return NOPE;
+  return NO;
 
 } // event ()
 
@@ -991,7 +1358,7 @@ int eventtype (void)
 
 // -----
 
-// Yeah, duplicated code. The thing is, I can't catch the bug.
+// YES, duplicated code. The thing is, I can't catch the bug.
 
 void _ellipse (int cx, int cy, int xradius, int yradius)
 {
@@ -1442,12 +1809,12 @@ void floodfill (int x, int y, int border)
       tmp_color = bgi_fill_style.color;
       // find a suitable temporary fill colour; it must be different
       // than the border and the background
-      found = NOPE;
+      found = NO;
       while (!found) {
         bgi_fill_style.color = BLUE + random (WHITE);
         if (oldcol != bgi_fill_style.color &&
             border != bgi_fill_style.color)
-          found = YEAH;
+          found = YES;
       }
       _floodfill (x, y, border);
       // ...then pattern fill
@@ -2027,7 +2394,7 @@ void graphdefaults (void)
 
   vp.right = bgi_maxx;
   vp.bottom = bgi_maxy;
-  vp.clip = NOPE;
+  vp.clip = NO;
 
   // initialise the CP
   bgi_cp_x = 0;
@@ -2086,7 +2453,7 @@ void initgraph (int *graphdriver, int *graphmode, char *pathtodriver)
 {
   // Initializes the graphics system.
 
-  bgi_fast_mode = NOPE;   // BGI compatibility
+  bgi_fast_mode = NO;   // BGI compatibility
 
   // the graphics driver parameter is ignored and is always
   // set to SDL; graphics modes may vary; the path parameter is
@@ -2179,7 +2546,7 @@ void initwindow (int width, int height)
     page;
 
   static int
-    first_run = YEAH,    // first run of initwindow()
+    first_run = YES,    // first run of initwindow()
     fullscreen = -1;     // fullscreen window already created?
 
   // the mutex is used by update()
@@ -2200,8 +2567,8 @@ void initwindow (int width, int height)
   SDL_DisplayMode mode =
   { SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, 0 };
 
-  if (YEAH == first_run) {
-    first_run = NOPE;
+  if (YES == first_run) {
+    first_run = NO;
      // initialise SDL2
     if (SDL_Init (SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
       SDL_Log ("SDL_Init() failed: %s", SDL_GetError ());
@@ -2210,7 +2577,7 @@ void initwindow (int width, int height)
     }
     // initialise active_windows[]
     for (int i = 0; i < NUM_BGI_WIN; i++)
-      active_windows[i] = NOPE;
+      active_windows[i] = NO;
   }
 
   // any display available?
@@ -2230,12 +2597,12 @@ void initwindow (int width, int height)
   // find a free ID for the window
   do {
     current_window++;
-    if (NOPE == active_windows[current_window])
+    if (NO == active_windows[current_window])
       break;
   } while (current_window < NUM_BGI_WIN);
 
   if (current_window < NUM_BGI_WIN) {
-    active_windows[current_window] = YEAH;
+    active_windows[current_window] = YES;
     num_windows++;
   }
   else {
@@ -2244,7 +2611,7 @@ void initwindow (int width, int height)
   }
 
   // check if a fullscreen window is already open
-  if (YEAH == fullscreen) {
+  if (YES == fullscreen) {
     fprintf (stderr, "Fullscreen window already open.\n");
     return;
   }
@@ -2253,19 +2620,19 @@ void initwindow (int width, int height)
   bgi_maxx = width - 1;
   bgi_maxy = height - 1;
 
-  if (NOPE == bgi_fast_mode) {  // called by initgraph ()
+  if (NO == bgi_fast_mode) {  // called by initgraph ()
     if (!width || !height) {    // fullscreen
       bgi_maxx = mode.w - 1;
       bgi_maxy = mode.h - 1;
       window_flags = window_flags | SDL_WINDOW_FULLSCREEN_DESKTOP;
-      fullscreen = YEAH;
+      fullscreen = YES;
     }
     else {
       bgi_maxx = width - 1;
       bgi_maxy = height - 1;
-      fullscreen = NOPE;
+      fullscreen = NO;
     }
-  } // if (NOPE == bgi_fast_mode)
+  } // if (NO == bgi_fast_mode)
   else { // initwindow () called directly
     if (width > mode.w || height > mode.h) {
       // window too large - force fullscreen
@@ -2275,13 +2642,13 @@ void initwindow (int width, int height)
     if ( (0 != width) && (0 != height) ) {
       bgi_maxx = width - 1;
       bgi_maxy = height - 1;
-      fullscreen = NOPE;
+      fullscreen = NO;
     }
     else { // 0, 0: fullscreen
       bgi_maxx = mode.w - 1;
       bgi_maxy = mode.h - 1;
       window_flags = window_flags | SDL_WINDOW_FULLSCREEN_DESKTOP;
-      fullscreen = YEAH;
+      fullscreen = YES;
     }
   }
 
@@ -2404,9 +2771,9 @@ int kbhit (void)
 
   update ();
 
-  if (YEAH == key_pressed) { // a key was pressed during delay()
-    key_pressed = NOPE;
-    return YEAH;
+  if (YES == key_pressed) { // a key was pressed during delay()
+    key_pressed = NO;
+    return YES;
   }
 
   if (SDL_PollEvent (&event)) {
@@ -2425,9 +2792,9 @@ int kbhit (void)
           key != SDLK_CAPSLOCK &&
           key != SDLK_MENU &&
           key != SDLK_APPLICATION)
-        return YEAH;
+        return YES;
       else
-        return NOPE;
+        return NO;
     } // if (SDL_KEYDOWN == event.type)
     else
       if (SDL_WINDOWEVENT == event.type) {
@@ -2438,7 +2805,7 @@ int kbhit (void)
       SDL_PushEvent (&event); // don't disrupt the mouse
   }
 
-  return NOPE;
+  return NO;
 
 } // kbhit ()
 
@@ -2814,7 +3181,7 @@ void line_fast (int x1, int y1, int x2, int y2)
   int
     fastmode = bgi_fast_mode;
 
-  bgi_fast_mode = YEAH; // draw in fast mode
+  bgi_fast_mode = YES; // draw in fast mode
   line (x1, y1, x2, y2);
   bgi_fast_mode = fastmode;
 
@@ -2871,13 +3238,13 @@ int mouseclick (void)
         }
       else {
         SDL_PushEvent (&event); // don't disrupt the keyboard
-        return NOPE;
+        return NO;
       }
-      return NOPE;
+      return NO;
 
     } // if
     else
-      return NOPE;
+      return NO;
 
   } // while
 
@@ -2907,7 +3274,7 @@ int ismouseclick (int btn)
 
   }
 
-  return NOPE;
+  return NO;
 
 } // ismouseclick ()
 
@@ -3268,7 +3635,7 @@ void putpixel_copy (int x, int y, Uint32 pixel)
   if (x < 0 || x > bgi_maxx || y < 0 || y > bgi_maxy)
     return;
 
-  if (YEAH == vp.clip)
+  if (YES == vp.clip)
     if (x < vp.left || x > vp.right || y < vp.top || y > vp.bottom)
       return;
 
@@ -3291,7 +3658,7 @@ void putpixel_xor (int x, int y, Uint32 pixel)
   if (x < 0 || x > bgi_maxx || y < 0 || y > bgi_maxy)
     return;
 
-  if (YEAH == vp.clip)
+  if (YES == vp.clip)
     if (x < vp.left || x > vp.right || y < vp.top || y > vp.bottom)
       return;
 
@@ -3310,7 +3677,7 @@ void putpixel_and (int x, int y, Uint32 pixel)
   if (x < 0 || x > bgi_maxx || y < 0 || y > bgi_maxy)
     return;
 
-  if (YEAH == vp.clip)
+  if (YES == vp.clip)
     if (x < vp.left || x > vp.right || y < vp.top || y > vp.bottom)
       return;
 
@@ -3329,7 +3696,7 @@ void putpixel_or (int x, int y, Uint32 pixel)
   if (x < 0 || x > bgi_maxx || y < 0 || y > bgi_maxy)
     return;
 
-  if (YEAH == vp.clip)
+  if (YES == vp.clip)
     if (x < vp.left || x > vp.right || y < vp.top || y > vp.bottom)
       return;
 
@@ -3348,7 +3715,7 @@ void putpixel_not (int x, int y, Uint32 pixel)
   if (x < 0 || x > bgi_maxx || y < 0 || y > bgi_maxy)
     return;
 
-  if (YEAH == vp.clip)
+  if (YES == vp.clip)
     if (x < vp.left || x > vp.right || y < vp.top || y > vp.bottom)
       return;
 
@@ -3369,18 +3736,18 @@ void putpixel (int x, int y, int color)
   y += vp.top;
 
   // clip
-  if (YEAH == vp.clip)
+  if (YES == vp.clip)
     if (x < vp.left || x > vp.right || y < vp.top || y > vp.bottom)
       return;
 
    // COLOR () set up the BGI_COLORS + 1 color
   if (-1 == color) {
-    bgi_argb_mode = YEAH;
+    bgi_argb_mode = YES;
     tmpcolor = TMP_FG_COL;
     palette[tmpcolor] = bgi_tmp_color_argb;
   }
   else {
-    bgi_argb_mode = NOPE;
+    bgi_argb_mode = NO;
     tmpcolor = color;
   }
 
@@ -3530,7 +3897,7 @@ void restorecrtmode (void)
   // Hides the graphics window.
 
   SDL_HideWindow (bgi_win[current_window]);
-  window_is_hidden = YEAH;
+  window_is_hidden = YES;
 
 } // restorecrtmode ()
 
@@ -3546,7 +3913,7 @@ static Uint32 updatecallback (Uint32 interval, void *param)
   if (refresh_needed)
     refresh_window ();
 
-  refresh_needed = NOPE;
+  refresh_needed = NO;
 
   if (update_mutex)
     SDL_UnlockMutex (update_mutex);
@@ -3567,7 +3934,7 @@ void update (void)
   if (! bgi_fast_mode)
     refresh_window ();
   else
-    refresh_needed = YEAH;
+    refresh_needed = YES;
 
   if (update_mutex)
     SDL_UnlockMutex (update_mutex);
@@ -3586,7 +3953,7 @@ void update_pixel (int x, int y)
   if (! bgi_fast_mode)
     updaterect (x, y, x, y);
   else
-    refresh_needed = YEAH;
+    refresh_needed = YES;
 
   if (update_mutex)
     SDL_UnlockMutex (update_mutex);
@@ -3621,7 +3988,7 @@ void sdlbgiauto ()
 
   // install a timer to periodically update the screen
   SDL_AddTimer (interval, updatecallback, NULL);
-  bgi_fast_mode = YEAH;
+  bgi_fast_mode = YES;
 
 } // sdlbgiauto ()
 
@@ -3632,7 +3999,7 @@ void sdlbgifast (void)
   // Triggers "fast mode", i.e. refresh() is needed to
   // display graphics.
 
-  bgi_fast_mode = YEAH;
+  bgi_fast_mode = YES;
 
 } // sdlbgifast ()
 
@@ -3643,7 +4010,7 @@ void sdlbgislow (void)
   // Triggers "slow mode", i.e. refresh() is not needed to
   // display graphics.
 
-  bgi_fast_mode = NOPE;
+  bgi_fast_mode = NO;
 
 } // sdlbgislow ()
 
@@ -3733,11 +4100,11 @@ void setalpha (int col, Uint8 alpha)
 
   // COLOR () set up the WHITE + 1 color
   if (-1 == col) {
-    bgi_argb_mode = YEAH;
+    bgi_argb_mode = YES;
     bgi_fg_color = WHITE + 1;
   }
   else {
-    bgi_argb_mode = NOPE;
+    bgi_argb_mode = NO;
     bgi_fg_color = col;
   }
   tmp = palette[bgi_fg_color] << 8; // get rid of alpha
@@ -3765,12 +4132,12 @@ void setbkcolor (int col)
 
   // COLOR () set up the BGI_COLORS + 2 color
   if (-1 == col) {
-    bgi_argb_mode = YEAH;
+    bgi_argb_mode = YES;
     bgi_bg_color = BGI_COLORS + 2;
     palette[bgi_bg_color] = bgi_tmp_color_argb;
   }
   else {
-    bgi_argb_mode = NOPE;
+    bgi_argb_mode = NO;
     bgi_bg_color = col;
   }
 
@@ -3805,12 +4172,12 @@ void setcolor (int col)
 
   // COLOR () set up the BGI_COLORS + 1 color
   if (-1 == col) {
-    bgi_argb_mode = YEAH;
+    bgi_argb_mode = YES;
     bgi_fg_color = TMP_FG_COL;
     palette[bgi_fg_color] = bgi_tmp_color_argb;
   }
   else {
-    bgi_argb_mode = NOPE;
+    bgi_argb_mode = NO;
     bgi_fg_color = col;
   }
 
@@ -3822,7 +4189,7 @@ void setcurrentwindow (int id)
 {
   // Sets the current window.
 
-  if (NOPE == active_windows[id]) {
+  if (NO == active_windows[id]) {
     fprintf (stderr, "Window %d does not exist.\n", id);
     return;
   }
@@ -3870,13 +4237,13 @@ void setfillpattern (char *upattern, int color)
 
   // COLOR () set up the BGI_COLORS + 3 color
   if (-1 == color) {
-    bgi_argb_mode = YEAH;
+    bgi_argb_mode = YES;
     bgi_fill_color = BGI_COLORS + 3;
     palette[bgi_fill_color] = bgi_tmp_color_argb;
     bgi_fill_style.color = bgi_fill_color;
   }
   else {
-    bgi_argb_mode = NOPE;
+    bgi_argb_mode = NO;
     bgi_fill_style.color = color;
   }
 
@@ -3894,13 +4261,13 @@ void setfillstyle (int pattern, int color)
 
   // COLOR () set up the temporary fill colour
   if (-1 == color) {
-    bgi_argb_mode = YEAH;
+    bgi_argb_mode = YES;
     bgi_fill_color = TMP_FILL_COL - 1;
     palette[bgi_fill_color] = bgi_tmp_color_argb;
     bgi_fill_style.color = bgi_fill_color;
   }
   else {
-    bgi_argb_mode = NOPE;
+    bgi_argb_mode = NO;
     bgi_fill_style.color = color;
   }
 
@@ -3913,7 +4280,7 @@ void setgraphmode (int mode)
   // Shows the window that was hidden by restorecrtmode ().
 
   SDL_ShowWindow (bgi_win[current_window]);
-  window_is_hidden = NOPE;
+  window_is_hidden = NO;
 
 } // setgraphmode ()
 
@@ -4241,14 +4608,14 @@ int xkbhit (void)
 
   update ();
 
-  if (YEAH == xkey_pressed) { // a key was pressed during delay()
-    xkey_pressed = NOPE;
-    return YEAH;
+  if (YES == xkey_pressed) { // a key was pressed during delay()
+    xkey_pressed = NO;
+    return YES;
   }
 
   if (SDL_PollEvent (&event)) {
     if (SDL_KEYDOWN == event.type)
-      return YEAH;
+      return YES;
     else
       if (SDL_WINDOWEVENT == event.type) {
         if (SDL_WINDOWEVENT_CLOSE == event.window.event)
@@ -4257,7 +4624,7 @@ int xkbhit (void)
     else
       SDL_PushEvent (&event); // don't disrupt the mouse
   }
-  return NOPE;
+  return NO;
 
 } // xkbhit ()
 
