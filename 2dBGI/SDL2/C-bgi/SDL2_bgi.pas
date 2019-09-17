@@ -1,18 +1,18 @@
-Unit SDL2_bgi;  //      -*- PASCAL -*-
+Unit SDL2_bgi;  
 
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs
 // and for teaching.
 
+// **MODIFIED FROM ORIGINAL C to FreePascal**
 
 // Updated to FreePascal/Lazarus by Richard Jasmin
 // Original Code By Guido Gonzato, PhD
 // Automatic refresh patch by Marco Diego Aurélio Mesquita
-// August 1, 2019
 
 {
 
-Copyright (c) 2014-2019 Guido Gonzato, PhD
+Copyright (c) 2014-2019 Guido Gonzato, PhD and Richard Jasmin
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -29,6 +29,20 @@ freely, subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
+
+--
+
+This files header (include) needs to be broken back down once the sources are more stable.
+
+This is for compatiblility -FPC can pull in this unit - if done correctly- bypassing 
+FPCs ANCIENT libSVGA unit version of libGraph and "compensating for using X11" these days.
+
+That old FPC libSVGA unit "may be useful" once we get Framebuffer or KMS functional-
+either as a fallback- or for RasPi.
+
+It will probably need an overhaul in the palette department. I am aware of this.
+
+-Jazz
 
 }
 
@@ -116,7 +130,7 @@ const
      WM_WHEELDOWN    =SDL_USEREVENT + 1;
      WM_MOUSEMOVE    =SDL_MOUSEMOTION;
 
-     PALETTE_SIZE    =4096;
+     PALETTE_SIZE    =512; // 256 colors ~ 512BYTES on disk(measured)
 
 --
 ** DO NOT COMPILE UNIT PORT IS COMPLETE **
