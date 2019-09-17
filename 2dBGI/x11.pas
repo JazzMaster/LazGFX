@@ -24,6 +24,7 @@ So far this is about 3 days worth of work-
 much faster than the old ways I was doing things.
 
 FPC team made this sooo much worse than it needs to be....
+3 lines of code to draw a circle/ellipse...
 
 }
 
@@ -83,6 +84,8 @@ var
   screen_colormap:TColormap;     // color map to use for allocating colors.   
   red, brown, blue, yellow, green:TXColor;
 	
+  vinfo:TXVisualInfo;
+  
   Context:PXGC;
   key:PKeySym;
 
@@ -332,6 +335,10 @@ begin
 
 
 //probe:
+
+//        XMatchVisualInfo()
+
+
     //query xrandr: get the available modes and bpp- see if we are above the requested.
     //if below - then x,y,bpp must match us or below ONLY. 
     //cycle thru modes until we find a match
@@ -370,13 +377,17 @@ begin
   DisplayHeight := XDisplayHeight(D, S);
   DefaultVisual := XDefaultVisual(d, S);
   DisplayDepth  := XDefaultDepth(d, S);
- screen_colormap := DefaultColormap(d, DefaultScreen(d));
+  screen_colormap := DefaultColormap(d, DefaultScreen(d));
+  //if bpp =32...
+    XMatchVisualInfo(d, XDefaultScreen(d), Requestedbpp, TrueColor, @vinfo);
+    attr.colormap := XCreateColormap(d, RootWindow(d), vinfo.visual, AllocNone);
 
-//  DefaultColorMap := XDefaultColorMap(D, DefaultScreen(d));
+//create window w specified depth(may fail)
+    w:= XCreateWindow(d, RootWindow(d), 0, 0, Xres, YRes, 0, vinfo.depth, InputOutput, vinfo.visual, Colormap , @attr);
 
 
   { create window }
-  w := XCreateSimpleWindow(d, RootWindow(d, s), 10, 10, XRes, YRes, 1,  BlackPixel(d, s), WhitePixel(d, s));
+//  w := XCreateSimpleWindow(d, RootWindow(d, s), 10, 10, XRes, YRes, 1,  Black,white);
 
 //  w := XCreateWindow(d, RootWindow(d,s), FLeft, FTop, FWidth, FHeight, 0, CopyFromParent, InputOutput, DefaultVisual,mask, @attr);
   if w = 0 then

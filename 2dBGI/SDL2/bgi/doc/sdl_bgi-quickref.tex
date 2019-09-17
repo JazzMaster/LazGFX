@@ -1,0 +1,1634 @@
+% sdl_bgi-quickref.tex
+%
+% Guido Gonzato, PhD
+% August 1, 2019
+
+\documentclass[a4paper,11pt]{article}
+\usepackage{graphicx}
+\thispagestyle{empty}
+\usepackage{color}
+\usepackage{alltt}
+\usepackage{framed}
+\usepackage{setspace}
+\usepackage[margin=3cm]{geometry}
+\usepackage[colorlinks,urlcolor=blue]{hyperref}
+
+\frenchspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+
+\newcommand{\SDLbgi}{\texttt{SDL\_bgi}}
+
+\newcommand{\version}{2.3.0}        % !!! <<<=== Change here !!!
+
+\newcommand{\V}{\texttt{void}}      % void
+\newcommand{\I}{\texttt{int}}       % int
+\newcommand{\Ue}{\texttt{Uint8}}    % Uint8
+\newcommand{\Ut}{\texttt{Uint32}}   % Uint32
+\newcommand{\C}{\texttt{char *}}    % char *
+\newcommand{\func}[1]{\textbf{\texttt{#1}}}  % function
+\newcommand{\A}[1]{\emph{#1}}       % parameter
+\newcommand{\F}[1]{\texttt{#1}}     % file
+\newcommand{\T}[1]{\texttt{#1}}     % constant
+
+\newcommand{\file}[1]{\texttt{#1}}
+
+\definecolor{defaultshadecolor}{rgb}{0.85,0.85,1}
+\definecolor{shadecolor}{rgb}{0.85,0.85,1}
+\definecolor{gray}{rgb}{0.7,0.7,0.7}
+\definecolor{charcolor}{rgb}{1,0.85,0.85}
+\definecolor{lightred}{rgb}{1,0.7,0.7}
+\definecolor{darkblue}{rgb}{0,0,0.5}
+\definecolor{darkred}{rgb}{0.75,0,0}
+
+\newenvironment{bgi}
+{ % beg def
+  \begin{snugshade}
+}
+{ % end def
+  \end{snugshade}
+}
+
+% =====
+
+\begin{document}
+
+\title{\SDLbgi{} \version{} Quick Reference}
+
+\author{Guido Gonzato, PhD}
+
+\date{\today}
+
+\maketitle
+
+\begin{center}
+  \includegraphics[width=0.5\textwidth]{SDL_bgi_logo.png}  
+\end{center}
+
+\tableofcontents
+
+% =====
+
+\section{Introduction to \SDLbgi}
+
+\SDLbgi{} is an SDL2-based implementation of BGI (Borland Graphics
+Interface, a.k.a. \texttt{graphics.h}), a graphics library that was
+part of Turbo/Borland C compilers for DOS. BGI was the \emph{de facto}
+standard for computer graphics in the late eighties--early nineties,
+especially in education.
+
+\SDLbgi{} is one of the easiest ways to do graphics programming in C.
+It is much simpler (but obviously, less complete) than SDL, OpenGL and
+the like. Teachers may find \SDLbgi{} a useful tool for introductory
+computer graphics courses.
+
+For example, this is a minimal program that opens a window and draws
+1000 random lines:
+
+\begin{small}
+\begin{spacing}{0.9}
+\begin{verbatim}
+#include <graphics.h>
+
+int main (int argc, char *argv[])
+{
+  int i, gd = DETECT, gm;
+  initgraph (&gd, &gm, "");
+  setbkcolor (BLACK);
+  cleardevice ();
+  outtextxy (0, 0, "Drawing 1000 lines...");
+  for (i = 0; i < 1000; i++) {
+    setcolor (1 + random (15));
+    line (random(getmaxx()), random(getmaxy()),
+    random (getmaxx()), random(getmaxy()) );
+  }
+  getch ();
+  closegraph ();
+  return 0;
+}
+\end{verbatim}
+\end{spacing}
+\end{small}
+
+The program includes the header file \F{graphics.h}, which in turn
+includes \F{SDL\_bgi.h} that contains all necessary definitions. The
+call to \func{initgraph()} opens a window; from now on, graphics
+functions may be called. \func{closegraph()} closes the window.
+ 
+Within the window, pixel coordinates range from (0, 0), the upper left
+corner, to (\func{get\-maxx()}, \func{getmaxy()}), the lower right
+corner.
+
+Some graphic functions set the coordinates of the last drawing
+position, defined as CP (Current Position). At any given moment, a
+foreground, background and fill colour, line style, line thickness,
+and fill pattern, are defined. A viewport (subwindow) may also be
+defined, with or without clipping. All of these parameters can be
+changed using appropriate functions.
+
+% -----
+
+\subsection{Constants}
+
+Many constants are defined in \F{SDL\_bgi.h}. The most important are
+the following:
+
+\begin{small}
+\begin{spacing}{0.85}
+\begin{verbatim}
+#ifndef _SDL_BGI_H
+#define _SDL_BGI_H
+
+#define SDL_BGI_VERSION 2.3.0
+
+enum { NOPE, YEAH };
+#define BGI_WINTITLE_LEN 512 // more than enough
+
+// number of concurrent windows that can be created
+
+#define NUM_BGI_WIN 16
+
+// everything gets drawn here
+
+extern SDL_Window   *bgi_window;
+extern SDL_Renderer *bgi_renderer;
+extern SDL_Texture  *bgi_texture;
+
+// available visual pages
+
+#define VPAGES 4
+
+// BGI fonts
+
+// only DEFAULT_FONT (8x8) is implemented
+enum {
+  DEFAULT_FONT, TRIPLEX_FONT, SMALL_FONT, SANSSERIF_FONT,
+  GOTHIC_FONT, BIG_FONT, SCRIPT_FONT, SIMPLEX_FONT,
+  TRIPLEX_SCR_FONT, COMPLEX_FONT, EUROPEAN_FONT, BOLD_FONT
+};
+
+enum { HORIZ_DIR, VERT_DIR };
+
+#define USER_CHAR_SIZE 0
+
+enum {
+  LEFT_TEXT, CENTER_TEXT, RIGHT_TEXT,
+  BOTTOM_TEXT = 0, TOP_TEXT = 2
+};
+
+// BGI colours
+
+enum {
+  BLACK, BLUE, GREEN, CYAN, RED, MAGENTA, BROWN,
+  LIGHTGRAY, DARKGRAY, LIGHTBLUE, LIGHTGREEN, LIGHTCYAN,
+  LIGHTRED, LIGHTMAGENTA, YELLOW, WHITE, MAXCOLORS = 15
+};
+
+// temporary colours
+
+enum { TMP_FG_COL = 16, TMP_BG_COL = 17, TMP_FILL_COL = 18 };
+
+// line style, thickness, and drawing mode
+
+enum { NORM_WIDTH = 1, THICK_WIDTH = 3 };
+
+enum { SOLID_LINE, DOTTED_LINE, CENTER_LINE, DASHED_LINE, USERBIT_LINE };
+
+enum { COPY_PUT, XOR_PUT, OR_PUT, AND_PUT, NOT_PUT };
+
+// fill styles
+
+enum {
+  EMPTY_FILL, SOLID_FILL, LINE_FILL, LTSLASH_FILL, SLASH_FILL,
+  BKSLASH_FILL, LTBKSLASH_FILL, HATCH_FILL, XHATCH_FILL,
+  INTERLEAVE_FILL, WIDE_DOT_FILL, CLOSE_DOT_FILL, USER_FILL
+};
+
+// mouse buttons
+
+#define WM_LBUTTONDOWN  SDL_BUTTON_LEFT
+#define WM_MBUTTONDOWN  SDL_BUTTON_MIDDLE
+#define WM_RBUTTONDOWN  SDL_BUTTON_RIGHT
+#define WM_WHEEL        SDL_MOUSEWHEEL
+#define WM_WHEELUP      SDL_USEREVENT
+#define WM_WHEELDOWN    SDL_USEREVENT + 1
+#define WM_MOUSEMOVE    SDL_MOUSEMOTION
+
+#define PALETTE_SIZE    4096
+
+#define KEY_HOME        SDLK_HOME
+#define KEY_LEFT        SDLK_LEFT
+#define KEY_UP          SDLK_UP
+#define KEY_RIGHT       SDLK_RIGHT
+#define KEY_DOWN        SDLK_DOWN
+#define KEY_PGUP        SDLK_PAGEUP
+#define KEY_PGDN        SDLK_PAGEDOWN
+#define KEY_END         SDLK_END
+#define KEY_INSERT      SDLK_INSERT
+#define KEY_DELETE      SDLK_DELETE
+#define KEY_F1          SDLK_F1
+#define KEY_F2          SDLK_F2
+#define KEY_F3          SDLK_F3
+#define KEY_F4          SDLK_F4
+#define KEY_F5          SDLK_F5
+#define KEY_F6          SDLK_F6
+#define KEY_F7          SDLK_F7
+#define KEY_F8          SDLK_F8
+#define KEY_F9          SDLK_F9
+#define KEY_F10         SDLK_F10
+#define KEY_F11         SDLK_F11
+#define KEY_F12         SDLK_F12
+#define KEY_CAPSLOCK    SDLK_CAPSLOCK
+#define KEY_LEFT_CTRL   SDLK_LCTRL
+#define KEY_RIGHT_CTRL  SDLK_RCTRL
+#define KEY_LEFT_SHIFT  SDLK_LSHIFT
+#define KEY_RIGHT_SHIFT SDLK_RSHIFT
+#define KEY_LEFT_ALT    SDLK_LALT
+#define KEY_RIGHT_ALT   SDLK_RALT
+#define KEY_ALT_GR      SDLK_MODE
+#define KEY_LGUI        SDLK_LGUI
+#define KEY_RGUI        SDLK_RGUI
+#define KEY_MENU        SDLK_MENU
+#define KEY_TAB         SDLK_TAB
+#define KEY_BS          SDLK_BACKSPACE
+#define KEY_RET         SDLK_RETURN
+#define KEY_PAUSE       SDLK_PAUSE
+#define KEY_SCR_LOCK    SDLK_SCROLLOCK
+#define KEY_ESC         SDLK_ESCAPE
+
+#define QUIT            SDL_QUIT
+
+// graphics modes. Expanded from the original GRAPHICS.H
+
+enum {
+  DETECT = -1,
+  grOk = 0, SDL = 0,
+  // all modes @ 320x200 
+  SDL_320x200 = 1, SDL_CGALO = 1, CGA = 1, CGAC0 = 1, CGAC1 = 1,
+  CGAC2 = 1, CGAC3 = 1, MCGAC0 = 1, MCGAC1 = 1, MCGAC2 = 1,
+  MCGAC3 = 1, ATT400C0 = 1, ATT400C1 = 1, ATT400C2 = 1, ATT400C3 = 1,
+  // all modes @ 640x200
+  SDL_640x200 = 2, SDL_CGAHI = 2, CGAHI = 2, MCGAMED = 2,
+  EGALO = 2, EGA64LO = 2,
+  // all modes @ 640x350
+  SDL_640x350 = 3, SDL_EGA = 3, EGA = 3, EGAHI = 3,
+  EGA64HI = 3, EGAMONOHI = 3,
+  // all modes @ 640x480
+  SDL_640x480 = 4, SDL_VGA = 4, VGA = 4, MCGAHI = 4, VGAHI = 4,
+  IBM8514LO = 4,
+  // all modes @ 720x348
+  SDL_720x348 = 5, SDL_HERC = 5,
+  // all modes @ 720x350
+  SDL_720x350 = 6, SDL_PC3270 = 6, HERCMONOHI = 6,
+  // all modes @ 800x600
+  SDL_800x600 = 7, SDL_SVGALO = 7, SVGA = 7,
+  // all modes @ 1024x768
+  SDL_1024x768 = 8, SDL_SVGAMED1 = 8,
+  // all modes @ 1152x900
+  SDL_1152x900 = 9, SDL_SVGAMED2 = 9,
+  // all modes @ 1280x1024
+  SDL_1280x1024 = 10, SDL_SVGAHI = 10,
+  // all modes @ 1366x768
+  SDL_1366x768 = 11, SDL_WXGA = 11,
+  // other
+  SDL_USER = 12, SDL_FULLSCREEN = 13
+};
+\end{verbatim}
+\end{spacing}
+\end{small}
+
+\subsection{Structs}
+
+Some of the BGI functions use the following structs:
+
+\begin{small}
+\begin{spacing}{0.85}
+\begin{verbatim}
+struct arccoordstype {
+  int x;
+  int y;
+  int xstart;
+  int ystart;
+  int xend;
+  int yend;
+};
+
+struct date {
+  int da_year;
+  int da_day;
+  int da_mon;
+};
+
+struct fillsettingstype {
+  int pattern;
+  int color;
+};
+
+struct linesettingstype {
+  int linestyle;
+  unsigned int upattern;
+  int thickness;
+};
+
+struct palettetype {
+  unsigned char size;
+  signed char colors[MAXCOLORS + 1];
+};
+
+struct textsettingstype {
+  int font;
+  int direction;
+  int charsize;
+  int horiz;
+  int vert;
+};
+
+struct viewporttype {
+  int left;
+  int top;
+  int right;
+  int bottom;
+  int clip;
+};
+
+struct bgi_info {
+  int colour_index;
+  char *colour_name;
+  unsigned long pixel_value;
+};
+
+struct rgb_colour {
+  int colour_index;
+  unsigned long pixel_value;
+};
+\end{verbatim}
+\end{spacing}
+\end{small}
+
+% -----
+
+\subsection{Colours}
+
+The default BGI palette includes 16 named colours (\T{BLACK}{\ldots}
+\T{WHITE}); functions \func{setbkco\-lor()}, \func{setcolor()},
+\func{getbkcolor()}, and \func{getcolor()} use this palette.
+
+An extended RGB palette of \T{PALETTE\_SIZE} additional colours can be
+created and accessed using the functions described below.
+
+Constants \T{TMP\_FG\_COL}, \T{TMP\_BG\_COL}, and \T{TMP\_FILL\_COL}
+denote the temporary foreground, background, and fill RGB colours that
+can be set up with the \func{COLOR()} function described below.
+
+% -----
+
+\subsection{Note for SDL2 Programmers}
+
+The following variables are declared in \F{SDL\_bgi.h}, and are
+accessible to the programmer:
+
+\begin{small}
+\begin{spacing}{0.85}
+\begin{verbatim}
+SDL_Window   *bgi_window;
+SDL_Renderer *bgi_renderer;
+SDL_Texture  *bgi_texture;
+\end{verbatim}
+\end{spacing}
+\end{small}
+
+and can be used by native SDL2 functions. That is, you can use BGI and
+native SDL2 functions together, as in the following code snippet:
+
+\begin{small}
+\begin{spacing}{0.85}
+\begin{verbatim}
+SDL_Surface *bitmap;
+SDL_Texture *texture;
+...
+bitmap = SDL_LoadBMP ("picture.bmp");
+texture = SDL_CreateTextureFromSurface (bgi_renderer, bitmap);
+SDL_RenderCopy (bgi_renderer, texture, NULL, NULL);
+SDL_RenderPresent (bgi_renderer);
+...
+\end{verbatim}
+\end{spacing}
+\end{small}
+
+% -----
+
+\section{Function List}
+
+\subsection{Standard BGI Graphics Functions}
+
+The following are standard BGI functions, as implemented for example
+in Turbo C. They are all prototyped in \F{SDL\_bgi.h}.
+
+Unless otherwise specified, graphics routines draw shapes using the
+current drawing colour, i.e.\ as specified by \func{setcolor()}.
+
+% -----
+
+\begin{bgi}
+  \V{} \func{arc} (\I{} \A{x}, \I{} \A{y}, \I{} \A{stangle}, \I{}
+  \A{endangle}, \I{} \A{radius});
+\end{bgi}
+
+Draws a circular arc centered at (\A{x}, \A{y}), with a radius given
+by \A{radius}, traveling from \A{stangle} to \A{endangle}. The angle
+for \func{arc()} is measured counterclockwise, with 0 degrees at 3 o'
+clock, 90 degrees at 12 o' clock, etc.
+
+\textbf{Note}: The \A{linestyle} parameter does not affect arcs,
+circles, ellipses, or pie\-slices. Only the \A{thickness} parameter is
+used.
+
+% -----
+
+\begin{bgi}
+\V{} \func{bar} (\I{} \A{left}, \I{} \A{top}, \I{} \A{right}, \I{}
+\A{bottom});
+\end{bgi}
+
+Draws a filled-in rectangle (bar), using the current fill colour and
+fill pattern. The bar is not outlined; to draw an outlined
+two-dimensional bar, use \func{bar3d()} with \A{depth} equal to 0.
+
+% -----
+
+\begin{bgi}
+\V{} \func{bar3d} (\I{} \A{left}, \I{} \A{top}, \I{} \A{right}, \I{}
+\A{bottom}, \I{} \A{depth}, \I{} \A{topflag});
+\end{bgi}
+
+Draws a three-dimensional, filled-in rectangle (bar), using the
+current fill colour and fill pattern. The three-dimensional outline of
+the bar is drawn in the current line style and colour. The bar's
+depth, in pixels, is given by \A{depth}. If \A{topflag} is nonzero, a
+top is put on.
+
+% -----
+
+\begin{bgi}
+\V{} \func{circle} (\I{} \A{x}, \I{} \A{y}, \I{} \A{radius});
+\end{bgi}
+
+Draws a circle of the given \A{radius} at (\A{x}, \A{y}).
+
+\textbf{Note}: The \A{linestyle} parameter does not affect arcs,
+circles, ellipses, or pie\-slices. Only the \A{thickness} parameter is
+used.
+
+% -----
+
+\begin{bgi}
+\V{} \func{cleardevice} (\V{});
+\end{bgi}
+
+Clears the graphics screen, filling it with the current background
+colour. The CP is moved to (0, 0).
+
+% -----
+
+\begin{bgi}
+\V{} \func{clearviewport} (\V{});
+\end{bgi}
+
+Clears the viewport, filling it with the current background colour.
+The CP is moved to (0, 0), relative to the viewport.
+
+% -----
+
+\begin{bgi}
+\V{} \func{closegraph} (\V{});
+\end{bgi}
+
+Closes the graphics system.
+
+% -----
+
+\begin{bgi}
+\V{} \func{detectgraph} (\I{} \A{*graphdriver}, \I{} \A{*graphmode});
+\end{bgi}
+
+Detects the graphics driver and default graphics mode to use; \T{SDL}
+and \T{SDL\_FULLSCREEN}, respectively.
+
+% -----
+
+\begin{bgi}
+\V{} \func{drawpoly} (\I{} \A{numpoints}, \I{} \A{*polypoints});
+\end{bgi}
+
+Draws a polygon of \A{numpoints} vertices. \A{polypoints} is a
+pointer to a sequence of (2 * \A{numpoints}) integers; each pair gives
+the \A{x} and \A{y} coordinate of each vertex.
+
+% -----
+
+\begin{bgi}
+\V{} \func{ellipse} (\I{} \A{x}, \I{} \A{y}, \I{} \A{stangle}, \I{}
+\A{endangle}, \I{} \A{xradius}, \I{} \A{yradius});
+\end{bgi}
+
+Draws an elliptical arc centered at (\A{x}, \A{y}), with axes given by
+\A{xradius} and \A{yradius}, traveling from \A{stangle} to
+\A{endangle}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{fillellipse} (\I{} \A{x}, \I{} \A{y}, \I{} \A{xradius},
+\I{} \A{yradius});
+\end{bgi}
+
+Draws an ellipse centered at (\A{x}, \A{y}), with axes given by
+\A{xradius} and \A{yradius}, and fills it using the current fill
+colour and fill pattern.
+
+% -----
+
+\begin{bgi}
+\V{} \func{fillpoly} (\I{} \A{numpoints}, \I{} \A{*polypoints});
+\end{bgi}
+
+Draws a polygon of \A{numpoints} vertices and fills it using the
+current fill colour.
+
+% -----
+
+\begin{bgi}
+\V{} \func{floodfill} (\I{} \A{x}, \I{} \A{y}, \I{} \A{border});
+\end{bgi}
+
+Fills an enclosed area, containing the \A{x} and \A{y} points bounded
+by the \A{border} colour. The area is filled using the current fill
+colour.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getactivepage} (\V{});
+\end{bgi}
+
+Returns the active page number.
+
+% -----
+
+\begin{bgi}
+\V{} \func{getarccoords} (\texttt{struct arccoordstype} \A{*arccoords});
+\end{bgi}
+
+Gets the coordinates of the last call to \func{arc()}, filling the
+\A{arccoords} structure.
+
+% -----
+
+\begin{bgi}
+\V{} \func{getaspectratio} (\I{} \A{*xasp}, \I{} \A{*yasp});
+\end{bgi}
+
+Retrieves the current graphics mode's aspect ratio. In \SDLbgi,
+\A{xasp} and \A{yasp} are both 10000 (i.e. pixels are squares).
+
+% -----
+
+\begin{bgi}
+\I{} \func{getbkcolor} (\V{});
+\end{bgi}
+
+Returns the current background colour.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getcolor} (\V{});
+\end{bgi}
+
+Returns the current drawing (foreground) colour.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getcurrentwindow} (\V{});
+\end{bgi}
+
+Gets the current window's identifier.
+
+% -----
+
+\begin{bgi}
+\texttt{struct palettetype} \func{*getdefaultpalette} (\V{});
+\end{bgi}
+
+Returns the palette definition structure.
+
+% -----
+
+\begin{bgi}
+\C{}\func{getdrivername} (\V{});
+\end{bgi}
+
+Returns a pointer to a string containing the name of the current
+graphics driver.
+
+% -----
+
+\begin{bgi}
+\V{} \func{getfillpattern} (\C{}\A{pattern}); 
+\end{bgi}
+
+Copies the user-defined fill pattern, as set by setfillpattern, into
+the 8-byte area pointed to by \A{pattern}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{getfillsettings} (\texttt{struct fillsettingstype}
+\A{*fillinfo});
+\end{bgi}
+
+Fills the \texttt{fillsettingstype} structure pointed to by
+\A{fillinfo} with information about the current fill pattern and fill
+colour.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getgraphmode} (\V{});
+\end{bgi}
+
+Returns the current graphics mode.
+
+% -----
+
+\begin{bgi}
+\V{} \func{getimage} (\I{} \A{left}, \I{} \A{top}, \I{} \A{right},
+\I{} \A{bottom}, \V{} \A{*bitmap});
+\end{bgi}
+
+Copies a bit image of the specified region into the memory pointed by
+\A{bitmap}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{getlinesettings} (\texttt{struct linesettingstype}
+\A{*lineinfo});
+\end{bgi}
+
+Fills the \texttt{linesettingstype} structure pointed by \A{lineinfo}
+with information about the current line style, pattern, and thickness.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getmaxcolor} (\V{});
+\end{bgi}
+
+Returns the maximum colour value available (\T{MAXCOLORS}). If RGB
+colours are being used, it returns \T{PALETTE\_SIZE}.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getmaxmode} (\V{}); 
+\end{bgi}
+
+Returns the maximum mode number for the current driver. In \SDLbgi,
+the default is \T{SDL\_FULLSCREEN}.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getmaxx} (\V{});
+\end{bgi}
+
+Returns the maximum \A{x} screen coordinate.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getmaxy} (\V{});
+\end{bgi}
+
+Returns the maximum \A{y} screen coordinate.
+
+% -----
+
+\begin{bgi}
+\texttt{char*} \func{getmodename} (\I{} \A{mode\_number});
+\end{bgi}
+
+Returns a pointer to a string containing the name of the specified
+graphics mode.
+
+% -----
+
+\begin{bgi}
+\V{} \func{getmoderange} (\I{} \A{graphdriver}, \I{} \A{*lomode}, \I{}
+\A{*himode});
+\end{bgi}
+
+Gets the range of valid graphics modes. The \A{graphdriver} parameter
+is ignored.
+
+% -----
+
+\begin{bgi}
+\V{} \func{getpalette} (\texttt{struct palettetype} \A{*palette});
+\end{bgi}
+
+Fills the \texttt{palettetype} structure pointed by \A{palette} with
+information about the current palette's size and colours.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getpalettesize} (\V{}); 
+\end{bgi}
+
+Returns the size of the palette (\T{MAXCOLORS} + 1 or
+\T{MAXRGB\-COLORS} + 1).
+
+% -----
+
+\begin{bgi}
+\I{} \func{getpixel} (\I{} \A{x}, \I{} \A{y});
+\end{bgi}
+
+Returns the colour of the pixel located at (\A{x}, \A{y}).
+
+% -----
+
+\begin{bgi}
+\V{} \func{gettextsettings} (\texttt{struct textsettingstype}
+\A{*texttypeinfo});
+\end{bgi}
+
+Fills the \texttt{textsettingstype} structure pointed to by
+\A{texttypeinfo} with information about the current text font,
+direction, size, and justification.
+
+% -----
+
+\begin{bgi}
+\V{} \func{getviewsettings} (\texttt{struct viewporttype} \A{*viewport});
+\end{bgi}
+
+Fills the \texttt{viewporttype} structure pointed to by \A{viewport}
+with information about the current viewport.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getvisualpage} (\V{});
+\end{bgi}
+
+Returns the visual page number.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getx} (\V{});
+\end{bgi}
+
+Returns the current viewport's \A{x} coordinate.
+
+% -----
+
+\begin{bgi}
+\I{} \func{gety} (\V{});
+\end{bgi}
+
+Returns the current viewport's \A{y} coordinate.
+
+% -----
+
+\begin{bgi}
+\V{} \func{graphdefaults} (\V{});
+\end{bgi}
+
+Resets all graphics settings to their defaults: sets the viewport to
+the entire screen, moves the CP to (0, 0), sets the default palette
+colours, the default drawing and background colour, the default fill
+style and pattern, the default text font and justification.
+
+% -----
+
+\begin{bgi}
+\texttt{char*} \func{grapherrormsg} (\I{} \A{errorcode});
+\end{bgi}
+
+Returns a pointer to the error message string associated with
+\A{errorcode}, returned by \func{graphresult()}.
+
+% -----
+
+\begin{bgi}
+\I{} \func{graphresult} (\V{});
+\end{bgi}
+
+Returns the error code for the last unsuccessful graphics operation
+and resets the error level to grOk.
+
+% -----
+
+\begin{bgi}
+\texttt{unsigned} \func{imagesize} (\I{} \A{left}, \I{} \A{top}, \I{}
+\A{right}, \I{} \A{bottom});
+\end{bgi}
+
+Returns the size in bytes of the memory area required to store a bit
+image.
+
+% -----
+
+\begin{bgi}
+\V{} \func{initgraph} (\I{} \A{*graphdriver}, \I{} \A{*graphmode},
+\C{}\A{pathtodriver});
+\end{bgi}
+
+Initializes the graphics system. In \SDLbgi, you can use SDL as
+\A{graphdriver}, then choose a suitable graphics mode (listed in
+\F{graphics.h}) as \A{graphmode}. The \A{pathtodriver} argument is
+ignored.
+
+You can also use \T{NULL} for \A{*graphdriver} and \A{*graphmode} to
+get the default resolution (800 $\times$ 600), or use
+\func{detectgraph} (see above) to get fullscreen.
+
+Multiple windows can be created, unless a fullscreen window is already
+present.
+
+After \func{initgraph()}, all graphics commands are immediately
+displayed, as in the original BGI. This could make drawing very slow;
+you may want to use \func{initwindow()} instead.
+
+Alternatively, automatic screen refresh can be performed according to
+the value of the \T{SDL\_BGI\_RATE} environment variable. If the
+variable is set to \T{auto}, screen refresh is automatically performed
+every \A{msec} milliseconds; this value is the current screen refresh
+rate, as given by \T{SDL\_GetDisplayMode()}. If the variable is set to
+an integer value \A{msec}, automatic screen refresh will be performed
+every \A{msec} milliseconds.
+
+Automatic screen refresh is much faster than the default behaviour;
+however, it is an experimental feature that may not work on some
+graphic cards.
+
+% -----
+
+\begin{bgi}
+\I{} \func{installuserdriver} (\C{}\A{name}, \I{} (\A{*detect})(\V{})); 
+\end{bgi}
+
+Unimplemented; not used by \SDLbgi.
+
+% -----
+
+\begin{bgi}
+\I{} \func{installuserfont} (\C{}\A{name}); 
+\end{bgi}
+
+Unimplemented; not used by \SDLbgi.
+
+% -----
+
+\begin{bgi}
+\V{} \func{line} (\I{} \A{x1}, \I{} \A{y1}, \I{} \A{x2}, \I{} \A{y2});
+\end{bgi}
+
+Draws a line between two specified points; the CP is not updated.
+
+% -----
+
+\begin{bgi}
+\V{} \func{linerel} (\I{} \A{dx}, \I{} \A{dy});
+\end{bgi}
+
+Draws a line from the CP to a point that is (\A{dx},\A{dy}) pixels
+from the CP. The CP is then advanced by (\A{dx}, \A{dy}).
+
+% -----
+
+\begin{bgi}
+\V{} \func{lineto} (\I{} \A{x}, \I{} \A{y});
+\end{bgi}
+
+Draws a line from the CP to (\A{x}, \A{y}), then moves the CP to
+(\A{dx}, \A{dy}).
+
+% -----
+
+\begin{bgi}
+\V{} \func{moverel} (\I{} \A{dx}, \I{} \A{dy});
+\end{bgi}
+
+Moves the CP by (\A{dx}, \A{dy}) pixels.
+
+% -----
+
+\begin{bgi}
+\V{} \func{moveto} (\I{} \A{x}, \I{} \A{y});
+\end{bgi}
+
+Moves the CP to the position (\A{x}, \A{y}), relative to the
+viewport.
+
+% -----
+
+\begin{bgi}
+\V{} \func{outtext} (\C{}\A{textstring});
+\end{bgi}
+
+Outputs \A{textstring} at the CP.
+
+% -----
+
+\begin{bgi}
+\V{} \func{outtextxy} (\I{} \A{x}, \I{} \A{y}, \C{}\A{textstring});
+\end{bgi}
+
+Outputs \A{textstring} at (\A{x}, \A{y}).
+
+% -----
+
+\begin{bgi}
+\V{} \func{pieslice} (\I{} \A{x}, \I{} \A{y}, \I{} \A{stangle}, \I{}
+\A{endangle}, \I{} \A{radius});
+\end{bgi}
+
+Draws and fills a pie slice centered at (\A{x}, \A{y}), with a radius
+given by \A{radius}, traveling from \A{stangle} to \A{endangle}. The
+pie slice is filled using the current fill colour.
+
+% -----
+
+\begin{bgi}
+\V{} \func{putimage} (\I{} \A{left}, \I{} \A{top}, \V{} \A{*bitmap},
+\I{} \A{op});
+\end{bgi}
+
+Puts the bit image pointed to by \A{bitmap} onto the screen, with the
+upper left corner of the image placed at (\A{left}, \A{top}). \A{op}
+specifies the drawing mode (COPY\_PUT, etc).
+
+% -----
+
+\begin{bgi}
+\V{} \func{putpixel} (\I{} \A{x}, \I{} \A{y}, \I{} \A{color}); 
+\end{bgi}
+
+Plots a point at (\A{x},\A{y}) in the colour defined by \A{color}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{rectangle} (\I{} \A{left}, \I{} \A{top}, \I{} \A{right},
+\I{} \A{bottom});
+\end{bgi}
+
+Draws a rectangle delimited by (\A{left},\A{top}) and
+(\A{right},\A{bottom}).
+
+% -----
+
+\begin{bgi}
+\I{} \func{registerbgidriver} (\V{} (\A{*driver})(\V{})); 
+\end{bgi}
+
+Unimplemented; not used by \SDLbgi.
+
+% -----
+
+\begin{bgi}
+\I{} \func{registerbgifont} (\V{} (\A{*font})(\V{})); 
+\end{bgi}
+
+Unimplemented; not used by \SDLbgi.
+
+% -----
+
+\begin{bgi}
+\V{} \func{restorecrtmode} (\V{}); 
+\end{bgi}
+
+Hides the graphics window.
+
+% -----
+
+\begin{bgi}
+\V{} \func{sector} (\I{} \A{x}, \I{} \A{y}, \I{} \A{stangle}, \I{}
+\A{endangle}, \I{} \A{xradius}, \I{} \A{yradius});
+\end{bgi}
+
+Draws and fills an elliptical pie slice centered at (\A{x}, \A{y}),
+horizontal and vertical radii given by \A{xradius} and \A{yradius},
+traveling from \A{stangle} to \A{endangle}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setactivepage} (\I{} \A{page});
+\end{bgi}
+
+Makes \A{page} the active page for all subsequent graphics output. In
+multi-window mode, \func{setactivepage} only works for the first window.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setallpalette} (\texttt{struct palettetype *}\A{palette}); 
+\end{bgi}
+
+Sets the current palette to the values given in \A{palette}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setaspectratio} (\I{} \A{xasp}, \I{} \A{yasp});
+\end{bgi}
+
+Changes the default aspect ratio of the graphics. In \SDLbgi, this
+function is not necessary since the pixels are square.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setbkcolor} (\I{} \A{color});
+\end{bgi}
+
+Sets the current background colour using the default palette.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setcolor} (\I{} \A{color});
+\end{bgi}
+
+Sets the current drawing colour using the default palette.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setcurrentwindow} (\I{} \A{window});
+\end{bgi}
+
+Sets the current window.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setfillpattern} (\C{}\A{upattern}, \I{} \A{color}); 
+\end{bgi}
+
+Sets a user-defined fill pattern. \A{upattern} is a pointer to a
+sequence of 8 bytes; each byte corresponds to 8 pixels in the pattern;
+each bit set to 1 is plotted as a pixel.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setfillstyle} (\I{} \A{upattern}, \I{} \A{color}); 
+\end{bgi}
+
+Sets the fill pattern and fill colour. \A{upattern} is a pointer to a
+sequence of 8 bytes, with each byte corresponding to 8 pixels in the
+pattern.
+
+% -----
+
+\begin{bgi}
+unsigned \func{setgraphbufsize} (\texttt{unsigned} \A{bufsize}); 
+\end{bgi}
+
+Unimplemented; not used by \SDLbgi.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setgraphmode} (\I{} \A{mode}); 
+\end{bgi}
+
+Shows the window that was hidden by \func{restorecrtmode()}. The
+\A{mode} parameter is ignored
+
+% -----
+
+\begin{bgi}
+\V{} \func{setlinestyle} (\I{} \A{linestyle}, \texttt{unsigned}
+\A{upattern}, \I{} \A{thickness});
+\end{bgi}
+
+Sets the line width and style for all lines drawn by \func{line()},
+\func{lineto()}, \func{rectangle()}, \func{drawpoly()}, etc. The line
+style can be \T{SOLID\_LINE}, \T{DOTTED\_LINE}, \T{CENTER\_LINE},
+\T{DASHED\-\_LINE}, or \T{USERBIT\_LINE}; in the latter case, the user
+provides a 16-bit number (\A{upattern}) whose bits set to 1 will be
+plotted as pixels.
+
+The line thickness can be set with \T{NORM\_WIDTH} or
+\T{THICK\-\_WIDTH}.
+
+Arcs, circles, ellipses, and pieslices are not affected by
+\A{linestyle}, but are affected by \A{thickness}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setpalette} (\I{} \A{colornum}, \I{} \A{color}); 
+\end{bgi}
+
+Changes the standard palette \A{colornum} to \A{color}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{settextjustify} (\I{} \A{horiz}, \I{} \A{vert});
+\end{bgi}
+
+Sets text justification. Text output will be justified around the CP
+horizontally and vertically; settings are \T{LEFT\_TEXT},
+\T{CENTER\_TEXT}, \T{RIGHT\-\_TEXT}, \T{BOTTOM\_TEXT}, and
+\T{TOP\_TEXT}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{settextstyle} (\I{} \A{font}, \I{} \A{direction}, \I{}
+\A{charsize});
+\end{bgi}
+
+Sets the text font (only \T{DEFAULT\_FONT} is actually available), the
+direction in which text is displayed (\T{HORIZ\_DIR}, \T{VERT\_DIR}),
+and the size of the characters. If \A{charsize} is an integer number,
+the text will be scaled by that number; if it is 0, the text will be
+scaled by \func{setusercharsize()}.
+
+% FIX IT!
+
+% -----
+
+\begin{bgi}
+\V{} \func{setusercharsize} (\I{} \A{multx}, \I{} \A{divx}, \I{}
+\A{multy}, \I{} \A{divy});
+\end{bgi}
+
+Lets the user change the character width and height. If a previous
+call to \func{settextstyle()} set \A{charsize} to 0, the default width
+is scaled by \A{multx}/\A{divx}, and the default height is scaled by
+\A{multy}/\A{divy}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setviewport} (\I{} \A{left}, \I{} \A{top}, \I{} \A{right},
+\I{} \A{bottom}, \I{} \A{clip});
+\end{bgi}
+
+Sets the current viewport for graphics output. If \A{clip} is nonzero,
+all drawings will be clipped (truncated) to the current viewport.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setvisualpage} (\I{} \A{page});
+\end{bgi}
+
+Sets the visual graphics page number. In ``fast mode'', the screen is
+not cleared.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setwritemode} (\I{} \A{mode});
+\end{bgi}
+
+Sets the writing mode for line drawing. \A{mode} can be \T{COPY\_PUT},
+\T{XOR\-\_PUT}, \T{OR\_PUT}, \T{AND\_PUT}, and \T{NOT\_PUT}.
+
+% -----
+
+\begin{bgi}
+\I{} \func{textheight} (\C{}\A{textstring});
+\end{bgi}
+
+Returns the height in pixels of a string.
+
+% -----
+
+\begin{bgi}
+\I{} \func{textwidth} (\C{}\A{textstring});
+\end{bgi}
+
+Returns the height in pixels of a string.
+
+% -----
+
+\subsection{Non-Graphics Functions and Macros}
+
+\begin{bgi}
+\V{} \func{delay} (\I{} \A{millisec});
+\end{bgi}
+
+Waits for \A{millisec} milliseconds. In ``slow mode'', a screen
+refresh is performed. Key presses during the delay are passed on to
+\func{kbhit} and \func{xkbhit}.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getch} (\V{});
+\end{bgi}
+
+Waits for a key and returns its ASCII code. In ``slow mode'', a screen
+refresh is performed. If an \T{SDL\_QUIT} event occurs, \T{QUIT} is
+returned.
+
+% -----
+
+\begin{bgi}
+\I{} \func{kbhit} (\V{});
+\end{bgi}
+
+Returns 1 when a key is pressed, excluding special keys (Ctrl, Shift,
+etc.); in ``slow mode'', a screen refresh is performed. If an
+\T{SDL\_QUIT} event occurs, \T{QUIT} is returned.
+
+% -----
+
+\begin{bgi}
+\I{} \func{random} (\I{} \A{range}) (macro)
+\end{bgi}
+
+Returns a random number between 0 and \A{range - 1}.
+
+% -----
+
+\subsection{\SDLbgi{} Additions}
+
+\begin{bgi}
+\I{} \func{ALPHA\_VALUE} (\I{} \A{color})
+\end{bgi}
+
+Returns the alpha (transparency) component of an RGB colour in the
+extended palette.
+
+% -----
+
+
+\begin{bgi}
+\I{} \func{BLUE\_VALUE} (\I{} \A{color})
+\end{bgi}
+
+Returns the blue component of an RGB colour in the extended palette.
+
+% -----
+
+\begin{bgi}
+\I{} \func{COLOR} (\I{} \A{r}, \I{} \A{g}, \I{} \A{b});
+\end{bgi}
+
+Can be used as an argument for \func{setcolor()}, \func{setbkcolor()},
+and \func{setfillstyle()} to set an RBG colour. Temporary colours are
+\T{TMP\_FG\_COL}, \T{TMP\_BG\_COL}, and \T{TMP\_FILL\_COL},
+respectively.
+
+Functions \func{ALPHA\_VALUE}, \func{BLUE\_VALUE},
+\func{GREEN\_VALUE}, and \func{RED\_VALUE} do not work on temporary
+colours.
+
+% -----
+
+\begin{bgi}
+\I{} \func{GREEN\_VALUE} (\I{} \A{color})
+\end{bgi}
+
+Returns the green component of an RGB colour in the extended palette.
+
+% -----
+
+\begin{bgi}
+\I{} \func{IS\_BGI\_COLOR} (\I{} \A{color});
+\end{bgi}
+
+Returns 1 if the \emph{current} drawing colour is a standard BGI
+colour (that is, not RGB). The \A{color} argument is actually
+redundant.
+
+% -----
+
+\begin{bgi}
+\I{} \func{IS\_RGB\_COLOR} (\I{} \A{color});
+\end{bgi}
+
+Returns 1 if the \emph{current} drawing colour is RGB. The \A{color}
+argument is actually redundant.
+
+% -----
+
+\begin{bgi}
+\I{} \func{RED\_VALUE} (\I{} \A{color})
+\end{bgi}
+
+Returns the red component of an RGB colour in the extended palette.
+
+% -----
+
+\begin{bgi}
+\V{} \func{closewindow} (\I{} \A{id});
+\end{bgi}
+
+Closes the window whose identifier is \A{id}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{event} (\V{});
+\end{bgi}
+
+Returns 1 if an event (mouse click, key press, or \T{QUIT}) has occurred.
+
+% -----
+
+\begin{bgi}
+\V{} \func{eventtype} (\V{});
+\end{bgi}
+
+Returns the type of the last event; either \T{SDL\_KEYPRESS} or
+\T{SDL\_MOUSEBUTTONDOWN}.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getcurrentwindow} (\V{});
+\end{bgi}
+
+Returns the integer \A{id} of the current window.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getevent} (\V{});
+\end{bgi}
+
+Waits for a keypress, mouse click, or \T{SDL\_QUIT} event, and returns
+the code of the key, mouse button, or \T{QUIT}.
+
+% -----
+
+% \begin{bgi}
+% \I{} \func{getmaxheight} (\V{});
+% \end{bgi}
+
+% Returns the screen (root window) height.
+
+% % -----
+
+% \begin{bgi}
+% \I{} \func{getmaxwidth} (\V{});
+% \end{bgi}
+
+% Returns the screen (root window) width.
+
+% -----
+
+\begin{bgi}
+\V{} \func{getmouseclick} (\I{} \A{kind}, \I{}\A{*x}, \I{}\A{*y});
+\end{bgi}
+
+Sets the \A{x},\A{y} coordinates of the last \A{kind} button click
+expected by \func{ismouseclick()}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{initwindow} (\I{} \A{width}, \I{} \A{height});
+\end{bgi}
+
+Initializes the graphics system, opening a \A{width}$\times$\A{height}
+window. If either \A{width} or \A{height} is 0, then
+\T{SDL\-\_FULL\-SCREEN} will be used. Multiple windows can be created,
+unless a fullscreen window is already present.
+
+The user must update the screen as needed using \func{refresh()}, or
+use \func{sdlbgiauto()}.
+
+% -----
+
+\begin{bgi}
+\I{} \func{ismouseclick} (\I{} \A{kind});
+\end{bgi}
+
+Returns 1 if the \A{kind} mouse button was clicked.
+
+% -----
+
+\begin{bgi}
+\I{} \func{mouseclick} (\V{});
+\end{bgi}
+
+Returns the code of the mouse button that was clicked, or 0 if none
+was clicked.
+
+% -----
+
+\begin{bgi}
+\I{} \func{mousex} (\V{});
+\end{bgi}
+
+Returns the X coordinate of the last mouse click.
+
+% -----
+
+\begin{bgi}
+\I{} \func{mousey} (\V{});
+\end{bgi}
+
+Returns the Y coordinate of the last mouse click.
+
+% -----
+
+\begin{bgi}
+\V{} \func{\_putpixel} (\I{} \A{x}, \I{} \A{y}); 
+\end{bgi}
+
+Plots a point at (\A{x},\A{y}) using the current drawing colour. This
+function may be faster than \func{putpixel()}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{readimagefile} (\C{}\A{filename}, \I{} \A{x1}, \I{} \A{y1}, 
+\I{} \A{x2}, \I{} \A{y2});
+\end{bgi}
+
+Reads a \F{.bmp} file and displays it immediately at (\A{x1}, \A{y1}).
+If (\A{x2}, \A{y2}) are not 0, the bitmap is stretched to fit the
+rectangle \A{x1},\A{y1}---\A{x2},\A{y2}; otherwise, the bitmap is
+clipped as necessary.
+
+% -----
+
+\begin{bgi}
+\V{} \func{refresh} (\V{}); 
+\end{bgi}
+
+Updates the screen contents, i.e.\ displays all graphics.
+
+% -----
+
+\begin{bgi}
+\V{} \func{sdlbgiauto} (\V{}); 
+\end{bgi}
+
+Triggers ``auto mode'', i.e.\ \func{refresh()} is performed
+automatically.
+
+% -----
+
+\begin{bgi}
+\V{} \func{sdlbgifast} (\V{}); 
+\end{bgi}
+
+Triggers ``fast mode'', i.e.\ \func{refresh()} is needed to display
+graphics.
+
+% -----
+
+\begin{bgi}
+\V{} \func{sdlbgislow} (\V{}); 
+\end{bgi}
+
+Triggers ``slow mode'', i.e.\ \func{refresh()} is not needed to
+display graphics.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setalpha} (\I{} \A{col}, \Ue{} \A{alpha}); 
+\end{bgi}
+
+Sets alpha transparency for colour \A{col} to \A{alpha} (0--255).
+
+% -----
+
+\begin{bgi}
+\V{} \func{setbkrgbcolor} (\I{} \A{n}); 
+\end{bgi}
+
+Sets the current background colour using using the \A{n}-th colour
+index in the RGB palette.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setblendmode} (\I{} \A{blendmode}); 
+\end{bgi}
+
+Sets the blend mode to be used with screen refresh. \A{blendmode} can
+be \T{SDL\_BLENDMODE\_NONE} (default in ``slow mode'') or
+\T{SDL\_BLENDMODE\_BLEND}. The latter enables alpha blending.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setcurrentwindow} (\I{} \A{id}); 
+\end{bgi}
+
+Sets the current active window to \I{} \A{id}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setrgbcolor} (\I{} \A{n}); 
+\end{bgi}
+
+Sets the current drawing colour using the \A{n}-th colour index in the
+RGB palette.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setrgbpalette} (\I{} \A{n}, \I{} \A{r}, \I{} \A{g}, \I{} \A{b}); 
+\end{bgi}
+
+Sets the \A{n}-th entry in the RGB palette specifying the \A{r},
+\A{g}, and \A{b} components.
+
+Using \func{setrgbpalette()} and \func{setrgbcolor()} is faster than
+setting colours with \func{setco\-lor()} with a \func{COLOR()}
+argument.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setwinoptions} (\C{}\A{title}, \I{} \A{x}, \I{} \A{y}, 
+  \Ut{} \A{flags});
+\end{bgi}
+
+Sets the window title \A{title}, the initial position to (\A{x},
+\A{y}), and SDL2 flags OR'ed together. \A{x} and \A{y} can be set to
+\T{SDL\_WINDOWPOS\_CENTERED} or \T{SDL\_WINDOWPOS\_UNDEFINED}.
+
+If \A{title} is an empty string, the window title is set to the
+default value \T{SDL\_bgi}.
+
+If either \A{x} or \A{y} are -1, the position parameters are ignored.
+
+If \A{flags} is -1, the parameter is ignored; otherwise, only the
+values \T{SDL\_WINDOW\_FULLSCREEN},
+\T{SDL\_WINDOW\_FULLSCREEN\_DESKTOP}, \T{SDL\_WINDOW\_SHOWN},
+\T{SDL\_WINDOW\_HIDDEN}, \T{SDL\_WINDOW\-\_BORDERLESS}, and
+\T{SDL\_WINDOW\_MINIMIZED} can be applied.
+
+% -----
+
+\begin{bgi}
+\V{} \func{showerrorbox} (const \C{}\A{message}); 
+\end{bgi}
+
+Opens an error message box with the specified message. The message box
+waits for the user to click on the OK button.
+
+% -----
+
+\begin{bgi}
+\I{} \func{swapbuffers} (\V{});
+\end{bgi}
+
+Swaps the current active and the current visual graphics pages.
+
+% -----
+
+\begin{bgi}
+\V{} \func{writeimagefile} (\C{}\A{filename}, \I{} \A{left}, \I{}
+\A{top}, \I{} \A{right}, \I{} \A{bottom});
+\end{bgi}
+
+Writes a \F{.bmp} file from the screen rectangle defined by
+\A{left},\A{top}---\A{right},\A{bottom}.
+
+% -----
+
+\begin{bgi}
+\I{} \func{xkbhit} (\V{});
+\end{bgi}
+
+Returns 1 when any key is pressed, including special keys (Ctrl, Shift,
+etc.); in ``slow mode'', a screen refresh is performed. If an
+\T{SDL\_QUIT} event occurs, \T{QUIT} is returned.
+
+% =====
+
+\bigskip
+
+\rule{\linewidth}{0.2pt}
+
+This document is a free manual, released under the GNU Free
+Documentation License (FDL) v. 1.3 or later.
+
+\end{document}
+
+% ----- end of file sdl_bgi-quickref.tex

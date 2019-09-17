@@ -1,0 +1,14 @@
+TODO
+----
+
+- make it c++ compatible?
+
+- implement getmaxheight(), getmaxwidth()?
+
+- add SDL_ttf TrueType fonts support?
+
+- use SDL_TEXTUREACCESS_STREAMING?
+
+- replace floodfill()?
+
+Your suggestions are welcome!
