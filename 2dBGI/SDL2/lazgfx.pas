@@ -7033,8 +7033,6 @@ IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
 end.
 
 {
-The C version of the BGI to merge in here
-
 
 interface
 
@@ -11631,9 +11629,6 @@ int xkbhit (void)
   return NO;
 
 } // xkbhit ()
-
-// --- End of file SDL_bgi.c
-
 
 
 

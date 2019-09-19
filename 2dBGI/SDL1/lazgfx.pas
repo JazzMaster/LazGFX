@@ -103,7 +103,6 @@ How to write good games:
 
 SDL1.2 (learn to page flip)
 SDL2.0 (renderer and "render to textures as surfaces")
-OGL_SDL (assisted 3D)
 
 OGL (straight--has rendering issues)
 
@@ -157,8 +156,6 @@ and X11Coreprimitives
 The FPC devs assume you can understand OpenGL right away...thats bad.
 I dont agree w "basic drawing primitives" being an "objectified mess".
 
-HOWEVER- 
-    I do have OpenGL Lazarus codes available
 
 HELP:
 
@@ -549,6 +546,7 @@ type
 //due to changes in pixel sizes- I let them get very FAT.
 
 //how BIG is a pixel? its smaller than you think. 
+
 //You are probly used to "MotionJPEG Quantization error BLOCKS" on your TV- those are not pixels. 
 //Those are compression artifacts after loss of signal (or in weak signal areas). 
 //That started after the DVD MPEG2 standard and digital TV signals came to be.
@@ -590,13 +588,10 @@ If we didnt reset- our charPtr would be off of the screen- with no way to see an
 (This was the old DOS way)
 
 -All of this- of Course- is also maintained with the "TextSurface".
-
 GL just has no clue how to "draw the fonts". 
 
-CHR code (FPC team) may help in that regards- but CHR files DO NOT SCALE WELL(>size 12).
-(Its been done- but not with GL- at least like SDL does it in 2D)
 
-Think of Text (in GL) like a "Transparent Label" or "clear sticker".
+Think of Text like a "Transparent Label" or "clear sticker".
 
 }
 
@@ -629,8 +624,9 @@ Think of Text (in GL) like a "Transparent Label" or "clear sticker".
 //This is a 8x8 (or 8x12) Font pattern (in HEX) according to the BGI sources
 //(A BLITTER BITMAP in SDL)
 
+//X11- at least has this already implemented, SDL2_BGI mimicks those routines.
+
    FillSettingsType = (clear,lines,slashes,THslashes,THBackSlashes,BackSlashes,SMBoxes,rhombus,wall,widePTs,DensePTS);
-//Borland VGA256 sources (expansion pack) has the deatils-which are temporarily outside of this repo ATM
 
 {
 
@@ -669,17 +665,12 @@ var
 //think minimaps in games like Warcraft and Skyrim
 
 
-{ I think Im going to leave this as an excercise to the user rather than dictate archane methods.
+{ 
+
+I think Im going to leave this as an excercise to the user rather than dictate archane methods.
 
 SDL Events fire after EVENT variable is assigned a pointer and either polling or event checking is enabled.
 NOT UTIL- so we should be "safe" to not check input until the user program calling us needs it.
-
-THAT SAID:
-
-    initgraph enables the event handler.
-
-So you need some sort of input (and window event) detection in your code SETUP --BEFORE calling initgraph.
-SDL will work-you just wont be able to process input correctly, or do anything.
 
 SDL will close the app and at the window managers request(I hope) without direct code intervention.
 But- its unsafe to assume things.
@@ -687,7 +678,7 @@ But- its unsafe to assume things.
 This is like "interrupt based kernel programming"- DO NOT code as if "waiting on input"- 
     pray it happens, continue on- if it doesnt.
 
-(events may still yet fire)
+These are the types of events.
 
 	KeyDownEventDefault:KeyDownEvent; //dont process here
 	PauseRoutineDefault:PauseRoutine;  
@@ -724,22 +715,14 @@ var
     X,Y:integer;
     _grResult:grErrortype;
     
-    //SDL2 broken game controller support nono-suid and root-only.
-    //again, this is wrong.
-
-    //you want event driven, not input driven-the code seems to be here.
     gGameController:PSDL_Joystick;
 
     Renderer:PSDL_Renderer; export;
     MainSurface,FontSurface : PSDL_Surface; //TnL mostly at this point, and for hacks
     window:PSDL_Window; //A window... heh..."windows" he he...
 
-    // no such thing as a MainTexture. Texture, period.
-    //its "on a path to the renderer" or "its made new"
-
     srcR,destR,TextRect:PSDL_Rect;
     //rmask,gmask,bmask,amask:longword;
-
  
     TextFore,TextBack : PSDL_Color; //font fg and bg...
 
@@ -774,7 +757,7 @@ older modes are not used, so y keep them in the list??
  mode13h(320x200x16 or x256) : EXTREMELY COMMON GAME PROGRAMMING
  (we use the more square pixel mode)
 
-Atari modes, etc. were removed. (double the res and we will talk)
+Atari modes, etc. were removed. (double the res and pixelSize and we will talk)
 
 }
 
@@ -784,13 +767,13 @@ Atari modes, etc. were removed. (double the res and we will talk)
   WantsJoyPad:boolean;
   screenshots:longint;
 
-//CDROM access is very limited and ancient. (Removed after SDLv1.2.)
+//CDROM access is very limited.
 
 //Used mostly for Audio CDs and RedBook Audio Games.
 //This said- I have some emulators(in C) that access the Linux CDROM device....
 //the code is old (Red Hat v7? vs RHEL v7) but builds "with a few hacks".
 
-//such games have CDROM Modeswitch delays in accessing data while playing audio tracks(game skippage).
+//such games have "CDROM Modeswitch delays" in accessing data while playing audio tracks(game skippage).
 
 //Descent II(PC) and SonicCD(PC and SEGA CD Emu) come to mind.
 //you would want ogg or mp3 or wav files these days- on some sort of storage medium.
@@ -809,11 +792,8 @@ Atari modes, etc. were removed. (double the res and we will talk)
   //ideally ignore this and use GetTicks estimates with "Deltas"
   //this is bare minimum support.
 
-//ideally we could mutex the renderer - but thats in a program, not this unit.
-
- 
   EventThread:Longint; //fpc uses Longint
-  EventThreadReturnValue:LongInt; //forked processes are supposed to return a error code
+  EventThreadReturnValue:LongInt; //Threads are supposed to return a error code
 	
   Rect : PSDL_Rect;
 
@@ -879,38 +859,10 @@ function FetchModeList:Tmodelist;
 
 procedure RoughSteinbergDither(filename,filename2:string);
 
-{
-locking and unlocking Texture may prove futile -but changing contexts is not
-query pixelFormat (of the Texture) is required for any color conversion to take place.
-
-no fetching (peeking) is done on the Texture without the "queried pixelFormat data"
-this is normally already set for surface ops when we made the surface(and kept until surface is freed)
-
-destroying MainSurface(especially in software) is disasterous. 
-(clone MainSurface -or blit- and destroy the clone.)
-
-The reason is thus:
-
-   As with ( bpp<24)- these modes are not normally unsupported
-   Which means more work(werk werk werk)
-
-In many ways SDL2 builds on SDLv1.2 Surface routines, anyway...and cant function without it.
-
-Pushing to the renderer is ok- but if we can outright avoid working with surfaces in general- its better.
-Sometimes, however, surface ops make more logical sense.
-
-}
-
 
 //surfaceOps
 procedure lock;
 procedure unlock;
-
-//works around SDL OpenGL bug where Windows got optimzed, but Unices didnt--WRONG BTW! (WRITE UNIVERSAL CODE)
-procedure Texlock(Tex:PSDL_Texture);
-procedure TexlockwRect(Tex:PSDL_Texture; Rect:PSDL_Rect);
-function lockNewTexture:PSDL_Texture;
-procedure TexUnlock(Tex:PSDL_Texture);
 
 
 //videoCallback
@@ -1805,6 +1757,7 @@ the 256 hex color data was pulled from xterm (and CGA) specs.
 
 
 the only guaranteed perfect palette code is (m)CGA -tweaked by me, and Greyscale 256.
+
 (greyscale mCGA is a hackish guess based on rough math, given 14 colors, and also black and white)
 256 should mimic xterm colors IF the endianess is correct and I dont need DWord hex math ops
 
@@ -1813,7 +1766,8 @@ while I did this thinking YES, possibly no. AYE AYE AYE!
 
 SDL performs the bit-flapping for us. so- if we set the Grey256 color value as a RGBA record/struct(c) entry 
 then we should be able to pull it back as a unknown DWord(in theory).
-(SDL_Map and SDL_Get RGB/RGBA are here for this purpose)
+(SDL_Map and SDL_Get RGB/RGBA are here for this purpose bu tour version is faster-
+and doesnt need to use bitdepth checks)
 
 }
 
@@ -1832,7 +1786,7 @@ begin
 end;
 
 function Word15_from_RGB(red,green, blue:byte):Word; //Word=GLShort
-//5551 16bit color
+//555[1] 16bit color
 
 var
     alpha:byte;
@@ -1845,27 +1799,13 @@ begin
   Word15_from_RGB:= (red shl 10) or (green shl 4) or blue;
 end;
 
-//sets "surface" as "texture" and flops back to render preSENT the data
-
-//Suraface uses CPU, Textures use GPU
-
-
-function loadTexture(filename:PChar; renderer:PSDL_RENDERER):PSDL_Texture;
-
-var
-    Texture:PSDL_TExture;
-
-begin
-	if (texture = nil) then begin
-		logLn('Cant load an empty filename to a Texture.');
-	end;
-    texture := IMG_LoadTexture(renderer, filename);
-	result:= texture;
-end;
-
 
 //rect size could be 1px for all we know- or the entire rendering surface...
 //note this function is "slow ASS"
+
+
+//HACKME:
+//renderer and texture ops need to be reworked back to the SDLv1 variants w "MainSurface"
 
 procedure GEtPixels(Rect:PSDL_Rect);
 var
@@ -3918,37 +3858,20 @@ end;
 
 
 
-//get the last color set
+//get the last color set:
+//__bgcolor and __fgcolor hold this information. No need to go anywhere.
 
 function GetFgRGB:PSDL_Color;
-var
-  color:PSDL_Color;
-  r,g,b,a:PUInt8;
 
-
-begin
-	SDL_GetRenderDrawColor(renderer,r,g,b,a);
-    color^.r:=byte(^r);
-    color^.g:=byte(^g);
-    color^.b:=byte(^b);
-    color^.a:= $ff;
-    GetFgRGB:=color; 
+begin    
+    GetFgRGB:=__Fgcolor; 
 end;
 
 function GetFgRGBA:PSDL_Color;
 
-var
-  color:PSDL_Color;
-  r,g,b,a:PUInt8;
-
 
 begin
-	SDL_GetRenderDrawColor(renderer,r,g,b,a);
-    color^.r:=byte(^r);
-    color^.g:=byte(^g);
-    color^.b:=byte(^b);
-    color^.a:= byte(^a);
-    GetFgRGBA:=color; 
+    GetFgRGBA:=__Fgcolor; 
 
 end;
 
@@ -4136,6 +4059,8 @@ PenUp is UpMouseButton[x]
 
 //"overloading" make things so much easier for us....
 
+
+//HACKME:
 //sets pen color given an indexed input
 procedure setFGColor(color:byte);
 var
@@ -4341,6 +4266,10 @@ NET:
 //checking supported is in another routine(DetectGraph)
 
 function FetchModeList:Tmodelist;
+
+//use XRandr...or...
+//SetVideoMode will not work anymore. Dont try it- it wil crash your app.
+
 var
     mode_index,modes_count ,display_index,display_count:integer;
     i:integer;
@@ -4557,8 +4486,10 @@ end;
 {
 Create a new texture for most ops-
 
-RenderPresent is being called automatically at minimum (screen_refresh) as an interval.
+PageFlip is being called automatically at minimum (screen_refresh) as an interval.
         If not ready(deltas..use deltas...) then set RenderingDone to false.
+
+This is the preferred "faster" method.
 
 Refreshing the screen is fine- if data is in the backbuffer. 
 Until its copied into the main buffer- its never displayed.
@@ -4566,10 +4497,8 @@ Until its copied into the main buffer- its never displayed.
 HOWEVER--
         DO NOT OVER RENDER. It will crash the best of systems.
     
-DirectRender based ops- DO NOT NEED TEXTURES.
 
-
-which surface/texture do we lock/unlock??
+which surface do we lock/unlock??
 solve for X -by providing it. 
 -dont beat your own brains out nuking the problem.
 
@@ -4610,112 +4539,7 @@ begin
     //else exit: no UNlocking needed
 end;
 
-
-procedure Texlock(Tex:PSDL_Texture);
-
-var
-  w,h:PInt;
-  pitch:integer;
-  pixels:^longword;
-
-begin
-  pixels:=Nil;
-  pitch:=0;
-  if (LIBGRAPHICS_ACTIVE=false) then begin
-    writeln('I cant lock a Texture if we are not active: Call initgraph first');
-    exit;    
-  end;
-  if (Tex = Nil) then begin
-     if IsConsoleInvoked then
-		writeln('Cannot Lock unassigned Texture.');
-        writeln('Cant Lock unassigned Texture');
-     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Lock an unassigned Texture.','OK',NIL);
-     exit;
-  end;
-//  SDL_QueryTexture(tex, format, Nil, w, h);
-  SDL_SetRenderTarget(renderer, tex);
-
-{$IFDEF mswindows}
-  SDL_LockTexture(tex,Nil,pixels,pitch);
-{$ENDIF}
-
-end;
-
-procedure TexlockwRect(Tex:PSDL_Texture; Rect:PSDL_Rect);
-
-var
-  w,h,pitch:integer;
-  pixels:^longword;
-
-begin
-  if (LIBGRAPHICS_ACTIVE=false) then begin
-    writeln('I cant lock a Texture if we are not active: Call initgraph first');
-    exit;    
-  end;
-  if (Tex = Nil) then begin
-     if IsConsoleInvoked then
-		writeln('Cannot Lock unassigned Texture.');
-        writeln('Cant Lock unassigned Texture');
-     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Lock an unassigned Texture.','OK',NIL);
-     exit;
-  end;
-//  SDL_QueryTexture(tex, format, rect, w, h);
-  SDL_SetRenderTarget(renderer, tex);
-{$IFDEF mswindows}
-  SDL_LockTexture(tex,Nil,pixels,pitch);
-{$ENDIF}
-end;
-
-function lockNewTexture:PSDL_Texture;
-
-var
-  tex:PSDL_Texture;
-
-begin
-  if (LIBGRAPHICS_ACTIVE=false) then begin
-    writeln('I cant lock a Texture if we are not active: Call initgraph first');
-    exit;    
-  end;
-//case bpp of... sets PixelFormat(forcibly)
-
-  tex:=Nil; //if we dont clear it before calling, results are unpredictable.
-  tex:= SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_TARGET, MaxX, MaxY);
-  if (tex = Nil) then begin
-     if IsConsoleInvoked then
-		writeln('Cannot Alloc Texture.');
-        writeln('Cant Alloc Texture');
-     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Alloc Texture.','OK',NIL);
-     exit;
-  end;
-//  SDL_QueryTexture(tex, format, Nil, w, h);
-  SDL_SetRenderTarget(renderer, tex);
-{$IFDEF mswindows}
-  SDL_LockTexture(tex,Nil,pixels,pitch);
-{$ENDIF}
-  lockNewTexture:=Tex; //kick it back
-end;
-
-//call when done drawing pixels
-procedure TexUnlock(Tex:PSDL_Texture);
-
-begin
-
-  if (LIBGRAPHICS_ACTIVE=false) then begin
-    writeln('I cant unlock a Texture if we are not active: Call initgraph first');
-    exit;    
-  end;
-{$IFDEF mswindows}
-    //we are done playing with pixels so....
-    SDL_UnLockTexture(tex);
-{$ENDIF}
-
-//get stuff ready for the renderer and render.
-  SDL_SetRenderTarget(renderer, NiL);
-  SDL_RenderCopy(renderer, tex, NiL, NiL);
-  SDL_DestroyTexture(tex); 
-
-end;
-
+//HACKME:
 //BGI spec
 procedure clearDevice;
 
@@ -4826,7 +4650,6 @@ begin
 	SDL_RenderClear(renderer);
 end;
 
-//end hack
 
 //this is for dividing up the screen or dialogs (in game or in app)
 
@@ -5150,7 +4973,7 @@ begin
 
 		end;
 
-{		m1280x1024xMil2:begin
+		m1280x1024xMil2:begin
            MaxX:=1280;
 		   MaxY:=1024;
 		   bpp:=32; 
@@ -5161,7 +4984,7 @@ begin
            YAspect:=3; 
 
 		end;
-}
+
 		m1366x768x256:begin
             MaxX:=1366;
 			MaxY:=768;
@@ -5210,7 +5033,7 @@ begin
 
 		end;
 
-{		m1366x768xMil2:begin
+		m1366x768xMil2:begin
            MaxX:=1366;
 		   MaxY:=768;
 		   bpp:=32; 
@@ -5221,7 +5044,7 @@ begin
            YAspect:=9; 
 
 		end;
-}
+
 
 		m1920x1080x256:begin
             MaxX:=1920;
@@ -5271,7 +5094,7 @@ begin
 
 		end;
 
-{
+
 		m1920x1080xMil2: begin
  	       MaxX:=1920;
 		   MaxY:=1080;
@@ -5283,7 +5106,7 @@ begin
            YAspect:=9; 
 
 		end;
-}	    
+	    
   end;{case}
 
 //once is enough with this list...its more of a nightmare than you know.
@@ -5426,20 +5249,15 @@ $F-
     //prepare mixer
 {
   if WantsAudioToo then begin
-//    audioFlags:=(MIX_INIT_FLAC or MIX_INIT_MP3 or MIX_INIT_OGG); //unless you need mikmod support, then or it in here.
-//    Mix_Init(AudioFlags);
-    AudioSystemCheck:=Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2, 4096); //cd audio quality
-    //(slower systems use smaller chunks and degraded quality.)
-    if AudioSystemCheck <> 0 then begin
-        if IsConsoleInvoked then
-                writeln('There is no audio. Mixer did not init.')
-        else  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There is no audio. Mixer did not init.','OK',NIL);
-    end;
 
-  end;}
+     //use uos
+
+  end;
+
+}
 
   //initialization of TrueType font engine
-  if TTF_Init = -1 then begin
+{  if TTF_Init = -1 then begin
     
     if IsConsoleInvoked then begin
         writeln('I cant engage the font engine, sirs.');
@@ -5449,7 +5267,7 @@ $F-
     _graphResult:=-3; //the most likely cause, not enuf ram.
     closegraph;
   end;
-
+}
 //set some sane default variables
   _fgcolor := $FFFFFFFF;	//Default drawing color = white (15)
   _bgcolor := $000000FF;	//default background = black(0)
@@ -5493,8 +5311,8 @@ $F-
     end; 
   end; //Joypad 
 
- // writeln(longword(@renderer));
-
+ //The GC:
+ // writeln(longword(@MainSurface));
 
   InitGraph:=renderer;
 end; //initgraph
@@ -5602,10 +5420,12 @@ begin
     SDL_SetViewPort(ShrunkenRect);
 
 end;
-}
+
 
 var
     FontPointer:PTTF_Font;
+}
+
 
 procedure closegraph;
 var
@@ -5694,11 +5514,6 @@ begin
 	MainSurface:= Nil;
   end;	
 
-  if (Renderer<> Nil) then begin
-    Renderer:= Nil;
-	SDL_DestroyRenderer( Renderer );
-  end;	
-
   if (Window<> Nil) then begin
 	Window:= Nil;
   	SDL_DestroyWindow ( Window );
@@ -5736,36 +5551,6 @@ begin
   x:=where.X;
   y:=where.Y;
   GetXY := (y * (MainSurface^.pitch mod (sizeof(byte)) ) + x); //byte or word-(lousy USint definition)
-end;
-
-{
- Draw an Texture to an Renderer at x, y. 
- preserve the texture's width and height- also taking a clip of the texture if desired
-
-- we can use just RenderCopy, but it doesnt take stretching or clipping into account.(its sloppy)
-
-I didnt write this (from stackExchange in C) but it makes sense and SDL is at least "GPL", so we are "safe in licensing".
-
-}
-
-procedure renderTexture( tex:PSDL_Texture;  ren:PSDL_Renderer;  x,y:integer;  clip:PSDL_Rect);
-
-var
-  dst:PSDL_Rect;
-
-begin
-	
-	dst^.x := x;
-	dst^.y := y;
-	if (clip <> Nil)then begin
-		dst^.w := clip^.w;
-		dst^.h := clip^.h;
-	end
-	else begin
-		SDL_QueryTexture(tex, NiL, NiL, @dst^.w, @dst^.h);
-	end;
-	SDL_RenderCopy(ren, tex, clip, dst); //clip is either Nil(whole surface) or assigned
-
 end;
 
 
@@ -5820,59 +5605,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
          end;
         writeln('initgraph: Window is online.');
 
-  
-    	renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
-		if (renderer = Nil ) then begin
- 			if IsConsoleInvoked then begin
-	    	   	writeln('Something Fishy. No hardware render support and cant setup a software one.');
-	    	   	writeln('SDL reports: '+' '+ SDL_GetError);      
-	    	end;
-	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy.',' No hardware render support. BYE..',NIL);
-	    	_grResult:=GEnError;
-	    	closegraph;
-		end;
-        // SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
-    writeln('rendering online');
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
-     SDL_RenderPresent(renderer); 
-
- // SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
-   if wantFullscreen then begin
-       //I dont know about double buffers yet but this looks yuumy..
-       //SDL_SetVideoMode(MaxX, MaxY, bpp, SDL_DOUBLEBUF|SDL_FULLSCREEN);
-
-       flags:=(SDL_GetWindowFlags(window));
-       flags:=(flags or SDL_WINDOW_FULLSCREEN_DESKTOP); //fake it till u make it..
-       //we dont want to change HW videomodes because 4bpp isnt supported.
-       
-       //autoscale us to the monitors actual resolution
-       SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 'linear');
-       SDL_RenderSetLogicalSize(renderer, MaxX, MaxY);
-//phones: SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"); 
-
-	   IsThere:=SDL_SetWindowFullscreen(window, flags);
        //Hide, mouse.
        SDL_ShowCursor(SDL_DISABLE);
-
-       //thisMode:=getgraphmode;
-  	   if ( IsThere < 0 ) then begin
-    	      if IsConsoleInvoked then begin
-    	         writeln('Unable to set FS: ');
-    	         writeln('SDL reports: '+' '+ SDL_GetError);      
-     	      end;
-
-              FSNotPossible:=true;      
-       
-         //if we failed then just gimmie a yuge window..      
-         SDL_SetWindowSize(window, MaxX, MaxY);
-         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
-         if IsconsoleInvoked then begin
-            writeln('ERROR: SDL cannot set FS.');
-            writeln(SDL_GetError);
-         end;
-       end;
 
     end; 
 
@@ -5928,43 +5662,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 			exit;
         end;
 
-   if wantFullscreen then begin
-       //I dont know about double buffers yet but this looks yuumy..
-       //SDL_SetVideoMode(MaxX, MaxY, bpp, SDL_DOUBLEBUF|SDL_FULLSCREEN);
-
-       flags:=(SDL_GetWindowFlags(window));
-       flags:=flags or SDL_WINDOW_FULLSCREEN_DESKTOP; //fake it till u make it..
-       //we dont want to change HW videomodes because 4bpp isnt supported.
-       
-       
-       if ((flags and SDL_WINDOW_FULLSCREEN_DESKTOP) <> 0) then begin
-            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 'linear');
-            SDL_RenderSetLogicalSize(renderer, MaxX, MaxY);
-//phones: SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"); 
-       end;
-
-	   IsThere:=SDL_SetWindowFullscreen(window, flags);
-      //Hide, mouse.
-       SDL_ShowCursor(SDL_DISABLE);
-
-  	 //  thisMode:=getgraphmode;
-  	   if ( IsThere < 0 ) then begin
-    	      if IsConsoleInvoked then begin
-    	         writeln('Unable to set FS: ');
-    	         writeln('SDL reports: '+' '+ SDL_GetError);      
-     	      end;
-              FSNotPossible:=true;      
-       
-          //if we failed then just gimmie a yuge window..      
-          SDL_SetWindowSize(window, MaxX, MaxY);
-          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
-          if IsConsoleInvoked then begin            
-            writeln('ERROR: SDL cannot set FS.');
-            writeln(SDL_GetError);
-          end;
-          exit;
-       end;
-
+//if want full screen , then....
     end;
 
   //reset palette data
@@ -6094,8 +5792,6 @@ SDL_ScrollX(Surface,DifX);
 SDL_ScrollY(Surface,DifY);
 //Then renderCopy it back as a "texture"
 
-
-if youre looking for batched ops:
 
 procedure BatchRenderPixels;
 var 
@@ -6702,7 +6398,7 @@ begin
 			 Rect^.h:=8;   
        end;
    end;
-   SDL_RenderFillRect(renderer, rect);
+   SDL_FillRect(renderer, rect);
 
    Dispose(Rect);
    //now restore x and y
@@ -6851,7 +6547,7 @@ begin  //main()
 {$IFDEF unix}
 IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
 
-  if (GetEnvironmentVariable('DISPLAY') = '') then LoadlibSVGA:=true;
+  if (GetEnvironmentVariable('DISPLAY') = '') then LoadlibSVGA:=true; //we have no X11 loaded.
 
 {
   libSVGA note:
@@ -6918,3 +6614,6 @@ IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
    grErrorStrings[7]:='Invalid font';
 
 end.
+
+
+
