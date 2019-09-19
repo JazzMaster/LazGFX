@@ -1,17 +1,68 @@
-Unit shapes;
-
-//to be clear: "shaped objects" not "window shapes"
-//SDL GFX rewrite (in Pascal)
-
-
-//FIXME: needs full rewrite for OpenGL
+Unit SDL2_gfx;
 
 {
+
+FULLY REWRITTEN SDL2 Graphics unit for FreePascal (using supposed hyper-accelerated functions).
+
+
+Use this unit instead of the BGI unit I am providing (if you only use SDL2).
+
+(Which is why this code is a mess- why should we avoid working code that acomplishes the same result?
+The reason we rewrote the BGI in SDL in the first place- is to avoid routines like these)
+
+-I may just diff this- and chop this unit to pieces. We really DO NOT NEED IT.
+
+AA routines do not have a use in 2D(overkill)- this is a GL function (3D).
+
+Calls to SDL2_GFX should be rewritten to use functions from the provided "BGI interface".
+
+
+--Jazz
+
+----
+
+ORIGINAL CODE LICENSE:
+
+Copyright (C) 2001-2012  Andreas Schiffler
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+claim that you wrote the original software. If you use this software
+in a product, an acknowledgment in the product documentation would be
+appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not be
+misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+distribution.
+
+Andreas Schiffler -- aschiffler at ferzkopp dot net
+
+Update by Richard Jasmin -- admin at southernhedgehogs.org
+
+
+to be clear: "shaped objects" not "window shapes"
+SDL2_GFX rewrite (in Pascal)
+
+AA ops should be a GL "switch" -ultimately SDL2 uses OpenGL.
+(These should not be seperate routines)
+
+Further- they are not needed for the BGI(2D) sections.
+
+We use Bresnan(Bresnian?) algorithm for most of the arc/cricle/ellipse operations.
+Fills *can be a bitch* but there is a way to do this using the stack, somehow.
  
  Sources modified from a combination of:
    SDL demos and public sources
    FPC Graphics unit sources
-
 
 "Roto-zooming" is a late 90s "thing" with games like:
 		Final Fantasy 7,SonicCD (temporal teleportation) 
@@ -24,30 +75,18 @@ However, management of such needs to happen-
 	Havoc engine -Skyrim refresh bugs- affect playability(in some cases very badly)
 
 
-Original SDL code (in C) Copyright (C) 2001-2012  Andreas Schiffler
- -- aschiffler at ferzkopp dot net
+The C is not horrible to translate.
 
-Im going to leave this to YOU.
-
-The C is not horrible to translate-but this unit will undergo a massive rewrite and Im dropping SDL like 
-a ton of bricks. There are some sections that I will most likely port- not many.
-
-(Circles, Ellipses...)
-
-AA functions are not needed- GL takes care of redrawing the scene for us.
-Palette functions using DWords are not needed and redundant.
-
-As such- this code is abandoned work in progress.
-SDL is missing in too many areas to continue.
-
-If you feel this code helps- use it.
+--Jazz
 
 }
 
 interface
 
 uses
-	sdlbgi,math,strings;
+	
+interface
+   uses SDL2,math,strings;
 
 const
     PI=3.1415926535897932384626433832795;
@@ -162,6 +201,14 @@ Type
    
    PFPSManager = ^TFPSManager;
 
+Const
+   SDL2_GFXPRIMITIVES_MAJOR = 1;
+   SDL2_GFXPRIMITIVES_MINOR = 0;
+   SDL2_GFXPRIMITIVES_MICRO = 1;
+
+var
+    SmoothingON:boolean;
+
 
 Procedure SDL_initFramerate(manager: PFPSManager);
 Function SDL_setFramerate(manager: PFPSManager; rate: LongWord):LongInt;  
@@ -231,9 +278,196 @@ Function shrinkSurface(src: PSDL_Surface; factorx, factory: LongInt):PSDL_Surfac
 Function rotateSurface90Degrees(src: PSDL_Surface; numClockwiseTurns: LongInt):PSDL_Surface; 
 
 
+{
+
+Procedure SDL_initFramerate(manager: PFPSManager);
+Function SDL_setFramerate(manager: PFPSManager; rate: uInt32):sInt32;
+Function SDL_getFramerate(manager: PFPSManager):sInt32;
+Function SDL_getFramecount(manager: PFPSManager):sInt32;
+Function SDL_framerateDelay(manager: PFPSManager):uInt32;
+
+(* Note: all ___Color routines expect the colour to be in format 0xRRGGBBAA *)
+
+Function pixelColor(renderer: PSDL_Renderer; x, y: sInt16; colour: uInt32):sInt32; cdecl;
+Function pixelRGBA(renderer: PSDL_Renderer; x, y: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function hlineColor(renderer: PSDL_Renderer; x1, x2, y: sInt16; colour: uInt32):sInt32; cdecl;
+Function hlineRGBA(renderer: PSDL_Renderer; x1, x2, y:sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function vlineColor(renderer: PSDL_Renderer; x, y1, y2: sInt16; colour: uInt32):sInt32; cdecl;
+Function vlineRGBA(renderer: PSDL_Renderer; x, y1, y2: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function rectangleColor(renderer: PSDL_Renderer; x1, y1, x2, y2: sInt16; colour: uInt32):sInt32; cdecl;
+Function rectangleRGBA(renderer: PSDL_Renderer; x1, y1, x2, y2: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function roundedRectangleColor(renderer: PSDL_Renderer; x1, y1, x2, y2, rad: sInt16; colour: uInt32):sInt32; cdecl;
+Function roundedRectangleRGBA(renderer: PSDL_Renderer; x1, y1, x2, y2, rad: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function boxColor(renderer: PSDL_Renderer; x1, y1, x2, y2: sInt16; colour: uInt32):sInt32; cdecl;
+Function boxRGBA(renderer: PSDL_Renderer; x1, y1, x2, y2: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function roundedBoxColor(renderer: PSDL_Renderer; x1, y1, x2, y2, rad: sInt16; colour: uInt32):sInt32; cdecl;
+Function roundedBoxRGBA(renderer: PSDL_Renderer; x1, y1, x2, y2, rad: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function lineColor(renderer: PSDL_Renderer; x1, y1, x2, y2: sInt16; colour: uInt32):sInt32; cdecl;
+Function lineRGBA(renderer: PSDL_Renderer; x1, y1, x2, y2: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function aalineColor(renderer: PSDL_Renderer; x1, y1, x2, y2: sInt16; colour: uInt32):sInt32; cdecl;
+Function aalineRGBA(renderer: PSDL_Renderer; x1, y1, x2, y2: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function thickLineColor(renderer: PSDL_Renderer; x1, y1, x2, y2: sInt16; width: uInt8; colour: uInt32):sInt32; cdecl;
+Function thickLineRGBA(renderer: PSDL_Renderer; x1, y1, x2, y2: sInt16; width, r, g, b, a: uInt8):sInt32; cdecl;
+Function circleColor(renderer: PSDL_Renderer; x, y, rad: sInt16; colour: uInt32):sInt32; cdecl;
+Function circleRGBA(renderer: PSDL_Renderer; x, y, rad: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function arcColor(renderer: PSDL_Renderer; x, y, rad, start, finish: sInt16; colour: uInt32):sInt32; cdecl;
+Function arcRGBA(renderer: PSDL_Renderer; x, y, rad, start, finish: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function aacircleColor(renderer: PSDL_Renderer; x, y, rad: sInt16; colour: uInt32):sInt32; cdecl;
+Function aacircleRGBA(renderer: PSDL_Renderer; x, y, rad: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function filledCircleColor(renderer: PSDL_Renderer; x, y, rad: sInt16; colour: uInt32):sInt32; cdecl;
+Function filledCircleRGBA(renderer: PSDL_Renderer; x, y, rad: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function ellipseColor(renderer: PSDL_Renderer; x, y, rx, ry: sInt16; colour: uInt32):sInt32; cdecl;
+Function ellipseRGBA(renderer: PSDL_Renderer; x, y, rx, ry: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function aaellipseColor(renderer: PSDL_Renderer; x, y, rx, ry: sInt16; colour: uInt32):sInt32; cdecl;
+Function aaellipseRGBA(renderer: PSDL_Renderer; x, y, rx, ry: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function filledEllipseColor(renderer: PSDL_Renderer; x, y, rx, ry: sInt16; colour: uInt32):sInt32; cdecl;
+Function filledEllipseRGBA(renderer: PSDL_Renderer; x, y, rx, ry: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function pieColor(renderer: PSDL_Renderer; x, y, rad, start, finish: sInt16; colour: uInt32):sInt32; cdecl;
+Function pieRGBA(renderer: PSDL_Renderer; x, y, rad, start, finish: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function filledPieColor(renderer: PSDL_Renderer; x, y, rad, start, finish: sInt16; colour: uInt32):sInt32; cdecl;
+Function filledPieRGBA(renderer: PSDL_Renderer; x, y, rad, start, finish: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function trigonColor(renderer: PSDL_Renderer; x1, y1, x2, y2, x3, y3: sInt16; colour: uInt32):sInt32; cdecl;
+Function trigonRGBA(renderer: PSDL_Renderer; x1, y1, x2, y2, x3, y3: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function aatrigonColor(renderer: PSDL_Renderer; x1, y1, x2, y2, x3, y3: sInt16; colour: uInt32):sInt32; cdecl;
+Function aatrigonRGBA(renderer: PSDL_Renderer;  x1, y1, x2, y2, x3, y3: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function filledTrigonColor(renderer: PSDL_Renderer; x1, y1, x2, y2, x3, y3: sInt16; colour: uInt32):sInt32; cdecl;
+Function filledTrigonRGBA(renderer: PSDL_Renderer; x1, y1, x2, y2, x3, y3: sInt16; r, g, b, a: uInt8):sInt32; cdecl;
+Function polygonColor(renderer: PSDL_Renderer; Const vx, vy: PsInt16; n: sInt32; colour: uInt32):sInt32; cdecl;
+Function polygonRGBA(renderer: PSDL_Renderer; Const vx, vy: PsInt16; n: sInt32; r, g, b, a: uInt8):sInt32; cdecl;
+Function aapolygonColor(renderer: PSDL_Renderer; Const vx, vy: PsInt16; n: sInt32; colour: uInt32):sInt32; cdecl;
+Function aapolygonRGBA(renderer: PSDL_Renderer; Const vx, vy: PsInt16; n: sInt32; r, g, b, a: uInt8):sInt32; cdecl;
+Function filledPolygonColor(renderer: PSDL_Renderer; Const vx, vy: PsInt16; n: sInt32; colour: uInt32):sInt32; cdecl;
+Function filledPolygonRGBA(renderer: PSDL_Renderer; Const vx, vy: PsInt16; n: sInt32; r, g, b, a: uInt8):sInt32; cdecl;
+Function texturedPolygon(renderer: PSDL_Renderer; Const vx, vy: PsInt16; n: sInt32; texture: PSDL_Surface; texture_dx, texture_dy: sInt32):sInt32; cdecl;
+
+Function bezierColor(renderer: PSDL_Renderer; Const vx, vy: PsInt16; n, s: sInt32; colour: uInt32):sInt32; cdecl;
+Function bezierRGBA(renderer: PSDL_Renderer; Const vx, vy: PsInt16; n, s: sInt32; r, g, b, a: uInt8):sInt32; cdecl;
+
+Procedure SetFont(Const fontdata: Pointer; cw, ch: uInt32); cdecl;
+Procedure SetFontRotation(rotation: uInt32); cdecl;
+Function characterColor(renderer: PSDL_Renderer; x, y: sInt16; c: Char; colour: uInt32):sInt32; cdecl;
+Function characterRGBA(renderer: PSDL_Renderer; x, y: sInt16; c: Char; r, g, b, a: uInt8):sInt32; cdecl;
+
+Function stringColor(renderer: PSDL_Renderer; x, y: sInt16; Const str: PChar; colour: uInt32):sInt32; cdecl;
+Function stringRGBA(renderer: PSDL_Renderer; x, y: sInt16; Const syt: PChar; r, g, b, a: uInt8):sInt32; cdecl;
+
+(* Comments:                                                                           *
+ *  1.) MMX functions work best if all data blocks are aligned on a 32 bytes boundary. *
+ *  2.) Data that is not within an 8 byte boundary is processed using the C routine.   *
+ *  3.) Convolution routines do not have C routines at this time.                      *)
+
+// Detect MMX capability in CPU
+Function SDL_imageFilterMMXdetect():sInt32; cdecl;
+
+// Force use of MMX off (or turn possible use back on)
+Procedure SDL_imageFilterMMXoff(); cdecl;
+
+Procedure SDL_imageFilterMMXon(); cdecl;
+
+//  SDL_imageFilterAdd: D = saturation255(S1 + S2)
+Function SDL_imageFilterAdd(Src1, Src2, Dest : PuInt8; Length : uInt32):sInt32; cdecl;
+
+//  SDL_imageFilterMean: D = S1/2 + S2/2
+Function SDL_imageFilterMean(Src1, Src2, Dest : PuInt8; Length:uInt32):Sint32; cdecl;
+
+//  SDL_imageFilterSub: D = saturation0(S1 - S2)
+Function SDL_imageFilterSub(Src1, Src2, Dest : PuInt8; Length:uInt32):Sint32; cdecl;
+
+//  SDL_imageFilterAbsDiff: D = | S1 - S2 |
+Function SDL_imageFilterAbsDiff(Src1, Src2, Dest : PuInt8; Length:uInt32):Sint32; cdecl;
+
+//  SDL_imageFilterMult: D = saturation(S1 * S2)
+Function SDL_imageFilterMult(Src1, Src2, Dest : PuInt8; Length:uInt32):Sint32; cdecl;
+
+//  SDL_imageFilterMultNor: D = S1 * S2   (non-MMX)
+Function SDL_imageFilterMultNor(Src1, Src2, Dest : PuInt8; Length:uInt32):Sint32; cdecl;
+
+//  SDL_imageFilterMultDivby2: D = saturation255(S1/2 * S2)
+Function SDL_imageFilterMultDivby2(Src1, Src2, Dest : PuInt8; Length: uInt32):Sint32; cdecl;
+
+//  SDL_imageFilterMultDivby4: D = saturation255(S1/2 * S2/2)
+Function SDL_imageFilterMultDivby4(Src1, Src2, Dest : PuInt8; Length : uInt32):Sint32; cdecl;
+
+//  SDL_imageFilterBitAnd: D = S1 & S2
+Function SDL_imageFilterBitAnd(Src1, Src2, Dest : PuInt8; Length:uInt32):Sint32; cdecl;
+
+//  SDL_imageFilterBitOr: D = S1 | S2
+Function SDL_imageFilterBitOr(Src1, Src2, Dest : PuInt8; Length:uInt32):Sint32; cdecl;
+
+//  SDL_imageFilterDiv: D = S1 / S2   (non-MMX)
+Function SDL_imageFilterDiv(Src1, Src2, Dest : PuInt8; Length:uInt32):Sint32; cdecl;
+
+//  SDL_imageFilterBitNegation: D = !S
+Function SDL_imageFilterBitNegation(Src1, Dest : PuInt8; Length:uInt32):Sint32; cdecl;
+
+//  SDL_imageFilterAddByte: D = saturation255(S + C)
+Function SDL_imageFilterAddByte(Src1, Dest : PuInt8; Length:uInt32; C : uInt8):Sint32; cdecl;
+
+//  SDL_imageFilterAddUsInt32: D = saturation255(S + (usInt32)C)
+Function SDL_imageFilterAddUsInt32(Src1, Dest : PuInt8; Length:uInt32; C : uInt32):Sint32; cdecl;
+
+//  SDL_imageFilterAddByteToHalf: D = saturation255(S/2 + C)
+Function SDL_imageFilterAddByteToHalf(Src1, Dest : PuInt8; Length:uInt32; C : uInt8):Sint32; cdecl;
+
+//  SDL_imageFilterSubByte: D = saturation0(S - C)
+Function SDL_imageFilterSubByte(Src1, Dest : PuInt8; Length:uInt32; C : uInt8):Sint32; cdecl;
+
+//  SDL_imageFilterSubUsInt32: D = saturation0(S - (usInt32)C)
+Function SDL_imageFilterSubUsInt32(Src1, Dest : PuInt8; Length:uInt32; C : uInt32):Sint32; cdecl;
+
+//  SDL_imageFilterShiftRight: D = saturation0(S >> N)
+Function SDL_imageFilterShiftRight(Src1, Dest : PuInt8; Length:uInt32; N : uInt8):Sint32; cdecl;
+
+//  SDL_imageFilterShiftRightUsInt32: D = saturation0((usInt32)S >> N)
+Function SDL_imageFilterShiftRightUsInt32(Src1, Dest : PuInt8; Length:uInt32; N : uInt8):Sint32; cdecl;
+
+//  SDL_imageFilterMultByByte: D = saturation255(S * C)
+Function SDL_imageFilterMultByByte(Src1, Dest : PuInt8; Length:uInt32; C : uInt8):Sint32; cdecl;
+
+//  SDL_imageFilterShiftRightAndMultByByte: D = saturation255((S >> N) * C)
+Function SDL_imageFilterShiftRightAndMultByByte(Src1, Dest : PuInt8; Length:uInt32; N, C : uInt8):Sint32; cdecl;
+
+//  SDL_imageFilterShiftLeftByte: D = (S << N)
+Function SDL_imageFilterShiftLeftByte(Src1, Dest : PuInt8; Length:uInt32; N: uInt8):Sint32; cdecl;
+
+//  SDL_imageFilterShiftLeftUsInt32: D = ((usInt32)S << N)
+Function SDL_imageFilterShiftLeftUsInt32(Src1, Dest : PuInt8; Length:uInt32; N:uInt8):Sint32; cdecl;
+
+//  SDL_imageFilterShiftLeft: D = saturation255(S << N)
+Function SDL_imageFilterShiftLeft(Src1, Dest : PuInt8; Length:uInt32; N : uInt8):Sint32; cdecl;
+
+//  SDL_imageFilterBinarizeUsingThreshold: D = S >= T ? 255:0
+Function SDL_imageFilterBinarizeUsingThreshold(Src1, Dest : PuInt8; Length:uInt32; T: uInt8):Sint32; cdecl;
+
+//  SDL_imageFilterClipToRange: D = (S >= Tmin) & (S <= Tmax) 255:0
+Function SDL_imageFilterClipToRange(Src1, Dest : PuInt8; Length:uInt32; Tmin, Tmax: uInt8):Sint32; cdecl;
+
+//  SDL_imageFilterNormalizeLinear: D = saturation255((Nmax - Nmin)/(Cmax - Cmin)*(S - Cmin) + Nmin)
+Function SDL_imageFilterNormalizeLinear(Src, Dest: PuInt8; Length, Cmin, Cmax, Nmin, Nmax: sInt32):Sint32; cdecl;
+
+Function rotozoomSurface(src: PSDL_Surface; angle, zoom: Double; smooth: sInt32):PSDL_Surface; cdecl;
+Function rotozoomSurfaceXY(src: PSDL_Surface; angle, zoomx, zoomy: Double; smooth: sInt32):PSDL_Surface; cdecl;
+Procedure rotozoomSurfaceSize(width, height: sInt32; angle, zoom: Double; dstwidth, dstheight: PuInt32); cdecl;
+Procedure rotozoomSurfaceSizeXY(width, height: sInt32; angle, zoomx, zoomy: Double; dstwidth, dstheight:PuInt32); cdecl;
+Function zoomSurface(src: PSDL_Surface; zoomx, zoomy: Double; smooth: sInt32):PSDL_Surface; cdecl;
+Procedure zoomSurfaceSize(width, height: sInt32; zoomx, zoomy: Double; dstwidth, dstheight: PuInt32); cdecl;
+Function shrinkSurface(src: PSDL_Surface; factorx, factory: sInt32):PSDL_Surface; cdecl;
+Function rotateSurface90Degrees(src: PSDL_Surface; numClockwiseTurns: sInt32):PSDL_Surface; cdecl;
+
+}
+
 implementation
+
 //dont assume- but it can be reasonably assumed that initgraph was called before
 //using anything here.
+
+Procedure SDL_GFX_VERSION(Out X: TSDL_Version);
+begin
+   X.Major := SDL2_GFXPRIMITIVES_MAJOR;
+   X.Minor := SDL2_GFXPRIMITIVES_MINOR;
+   X.Patch := SDL2_GFXPRIMITIVES_MICRO;
+end;
+
 
 
 //the C isnt ported yet-

@@ -1,15 +1,17 @@
 This is the old SDL port.
-Licence changed "for your programming pleaseure".
+Licence updated to Apache/Mozilla "for your programming pleasure".
 
 ---		
 
-state:  RELEASE .84
+state:  RELEASE .84(WIP)
 
 ---
 
 Other documentaion still applies here.
 You wont notice much difference in code as its running or called-
 	the differences should be internal.
+
+Units SDL2_BGI and LazGFX will be merged. The C nees to be translated.
 
 #### Some SDL routines disappear- 
 
