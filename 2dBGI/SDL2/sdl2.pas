@@ -10397,12 +10397,12 @@ end;
 
 function SDL_WindowPos_IsUndefined(X: Variant): Variant;
 begin
-  Result := (X and $FFFF0000) = SDL_WINDOWPOS_UNDEFINED_MASK;
+  //Result := (X and $FFFF0000) = SDL_WINDOWPOS_UNDEFINED_MASK;
 end;
 
 function SDL_WindowPos_IsCentered(X: Variant): Variant;
 begin
-  Result := (X and $FFFF0000) = SDL_WINDOWPOS_CENTERED_MASK;
+  //Result := (X and $FFFF0000) = SDL_WINDOWPOS_CENTERED_MASK;
 end;
 
 

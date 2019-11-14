@@ -1,8 +1,4 @@
 unit sdl;
-{
-  $Id: sdl.pas,v 1.38 2008/01/26 10:09:32 savage Exp $
-
-}
 {******************************************************************************}
 {                                                                              }
 {          JEDI-SDL : Pascal units for SDL - Simple DirectMedia Layer          }
@@ -12,6 +8,7 @@ unit sdl;
 { Copyright (C) 1997-2004  Sam Lantinga                                        }
 { 5635-34 Springhouse Dr.                                                      }
 { Pleasanton, CA 94588 (USA)                                                   }
+{ Code Cleanup for FPC by Richard Jasmin                                       }
 {                                                                              }
 { All Rights Reserved.                                                         }
 {                                                                              }
@@ -50,9 +47,7 @@ unit sdl;
 { Obtained through:                                                            }
 { Joint Endeavour of Delphi Innovators ( Project JEDI )                        }
 {                                                                              }
-{ You may retrieve the latest version of this file at the Project              }
-{ JEDI home page, located at http://delphi-jedi.org                            }
-{                                                                              }
+{ This software is basically abandoned - Jazz                                  }
 { The contents of this file are used with permission, subject to               }
 { the Mozilla Public License Version 1.1 (the "License"); you may              }
 { not use this file except in compliance with the License. You may             }
@@ -73,50 +68,16 @@ unit sdl;
 {                                                                              }
 {******************************************************************************}
 
-{$IFNDEF JEDI_INC}
-{$DEFINE JEDI_INC}
-
-{**************************************************************************************************}
-{                                                                                                  }
-{  Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF  }
-{  ANY KIND, either express or implied. See the License for the specific language governing rights }
-{  and limitations under the License.                                                              }
-{                                                                                                  }
-{  The Original Code is: jedi.inc.                                                                 }
-{  The Initial Developer of the Original Code is Project JEDI http://www.delphi-jedi.org           }
-{                                                                                                  }
-{                                                                                                  }
-{  For more information about the LGPL: http://www.gnu.org/copyleft/lesser.html                    }
-{                                                                                                  }
-{**************************************************************************************************}
-{                                                                                                  }
-{  This file defines various generic compiler directives used in different libraries, e.g. in the  }
-{  JEDI Code Library (JCL) and JEDI Visual Component Library Library (JVCL). The directives in     }
-{  this file are of generic nature and consist mostly of mappings from the VERXXX directives       }
-{  defined by Delphi, C++Builder and FPC to friendly names such as DELPHI5 and                     }
-{  SUPPORTS_WIDESTRING. These friendly names are subsequently used in the libraries to test for    }
-{  compiler versions and/or whether the compiler supports certain features (such as widestrings or }
-{  64 bit integers. The libraries provide an additional, library specific, include file. For the   }
-{  JCL e.g. this is jcl.inc. }
-
+ 
 (*
 
 - Development environment directives
 
   This file defines two directives to indicate which development environment the
-  library is being compiled with. Currently this can either be Delphi, Kylix,
-  C++Builder or FPC.
+  library is being compiled with. Currently this can be FPC.
 
   Directive           Description
   ------------------------------------------------------------------------------
-  DELPHI              Defined if compiled with Delphi
-  KYLIX               Defined if compiled with Kylix
-  DELPHICOMPILER      Defined if compiled with Delphi or Kylix/Delphi
-  BCB                 Defined if compiled with C++Builder
-  CPPBUILDER          Defined if compiled with C++Builder (alias for BCB)
-  BCBCOMPILER         Defined if compiled with C++Builder or Kylix/C++
-  DELPHILANGUAGE      Defined if compiled with Delphi, Kylix or C++Builder
-  BORLAND             Defined if compiled with Delphi, Kylix or C++Builder
   FPC                 Defined if compiled with FPC
 
 - Platform Directives
@@ -131,7 +92,6 @@ unit sdl;
   MSWINDOWS           Defined when target platform is 32 bit Windows
   LINUX               Defined when target platform is Linux
   UNIX                Defined when target platform is Unix-like (including Linux)
-  CLR                 Defined when target platform is .NET
 
 - Architecture directives. These are auto-defined by FPC
   CPU32 and CPU64 are mostly for generic pointer size dependant differences rather
@@ -143,18 +103,6 @@ unit sdl;
   CPU64	              Defined when target is 64-bit
   CPUASM              Defined when target assembler is available
 
-- Visual library Directives
-
-  The following directives indicate for a visual library. In a Delphi/BCB
-  (Win32) application you need to define the VisualCLX symbol in the project
-  options, if  you want to use the VisualCLX library. Alternatively you can use
-  the IDE expert, which is distributed with the JCL to do this automatically.
-
-  Directive           Description
-  ------------------------------------------------------------------------------
-  VCL                 Defined for Delphi/BCB (Win32) exactly if VisualCLX is not defined
-  VisualCLX           Defined for Kylix; needs to be defined for Delphi/BCB to
-                      use JCL with VisualCLX applications.
 
 
 - Other cross-platform related defines
@@ -166,354 +114,6 @@ unit sdl;
   PUREPASCAL          Code is machine-independent (as opposed to assembler code)
   Win32API            Code is specific for the Win32 API;
                       use instead of "{$IFNDEF CLR} {$IFDEF MSWINDOWS}" constructs
-
-
-- Delphi Versions
-
-  The following directives are direct mappings from the VERXXX directives to a
-  friendly name of the associated compiler. These directives are only defined if
-  the compiler is Delphi (ie DELPHI is defined).
-
-  Directive           Description
-  ------------------------------------------------------------------------------
-  DELPHI1             Defined when compiling with Delphi 1 (Codename WASABI/MANGO)
-  DELPHI2             Defined when compiling with Delphi 2 (Codename POLARIS)
-  DELPHI3             Defined when compiling with Delphi 3 (Codename IVORY)
-  DELPHI4             Defined when compiling with Delphi 4 (Codename ALLEGRO)
-  DELPHI5             Defined when compiling with Delphi 5 (Codename ARGUS)
-  DELPHI6             Defined when compiling with Delphi 6 (Codename ILLIAD)
-  DELPHI7             Defined when compiling with Delphi 7 (Codename AURORA)
-  DELPHI8             Defined when compiling with Delphi 8 (Codename OCTANE)
-  DELPHI2005          Defined when compiling with Delphi 2005 (Codename DIAMONDBACK)
-  DELPHI9             Alias for DELPHI2005
-  DELPHI10            Defined when compiling with Delphi 2006 (Codename DEXTER)
-  DELPHI2006          Alias for DELPHI10
-  DELPHI11            Defined when compiling with Delphi 2007 for Win32 (Codename SPACELY)
-  DELPHI2007          Alias for DELPHI11
-  DELPHI12            Defined when compiling with Delphi 2009 for Win32 (Codename TIBURON)
-  DELPHI2009          Alias for DELPHI12
-  DELPHI14            Defined when compiling with Delphi 2010 for Win32 (Codename WEAVER)
-  DELPHI2010          Alias for DELPHI14
-  DELPHI15            Defined when compiling with Delphi XE for Win32 (Codename FULCRUM)
-  DELPHIXE            Alias for DELPHI15
-  DELPHI16            Defined when compiling with Delphi XE2 for Win32 (Codename PULSAR)
-  DELPHIXE2           Alias for DELPHI16
-  DELPHI17            Defined when compiling with Delphi XE3 for Win32 (Codename WATERDRAGON)
-  DELPHIXE3           Alias for DELPHI17
-  DELPHI18            Defined when compiling with Delphi XE4 for Win32 (Codename QUINTESSENCE)
-  DELPHIXE4           Alias for DELPHI18
-  DELPHI19            Defined when compiling with Delphi XE5 for Win32 (Codename ZEPHYR)
-  DELPHIXE5           Alias for DELPHI19
-  DELPHI20            Defined when compiling with Delphi XE6 for Win32 (Codename PROTEUS)
-  DELPHIXE6           Alias for DELPHI20
-  DELPHI21            Defined when compiling with Delphi XE7 for Win32 (Codename CARPATHIA)
-  DELPHIXE7           Alias for DELPHI21
-  DELPHI22            Defined when compiling with Delphi XE8 for Win32 (Codename ELBRUS)
-  DELPHIXE8           Alias for DELPHI22
-  DELPHI23            Defined when compiling with Delphi 10 for Win32 (Codename AITANA)
-  DELPHIX_SEATTLE     Alias for DELPHI23
-  DELPHI1_UP          Defined when compiling with Delphi 1 or higher
-  DELPHI2_UP          Defined when compiling with Delphi 2 or higher
-  DELPHI3_UP          Defined when compiling with Delphi 3 or higher
-  DELPHI4_UP          Defined when compiling with Delphi 4 or higher
-  DELPHI5_UP          Defined when compiling with Delphi 5 or higher
-  DELPHI6_UP          Defined when compiling with Delphi 6 or higher
-  DELPHI7_UP          Defined when compiling with Delphi 7 or higher
-  DELPHI8_UP          Defined when compiling with Delphi 8 or higher
-  DELPHI2005_UP       Defined when compiling with Delphi 2005 or higher
-  DELPHI9_UP          Alias for DELPHI2005_UP
-  DELPHI10_UP         Defined when compiling with Delphi 2006 or higher
-  DELPHI2006_UP       Alias for DELPHI10_UP
-  DELPHI11_UP         Defined when compiling with Delphi 2007 for Win32 or higher
-  DELPHI2007_UP       Alias for DELPHI11_UP
-  DELPHI12_UP         Defined when compiling with Delphi 2009 for Win32 or higher
-  DELPHI2009_UP       Alias for DELPHI12_UP
-  DELPHI14_UP         Defined when compiling with Delphi 2010 for Win32 or higher
-  DELPHI2010_UP       Alias for DELPHI14_UP
-  DELPHI15_UP         Defined when compiling with Delphi XE for Win32 or higher
-  DELPHIXE_UP         Alias for DELPHI15_UP
-  DELPHI16_UP         Defined when compiling with Delphi XE2 for Win32 or higher
-  DELPHIXE2_UP        Alias for DELPHI16_UP
-  DELPHI17_UP         Defined when compiling with Delphi XE3 for Win32 or higher
-  DELPHIXE3_UP        Alias for DELPHI17_UP
-  DELPHI18_UP         Defined when compiling with Delphi XE4 for Win32 or higher
-  DELPHIXE4_UP        Alias for DELPHI18_UP
-  DELPHI19_UP         Defined when compiling with Delphi XE5 for Win32 or higher
-  DELPHIXE5_UP        Alias for DELPHI19_UP
-  DELPHI20_UP         Defined when compiling with Delphi XE6 for Win32 or higher
-  DELPHIXE6_UP        Alias for DELPHI20_UP
-  DELPHI21_UP         Defined when compiling with Delphi XE7 for Win32 or higher
-  DELPHIXE7_UP        Alias for DELPHI21_UP
-  DELPHI22_UP         Defined when compiling with Delphi XE8 for Win32 or higher
-  DELPHIXE8_UP        Alias for DELPHI22_UP
-  DELPHI23_UP         Defined when compiling with Delphi 10 for Win32 or higher
-  DELPHIX_SEATTLE_UP  Alias for DELPHI23_UP
-
-
-- Kylix Versions
-
-  The following directives are direct mappings from the VERXXX directives to a
-  friendly name of the associated compiler. These directives are only defined if
-  the compiler is Kylix (ie KYLIX is defined).
-
-  Directive           Description
-  ------------------------------------------------------------------------------
-  KYLIX1              Defined when compiling with Kylix 1
-  KYLIX2              Defined when compiling with Kylix 2
-  KYLIX3              Defined when compiling with Kylix 3 (Codename CORTEZ)
-  KYLIX1_UP           Defined when compiling with Kylix 1 or higher
-  KYLIX2_UP           Defined when compiling with Kylix 2 or higher
-  KYLIX3_UP           Defined when compiling with Kylix 3 or higher
-
-
-- Delphi Compiler Versions (Delphi / Kylix, not in BCB mode)
-
-  Directive           Description
-  ------------------------------------------------------------------------------
-  DELPHICOMPILER1      Defined when compiling with Delphi 1
-  DELPHICOMPILER2      Defined when compiling with Delphi 2
-  DELPHICOMPILER3      Defined when compiling with Delphi 3
-  DELPHICOMPILER4      Defined when compiling with Delphi 4
-  DELPHICOMPILER5      Defined when compiling with Delphi 5
-  DELPHICOMPILER6      Defined when compiling with Delphi 6 or Kylix 1, 2 or 3
-  DELPHICOMPILER7      Defined when compiling with Delphi 7
-  DELPHICOMPILER8      Defined when compiling with Delphi 8
-  DELPHICOMPILER9      Defined when compiling with Delphi 2005
-  DELPHICOMPILER10     Defined when compiling with Delphi Personality of BDS 4.0
-  DELPHICOMPILER11     Defined when compiling with Delphi 2007 for Win32
-  DELPHICOMPILER12     Defined when compiling with Delphi Personality of BDS 6.0
-  DELPHICOMPILER14     Defined when compiling with Delphi Personality of BDS 7.0
-  DELPHICOMPILER15     Defined when compiling with Delphi Personality of BDS 8.0
-  DELPHICOMPILER16     Defined when compiling with Delphi Personality of BDS 9.0
-  DELPHICOMPILER17     Defined when compiling with Delphi Personality of BDS 10.0
-  DELPHICOMPILER18     Defined when compiling with Delphi Personality of BDS 11.0
-  DELPHICOMPILER19     Defined when compiling with Delphi Personality of BDS 12.0
-  DELPHICOMPILER20     Defined when compiling with Delphi Personality of BDS 14.0
-  DELPHICOMPILER21     Defined when compiling with Delphi Personality of BDS 15.0
-  DELPHICOMPILER22     Defined when compiling with Delphi Personality of BDS 16.0
-  DELPHICOMPILER23     Defined when compiling with Delphi Personality of BDS 17.0
-  DELPHICOMPILER1_UP   Defined when compiling with Delphi 1 or higher
-  DELPHICOMPILER2_UP   Defined when compiling with Delphi 2 or higher
-  DELPHICOMPILER3_UP   Defined when compiling with Delphi 3 or higher
-  DELPHICOMPILER4_UP   Defined when compiling with Delphi 4 or higher
-  DELPHICOMPILER5_UP   Defined when compiling with Delphi 5 or higher
-  DELPHICOMPILER6_UP   Defined when compiling with Delphi 6 or Kylix 1, 2 or 3 or higher
-  DELPHICOMPILER7_UP   Defined when compiling with Delphi 7 or higher
-  DELPHICOMPILER8_UP   Defined when compiling with Delphi 8 or higher
-  DELPHICOMPILER9_UP   Defined when compiling with Delphi 2005
-  DELPHICOMPILER10_UP  Defined when compiling with Delphi 2006 or higher
-  DELPHICOMPILER11_UP  Defined when compiling with Delphi 2007 for Win32 or higher
-  DELPHICOMPILER12_UP  Defined when compiling with Delphi 2009 for Win32 or higher
-  DELPHICOMPILER14_UP  Defined when compiling with Delphi 2010 for Win32 or higher
-  DELPHICOMPILER15_UP  Defined when compiling with Delphi XE for Win32 or higher
-  DELPHICOMPILER16_UP  Defined when compiling with Delphi XE2 for Win32 or higher
-  DELPHICOMPILER17_UP  Defined when compiling with Delphi XE3 for Win32 or higher
-  DELPHICOMPILER18_UP  Defined when compiling with Delphi XE4 for Win32 or higher
-  DELPHICOMPILER19_UP  Defined when compiling with Delphi XE5 for Win32 or higher
-  DELPHICOMPILER20_UP  Defined when compiling with Delphi XE6 for Win32 or higher
-  DELPHICOMPILER21_UP  Defined when compiling with Delphi XE7 for Win32 or higher
-  DELPHICOMPILER22_UP  Defined when compiling with Delphi XE8 for Win32 or higher
-  DELPHICOMPILER23_UP  Defined when compiling with Delphi 10 for Win32 or higher
-
-
-- C++Builder Versions
-
-  The following directives are direct mappings from the VERXXX directives to a
-  friendly name of the associated compiler. These directives are only defined if
-  the compiler is C++Builder (ie BCB is defined).
-
-  Directive    Description
-  ------------------------------------------------------------------------------
-  BCB1         Defined when compiling with C++Builder 1
-  BCB3         Defined when compiling with C++Builder 3
-  BCB4         Defined when compiling with C++Builder 4
-  BCB5         Defined when compiling with C++Builder 5 (Codename RAMPAGE)
-  BCB6         Defined when compiling with C++Builder 6 (Codename RIPTIDE)
-  BCB10        Defined when compiling with C++Builder Personality of BDS 4.0 (also known as C++Builder 2006) (Codename DEXTER)
-  BCB11        Defined when compiling with C++Builder Personality of RAD Studio 2007 (also known as C++Builder 2007) (Codename COGSWELL)
-  BCB12        Defined when compiling with C++Builder Personality of RAD Studio 2009 (also known as C++Builder 2009) (Codename TIBURON)
-  BCB14        Defined when compiling with C++Builder Personality of RAD Studio 2010 (also known as C++Builder 2010) (Codename WEAVER)
-  BCB15        Defined when compiling with C++Builder Personality of RAD Studio XE (also known as C++Builder XE) (Codename FULCRUM)
-  BCB16        Defined when compiling with C++Builder Personality of RAD Studio XE2 (also known as C++Builder XE2) (Codename PULSAR)
-  BCB17        Defined when compiling with C++Builder Personality of RAD Studio XE3 (also known as C++Builder XE3) (Codename WATERDRAGON)
-  BCB18        Defined when compiling with C++Builder Personality of RAD Studio XE4 (also known as C++Builder XE4) (Codename QUINTESSENCE)
-  BCB19        Defined when compiling with C++Builder Personality of RAD Studio XE5 (also known as C++Builder XE5) (Codename ZEPHYR)
-  BCB20        Defined when compiling with C++Builder Personality of RAD Studio XE6 (also known as C++Builder XE6) (Codename PROTEUS)
-  BCB21        Defined when compiling with C++Builder Personality of RAD Studio XE7 (also known as C++Builder XE7) (Codename CARPATHIA)
-  BCB22        Defined when compiling with C++Builder Personality of RAD Studio XE8 (also known as C++Builder XE8) (Codename ELBRUS)
-  BCB23        Defined when compiling with C++Builder Personality of RAD Studio 10 Seattle (also known as C++Builder 10 Seattle) (Codename AITANA)
-  BCB1_UP      Defined when compiling with C++Builder 1 or higher
-  BCB3_UP      Defined when compiling with C++Builder 3 or higher
-  BCB4_UP      Defined when compiling with C++Builder 4 or higher
-  BCB5_UP      Defined when compiling with C++Builder 5 or higher
-  BCB6_UP      Defined when compiling with C++Builder 6 or higher
-  BCB10_UP     Defined when compiling with C++Builder Personality of BDS 4.0 or higher
-  BCB11_UP     Defined when compiling with C++Builder Personality of RAD Studio 2007 or higher
-  BCB12_UP     Defined when compiling with C++Builder Personality of RAD Studio 2009 or higher
-  BCB14_UP     Defined when compiling with C++Builder Personality of RAD Studio 2010 or higher
-  BCB15_UP     Defined when compiling with C++Builder Personality of RAD Studio XE or higher
-  BCB16_UP     Defined when compiling with C++Builder Personality of RAD Studio XE2 or higher
-  BCB17_UP     Defined when compiling with C++Builder Personality of RAD Studio XE3 or higher
-  BCB18_UP     Defined when compiling with C++Builder Personality of RAD Studio XE4 or higher
-  BCB19_UP     Defined when compiling with C++Builder Personality of RAD Studio XE5 or higher
-  BCB20_UP     Defined when compiling with C++Builder Personality of RAD Studio XE6 or higher
-  BCB21_UP     Defined when compiling with C++Builder Personality of RAD Studio XE7 or higher
-  BCB22_UP     Defined when compiling with C++Builder Personality of RAD Studio XE8 or higher
-  BCB23_UP     Defined when compiling with C++Builder Personality of RAD Studio 10 or higher
-
-
-- RAD Studio / Borland Developer Studio Versions
-
-  The following directives are direct mappings from the VERXXX directives to a
-  friendly name of the associated IDE. These directives are only defined if
-  the IDE is Borland Developer Studio Version 2 or above.
-
-  Note: Borland Developer Studio 2006 is marketed as Delphi 2006 or C++Builder 2006,
-  but those provide only different labels for identical content.
-
-  Directive    Description
-  ------------------------------------------------------------------------------
-  BDS          Defined when compiling with BDS version of dcc32.exe (Codename SIDEWINDER)
-  BDS2         Defined when compiling with BDS 2.0 (Delphi 8) (Codename OCTANE)
-  BDS3         Defined when compiling with BDS 3.0 (Delphi 2005) (Codename DIAMONDBACK)
-  BDS4         Defined when compiling with BDS 4.0 (Borland Developer Studio 2006) (Codename DEXTER)
-  BDS5         Defined when compiling with BDS 5.0 (CodeGear RAD Studio 2007) (Codename HIGHLANDER)
-  BDS6         Defined when compiling with BDS 6.0 (CodeGear RAD Studio 2009) (Codename TIBURON)
-  BDS7         Defined when compiling with BDS 7.0 (Embarcadero RAD Studio 2010) (Codename WEAVER)
-  BDS8         Defined when compiling with BDS 8.0 (Embarcadero RAD Studio XE) (Codename FULCRUM)
-  BDS9         Defined when compiling with BDS 9.0 (Embarcadero RAD Studio XE2) (Codename PULSAR)
-  BDS10        Defined when compiling with BDS 10.0 (Embarcadero RAD Studio XE3) (Codename WATERDRAGON)
-  BDS11        Defined when compiling with BDS 11.0 (Embarcadero RAD Studio XE4) (Codename QUINTESSENCE)
-  BDS12        Defined when compiling with BDS 12.0 (Embarcadero RAD Studio XE5) (Codename ZEPHYR)
-  BDS14        Defined when compiling with BDS 14.0 (Embarcadero RAD Studio XE6) (Codename PROTEUS)
-  BDS15        Defined when compiling with BDS 15.0 (Embarcadero RAD Studio XE7) (Codename CARPATHIA)
-  BDS16        Defined when compiling with BDS 16.0 (Embarcadero RAD Studio XE8) (Codename ELBRUS)
-  BDS17        Defined when compiling with BDS 17.0 (Embarcadero RAD Studio 10) (Codename AITANA)
-  BDS2_UP      Defined when compiling with BDS 2.0 or higher
-  BDS3_UP      Defined when compiling with BDS 3.0 or higher
-  BDS4_UP      Defined when compiling with BDS 4.0 or higher
-  BDS5_UP      Defined when compiling with BDS 5.0 or higher
-  BDS6_UP      Defined when compiling with BDS 6.0 or higher
-  BDS7_UP      Defined when compiling with BDS 7.0 or higher
-  BDS8_UP      Defined when compiling with BDS 8.0 or higher
-  BDS9_UP      Defined when compiling with BDS 9.0 or higher
-  BDS10_UP     Defined when compiling with BDS 10.0 or higher
-  BDS11_UP     Defined when compiling with BDS 11.0 or higher
-  BDS12_UP     Defined when compiling with BDS 12.0 or higher
-  BDS14_UP     Defined when compiling with BDS 14.0 or higher
-  BDS15_UP     Defined when compiling with BDS 15.0 or higher
-  BDS16_UP     Defined when compiling with BDS 16.0 or higher
-  BDS17_UP     Defined when compiling with BDS 17.0 or higher
-
-- Compiler Versions
-
-  The following directives are direct mappings from the VERXXX directives to a
-  friendly name of the associated compiler. Unlike the DELPHI_X and BCB_X
-  directives, these directives are indepedent of the development environment.
-  That is, they are defined regardless of whether compilation takes place using
-  Delphi or C++Builder.
-
-  Directive     Description
-  ------------------------------------------------------------------------------
-  COMPILER1      Defined when compiling with Delphi 1
-  COMPILER2      Defined when compiling with Delphi 2 or C++Builder 1
-  COMPILER3      Defined when compiling with Delphi 3
-  COMPILER35     Defined when compiling with C++Builder 3
-  COMPILER4      Defined when compiling with Delphi 4 or C++Builder 4
-  COMPILER5      Defined when compiling with Delphi 5 or C++Builder 5
-  COMPILER6      Defined when compiling with Delphi 6 or C++Builder 6
-  COMPILER7      Defined when compiling with Delphi 7
-  COMPILER8      Defined when compiling with Delphi 8
-  COMPILER9      Defined when compiling with Delphi 9
-  COMPILER10     Defined when compiling with Delphi or C++Builder Personalities of BDS 4.0
-  COMPILER11     Defined when compiling with Delphi or C++Builder Personalities of BDS 5.0
-  COMPILER12     Defined when compiling with Delphi or C++Builder Personalities of BDS 6.0
-  COMPILER14     Defined when compiling with Delphi or C++Builder Personalities of BDS 7.0
-  COMPILER15     Defined when compiling with Delphi or C++Builder Personalities of BDS 8.0
-  COMPILER16     Defined when compiling with Delphi or C++Builder Personalities of BDS 9.0
-  COMPILER17     Defined when compiling with Delphi or C++Builder Personalities of BDS 10.0
-  COMPILER18     Defined when compiling with Delphi or C++Builder Personalities of BDS 11.0
-  COMPILER19     Defined when compiling with Delphi or C++Builder Personalities of BDS 12.0
-  COMPILER20     Defined when compiling with Delphi or C++Builder Personalities of BDS 14.0
-  COMPILER21     Defined when compiling with Delphi or C++Builder Personalities of BDS 15.0
-  COMPILER22     Defined when compiling with Delphi or C++Builder Personalities of BDS 16.0
-  COMPILER23     Defined when compiling with Delphi or C++Builder Personalities of BDS 17.0
-  COMPILER1_UP   Defined when compiling with Delphi 1 or higher
-  COMPILER2_UP   Defined when compiling with Delphi 2 or C++Builder 1 or higher
-  COMPILER3_UP   Defined when compiling with Delphi 3 or higher
-  COMPILER35_UP  Defined when compiling with C++Builder 3 or higher
-  COMPILER4_UP   Defined when compiling with Delphi 4 or C++Builder 4 or higher
-  COMPILER5_UP   Defined when compiling with Delphi 5 or C++Builder 5 or higher
-  COMPILER6_UP   Defined when compiling with Delphi 6 or C++Builder 6 or higher
-  COMPILER7_UP   Defined when compiling with Delphi 7
-  COMPILER8_UP   Defined when compiling with Delphi 8
-  COMPILER9_UP   Defined when compiling with Delphi Personalities of BDS 3.0
-  COMPILER10_UP  Defined when compiling with Delphi or C++Builder Personalities of BDS 4.0 or higher
-  COMPILER11_UP  Defined when compiling with Delphi or C++Builder Personalities of BDS 5.0 or higher
-  COMPILER12_UP  Defined when compiling with Delphi or C++Builder Personalities of BDS 6.0 or higher
-  COMPILER14_UP  Defined when compiling with Delphi or C++Builder Personalities of BDS 7.0 or higher
-  COMPILER15_UP  Defined when compiling with Delphi or C++Builder Personalities of BDS 8.0 or higher
-  COMPILER16_UP  Defined when compiling with Delphi or C++Builder Personalities of BDS 9.0 or higher
-  COMPILER17_UP  Defined when compiling with Delphi or C++Builder Personalities of BDS 10.0 or higher
-  COMPILER18_UP  Defined when compiling with Delphi or C++Builder Personalities of BDS 11.0 or higher
-  COMPILER19_UP  Defined when compiling with Delphi or C++Builder Personalities of BDS 12.0 or higher
-  COMPILER20_UP  Defined when compiling with Delphi or C++Builder Personalities of BDS 14.0 or higher
-  COMPILER21_UP  Defined when compiling with Delphi or C++Builder Personalities of BDS 15.0 or higher
-  COMPILER22_UP  Defined when compiling with Delphi or C++Builder Personalities of BDS 16.0 or higher
-  COMPILER23_UP  Defined when compiling with Delphi or C++Builder Personalities of BDS 17.0 or higher
-
-
-- RTL Versions
-
-  Use e.g. following to determine the exact RTL version since version 14.0:
-    {$IFDEF CONDITIONALEXPRESSIONS}
-      {$IF Declared(RTLVersion) and (RTLVersion >= 14.2)}
-        // code for Delphi 6.02 or higher, Kylix 2 or higher, C++Builder 6 or higher
-        ...
-      {$IFEND}
-    {$ENDIF}
-
-  Directive     Description
-  ------------------------------------------------------------------------------
-  RTL80_UP      Defined when compiling with Delphi 1 or higher
-  RTL90_UP      Defined when compiling with Delphi 2 or higher
-  RTL93_UP      Defined when compiling with C++Builder 1 or higher
-  RTL100_UP     Defined when compiling with Delphi 3 or higher
-  RTL110_UP     Defined when compiling with C++Builder 3 or higher
-  RTL120_UP     Defined when compiling with Delphi 4 or higher
-  RTL125_UP     Defined when compiling with C++Builder 4 or higher
-  RTL130_UP     Defined when compiling with Delphi 5 or C++Builder 5 or higher
-  RTL140_UP     Defined when compiling with Delphi 6, Kylix 1, 2 or 3 or C++Builder 6 or higher
-  RTL150_UP     Defined when compiling with Delphi 7 or higher
-  RTL160_UP     Defined when compiling with Delphi 8 or higher
-  RTL170_UP     Defined when compiling with Delphi Personalities of BDS 3.0 or higher
-  RTL180_UP     Defined when compiling with Delphi or C++Builder Personalities of BDS 4.0 or higher
-  RTL185_UP     Defined when compiling with Delphi or C++Builder Personalities of BDS 5.0 or higher
-  RTL190_UP     Defined when compiling with Delphi.NET of BDS 5.0 or higher
-  RTL200_UP     Defined when compiling with Delphi or C++Builder Personalities of BDS 6.0 or higher
-  RTL210_UP     Defined when compiling with Delphi or C++Builder Personalities of BDS 7.0 or higher
-  RTL220_UP     Defined when compiling with Delphi or C++Builder Personalities of BDS 8.0 or higher
-  RTL230_UP     Defined when compiling with Delphi or C++Builder Personalities of BDS 9.0 or higher
-  RTL240_UP     Defined when compiling with Delphi or C++Builder Personalities of BDS 10.0 or higher
-  RTL250_UP     Defined when compiling with Delphi or C++Builder Personalities of BDS 11.0 or higher
-  RTL260_UP     Defined when compiling with Delphi or C++Builder Personalities of BDS 12.0 or higher
-  RTL270_UP     Defined when compiling with Delphi or C++Builder Personalities of BDS 14.0 or higher
-  RTL280_UP     Defined when compiling with Delphi or C++Builder Personalities of BDS 15.0 or higher
-  RTL290_UP     Defined when compiling with Delphi or C++Builder Personalities of BDS 16.0 or higher
-  RTL300_UP     Defined when compiling with Delphi or C++Builder Personalities of BDS 17.0 or higher
-
-
-- CLR Versions
-
-  Directive     Description
-  ------------------------------------------------------------------------------
-  CLR            Defined when compiling for .NET
-  CLR10          Defined when compiling for .NET 1.0 (may be overriden by FORCE_CLR10)
-  CLR10_UP       Defined when compiling for .NET 1.0 or higher
-  CLR11          Defined when compiling for .NET 1.1 (may be overriden by FORCE_CLR11)
-  CLR11_UP       Defined when compiling for .NET 1.1 or higher
-  CLR20          Defined when compiling for .NET 2.0 (may be overriden by FORCE_CLR20)
-  CLR20_UP       Defined when compiling for .NET 2.0 or higher
 
 
 - Feature Directives
@@ -644,806 +244,15 @@ unit sdl;
   EXTENDEDSYNTAX_ON      Compiling in the X+ state (Delphi extended syntax enabled)
 *)
 
-{$DEFINE BORLAND}
 
 { Set FreePascal to Delphi mode }
 {$IFDEF FPC}
   {$MODE DELPHI}
   {$ASMMODE Intel}
-  {$UNDEF BORLAND}
   {$DEFINE CPUASM}
    // FPC defines CPU32, CPU64 and Unix automatically
 {$ENDIF}
 
-{$IFDEF BORLAND}
-
-  {$IFNDEF CLR}
-    {$IFNDEF CPUX86}
-      {$IFNDEF CPUX64}
-        {$DEFINE CPU386}  // For Borland compilers select the x86 compat assembler by default
-        {$DEFINE CPU32}   // Assume Borland compilers are 32-bit (rather than 64-bit)
-        {$DEFINE CPUASM}
-      {$ELSE ~CPUX64}
-        {$DEFINE CPU64}
-        {$DEFINE CPUASM}
-        {$DEFINE DELPHI64_TEMPORARY}
-      {$ENDIF ~CPUX64}
-    {$ELSE ~CPUX86}
-      {$DEFINE CPU386}
-      {$DEFINE CPU32}
-      {$DEFINE CPUASM}
-    {$ENDIF ~CPUX86}
-  {$ENDIF ~CLR}
-{$ENDIF BORLAND}
-
-{------------------------------------------------------------------------------}
-{ VERXXX to COMPILERX, DELPHIX and BCBX mappings                               }
-{------------------------------------------------------------------------------}
-
-{$IFDEF BORLAND}
-  
-    {$DEFINE UNKNOWN_COMPILER_VERSION}
-
-    {$IFDEF VER80}
-      {$DEFINE COMPILER1}
-      {$DEFINE DELPHI1}
-      {$DEFINE DELPHICOMPILER1}
-      {$DEFINE RTL80_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-    {$IFDEF VER90}
-      {$DEFINE COMPILER2}
-      {$DEFINE DELPHI2}
-      {$DEFINE DELPHICOMPILER2}
-      {$DEFINE RTL90_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-    {$IFDEF VER93}
-      {$DEFINE COMPILER2}
-      {$DEFINE BCB1}
-      {$DEFINE BCB}
-      {$DEFINE RTL93_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-    {$IFDEF VER100}
-      {$DEFINE COMPILER3}
-      {$DEFINE DELPHI3}
-      {$DEFINE DELPHICOMPILER3}
-      {$DEFINE RTL100_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-    {$IFDEF VER110}
-      {$DEFINE COMPILER35}
-      {$DEFINE BCB3}
-      {$DEFINE BCB}
-      {$DEFINE RTL110_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-    {$IFDEF VER120}
-      {$DEFINE COMPILER4}
-      {$DEFINE DELPHI4}
-      {$DEFINE DELPHICOMPILER4}
-      {$DEFINE RTL120_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-    {$IFDEF VER125}
-      {$DEFINE COMPILER4}
-      {$DEFINE BCB4}
-      {$DEFINE BCB}
-      {$DEFINE RTL125_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-    {$IFDEF VER130}
-      {$DEFINE COMPILER5}
-      {$IFDEF BCB}
-        {$DEFINE BCB5}
-      {$ELSE}
-        {$DEFINE DELPHI5}
-        {$DEFINE DELPHICOMPILER5}
-      {$ENDIF}
-      {$DEFINE RTL130_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-    {$IFDEF VER140}
-      {$DEFINE COMPILER6}
-      {$IFDEF BCB}
-        {$DEFINE BCB6}
-      {$ELSE}
-        {$DEFINE DELPHI6}
-        {$DEFINE DELPHICOMPILER6}
-      {$ENDIF}
-      {$DEFINE RTL140_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-    {$IFDEF VER150}
-      {$DEFINE COMPILER7}
-      {$DEFINE DELPHI7}
-      {$DEFINE DELPHICOMPILER7}
-      {$DEFINE RTL150_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-    {$IFDEF VER160}
-      {$DEFINE BDS2}
-      {$DEFINE BDS}
-      {$IFDEF CLR}
-        {$DEFINE CLR10}
-      {$ENDIF CLR}
-      {$DEFINE COMPILER8}
-      {$DEFINE DELPHI8}
-      {$DEFINE DELPHICOMPILER8}
-      {$DEFINE RTL160_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-    {$IFDEF VER170}
-      {$DEFINE BDS3}
-      {$DEFINE BDS}
-      {$IFDEF CLR}
-        {$DEFINE CLR11}
-      {$ENDIF CLR}
-      {$DEFINE COMPILER9}
-      {$DEFINE DELPHI9}
-      {$DEFINE DELPHI2005} // synonym to DELPHI9
-      {$DEFINE DELPHICOMPILER9}
-      {$DEFINE RTL170_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-    {$IFDEF VER180}
-      {$DEFINE BDS}
-      {$IFDEF CLR}
-        {$DEFINE CLR11}
-      {$ENDIF CLR}
-      {$IFDEF VER185}
-        {$DEFINE BDS5}
-        {$DEFINE COMPILER11}
-        {$IFDEF BCB}
-          {$DEFINE BCB11}
-        {$ELSE}
-          {$DEFINE DELPHI11}
-          {$DEFINE DELPHI2007} // synonym to DELPHI11
-          {$DEFINE DELPHICOMPILER11}
-        {$ENDIF}
-        {$DEFINE RTL185_UP}
-      {$ELSE ~~VER185}
-        {$DEFINE BDS4}
-        {$DEFINE COMPILER10}
-        {$IFDEF BCB}
-          {$DEFINE BCB10}
-        {$ELSE}
-          {$DEFINE DELPHI10}
-          {$DEFINE DELPHI2006} // synonym to DELPHI10
-          {$DEFINE DELPHICOMPILER10}
-        {$ENDIF}
-        {$DEFINE RTL180_UP}
-      {$ENDIF ~VER185}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-    {$IFDEF VER190} // Delphi 2007 for .NET
-      {$DEFINE BDS}
-      {$DEFINE BDS5}
-      {$IFDEF CLR}
-        {$DEFINE CLR20}
-      {$ENDIF CLR}
-      {$DEFINE COMPILER11}
-      {$DEFINE DELPHI11}
-      {$DEFINE DELPHI2007} // synonym to DELPHI11
-      {$DEFINE DELPHICOMPILER11}
-      {$DEFINE RTL190_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF VER190}
-
-    {$IFDEF VER200} // RAD Studio 2009
-      {$DEFINE BDS}
-      {$DEFINE BDS6}
-      {$IFDEF CLR}
-        {$DEFINE CLR20}
-      {$ENDIF CLR}
-      {$DEFINE COMPILER12}
-      {$IFDEF BCB}
-        {$DEFINE BCB12}
-      {$ELSE}
-        {$DEFINE DELPHI12}
-        {$DEFINE DELPHI2009} // synonym to DELPHI12
-        {$DEFINE DELPHICOMPILER12}
-      {$ENDIF BCB}
-      {$IFDEF CLR}
-        {$DEFINE RTL190_UP}
-      {$ELSE}
-        {$DEFINE RTL200_UP}
-      {$ENDIF}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF VER200}
-
-    {$IFDEF VER210} // RAD Studio 2010
-      {$DEFINE BDS}
-      {$DEFINE BDS7}
-      {$DEFINE COMPILER14}
-      {$IFDEF BCB}
-        {$DEFINE BCB14}
-      {$ELSE}
-        {$DEFINE DELPHI14}
-        {$DEFINE DELPHI2010} // synonym to DELPHI14
-        {$DEFINE DELPHICOMPILER14}
-      {$ENDIF BCB}
-      {$DEFINE RTL210_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF VER210}
-
-    {$IFDEF VER220} // RAD Studio XE
-      {$DEFINE BDS}
-      {$DEFINE BDS8}
-      {$DEFINE COMPILER15}
-      {$IFDEF BCB}
-        {$DEFINE BCB15}
-      {$ELSE}
-        {$DEFINE DELPHI15}
-        {$DEFINE DELPHIXE} // synonym to DELPHI15
-        {$DEFINE DELPHICOMPILER15}
-      {$ENDIF BCB}
-      {$DEFINE RTL220_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF VER220}
-
-    {$IFDEF VER230} // RAD Studio XE2
-      {$DEFINE BDS}
-      {$DEFINE BDS9}
-      {$DEFINE COMPILER16}
-      {$IFDEF BCB}
-        {$DEFINE BCB16}
-      {$ELSE}
-        {$DEFINE DELPHI16}
-        {$DEFINE DELPHIXE2} // synonym to DELPHI16
-        {$DEFINE DELPHICOMPILER16}
-      {$ENDIF BCB}
-      {$DEFINE RTL230_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF VER230}
-
-    {$IFDEF VER240} // RAD Studio XE3
-      {$DEFINE BDS}
-      {$DEFINE BDS10}
-      {$DEFINE COMPILER17}
-      {$IFDEF BCB}
-        {$DEFINE BCB17}
-      {$ELSE}
-        {$DEFINE DELPHI17}
-        {$DEFINE DELPHIXE3} // synonym to DELPHI17
-        {$DEFINE DELPHICOMPILER17}
-      {$ENDIF BCB}
-      {$DEFINE RTL240_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF VER240}
-
-    {$IFDEF VER250} // RAD Studio XE4
-      {$DEFINE BDS}
-      {$DEFINE BDS11}
-      {$DEFINE COMPILER18}
-      {$IFDEF BCB}
-        {$DEFINE BCB18}
-      {$ELSE}
-        {$DEFINE DELPHI18}
-        {$DEFINE DELPHIXE4} // synonym to DELPHI18
-        {$DEFINE DELPHICOMPILER18}
-      {$ENDIF BCB}
-      {$DEFINE RTL250_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF VER250}
-
-    {$IFDEF VER260} // RAD Studio XE5
-      {$DEFINE BDS}
-      {$DEFINE BDS12}
-      {$DEFINE COMPILER19}
-      {$IFDEF BCB}
-        {$DEFINE BCB19}
-      {$ELSE}
-        {$DEFINE DELPHI19}
-        {$DEFINE DELPHIXE5} // synonym to DELPHI19
-        {$DEFINE DELPHICOMPILER19}
-      {$ENDIF BCB}
-      {$DEFINE RTL260_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF VER260}
-
-    {$IFDEF VER270} // RAD Studio XE6
-      {$DEFINE BDS}
-      {$DEFINE BDS14}
-      {$DEFINE COMPILER20}
-      {$IFDEF BCB}
-        {$DEFINE BCB20}
-      {$ELSE}
-        {$DEFINE DELPHI20}
-        {$DEFINE DELPHIXE6} // synonym to DELPHI20
-        {$DEFINE DELPHICOMPILER20}
-      {$ENDIF BCB}
-      {$DEFINE RTL270_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF VER270}
-
-    {$IFDEF VER280} // RAD Studio XE7
-      {$DEFINE BDS}
-      {$DEFINE BDS15}
-      {$DEFINE COMPILER21}
-      {$IFDEF BCB}
-        {$DEFINE BCB21}
-      {$ELSE}
-        {$DEFINE DELPHI21}
-        {$DEFINE DELPHIXE7} // synonym to DELPHI21
-        {$DEFINE DELPHICOMPILER21}
-      {$ENDIF BCB}
-      {$DEFINE RTL280_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF VER280}
-
-    {$IFDEF VER290} // RAD Studio XE8
-      {$DEFINE BDS}
-      {$DEFINE BDS16}
-      {$DEFINE COMPILER22}
-      {$IFDEF BCB}
-        {$DEFINE BCB22}
-      {$ELSE}
-        {$DEFINE DELPHI22}
-        {$DEFINE DELPHIXE8} // synonym to DELPHI22
-        {$DEFINE DELPHICOMPILER22}
-      {$ENDIF BCB}
-      {$DEFINE RTL290_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF VER290}
-
-    {$IFDEF VER300} // RAD Studio 10
-      {$DEFINE BDS}
-      {$DEFINE BDS17}
-      {$DEFINE COMPILER23}
-      {$IFDEF BCB}
-        {$DEFINE BCB23}
-      {$ELSE}
-        {$DEFINE DELPHI23}
-        {$DEFINE DELPHIX_SEATTLE} // synonym to DELPHI23
-        {$DEFINE DELPHICOMPILER23}
-      {$ENDIF BCB}
-      {$DEFINE RTL300_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF VER290}
-
-    {$IFDEF UNKNOWN_COMPILER_VERSION} // adjust for newer version (always use latest version)
-      {$DEFINE BDS}
-      {$DEFINE BDS17}
-      {$DEFINE COMPILER23}
-      {$IFDEF BCB}
-        {$DEFINE BCB23}
-      {$ELSE}
-        {$DEFINE DELPHI23}
-        {$DEFINE DELPHIX_SEATTLE} // synonym to DELPHI23
-        {$DEFINE DELPHICOMPILER23}
-      {$ENDIF BCB}
-      {$DEFINE RTL300_UP}
-      {$UNDEF UNKNOWN_COMPILER_VERSION}
-    {$ENDIF}
-
-  {$ENDIF ~KYLIX}
-
-  {$IFDEF BCB}
-    {$DEFINE CPPBUILDER}
-    {$DEFINE BCBCOMPILER}
-  {$ELSE ~BCB}
-    {$DEFINE DELPHI}
-    {$DEFINE DELPHICOMPILER}
-  {$ENDIF ~BCB}
-
-{$ENDIF BORLAND}
-
-{------------------------------------------------------------------------------}
-{ DELPHIX_UP from DELPHIX mappings                                             }
-{------------------------------------------------------------------------------}
-
-{$IFDEF DELPHI23} {$DEFINE DELPHI23_UP} {$ENDIF}
-{$IFDEF DELPHI22} {$DEFINE DELPHI22_UP} {$ENDIF}
-{$IFDEF DELPHI21} {$DEFINE DELPHI21_UP} {$ENDIF}
-{$IFDEF DELPHI20} {$DEFINE DELPHI20_UP} {$ENDIF}
-{$IFDEF DELPHI19} {$DEFINE DELPHI19_UP} {$ENDIF}
-{$IFDEF DELPHI18} {$DEFINE DELPHI18_UP} {$ENDIF}
-{$IFDEF DELPHI17} {$DEFINE DELPHI17_UP} {$ENDIF}
-{$IFDEF DELPHI16} {$DEFINE DELPHI16_UP} {$ENDIF}
-{$IFDEF DELPHI15} {$DEFINE DELPHI15_UP} {$ENDIF}
-{$IFDEF DELPHI14} {$DEFINE DELPHI14_UP} {$ENDIF}
-{$IFDEF DELPHI12} {$DEFINE DELPHI12_UP} {$ENDIF}
-{$IFDEF DELPHI11} {$DEFINE DELPHI11_UP} {$ENDIF}
-{$IFDEF DELPHI10} {$DEFINE DELPHI10_UP} {$ENDIF}
-{$IFDEF DELPHI9}  {$DEFINE DELPHI9_UP}  {$ENDIF}
-{$IFDEF DELPHI8}  {$DEFINE DELPHI8_UP}  {$ENDIF}
-{$IFDEF DELPHI7}  {$DEFINE DELPHI7_UP}  {$ENDIF}
-{$IFDEF DELPHI6}  {$DEFINE DELPHI6_UP}  {$ENDIF}
-{$IFDEF DELPHI5}  {$DEFINE DELPHI5_UP}  {$ENDIF}
-{$IFDEF DELPHI4}  {$DEFINE DELPHI4_UP}  {$ENDIF}
-{$IFDEF DELPHI3}  {$DEFINE DELPHI3_UP}  {$ENDIF}
-{$IFDEF DELPHI2}  {$DEFINE DELPHI2_UP}  {$ENDIF}
-{$IFDEF DELPHI1}  {$DEFINE DELPHI1_UP}  {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ DELPHIX_UP from DELPHIX_UP mappings                                          }
-{------------------------------------------------------------------------------}
-
-{$IFDEF DELPHI23_UP}
-  {$DEFINE DELPHIX_SEATTLE_UP} // synonym to DELPHI23_UP
-  {$DEFINE DELPHI22_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI22_UP}
-  {$DEFINE DELPHIXE8_UP} // synonym to DELPHI22_UP
-  {$DEFINE DELPHI21_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI21_UP}
-  {$DEFINE DELPHIXE7_UP} // synonym to DELPHI21_UP
-  {$DEFINE DELPHI20_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI20_UP}
-  {$DEFINE DELPHIXE6_UP} // synonym to DELPHI20_UP
-  {$DEFINE DELPHI19_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI19_UP}
-  {$DEFINE DELPHIXE5_UP} // synonym to DELPHI19_UP
-  {$DEFINE DELPHI18_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI18_UP}
-  {$DEFINE DELPHIXE4_UP} // synonym to DELPHI18_UP
-  {$DEFINE DELPHI17_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI17_UP}
-  {$DEFINE DELPHIXE3_UP} // synonym to DELPHI17_UP
-  {$DEFINE DELPHI16_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI16_UP}
-  {$DEFINE DELPHIXE2_UP} // synonym to DELPHI16_UP
-  {$DEFINE DELPHI15_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI15_UP}
-  {$DEFINE DELPHIXE_UP} // synonym to DELPHI15_UP
-  {$DEFINE DELPHI14_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI14_UP}
-  {$DEFINE DELPHI2010_UP} // synonym to DELPHI14_UP
-  {$DEFINE DELPHI12_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI12_UP}
-  {$DEFINE DELPHI2009_UP} // synonym to DELPHI12_UP
-  {$DEFINE DELPHI11_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI11_UP}
-  {$DEFINE DELPHI2007_UP} // synonym to DELPHI11_UP
-  {$DEFINE DELPHI10_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI10_UP}
-  {$DEFINE DELPHI2006_UP} // synonym to DELPHI10_UP
-  {$DEFINE DELPHI9_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI9_UP}
-  {$DEFINE DELPHI2005_UP} // synonym to DELPHI9_UP
-  {$DEFINE DELPHI8_UP}
-{$ENDIF}
-
-{$IFDEF DELPHI8_UP} {$DEFINE DELPHI7_UP} {$ENDIF}
-{$IFDEF DELPHI7_UP} {$DEFINE DELPHI6_UP} {$ENDIF}
-{$IFDEF DELPHI6_UP} {$DEFINE DELPHI5_UP} {$ENDIF}
-{$IFDEF DELPHI5_UP} {$DEFINE DELPHI4_UP} {$ENDIF}
-{$IFDEF DELPHI4_UP} {$DEFINE DELPHI3_UP} {$ENDIF}
-{$IFDEF DELPHI3_UP} {$DEFINE DELPHI2_UP} {$ENDIF}
-{$IFDEF DELPHI2_UP} {$DEFINE DELPHI1_UP} {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ BCBX_UP from BCBX mappings                                                   }
-{------------------------------------------------------------------------------}
-
-{$IFDEF BCB23} {$DEFINE BCB23_UP} {$ENDIF}
-{$IFDEF BCB22} {$DEFINE BCB22_UP} {$ENDIF}
-{$IFDEF BCB21} {$DEFINE BCB21_UP} {$ENDIF}
-{$IFDEF BCB20} {$DEFINE BCB20_UP} {$ENDIF}
-{$IFDEF BCB19} {$DEFINE BCB19_UP} {$ENDIF}
-{$IFDEF BCB18} {$DEFINE BCB18_UP} {$ENDIF}
-{$IFDEF BCB17} {$DEFINE BCB17_UP} {$ENDIF}
-{$IFDEF BCB16} {$DEFINE BCB16_UP} {$ENDIF}
-{$IFDEF BCB15} {$DEFINE BCB15_UP} {$ENDIF}
-{$IFDEF BCB14} {$DEFINE BCB14_UP} {$ENDIF}
-{$IFDEF BCB12} {$DEFINE BCB12_UP} {$ENDIF}
-{$IFDEF BCB11} {$DEFINE BCB11_UP} {$ENDIF}
-{$IFDEF BCB10} {$DEFINE BCB10_UP} {$ENDIF}
-{$IFDEF BCB6}  {$DEFINE BCB6_UP}  {$ENDIF}
-{$IFDEF BCB5}  {$DEFINE BCB5_UP}  {$ENDIF}
-{$IFDEF BCB4}  {$DEFINE BCB4_UP}  {$ENDIF}
-{$IFDEF BCB3}  {$DEFINE BCB3_UP}  {$ENDIF}
-{$IFDEF BCB1}  {$DEFINE BCB1_UP}  {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ BCBX_UP from BCBX_UP mappings                                                }
-{------------------------------------------------------------------------------}
-
-{$IFDEF BCB23_UP} {$DEFINE BCB22_UP} {$ENDIF}
-{$IFDEF BCB22_UP} {$DEFINE BCB21_UP} {$ENDIF}
-{$IFDEF BCB21_UP} {$DEFINE BCB20_UP} {$ENDIF}
-{$IFDEF BCB20_UP} {$DEFINE BCB19_UP} {$ENDIF}
-{$IFDEF BCB19_UP} {$DEFINE BCB18_UP} {$ENDIF}
-{$IFDEF BCB18_UP} {$DEFINE BCB17_UP} {$ENDIF}
-{$IFDEF BCB17_UP} {$DEFINE BCB16_UP} {$ENDIF}
-{$IFDEF BCB16_UP} {$DEFINE BCB15_UP} {$ENDIF}
-{$IFDEF BCB15_UP} {$DEFINE BCB14_UP} {$ENDIF}
-{$IFDEF BCB14_UP} {$DEFINE BCB12_UP} {$ENDIF}
-{$IFDEF BCB12_UP} {$DEFINE BCB11_UP} {$ENDIF}
-{$IFDEF BCB11_UP} {$DEFINE BCB10_UP} {$ENDIF}
-{$IFDEF BCB10_UP} {$DEFINE BCB6_UP}  {$ENDIF}
-{$IFDEF BCB6_UP}  {$DEFINE BCB5_UP}  {$ENDIF}
-{$IFDEF BCB5_UP}  {$DEFINE BCB4_UP}  {$ENDIF}
-{$IFDEF BCB4_UP}  {$DEFINE BCB3_UP}  {$ENDIF}
-{$IFDEF BCB3_UP}  {$DEFINE BCB1_UP}  {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ BDSX_UP from BDSX mappings                                                   }
-{------------------------------------------------------------------------------}
-
-{$IFDEF BDS17} {$DEFINE BDS17_UP} {$ENDIF}
-{$IFDEF BDS16} {$DEFINE BDS16_UP} {$ENDIF}
-{$IFDEF BDS15} {$DEFINE BDS15_UP} {$ENDIF}
-{$IFDEF BDS14} {$DEFINE BDS14_UP} {$ENDIF}
-{$IFDEF BDS12} {$DEFINE BDS12_UP} {$ENDIF}
-{$IFDEF BDS11} {$DEFINE BDS11_UP} {$ENDIF}
-{$IFDEF BDS10} {$DEFINE BDS10_UP} {$ENDIF}
-{$IFDEF BDS9} {$DEFINE BDS9_UP} {$ENDIF}
-{$IFDEF BDS8} {$DEFINE BDS8_UP} {$ENDIF}
-{$IFDEF BDS7} {$DEFINE BDS7_UP} {$ENDIF}
-{$IFDEF BDS6} {$DEFINE BDS6_UP} {$ENDIF}
-{$IFDEF BDS5} {$DEFINE BDS5_UP} {$ENDIF}
-{$IFDEF BDS4} {$DEFINE BDS4_UP} {$ENDIF}
-{$IFDEF BDS3} {$DEFINE BDS3_UP} {$ENDIF}
-{$IFDEF BDS2} {$DEFINE BDS2_UP} {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ BDSX_UP from BDSX_UP mappings                                                }
-{------------------------------------------------------------------------------}
-
-{$IFDEF BDS17_UP} {$DEFINE BDS16_UP} {$ENDIF}
-{$IFDEF BDS16_UP} {$DEFINE BDS15_UP} {$ENDIF}
-{$IFDEF BDS15_UP} {$DEFINE BDS14_UP} {$ENDIF}
-{$IFDEF BDS14_UP} {$DEFINE BDS12_UP} {$ENDIF}
-{$IFDEF BDS12_UP} {$DEFINE BDS11_UP} {$ENDIF}
-{$IFDEF BDS11_UP} {$DEFINE BDS10_UP} {$ENDIF}
-{$IFDEF BDS10_UP} {$DEFINE BDS9_UP} {$ENDIF}
-{$IFDEF BDS9_UP} {$DEFINE BDS8_UP} {$ENDIF}
-{$IFDEF BDS8_UP} {$DEFINE BDS7_UP} {$ENDIF}
-{$IFDEF BDS7_UP} {$DEFINE BDS6_UP} {$ENDIF}
-{$IFDEF BDS6_UP} {$DEFINE BDS5_UP} {$ENDIF}
-{$IFDEF BDS5_UP} {$DEFINE BDS4_UP} {$ENDIF}
-{$IFDEF BDS4_UP} {$DEFINE BDS3_UP} {$ENDIF}
-{$IFDEF BDS3_UP} {$DEFINE BDS2_UP} {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ DELPHICOMPILERX_UP from DELPHICOMPILERX mappings                             }
-{------------------------------------------------------------------------------}
-
-{$IFDEF DELPHICOMPILER23} {$DEFINE DELPHICOMPILER23_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER22} {$DEFINE DELPHICOMPILER22_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER21} {$DEFINE DELPHICOMPILER21_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER20} {$DEFINE DELPHICOMPILER20_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER19} {$DEFINE DELPHICOMPILER19_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER18} {$DEFINE DELPHICOMPILER18_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER17} {$DEFINE DELPHICOMPILER17_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER16} {$DEFINE DELPHICOMPILER16_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER15} {$DEFINE DELPHICOMPILER15_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER14} {$DEFINE DELPHICOMPILER14_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER12} {$DEFINE DELPHICOMPILER12_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER11} {$DEFINE DELPHICOMPILER11_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER10} {$DEFINE DELPHICOMPILER10_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER9}  {$DEFINE DELPHICOMPILER9_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER8}  {$DEFINE DELPHICOMPILER8_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER7}  {$DEFINE DELPHICOMPILER7_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER6}  {$DEFINE DELPHICOMPILER6_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER5}  {$DEFINE DELPHICOMPILER5_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER4}  {$DEFINE DELPHICOMPILER4_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER3}  {$DEFINE DELPHICOMPILER3_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER2}  {$DEFINE DELPHICOMPILER2_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER1}  {$DEFINE DELPHICOMPILER1_UP}  {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ DELPHICOMPILERX_UP from DELPHICOMPILERX_UP mappings                          }
-{------------------------------------------------------------------------------}
-
-{$IFDEF DELPHICOMPILER23_UP} {$DEFINE DELPHICOMPILER22_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER22_UP} {$DEFINE DELPHICOMPILER21_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER21_UP} {$DEFINE DELPHICOMPILER20_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER20_UP} {$DEFINE DELPHICOMPILER19_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER19_UP} {$DEFINE DELPHICOMPILER18_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER18_UP} {$DEFINE DELPHICOMPILER17_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER17_UP} {$DEFINE DELPHICOMPILER16_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER16_UP} {$DEFINE DELPHICOMPILER15_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER15_UP} {$DEFINE DELPHICOMPILER14_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER14_UP} {$DEFINE DELPHICOMPILER12_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER12_UP} {$DEFINE DELPHICOMPILER11_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER11_UP} {$DEFINE DELPHICOMPILER10_UP} {$ENDIF}
-{$IFDEF DELPHICOMPILER10_UP} {$DEFINE DELPHICOMPILER9_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER9_UP}  {$DEFINE DELPHICOMPILER8_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER8_UP}  {$DEFINE DELPHICOMPILER7_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER8_UP}  {$DEFINE DELPHICOMPILER7_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER7_UP}  {$DEFINE DELPHICOMPILER6_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER6_UP}  {$DEFINE DELPHICOMPILER5_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER5_UP}  {$DEFINE DELPHICOMPILER4_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER4_UP}  {$DEFINE DELPHICOMPILER3_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER3_UP}  {$DEFINE DELPHICOMPILER2_UP}  {$ENDIF}
-{$IFDEF DELPHICOMPILER2_UP}  {$DEFINE DELPHICOMPILER1_UP}  {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ COMPILERX_UP from COMPILERX mappings                                         }
-{------------------------------------------------------------------------------}
-
-{$IFDEF COMPILER23} {$DEFINE COMPILER23_UP} {$ENDIF}
-{$IFDEF COMPILER22} {$DEFINE COMPILER22_UP} {$ENDIF}
-{$IFDEF COMPILER21} {$DEFINE COMPILER21_UP} {$ENDIF}
-{$IFDEF COMPILER20} {$DEFINE COMPILER20_UP} {$ENDIF}
-{$IFDEF COMPILER19} {$DEFINE COMPILER19_UP} {$ENDIF}
-{$IFDEF COMPILER18} {$DEFINE COMPILER18_UP} {$ENDIF}
-{$IFDEF COMPILER17} {$DEFINE COMPILER17_UP} {$ENDIF}
-{$IFDEF COMPILER16} {$DEFINE COMPILER16_UP} {$ENDIF}
-{$IFDEF COMPILER15} {$DEFINE COMPILER15_UP} {$ENDIF}
-{$IFDEF COMPILER14} {$DEFINE COMPILER14_UP} {$ENDIF}
-{$IFDEF COMPILER12} {$DEFINE COMPILER12_UP} {$ENDIF}
-{$IFDEF COMPILER11} {$DEFINE COMPILER11_UP} {$ENDIF}
-{$IFDEF COMPILER10} {$DEFINE COMPILER10_UP} {$ENDIF}
-{$IFDEF COMPILER9}  {$DEFINE COMPILER9_UP}  {$ENDIF}
-{$IFDEF COMPILER8}  {$DEFINE COMPILER8_UP}  {$ENDIF}
-{$IFDEF COMPILER7}  {$DEFINE COMPILER7_UP}  {$ENDIF}
-{$IFDEF COMPILER6}  {$DEFINE COMPILER6_UP}  {$ENDIF}
-{$IFDEF COMPILER5}  {$DEFINE COMPILER5_UP}  {$ENDIF}
-{$IFDEF COMPILER4}  {$DEFINE COMPILER4_UP}  {$ENDIF}
-{$IFDEF COMPILER35} {$DEFINE COMPILER35_UP} {$ENDIF}
-{$IFDEF COMPILER3}  {$DEFINE COMPILER3_UP}  {$ENDIF}
-{$IFDEF COMPILER2}  {$DEFINE COMPILER2_UP}  {$ENDIF}
-{$IFDEF COMPILER1}  {$DEFINE COMPILER1_UP}  {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ COMPILERX_UP from COMPILERX_UP mappings                                      }
-{------------------------------------------------------------------------------}
-
-{$IFDEF COMPILER23_UP} {$DEFINE COMPILER22_UP} {$ENDIF}
-{$IFDEF COMPILER22_UP} {$DEFINE COMPILER21_UP} {$ENDIF}
-{$IFDEF COMPILER21_UP} {$DEFINE COMPILER20_UP} {$ENDIF}
-{$IFDEF COMPILER20_UP} {$DEFINE COMPILER19_UP} {$ENDIF}
-{$IFDEF COMPILER19_UP} {$DEFINE COMPILER18_UP} {$ENDIF}
-{$IFDEF COMPILER18_UP} {$DEFINE COMPILER17_UP} {$ENDIF}
-{$IFDEF COMPILER17_UP} {$DEFINE COMPILER16_UP} {$ENDIF}
-{$IFDEF COMPILER16_UP} {$DEFINE COMPILER15_UP} {$ENDIF}
-{$IFDEF COMPILER15_UP} {$DEFINE COMPILER14_UP} {$ENDIF}
-{$IFDEF COMPILER14_UP} {$DEFINE COMPILER12_UP} {$ENDIF}
-{$IFDEF COMPILER12_UP} {$DEFINE COMPILER11_UP} {$ENDIF}
-{$IFDEF COMPILER11_UP} {$DEFINE COMPILER10_UP} {$ENDIF}
-{$IFDEF COMPILER10_UP} {$DEFINE COMPILER9_UP}  {$ENDIF}
-{$IFDEF COMPILER9_UP}  {$DEFINE COMPILER8_UP}  {$ENDIF}
-{$IFDEF COMPILER8_UP}  {$DEFINE COMPILER7_UP}  {$ENDIF}
-{$IFDEF COMPILER7_UP}  {$DEFINE COMPILER6_UP}  {$ENDIF}
-{$IFDEF COMPILER6_UP}  {$DEFINE COMPILER5_UP}  {$ENDIF}
-{$IFDEF COMPILER5_UP}  {$DEFINE COMPILER4_UP}  {$ENDIF}
-{$IFDEF COMPILER4_UP}  {$DEFINE COMPILER35_UP} {$ENDIF}
-{$IFDEF COMPILER35_UP} {$DEFINE COMPILER3_UP}  {$ENDIF}
-{$IFDEF COMPILER3_UP}  {$DEFINE COMPILER2_UP}  {$ENDIF}
-{$IFDEF COMPILER2_UP}  {$DEFINE COMPILER1_UP}  {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ RTLX_UP from RTLX_UP mappings                                                }
-{------------------------------------------------------------------------------}
-
-{$IFDEF RTL300_UP} {$DEFINE RTL290_UP} {$ENDIF}
-{$IFDEF RTL290_UP} {$DEFINE RTL280_UP} {$ENDIF}
-{$IFDEF RTL280_UP} {$DEFINE RTL270_UP} {$ENDIF}
-{$IFDEF RTL270_UP} {$DEFINE RTL260_UP} {$ENDIF}
-{$IFDEF RTL260_UP} {$DEFINE RTL250_UP} {$ENDIF}
-{$IFDEF RTL250_UP} {$DEFINE RTL240_UP} {$ENDIF}
-{$IFDEF RTL240_UP} {$DEFINE RTL230_UP} {$ENDIF}
-{$IFDEF RTL230_UP} {$DEFINE RTL220_UP} {$ENDIF}
-{$IFDEF RTL220_UP} {$DEFINE RTL210_UP} {$ENDIF}
-{$IFDEF RTL210_UP} {$DEFINE RTL200_UP} {$ENDIF}
-{$IFDEF RTL200_UP} {$DEFINE RTL190_UP} {$ENDIF}
-{$IFDEF RTL190_UP} {$DEFINE RTL185_UP} {$ENDIF}
-{$IFDEF RTL185_UP} {$DEFINE RTL180_UP} {$ENDIF}
-{$IFDEF RTL180_UP} {$DEFINE RTL170_UP} {$ENDIF}
-{$IFDEF RTL170_UP} {$DEFINE RTL160_UP} {$ENDIF}
-{$IFDEF RTL160_UP} {$DEFINE RTL150_UP} {$ENDIF}
-{$IFDEF RTL150_UP} {$DEFINE RTL145_UP} {$ENDIF}
-{$IFDEF RTL145_UP} {$DEFINE RTL142_UP} {$ENDIF}
-{$IFDEF RTL142_UP} {$DEFINE RTL140_UP} {$ENDIF}
-{$IFDEF RTL140_UP} {$DEFINE RTL130_UP} {$ENDIF}
-{$IFDEF RTL130_UP} {$DEFINE RTL125_UP} {$ENDIF}
-{$IFDEF RTL125_UP} {$DEFINE RTL120_UP} {$ENDIF}
-{$IFDEF RTL120_UP} {$DEFINE RTL110_UP} {$ENDIF}
-{$IFDEF RTL110_UP} {$DEFINE RTL100_UP} {$ENDIF}
-{$IFDEF RTL100_UP} {$DEFINE RTL93_UP}  {$ENDIF}
-{$IFDEF RTL93_UP}  {$DEFINE RTL90_UP}  {$ENDIF}
-{$IFDEF RTL90_UP}  {$DEFINE RTL80_UP}  {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ Check for CLR overrides of default detection                                 }
-{------------------------------------------------------------------------------}
-
-{$IFDEF CLR}
-  {$IFDEF FORCE_CLR10}
-    {$DEFINE CLR10}
-    {$UNDEF CLR11}
-    {$UNDEF CLR20}
-  {$ENDIF FORCE_CLR10}
-
-  {$IFDEF FORCE_CLR11}
-    {$UNDEF CLR10}
-    {$DEFINE CLR11}
-    {$UNDEF CLR20}
-  {$ENDIF FORCE_CLR11}
-
-  {$IFDEF FORCE_CLR20}
-    {$UNDEF CLR10}
-    {$UNDEF CLR11}
-    {$DEFINE CLR20}
-  {$ENDIF FORCE_CLR20}
-{$ENDIF CLR}
-
-{------------------------------------------------------------------------------}
-{ CLRX from CLRX_UP mappings                                                   }
-{------------------------------------------------------------------------------}
-
-{$IFDEF CLR10} {$DEFINE CLR10_UP} {$ENDIF}
-{$IFDEF CLR11} {$DEFINE CLR11_UP} {$ENDIF}
-{$IFDEF CLR20} {$DEFINE CLR20_UP} {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ CLRX_UP from CLRX_UP mappings                                                }
-{------------------------------------------------------------------------------}
-
-{$IFDEF CLR20_UP} {$DEFINE CLR11_UP} {$ENDIF}
-{$IFDEF CLR11_UP} {$DEFINE CLR10_UP} {$ENDIF}
-
-{------------------------------------------------------------------------------}
-
-{$IFDEF DELPHICOMPILER}
-  {$DEFINE DELPHILANGUAGE}
-{$ENDIF}
-
-{$IFDEF BCBCOMPILER}
-  {$DEFINE DELPHILANGUAGE}
-{$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ KYLIXX_UP from KYLIXX mappings                                               }
-{------------------------------------------------------------------------------}
-
-{$IFDEF KYLIX3} {$DEFINE KYLIX3_UP} {$ENDIF}
-{$IFDEF KYLIX2} {$DEFINE KYLIX2_UP} {$ENDIF}
-{$IFDEF KYLIX1} {$DEFINE KYLIX1_UP} {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ KYLIXX_UP from KYLIXX_UP mappings                                            }
-{------------------------------------------------------------------------------}
-
-{$IFDEF KYLIX3_UP} {$DEFINE KYLIX2_UP} {$ENDIF}
-{$IFDEF KYLIX2_UP} {$DEFINE KYLIX1_UP} {$ENDIF}
-
-{------------------------------------------------------------------------------}
-{ Map COMPILERX_UP to friendly feature names                                   }
-{------------------------------------------------------------------------------}
 
 {$IFDEF FPC}
   {$IFDEF  VER1_0}
@@ -1510,190 +319,6 @@ unit sdl;
   {$ENDIF}
 {$ENDIF FPC}
 
-{$IFDEF CLR}
-  {$DEFINE SUPPORTS_UNICODE}
-{$ENDIF CLR}
-
-{$IFDEF COMPILER1_UP}
-  {$DEFINE SUPPORTS_CONSTPARAMS}
-  {$DEFINE SUPPORTS_SINGLE}
-  {$DEFINE SUPPORTS_DOUBLE}
-  {$DEFINE SUPPORTS_EXTENDED}
-  {$DEFINE SUPPORTS_PACKAGES} 
-{$ENDIF COMPILER1_UP}
-
-{$IFDEF COMPILER2_UP}
-  {$DEFINE SUPPORTS_CURRENCY}
-  {$DEFINE SUPPORTS_THREADVAR}
-  {$DEFINE SUPPORTS_VARIANT}
-  {$DEFINE SUPPORTS_WIDECHAR}
-{$ENDIF COMPILER2_UP}
-
-{$IFDEF COMPILER3_UP}
-  {$DEFINE SUPPORTS_OUTPARAMS}
-  {$DEFINE SUPPORTS_WIDESTRING}
-  {$DEFINE SUPPORTS_INTERFACE}
-  {$DEFINE SUPPORTS_DISPINTERFACE}
-  {$DEFINE SUPPORTS_DISPID}
-  {$DEFINE SUPPORTS_WEAKPACKAGEUNIT}
-{$ENDIF COMPILER3_UP}
-
-{$IFDEF COMPILER35_UP}
-  {$DEFINE SUPPORTS_EXTSYM}
-  {$DEFINE SUPPORTS_NODEFINE}
-{$ENDIF COMPILER35_UP}
-
-{$IFDEF COMPILER4_UP}
-  {$DEFINE SUPPORTS_LONGWORD}
-  {$DEFINE SUPPORTS_INT64}
-  {$DEFINE SUPPORTS_DYNAMICARRAYS}
-  {$DEFINE SUPPORTS_DEFAULTPARAMS}
-  {$DEFINE SUPPORTS_OVERLOAD}
-  {$DEFINE SUPPORTS_IMPLEMENTS}
-{$ENDIF COMPILER4_UP}
-
-{$IFDEF COMPILER6_UP}
-  {$DEFINE SUPPORTS_DEPRECATED}
-  {$DEFINE SUPPORTS_LIBRARY}
-  {$DEFINE SUPPORTS_PLATFORM}
-  {$DEFINE SUPPORTS_LOCAL}
-  {$DEFINE SUPPORTS_SETPEFLAGS}
-  {$DEFINE SUPPORTS_EXPERIMENTAL_WARNINGS}
-  {$DEFINE ACCEPT_DEPRECATED}
-  {$DEFINE ACCEPT_PLATFORM}
-  {$DEFINE ACCEPT_LIBRARY}
-  {$DEFINE SUPPORTS_DEPRECATED_WARNINGS}
-  {$DEFINE SUPPORTS_LIBRARY_WARNINGS}
-  {$DEFINE SUPPORTS_PLATFORM_WARNINGS}
-  {$DEFINE SUPPORTS_CUSTOMVARIANTS}
-  {$DEFINE SUPPORTS_VARARGS}
-  {$DEFINE SUPPORTS_ENUMVALUE}
-  {$DEFINE SUPPORTS_COMPILETIME_MESSAGES}
-{$ENDIF COMPILER6_UP}
-
-{$IFDEF COMPILER7_UP}
-  {$DEFINE SUPPORTS_UNSAFE_WARNINGS}
-  {$DEFINE SUPPORTS_UINT64}
-{$ENDIF COMPILER7_UP}
-
-{$IFDEF COMPILER9_UP}
-  {$DEFINE SUPPORTS_FOR_IN}
-  {$DEFINE SUPPORTS_INLINE}
-  {$DEFINE SUPPORTS_NESTED_CONSTANTS}
-  {$DEFINE SUPPORTS_NESTED_TYPES}
-  {$DEFINE SUPPORTS_REGION}
-  {$IFDEF CLR}
-    {$DEFINE SUPPORTS_ENHANCED_RECORDS}
-    {$DEFINE SUPPORTS_CLASS_FIELDS}
-    {$DEFINE SUPPORTS_CLASS_HELPERS}
-    {$DEFINE SUPPORTS_CLASS_OPERATORS}
-    {$DEFINE SUPPORTS_STRICT}
-    {$DEFINE SUPPORTS_STATIC}
-    {$DEFINE SUPPORTS_FINAL}
-  {$ENDIF CLR}
-{$ENDIF COMPILER9_UP}
-
-{$IFDEF COMPILER10_UP}
-  {$DEFINE SUPPORTS_ENHANCED_RECORDS}
-  {$DEFINE SUPPORTS_CLASS_FIELDS}
-  {$DEFINE SUPPORTS_CLASS_HELPERS}
-  {$DEFINE SUPPORTS_CLASS_OPERATORS}
-  {$DEFINE SUPPORTS_STRICT}
-  {$DEFINE SUPPORTS_STATIC}
-  {$DEFINE SUPPORTS_FINAL}
-  {$DEFINE SUPPORTS_METHODINFO}
-{$ENDIF COMPILER10_UP}
-
-{$IFDEF COMPILER11_UP}
-  {$IFDEF CLR}
-    {$DEFINE SUPPORTS_GENERICS}
-    {$DEFINE SUPPORTS_DEPRECATED_DETAILS}
-  {$ENDIF CLR}
-{$ENDIF COMPILER11_UP}
-
-{$IFDEF COMPILER12_UP}
-  {$DEFINE SUPPORTS_GENERICS}
-  {$DEFINE SUPPORTS_DEPRECATED_DETAILS}
-  {$DEFINE SUPPORTS_INT_ALIASES}
-  {$IFNDEF CLR}
-    {$DEFINE SUPPORTS_UNICODE}
-    {$DEFINE SUPPORTS_UNICODE_STRING}
-  {$ENDIF  CLR}
-{$ENDIF COMPILER12_UP}
-
-{$IFDEF COMPILER14_UP}
-  {$DEFINE SUPPORTS_CLASS_CTORDTORS}
-  {$DEFINE HAS_UNIT_RTTI}
-  {$DEFINE SUPPORTS_CAST_INTERFACE_TO_OBJ}
-  {$DEFINE SUPPORTS_DELAYED_LOADING}
-{$ENDIF COMPILER14_UP}
-
-{$IFDEF COMPILER16_UP}
-  {$DEFINE USE_64BIT_TYPES}
-{$ENDIF COMPILER16_UP}
-
-{$IFDEF RTL130_UP}
-  {$DEFINE HAS_UNIT_CONTNRS}
-{$ENDIF RTL130_UP}
-
-{$IFDEF RTL140_UP}
-  {$IFDEF LINUX}
-    {$DEFINE HAS_UNIT_LIBC}
-  {$ENDIF LINUX}
-  {$DEFINE HAS_UNIT_RTLCONSTS}
-  {$DEFINE HAS_UNIT_TYPES}
-  {$DEFINE HAS_UNIT_VARIANTS}
-  {$DEFINE HAS_UNIT_STRUTILS}
-  {$DEFINE HAS_UNIT_DATEUTILS}
-  {$DEFINE XPLATFORM_RTL}
-{$ENDIF RTL140_UP}
-
-{$IFDEF RTL150_UP}
-  {$DEFINE HAS_UNIT_UXTHEME}
-{$ENDIF RTL150_UP}
-
-{$IFDEF RTL170_UP}
-  {$DEFINE HAS_UNIT_HTTPPROD}
-{$ENDIF RTL170_UP}
-
-{$IFDEF RTL185_UP}
-  {$DEFINE HAS_UNIT_GIFIMG}
-{$ENDIF RTL185_UP}
-
-{$IFDEF RTL200_UP}
-  {$DEFINE HAS_UNIT_ANSISTRINGS}
-  {$DEFINE HAS_UNIT_PNGIMAGE}
-  {$DEFINE HAS_UNIT_CHARACTER}
-  {$DEFINE HAS_EXCEPTION_STACKTRACE}
-{$ENDIF RTL200_UP}
-
-{$IFDEF RTL210_UP}
-  {$DEFINE HAS_EARGUMENTEXCEPTION}
-{$ENDIF RTL210_UP} 
-
-{$IFDEF RTL220_UP}
-  {$DEFINE HAS_UNIT_REGULAREXPRESSIONSAPI}
-  {$DEFINE HAS_ENOTIMPLEMENTED}
-{$ENDIF RTL220_UP}
-
-{$IFDEF RTL230_UP}
-  {$DEFINE HAS_UNITSCOPE}
-  {$DEFINE HAS_UNIT_SYSTEM_UITYPES}
-  {$DEFINE HAS_UNIT_VCL_THEMES}
-{$ENDIF RTL230_UP}
-
-{$IFDEF RTL240_UP}
-  {$DEFINE HAS_UNIT_SYSTEM_ACTIONS}
-  {$DEFINE HAS_PROPERTY_STYLEELEMENTS}
-{$ENDIF RTL240_UP}
-
-{$IFDEF RTL250_UP}
-  {$DEFINE DEPRECATED_SYSUTILS_ANSISTRINGS}
-{$ENDIF RTL250_UP}
-
-{$IFDEF RTL270_UP}
-  {$DEFINE HAS_AUTOMATIC_DB_FIELDS}
-{$ENDIF RTL270_UP}
 
 {------------------------------------------------------------------------------}
 { Cross-platform related defines                                               }
@@ -1701,7 +326,7 @@ unit sdl;
 
 {$IFNDEF CPUASM}
   {$DEFINE PUREPASCAL}
-{$ENDIF ~CPUASM}
+{$ENDIF CPUASM}
 
 {$IFDEF WIN32}
   {$DEFINE MSWINDOWS} // predefined for D6+/BCB6+
@@ -1751,11 +376,6 @@ unit sdl;
 // Warnings
 {$IFOPT X+} {$DEFINE EXTENDEDSYNTAX_ON} {$ENDIF}
 
-// for Delphi/BCB trial versions remove the point from the line below
-{.$UNDEF SUPPORTS_WEAKPACKAGEUNIT}
-
-{$ENDIF ~JEDI_INC}
-
 
 {$IFDEF MSWINDOWS}
   {$DEFINE WINDOWS}
@@ -1777,36 +397,14 @@ uses
 {$ENDIF}
 
 {$IFDEF UNIX}
-  {$IFDEF FPC}
-  {$IFNDEF SKYOS}
+
   pthreads,
-  {$ENDIF}
   baseunix,
-  {$IFNDEF GP2X}
-  {$IFNDEF DARWIN}
-  {$IFNDEF SKYOS}
   unix,
-  {$ELSE}
-  unix;
-  {$ENDIF}
-  {$ELSE}
-  unix;
-  {$ENDIF}
-  {$ELSE}
-  unix;
-  {$ENDIF}
-  {$IFNDEF GP2X}
-  {$IFNDEF DARWIN}
-  {$IFNDEF SKYOS}
   x,
-  xlib;
-  {$ENDIF}
-  {$ENDIF}
-  {$ENDIF}
-  {$ELSE}
-  Libc,
-  Xlib;
-  {$ENDIF}
+  Xlib,  
+SysUtils;
+
 {$ENDIF}
 
 const
@@ -1815,19 +413,19 @@ const
     SDLLibName = 'SDL64.dll';
   {$ELSE}
     SDLLibName = 'SDL.dll';
-  {$IFEND}
+  {$ENDIF}
 {$ENDIF}
 
+//fpc team hack to get OSX to compile correctly.
 {$IFDEF UNIX}
 {$IFDEF DARWIN}
   SDLLibName = 'libSDL-1.2.0.dylib';
-{$ELSE}
-  {$IFDEF FPC}
-  SDLLibName = 'libSDL.so';
-  {$ELSE}
-  SDLLibName = 'libSDL-1.2.so.0';
-  {$ENDIF}
+  {$linklib libSDL-1.2.0}
+  {$linklib SDLmain}
+  {$linkframework Cocoa}
+  {$PASCALMAINNAME SDL_main}
 {$ENDIF}
+  SDLLibName = 'libSDL.so';
 {$ENDIF}
 
 {$IFDEF MACOS}
@@ -2818,7 +1416,7 @@ type
   THandle = Cardinal;
   //SDL_types.h types
   // Basic data types
-
+  
   SDL_Bool  = (SDL_FALSE, SDL_TRUE);
   TSDL_Bool = SDL_Bool;
 
@@ -2879,6 +1477,8 @@ type
   SDL_errorcode = TSDL_errorcode;
 {$EXTERNALSYM SDL_errorcode}
 
+ TGradientStyle = ( gsHorizontal, gsVertical );
+
   TArg = record
     case Byte of
       0: (value_ptr: Pointer);
@@ -2930,17 +1530,10 @@ type
   // first declare the pointer type
   PSDL_RWops = ^TSDL_RWops;
   // now the pointer to function types
-  {$IFNDEF __GPC__}
   TSeek = function( context: PSDL_RWops; offset: Integer; whence: Integer ): Integer; cdecl;
   TRead = function( context: PSDL_RWops; Ptr: Pointer; size: Integer; maxnum : Integer ): Integer;  cdecl;
   TWrite = function( context: PSDL_RWops; Ptr: Pointer; size: Integer; num: Integer ): Integer; cdecl;
   TClose = function( context: PSDL_RWops ): Integer; cdecl;
-  {$ELSE}
-  TSeek = function( context: PSDL_RWops; offset: Integer; whence: Integer ): Integer;
-  TRead = function( context: PSDL_RWops; Ptr: Pointer; size: Integer; maxnum : Integer ): Integer;
-  TWrite = function( context: PSDL_RWops; Ptr: Pointer; size: Integer; num: Integer ): Integer;
-  TClose = function( context: PSDL_RWops ): Integer;
-  {$ENDIF}
   // the variant record itself
   TSDL_RWops = record
     seek: TSeek;
@@ -2962,11 +1555,7 @@ type
 
   // SDL_timer.h types
   // Function prototype for the timer callback function
-  {$IFNDEF __GPC__}
   TSDL_TimerCallback = function( interval: UInt32 ): UInt32; cdecl;
-  {$ELSE}
-  TSDL_TimerCallback = function( interval: UInt32 ): UInt32;
-  {$ENDIF}
 
  { New timer API, supports multiple timers
    Written by Stephane Peter <megastep@lokigames.com> }
@@ -2976,11 +1565,7 @@ type
    the next timer interval.  If the returned value is the same as the one
    passed in, the periodic alarm continues, otherwise a new alarm is
    scheduled.  If the callback returns 0, the periodic alarm is cancelled. }
-  {$IFNDEF __GPC__}
   TSDL_NewTimerCallback = function( interval: UInt32; param: Pointer ): UInt32; cdecl;
-  {$ELSE}
-  TSDL_NewTimerCallback = function( interval: UInt32; param: Pointer ): UInt32;
-  {$ENDIF}
   
   // Definition of the timer ID type
   PSDL_TimerID = ^TSDL_TimerID;
@@ -2992,11 +1577,7 @@ type
     next: PSDL_TimerID;
   end;
 
-  {$IFNDEF __GPC__}
   TSDL_AudioSpecCallback = procedure( userdata: Pointer; stream: PUInt8; len: Integer ); cdecl;
-  {$ELSE}
-  TSDL_AudioSpecCallback = procedure( userdata: Pointer; stream: PUInt8; len: Integer );
-  {$ENDIF}
 
   // SDL_audio.h types
   // The calculated values in this structure are calculated by SDL_OpenAudio()
@@ -3322,9 +1903,6 @@ type
 
 // The Linux custom window manager information structure
 {$IFDEF Unix}
-  {$IFNDEF GP2X}
-  {$IFNDEF DARWIN}
-  {$IFNDEF SKYOS}
   TX11 = record
     display : PDisplay;	// The X11 display
     window : TWindow ;		// The X11 display window */
@@ -3340,21 +1918,12 @@ type
     fswindow : TWindow ;	// The X11 fullscreen window */
     wmwindow : TWindow ;	// The X11 managed input window */
   end;
-  {$ENDIF}
-  {$ENDIF}
-  {$ENDIF}
   
   PSDL_SysWMinfo = ^TSDL_SysWMinfo;
   TSDL_SysWMinfo = record
      version : TSDL_version ;
      subsystem : TSDL_SysWm;
-     {$IFNDEF GP2X}
-     {$IFNDEF DARWIN}
-     {$IFNDEF SKYOS}
      X11 : TX11;
-     {$ENDIF}
-     {$ENDIF}
-     {$ENDIF}
   end;
 {$ELSE}
   // The generic custom window manager information structure
@@ -3396,11 +1965,7 @@ type
   change internal state and are posted to the internal event queue.
 
   The filter is protypted as: }
-  {$IFNDEF __GPC__}
   TSDL_EventFilter = function( event : PSDL_Event ): Integer; cdecl;
-  {$ELSE}
-  TSDL_EventFilter = function( event : PSDL_Event ): Integer;
-  {$ENDIF}
 
   // SDL_video.h types
   // Useful data types
@@ -3415,6 +1980,8 @@ type
 {$EXTERNALSYM SDL_Rect}
 
   PSDL_Color = ^TSDL_Color;
+//FIXME: (Jazz)
+//bug: unused= 256 max colors or 24bpp max; should be A
   TSDL_Color = record
     r: UInt8;
     g: UInt8;
@@ -3422,6 +1989,7 @@ type
     unused: UInt8;
   end;
 
+//65K = 16bpp max
   PSDL_ColorArray = ^TSDL_ColorArray;
   TSDL_ColorArray = array[0..65000] of TSDL_Color;
 
@@ -3482,11 +2050,7 @@ type
   // typedef for private surface blitting functions
   PSDL_Surface = ^TSDL_Surface;
 
-  {$IFNDEF __GPC__}
   TSDL_Blit = function( src: PSDL_Surface; srcrect: PSDL_Rect; dst: PSDL_Surface; dstrect: PSDL_Rect ): Integer; cdecl;
-  {$ELSE}
-  TSDL_Blit = function( src: PSDL_Surface; srcrect: PSDL_Rect; dst: PSDL_Surface; dstrect: PSDL_Rect ): Integer;
-  {$ENDIF}
 
   // The type definition for the low level blit functions
   //TSDL_LoBlit = procedure( info : PSDL_BlitInfo ); cdecl;
@@ -3623,14 +2187,6 @@ type
   end;
 {$ENDIF}
 
-{$IFDEF NDS}
-  PSDL_mutex = ^TSDL_Mutex;
-  TSDL_Mutex = record
-    recursive: Integer;
-    Owner: UInt32;
-    sem: PSDL_sem;
-  end;
-{$ENDIF}
 
 {$IFDEF __MACH__}
   {$define USE_NAMED_SEMAPHORES}
@@ -3700,9 +2256,6 @@ PSDL_semaphore = ^TSDL_semaphore;
   TSYS_ThreadHandle = pthread_t;
 {$ENDIF}
 
-{$IFDEF NDS}
-  TSYS_ThreadHandle = Integer;
-{$ENDIF}
 
   { This is the system-independent thread info structure }
   PSDL_Thread = ^TSDL_Thread;
@@ -3738,11 +2291,7 @@ PSDL_semaphore = ^TSDL_semaphore;
   TPoint = Types.TPoint;
   {$ELSE}
     {$IFDEF WINDOWS}
-      {$IFDEF __GPC__}
-      TPoint = wintypes.TPoint;
-      {$ELSE}
       TPoint = Windows.TPoint;
-      {$ENDIF}
     {$ELSE}
       //Can't define TPoint : neither Types nor Windows unit available.
     {$ENDIF}
@@ -3753,11 +2302,7 @@ PSDL_semaphore = ^TSDL_semaphore;
   TRect = Types.TRect;
   {$ELSE}
     {$IFDEF WINDOWS}
-      {$IFDEF __GPC__}
-      TRect = wintypes.TRect;
-      {$ELSE}
       TRect = Windows.TRect;
-      {$ENDIF}
     {$ELSE}
       //Can't define TRect: neither Types nor Windows unit available.
     {$ENDIF}
@@ -3769,6 +2314,81 @@ PSDL_semaphore = ^TSDL_semaphore;
 {------------------------------------------------------------------------------}
 { initialization                                                               }
 {------------------------------------------------------------------------------}
+
+
+// Pixel procedures
+function SDL_PixelTest( SrcSurface1 : PSDL_Surface; SrcRect1 : PSDL_Rect; SrcSurface2 : PSDL_Surface; SrcRect2 : PSDL_Rect; Left1, Top1, Left2, Top2 : integer ) : Boolean;
+
+//implemented from scratch
+function SDL_GetPixel( SrcSurface : PSDL_Surface; x : integer; y : integer ) : PtrUInt;
+procedure SDL_PutPixel( DstSurface : PSDL_Surface; x : integer; y : integer; pixel : PtrUInt );
+
+procedure SDL_AddPixel( DstSurface : PSDL_Surface; x : cardinal; y : cardinal; Color : cardinal );
+procedure SDL_SubPixel( DstSurface : PSDL_Surface; x : cardinal; y : cardinal; Color :  cardinal );
+
+// Line procedures
+procedure SDL_DrawLine( DstSurface : PSDL_Surface; x1, y1, x2, y2 : integer; Color : cardinal ); 
+procedure SDL_DrawDashedLine( DstSurface : PSDL_Surface; x1, y1, x2, y2 : integer; Color : cardinal; DashLength, DashSpace : byte ); 
+procedure SDL_AddLine( DstSurface : PSDL_Surface; x1, y1, x2, y2 : integer; Color :  cardinal );
+procedure SDL_SubLine( DstSurface : PSDL_Surface; x1, y1, x2, y2 : integer; Color :  cardinal );
+
+// Surface procedures
+procedure SDL_AddSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DestSurface : PSDL_Surface; DestRect : PSDL_Rect );
+procedure SDL_SubSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DestSurface : PSDL_Surface; DestRect : PSDL_Rect );
+procedure SDL_MonoSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DestSurface : PSDL_Surface; DestRect : PSDL_Rect; Color : cardinal );
+
+procedure SDL_TexturedSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DestSurface : PSDL_Surface; DestRect : PSDL_Rect; Texture :PSDL_Surface; TextureRect : PSDL_Rect );
+
+procedure SDL_ZoomSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DstSurface : PSDL_Surface; DstRect : PSDL_Rect );
+procedure SDL_WarpSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DstSurface : PSDL_Surface; UL, UR, LR, LL : PPoint );
+
+// Flip procedures
+procedure SDL_FlipRectH( DstSurface : PSDL_Surface; Rect : PSDL_Rect );
+procedure SDL_FlipRectV( DstSurface : PSDL_Surface; Rect : PSDL_Rect );
+
+function PSDLRect( aLeft, aTop, aWidth, aHeight : integer ) : PSDL_Rect;
+function SDLRect( aLeft, aTop, aWidth, aHeight : integer ) : TSDL_Rect; overload;
+
+function SDLRect( aRect : TRect ) : TSDL_Rect; overload;
+
+function SDL_ScaleSurfaceRect( SrcSurface : PSDL_Surface; SrcX1, SrcY1, SrcW, SrcH, Width, Height : integer ) : PSDL_Surface;
+procedure SDL_ScrollY( DstSurface : PSDL_Surface; DifY : integer );
+procedure SDL_ScrollX( DstSurface : PSDL_Surface; DifX : integer );
+procedure SDL_RotateDeg( DstSurface, SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DestX, DestY, OffsetX, OffsetY : Integer; Angle : Integer );
+
+procedure SDL_RotateRad( DstSurface, SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DestX, DestY, OffsetX, OffsetY : Integer; Angle : Single );
+
+function ValidateSurfaceRect( DstSurface : PSDL_Surface; dstrect : PSDL_Rect ) : TSDL_Rect;
+
+// Fill Rect routine
+procedure SDL_FillRectAdd( DstSurface : PSDL_Surface; dstrect : PSDL_Rect; color : UInt32 );
+procedure SDL_FillRectSub( DstSurface : PSDL_Surface; dstrect : PSDL_Rect; color : UInt32 );
+
+procedure SDL_GradientFillRect( DstSurface : PSDL_Surface; const Rect : PSDL_Rect; const StartColor, EndColor : TSDL_Color; const Style : TGradientStyle );
+
+// NOTE for All SDL_2xblit... function : the dest surface must be 2x of the source surface!
+procedure SDL_2xBlit( Src, Dest : PSDL_Surface );
+procedure SDL_Scanline2xBlit( Src, Dest : PSDL_Surface );
+procedure SDL_50Scanline2xBlit( Src, Dest : PSDL_Surface );
+
+function SDL_PixelTestSurfaceVsRect( SrcSurface1 : PSDL_Surface; SrcRect1 : PSDL_Rect; SrcRect2 : PSDL_Rect; Left1, Top1, Left2, Top2 : integer ) : boolean;
+
+// Jason's boolean Surface functions
+procedure SDL_ORSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DestSurface : PSDL_Surface; DestRect : PSDL_Rect );
+procedure SDL_ANDSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DestSurface : PSDL_Surface; DestRect : PSDL_Rect );
+procedure SDL_GTSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DestSurface : PSDL_Surface; DestRect : PSDL_Rect );
+procedure SDL_LTSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DestSurface : PSDL_Surface; DestRect : PSDL_Rect );
+
+function SDL_ClipLine( var x1, y1, x2, y2 : Integer; ClipRect : PSDL_Rect ) : boolean;
+
+//see lazgfx unit- linked in. If this unit is used or linked by itelf- not thru lazgfx
+//you will get linker failure: $SDL_GetPixel not declared...something like that.
+
+//(ITS NOT MY FAULT THAT SDL IS A PIECE OF SHIT!)
+
+function SDL_GetPixel( SrcSurface : PSDL_Surface; x : integer; y : integer ) : PtrUInt; external;
+procedure SDL_PutPixel( DstSurface : PSDL_Surface; x : integer; y : integer; pixel : PtrUInt ); external;
+
 
 { This function loads the SDL dynamically linked library and initializes
   the subsystems specified by 'flags' (and those satisfying dependencies)
@@ -5407,10 +4027,8 @@ cdecl;
 {$ENDIF}
 
 {$IFDEF Unix}
-{$IFDEF FPC}
 function _putenv( const variable : PAnsiChar ): integer;
 cdecl; external 'libc.so' name 'putenv';
-{$ENDIF}
 {$ENDIF}
 
 { Put a variable of the form "name=value" into the environment }
@@ -5424,9 +4042,7 @@ function SDL_putenv(const variable: PAnsiChar): integer;
 //{$EXTERNALSYM putenv}
 
 {$IFDEF WINDOWS}
-{$IFNDEF __GPC__}
 function getenv( const name : PAnsiChar ): PAnsiChar; cdecl;
-{$ENDIF}
 {$ENDIF}
 
 {* Retrieve a variable named "name" from the environment }
@@ -5494,16 +4110,49 @@ procedure AddExitProc(Proc: TProcedure);
 
 // Bitwise Checking functions
 function IsBitOn( value : integer; bit : Byte ) : boolean;
-
 function TurnBitOn( value : integer; bit : Byte ) : integer;
-
 function TurnBitOff( value : integer; bit : Byte ) : integer;
 
 implementation
 
-{$IFDEF __GPC__}
-  {$L 'sdl'}  { link sdl.dll.a or libsdl.so or libsdl.a }
-{$ENDIF}
+
+uses
+  Math;
+
+
+//core routines
+//FIXME: SDL2- switch back to SDLv1.
+
+{
+//more than one
+procedure GetPixels(Surface:PSDL_Surface; Rect:PSDL_Rect);
+
+//rect size could be 1px for all we know- or the entire rendering surface...
+//note this function is "slow ASS"
+
+var
+
+  pitch:integer;
+  AttemptRead:longint;
+  pixels:pointer;
+
+begin
+   pixels:=Nil;
+   pitch:=0;
+
+//case format of...
+
+//format and rect we already can derive
+//pixels and pitch will be returned for the given rect in SDL_Color format given by our set definition
+//rect is Nil to copy the entire rendering target
+
+   AttemptRead:= SDL_RenderReadPixels( renderer, rect, format, pixels, pitch);
+   if AttemptRead=0 then
+     exit;
+
+end;
+}
+
 
 function SDL_TABLESIZE(table: PAnsiChar): Integer;
 begin
@@ -5515,6 +4164,7 @@ begin
   {$IFNDEF WINDOWS}
   SDL_Error(SDL_ENOMEM);
   {$ENDIF}
+//and if windows??
 end;
 
 function SDL_RWSeek(context: PSDL_RWops; offset: Integer; whence: Integer) : Integer;
@@ -5635,7 +4285,7 @@ end;
 
 {$IFDEF WINDOWS}
 function _putenv( const variable : PAnsiChar ): Integer;
-cdecl; external {$IFDEF __GPC__}name '_putenv'{$ELSE} 'MSVCRT.DLL'{$ENDIF __GPC__};
+cdecl; external  'MSVCRT.DLL';
 {$ENDIF}
 
 
@@ -5646,40 +4296,26 @@ begin
   {$ENDIF}
 
   {$IFDEF UNIX}
-  {$IFDEF FPC}
   Result := _putenv(variable);
-  {$ELSE}
-  Result := libc.putenv(variable);
-  {$ENDIF}
   {$ENDIF}
 end;
 
 {$IFDEF WINDOWS}
-{$IFNDEF __GPC__}
 function getenv( const name : PAnsiChar ): PAnsiChar;
-cdecl; external {$IFDEF __GPC__}name 'getenv'{$ELSE} 'MSVCRT.DLL'{$ENDIF};
-{$ENDIF}
+cdecl; external 'MSVCRT.DLL';
 {$ENDIF}
 
 function SDL_getenv(const name: PAnsiChar): PAnsiChar;
 begin
   {$IFDEF WINDOWS}
 
-  {$IFDEF __GPC__}
-  Result := getenv( string( name ) );
-  {$ELSE}
   Result := getenv( name );
-  {$ENDIF}
 
   {$ELSE}
 
   {$IFDEF UNIX}
 
-  {$IFDEF FPC}
   Result := fpgetenv(name);
-  {$ELSE}
-  Result := libc.getenv(name);  
-  {$ENDIF}
 
   {$ENDIF}
 
@@ -5697,20 +4333,12 @@ begin
 end;
 
 procedure FreeAndNil(var Obj);
-{$IFNDEF __GPC__}
-{$IFNDEF __TMT__}
 var
   Temp: TObject;
-{$ENDIF}
-{$ENDIF}
 begin
-{$IFNDEF __GPC__}
-{$IFNDEF __TMT__}
   Temp := TObject(Obj);
   Pointer(Obj) := nil;
   Temp.Free;
-{$ENDIF}
-{$ENDIF}
 end;
 
 { Exit procedure handling }
@@ -5764,6 +4392,4066 @@ function TurnBitOff( value : integer; bit : Byte ) : integer;
 begin
   result := ( value and not ( 1 shl bit ) );
 end;
+
+
+function SDL_PixelTest( SrcSurface1 : PSDL_Surface; SrcRect1 : PSDL_Rect; SrcSurface2 : PSDL_Surface; SrcRect2 : PSDL_Rect; Left1, Top1, Left2, Top2 : integer ) : boolean;
+var
+  Src_Rect1, Src_Rect2 : TSDL_Rect;
+  right1, bottom1 : integer;
+  right2, bottom2 : integer;
+  Scan1Start, Scan2Start, ScanWidth, ScanHeight : cardinal;
+  Mod1, Mod2   : cardinal;
+  Addr1, Addr2 : cardinal;
+  BPP          : cardinal;
+  Pitch1, Pitch2 : cardinal;
+  TransparentColor1, TransparentColor2 : cardinal;
+  tx, ty       : cardinal;
+  StartTick    : cardinal;
+  Color1, Color2 : cardinal;
+begin
+  Result := false;
+  if SrcRect1 = nil then
+  begin
+    with Src_Rect1 do
+    begin
+      x := 0;
+      y := 0;
+      w := SrcSurface1.w;
+      h := SrcSurface1.h;
+    end;
+  end
+  else
+    Src_Rect1 := SrcRect1^;
+  if SrcRect2 = nil then
+  begin
+    with Src_Rect2 do
+    begin
+      x := 0;
+      y := 0;
+      w := SrcSurface2.w;
+      h := SrcSurface2.h;
+    end;
+  end
+  else
+    Src_Rect2 := SrcRect2^;
+  with Src_Rect1 do
+  begin
+    Right1 := Left1 + w;
+    Bottom1 := Top1 + h;
+  end;
+  with Src_Rect2 do
+  begin
+    Right2 := Left2 + w;
+    Bottom2 := Top2 + h;
+  end;
+  if ( Left1 >= Right2 ) or ( Right1 <= Left2 ) or ( Top1 >= Bottom2 ) or ( Bottom1 <=
+    Top2 ) then
+    exit;
+  if Left1 <= Left2 then
+  begin
+    // 1. left, 2. right
+    Scan1Start := Src_Rect1.x + Left2 - Left1;
+    Scan2Start := Src_Rect2.x;
+    ScanWidth := Right1 - Left2;
+    with Src_Rect2 do
+      if ScanWidth > w then
+        ScanWidth := w;
+  end
+  else
+  begin
+    // 1. right, 2. left
+    Scan1Start := Src_Rect1.x;
+    Scan2Start := Src_Rect2.x + Left1 - Left2;
+    ScanWidth := Right2 - Left1;
+    with Src_Rect1 do
+      if ScanWidth > w then
+        ScanWidth := w;
+  end;
+  with SrcSurface1^ do
+  begin
+    Pitch1 := Pitch;
+    Addr1 := cardinal( Pixels );
+    inc( Addr1, Pitch1 * UInt32( Src_Rect1.y ) );
+    with format^ do
+    begin
+      BPP := BytesPerPixel;
+      TransparentColor1 := colorkey;
+    end;
+  end;
+  with SrcSurface2^ do
+  begin
+    TransparentColor2 := format.colorkey;
+    Pitch2 := Pitch;
+    Addr2 := cardinal( Pixels );
+    inc( Addr2, Pitch2 * UInt32( Src_Rect2.y ) );
+  end;
+  Mod1 := Pitch1 - ( ScanWidth * BPP );
+  Mod2 := Pitch2 - ( ScanWidth * BPP );
+  inc( Addr1, BPP * Scan1Start );
+  inc( Addr2, BPP * Scan2Start );
+  if Top1 <= Top2 then
+  begin
+    // 1. up, 2. down
+    ScanHeight := Bottom1 - Top2;
+    if ScanHeight > Src_Rect2.h then
+      ScanHeight := Src_Rect2.h;
+    inc( Addr1, Pitch1 * UInt32( Top2 - Top1 ) );
+  end
+  else
+  begin
+    // 1. down, 2. up
+    ScanHeight := Bottom2 - Top1;
+    if ScanHeight > Src_Rect1.h then
+      ScanHeight := Src_Rect1.h;
+    inc( Addr2, Pitch2 * UInt32( Top1 - Top2 ) );
+  end;
+  case BPP of
+    1 :
+      for ty := 1 to ScanHeight do
+      begin
+        for tx := 1 to ScanWidth do
+        begin
+          if ( PByte( Addr1 )^ <> TransparentColor1 ) and ( PByte( Addr2 )^ <>
+            TransparentColor2 ) then
+          begin
+            Result := true;
+            exit;
+          end;
+          inc( Addr1 );
+          inc( Addr2 );
+        end;
+        inc( Addr1, Mod1 );
+        inc( Addr2, Mod2 );
+      end;
+    2 :
+      for ty := 1 to ScanHeight do
+      begin
+        for tx := 1 to ScanWidth do
+        begin
+          if ( PWord( Addr1 )^ <> TransparentColor1 ) and ( PWord( Addr2 )^ <>
+            TransparentColor2 ) then
+          begin
+            Result := true;
+            exit;
+          end;
+          inc( Addr1, 2 );
+          inc( Addr2, 2 );
+        end;
+        inc( Addr1, Mod1 );
+        inc( Addr2, Mod2 );
+      end;
+    3 :
+      for ty := 1 to ScanHeight do
+      begin
+        for tx := 1 to ScanWidth do
+        begin
+          Color1 := PLongWord( Addr1 )^ and $00FFFFFF;
+          Color2 := PLongWord( Addr2 )^ and $00FFFFFF;
+          if ( Color1 <> TransparentColor1 ) and ( Color2 <> TransparentColor2 )
+            then
+          begin
+            Result := true;
+            exit;
+          end;
+          inc( Addr1, 3 );
+          inc( Addr2, 3 );
+        end;
+        inc( Addr1, Mod1 );
+        inc( Addr2, Mod2 );
+      end;
+    4 :
+      for ty := 1 to ScanHeight do
+      begin
+        for tx := 1 to ScanWidth do
+        begin
+          if ( PLongWord( Addr1 )^ <> TransparentColor1 ) and ( PLongWord( Addr2 )^ <>
+            TransparentColor2 ) then
+          begin
+            Result := true;
+            exit;
+          end;
+          inc( Addr1, 4 );
+          inc( Addr2, 4 );
+        end;
+        inc( Addr1, Mod1 );
+        inc( Addr2, Mod2 );
+      end;
+  end;
+end;
+
+procedure SDL_AddPixel( DstSurface : PSDL_Surface; x : cardinal; y : cardinal; Color :
+  cardinal );
+var
+  SrcColor     : cardinal;
+  Addr         : cardinal;
+  R, G, B      : cardinal;
+begin
+  if Color = 0 then
+    exit;
+  with DstSurface^ do
+  begin
+    Addr := cardinal( Pixels ) + y * Pitch + x * format.BytesPerPixel;
+    SrcColor := PUInt32( Addr )^;
+    case format.BitsPerPixel of
+      8 :
+        begin
+          R := SrcColor and $E0 + Color and $E0;
+          G := SrcColor and $1C + Color and $1C;
+          B := SrcColor and $03 + Color and $03;
+          if R > $E0 then
+            R := $E0;
+          if G > $1C then
+            G := $1C;
+          if B > $03 then
+            B := $03;
+          PUInt8( Addr )^ := R or G or B;
+        end;
+      15 :
+        begin
+          R := SrcColor and $7C00 + Color and $7C00;
+          G := SrcColor and $03E0 + Color and $03E0;
+          B := SrcColor and $001F + Color and $001F;
+          if R > $7C00 then
+            R := $7C00;
+          if G > $03E0 then
+            G := $03E0;
+          if B > $001F then
+            B := $001F;
+          PUInt16( Addr )^ := R or G or B;
+        end;
+      16 :
+        begin
+          R := SrcColor and $F800 + Color and $F800;
+          G := SrcColor and $07C0 + Color and $07C0;
+          B := SrcColor and $001F + Color and $001F;
+          if R > $F800 then
+            R := $F800;
+          if G > $07C0 then
+            G := $07C0;
+          if B > $001F then
+            B := $001F;
+          PUInt16( Addr )^ := R or G or B;
+        end;
+      24 :
+        begin
+          R := SrcColor and $00FF0000 + Color and $00FF0000;
+          G := SrcColor and $0000FF00 + Color and $0000FF00;
+          B := SrcColor and $000000FF + Color and $000000FF;
+          if R > $FF0000 then
+            R := $FF0000;
+          if G > $00FF00 then
+            G := $00FF00;
+          if B > $0000FF then
+            B := $0000FF;
+          PUInt32( Addr )^ := SrcColor and $FF000000 or R or G or B;
+        end;
+      32 :
+        begin
+          R := SrcColor and $00FF0000 + Color and $00FF0000;
+          G := SrcColor and $0000FF00 + Color and $0000FF00;
+          B := SrcColor and $000000FF + Color and $000000FF;
+          if R > $FF0000 then
+            R := $FF0000;
+          if G > $00FF00 then
+            G := $00FF00;
+          if B > $0000FF then
+            B := $0000FF;
+          PUInt32( Addr )^ := R or G or B;
+        end;
+    end;
+  end;
+end;
+
+procedure SDL_SubPixel( DstSurface : PSDL_Surface; x : cardinal; y : cardinal; Color :
+  cardinal );
+var
+  SrcColor     : cardinal;
+  Addr         : cardinal;
+  R, G, B      : cardinal;
+begin
+  if Color = 0 then
+    exit;
+  with DstSurface^ do
+  begin
+    Addr := cardinal( Pixels ) + y * Pitch + x * format.BytesPerPixel;
+    SrcColor := PUInt32( Addr )^;
+    case format.BitsPerPixel of
+      8 :
+        begin
+          R := SrcColor and $E0 - Color and $E0;
+          G := SrcColor and $1C - Color and $1C;
+          B := SrcColor and $03 - Color and $03;
+          if R > $E0 then
+            R := 0;
+          if G > $1C then
+            G := 0;
+          if B > $03 then
+            B := 0;
+          PUInt8( Addr )^ := R or G or B;
+        end;
+      15 :
+        begin
+          R := SrcColor and $7C00 - Color and $7C00;
+          G := SrcColor and $03E0 - Color and $03E0;
+          B := SrcColor and $001F - Color and $001F;
+          if R > $7C00 then
+            R := 0;
+          if G > $03E0 then
+            G := 0;
+          if B > $001F then
+            B := 0;
+          PUInt16( Addr )^ := R or G or B;
+        end;
+      16 :
+        begin
+          R := SrcColor and $F800 - Color and $F800;
+          G := SrcColor and $07C0 - Color and $07C0;
+          B := SrcColor and $001F - Color and $001F;
+          if R > $F800 then
+            R := 0;
+          if G > $07C0 then
+            G := 0;
+          if B > $001F then
+            B := 0;
+          PUInt16( Addr )^ := R or G or B;
+        end;
+      24 :
+        begin
+          R := SrcColor and $00FF0000 - Color and $00FF0000;
+          G := SrcColor and $0000FF00 - Color and $0000FF00;
+          B := SrcColor and $000000FF - Color and $000000FF;
+          if R > $FF0000 then
+            R := 0;
+          if G > $00FF00 then
+            G := 0;
+          if B > $0000FF then
+            B := 0;
+          PUInt32( Addr )^ := SrcColor and $FF000000 or R or G or B;
+        end;
+      32 :
+        begin
+          R := SrcColor and $00FF0000 - Color and $00FF0000;
+          G := SrcColor and $0000FF00 - Color and $0000FF00;
+          B := SrcColor and $000000FF - Color and $000000FF;
+          if R > $FF0000 then
+            R := 0;
+          if G > $00FF00 then
+            G := 0;
+          if B > $0000FF then
+            B := 0;
+          PUInt32( Addr )^ := R or G or B;
+        end;
+    end;
+  end;
+end;
+// This procedure works on 8, 15, 16, 24 and 32 bits color depth surfaces.
+// In 8 bit color depth mode the procedure works with the default packed
+//  palette (RRRGGGBB). It handles all clipping.
+
+procedure SDL_AddSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect;
+  DestSurface : PSDL_Surface; DestRect : PSDL_Rect );
+var
+  R, G, B, Pixel1, Pixel2, TransparentColor : cardinal;
+  Src, Dest    : TSDL_Rect;
+  Diff         : integer;
+  SrcAddr, DestAddr : cardinal;
+  WorkX, WorkY : word;
+  SrcMod, DestMod : cardinal;
+  Bits         : cardinal;
+begin
+  if ( SrcSurface = nil ) or ( DestSurface = nil ) then
+    exit; // Remove this to make it faster
+  if ( SrcSurface.Format.BitsPerPixel <> DestSurface.Format.BitsPerPixel ) then
+    exit; // Remove this to make it faster
+  if SrcRect = nil then
+  begin
+    with Src do
+    begin
+      x := 0;
+      y := 0;
+      w := SrcSurface.w;
+      h := SrcSurface.h;
+    end;
+  end
+  else
+    Src := SrcRect^;
+  if DestRect = nil then
+  begin
+    Dest.x := 0;
+    Dest.y := 0;
+  end
+  else
+    Dest := DestRect^;
+  Dest.w := Src.w;
+  Dest.h := Src.h;
+  with DestSurface.Clip_Rect do
+  begin
+    // Source's right side is greater than the dest.cliprect
+    if Dest.x + Src.w > x + w then
+    begin
+      smallint( Src.w ) := x + w - Dest.x;
+      smallint( Dest.w ) := x + w - Dest.x;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's bottom side is greater than the dest.clip
+    if Dest.y + Src.h > y + h then
+    begin
+      smallint( Src.h ) := y + h - Dest.y;
+      smallint( Dest.h ) := y + h - Dest.y;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+    // Source's left side is less than the dest.clip
+    if Dest.x < x then
+    begin
+      Diff := x - Dest.x;
+      Src.x := Src.x + Diff;
+      smallint( Src.w ) := smallint( Src.w ) - Diff;
+      Dest.x := x;
+      smallint( Dest.w ) := smallint( Dest.w ) - Diff;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's Top side is less than the dest.clip
+    if Dest.y < y then
+    begin
+      Diff := y - Dest.y;
+      Src.y := Src.y + Diff;
+      smallint( Src.h ) := smallint( Src.h ) - Diff;
+      Dest.y := y;
+      smallint( Dest.h ) := smallint( Dest.h ) - Diff;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+  end;
+  with SrcSurface^ do
+  begin
+    SrcAddr := cardinal( Pixels ) + UInt32( Src.y ) * Pitch + UInt32( Src.x ) *
+      Format.BytesPerPixel;
+    SrcMod := Pitch - Src.w * Format.BytesPerPixel;
+    TransparentColor := Format.colorkey;
+  end;
+  with DestSurface^ do
+  begin
+    DestAddr := cardinal( Pixels ) + UInt32( Dest.y ) * Pitch + UInt32( Dest.x ) *
+      Format.BytesPerPixel;
+    DestMod := Pitch - Dest.w * Format.BytesPerPixel;
+    Bits := Format.BitsPerPixel;
+  end;
+  SDL_LockSurface( SrcSurface );
+  SDL_LockSurface( DestSurface );
+  WorkY := Src.h;
+  case bits of
+    8 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt8( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt8( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+                R := Pixel1 and $E0 + Pixel2 and $E0;
+                G := Pixel1 and $1C + Pixel2 and $1C;
+                B := Pixel1 and $03 + Pixel2 and $03;
+                if R > $E0 then
+                  R := $E0;
+                if G > $1C then
+                  G := $1C;
+                if B > $03 then
+                  B := $03;
+                PUInt8( DestAddr )^ := R or G or B;
+              end
+              else
+                PUInt8( DestAddr )^ := Pixel1;
+            end;
+            inc( SrcAddr );
+            inc( DestAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    15 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt16( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt16( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+                R := Pixel1 and $7C00 + Pixel2 and $7C00;
+                G := Pixel1 and $03E0 + Pixel2 and $03E0;
+                B := Pixel1 and $001F + Pixel2 and $001F;
+                if R > $7C00 then
+                  R := $7C00;
+                if G > $03E0 then
+                  G := $03E0;
+                if B > $001F then
+                  B := $001F;
+                PUInt16( DestAddr )^ := R or G or B;
+              end
+              else
+                PUInt16( DestAddr )^ := Pixel1;
+            end;
+            inc( SrcAddr, 2 );
+            inc( DestAddr, 2 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    16 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt16( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt16( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+                R := Pixel1 and $F800 + Pixel2 and $F800;
+                G := Pixel1 and $07E0 + Pixel2 and $07E0;
+                B := Pixel1 and $001F + Pixel2 and $001F;
+                if R > $F800 then
+                  R := $F800;
+                if G > $07E0 then
+                  G := $07E0;
+                if B > $001F then
+                  B := $001F;
+                PUInt16( DestAddr )^ := R or G or B;
+              end
+              else
+                PUInt16( DestAddr )^ := Pixel1;
+            end;
+            inc( SrcAddr, 2 );
+            inc( DestAddr, 2 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    24 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt32( SrcAddr )^ and $00FFFFFF;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt32( DestAddr )^ and $00FFFFFF;
+              if Pixel2 > 0 then
+              begin
+                R := Pixel1 and $FF0000 + Pixel2 and $FF0000;
+                G := Pixel1 and $00FF00 + Pixel2 and $00FF00;
+                B := Pixel1 and $0000FF + Pixel2 and $0000FF;
+                if R > $FF0000 then
+                  R := $FF0000;
+                if G > $00FF00 then
+                  G := $00FF00;
+                if B > $0000FF then
+                  B := $0000FF;
+                PUInt32( DestAddr )^ := PUInt32( DestAddr )^ and $FF000000 or ( R or G or B );
+              end
+              else
+                PUInt32( DestAddr )^ := PUInt32( DestAddr )^ and $FF000000 or Pixel1;
+            end;
+            inc( SrcAddr, 3 );
+            inc( DestAddr, 3 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    32 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt32( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt32( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+                R := Pixel1 and $FF0000 + Pixel2 and $FF0000;
+                G := Pixel1 and $00FF00 + Pixel2 and $00FF00;
+                B := Pixel1 and $0000FF + Pixel2 and $0000FF;
+                if R > $FF0000 then
+                  R := $FF0000;
+                if G > $00FF00 then
+                  G := $00FF00;
+                if B > $0000FF then
+                  B := $0000FF;
+                PUInt32( DestAddr )^ := R or G or B;
+              end
+              else
+                PUInt32( DestAddr )^ := Pixel1;
+            end;
+            inc( SrcAddr, 4 );
+            inc( DestAddr, 4 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+  end;
+  SDL_UnlockSurface( SrcSurface );
+  SDL_UnlockSurface( DestSurface );
+end;
+
+procedure SDL_SubSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect;
+  DestSurface : PSDL_Surface; DestRect : PSDL_Rect );
+var
+  R, G, B, Pixel1, Pixel2, TransparentColor : cardinal;
+  Src, Dest    : TSDL_Rect;
+  Diff         : integer;
+  SrcAddr, DestAddr : cardinal;
+  _ebx, _esi, _edi, _esp : cardinal;
+  WorkX, WorkY : word;
+  SrcMod, DestMod : cardinal;
+  Bits         : cardinal;
+begin
+  if ( SrcSurface = nil ) or ( DestSurface = nil ) then
+    exit; // Remove this to make it faster
+  if ( SrcSurface.Format.BitsPerPixel <> DestSurface.Format.BitsPerPixel ) then
+    exit; // Remove this to make it faster
+  if SrcRect = nil then
+  begin
+    with Src do
+    begin
+      x := 0;
+      y := 0;
+      w := SrcSurface.w;
+      h := SrcSurface.h;
+    end;
+  end
+  else
+    Src := SrcRect^;
+  if DestRect = nil then
+  begin
+    Dest.x := 0;
+    Dest.y := 0;
+  end
+  else
+    Dest := DestRect^;
+  Dest.w := Src.w;
+  Dest.h := Src.h;
+  with DestSurface.Clip_Rect do
+  begin
+    // Source's right side is greater than the dest.cliprect
+    if Dest.x + Src.w > x + w then
+    begin
+      smallint( Src.w ) := x + w - Dest.x;
+      smallint( Dest.w ) := x + w - Dest.x;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's bottom side is greater than the dest.clip
+    if Dest.y + Src.h > y + h then
+    begin
+      smallint( Src.h ) := y + h - Dest.y;
+      smallint( Dest.h ) := y + h - Dest.y;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+    // Source's left side is less than the dest.clip
+    if Dest.x < x then
+    begin
+      Diff := x - Dest.x;
+      Src.x := Src.x + Diff;
+      smallint( Src.w ) := smallint( Src.w ) - Diff;
+      Dest.x := x;
+      smallint( Dest.w ) := smallint( Dest.w ) - Diff;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's Top side is less than the dest.clip
+    if Dest.y < y then
+    begin
+      Diff := y - Dest.y;
+      Src.y := Src.y + Diff;
+      smallint( Src.h ) := smallint( Src.h ) - Diff;
+      Dest.y := y;
+      smallint( Dest.h ) := smallint( Dest.h ) - Diff;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+  end;
+  with SrcSurface^ do
+  begin
+    SrcAddr := cardinal( Pixels ) + UInt32( Src.y ) * Pitch + UInt32( Src.x ) *
+      Format.BytesPerPixel;
+    SrcMod := Pitch - Src.w * Format.BytesPerPixel;
+    TransparentColor := Format.colorkey;
+  end;
+  with DestSurface^ do
+  begin
+    DestAddr := cardinal( Pixels ) + UInt32( Dest.y ) * Pitch + UInt32( Dest.x ) *
+      Format.BytesPerPixel;
+    DestMod := Pitch - Dest.w * Format.BytesPerPixel;
+    Bits := DestSurface.Format.BitsPerPixel;
+  end;
+  SDL_LockSurface( SrcSurface );
+  SDL_LockSurface( DestSurface );
+  WorkY := Src.h;
+  case bits of
+    8 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt8( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt8( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+                R := Pixel2 and $E0 - Pixel1 and $E0;
+                G := Pixel2 and $1C - Pixel1 and $1C;
+                B := Pixel2 and $03 - Pixel1 and $03;
+                if R > $E0 then
+                  R := 0;
+                if G > $1C then
+                  G := 0;
+                if B > $03 then
+                  B := 0;
+                PUInt8( DestAddr )^ := R or G or B;
+              end;
+            end;
+            inc( SrcAddr );
+            inc( DestAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    15 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt16( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt16( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+                R := Pixel2 and $7C00 - Pixel1 and $7C00;
+                G := Pixel2 and $03E0 - Pixel1 and $03E0;
+                B := Pixel2 and $001F - Pixel1 and $001F;
+                if R > $7C00 then
+                  R := 0;
+                if G > $03E0 then
+                  G := 0;
+                if B > $001F then
+                  B := 0;
+                PUInt16( DestAddr )^ := R or G or B;
+              end;
+            end;
+            inc( SrcAddr, 2 );
+            inc( DestAddr, 2 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    16 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt16( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt16( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+                R := Pixel2 and $F800 - Pixel1 and $F800;
+                G := Pixel2 and $07E0 - Pixel1 and $07E0;
+                B := Pixel2 and $001F - Pixel1 and $001F;
+                if R > $F800 then
+                  R := 0;
+                if G > $07E0 then
+                  G := 0;
+                if B > $001F then
+                  B := 0;
+                PUInt16( DestAddr )^ := R or G or B;
+              end;
+            end;
+            inc( SrcAddr, 2 );
+            inc( DestAddr, 2 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    24 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt32( SrcAddr )^ and $00FFFFFF;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt32( DestAddr )^ and $00FFFFFF;
+              if Pixel2 > 0 then
+              begin
+                R := Pixel2 and $FF0000 - Pixel1 and $FF0000;
+                G := Pixel2 and $00FF00 - Pixel1 and $00FF00;
+                B := Pixel2 and $0000FF - Pixel1 and $0000FF;
+                if R > $FF0000 then
+                  R := 0;
+                if G > $00FF00 then
+                  G := 0;
+                if B > $0000FF then
+                  B := 0;
+                PUInt32( DestAddr )^ := PUInt32( DestAddr )^ and $FF000000 or ( R or G or B );
+              end;
+            end;
+            inc( SrcAddr, 3 );
+            inc( DestAddr, 3 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    32 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt32( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt32( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+                R := Pixel2 and $FF0000 - Pixel1 and $FF0000;
+                G := Pixel2 and $00FF00 - Pixel1 and $00FF00;
+                B := Pixel2 and $0000FF - Pixel1 and $0000FF;
+                if R > $FF0000 then
+                  R := 0;
+                if G > $00FF00 then
+                  G := 0;
+                if B > $0000FF then
+                  B := 0;
+                PUInt32( DestAddr )^ := R or G or B;
+              end
+              else
+                PUInt32( DestAddr )^ := Pixel2;
+            end;
+            inc( SrcAddr, 4 );
+            inc( DestAddr, 4 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+  end;
+  SDL_UnlockSurface( SrcSurface );
+  SDL_UnlockSurface( DestSurface );
+end;
+
+procedure SDL_MonoSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect;
+  DestSurface : PSDL_Surface; DestRect : PSDL_Rect; Color : cardinal );
+var
+  Src, Dest    : TSDL_Rect;
+  Diff         : integer;
+  SrcAddr, DestAddr : cardinal;
+  _ebx, _esi, _edi, _esp : cardinal;
+  WorkX, WorkY : word;
+  SrcMod, DestMod : cardinal;
+  TransparentColor, SrcColor : cardinal;
+  BPP          : cardinal;
+begin
+  if ( SrcSurface = nil ) or ( DestSurface = nil ) then
+    exit; // Remove this to make it faster
+  if ( SrcSurface.Format.BitsPerPixel <> DestSurface.Format.BitsPerPixel ) then
+    exit; // Remove this to make it faster
+  if SrcRect = nil then
+  begin
+    with Src do
+    begin
+      x := 0;
+      y := 0;
+      w := SrcSurface.w;
+      h := SrcSurface.h;
+    end;
+  end
+  else
+    Src := SrcRect^;
+  if DestRect = nil then
+  begin
+    Dest.x := 0;
+    Dest.y := 0;
+  end
+  else
+    Dest := DestRect^;
+  Dest.w := Src.w;
+  Dest.h := Src.h;
+  with DestSurface.Clip_Rect do
+  begin
+    // Source's right side is greater than the dest.cliprect
+    if Dest.x + Src.w > x + w then
+    begin
+      smallint( Src.w ) := x + w - Dest.x;
+      smallint( Dest.w ) := x + w - Dest.x;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's bottom side is greater than the dest.clip
+    if Dest.y + Src.h > y + h then
+    begin
+      smallint( Src.h ) := y + h - Dest.y;
+      smallint( Dest.h ) := y + h - Dest.y;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+    // Source's left side is less than the dest.clip
+    if Dest.x < x then
+    begin
+      Diff := x - Dest.x;
+      Src.x := Src.x + Diff;
+      smallint( Src.w ) := smallint( Src.w ) - Diff;
+      Dest.x := x;
+      smallint( Dest.w ) := smallint( Dest.w ) - Diff;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's Top side is less than the dest.clip
+    if Dest.y < y then
+    begin
+      Diff := y - Dest.y;
+      Src.y := Src.y + Diff;
+      smallint( Src.h ) := smallint( Src.h ) - Diff;
+      Dest.y := y;
+      smallint( Dest.h ) := smallint( Dest.h ) - Diff;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+  end;
+  with SrcSurface^ do
+  begin
+    SrcAddr := cardinal( Pixels ) + UInt32( Src.y ) * Pitch + UInt32( Src.x ) *
+      Format.BytesPerPixel;
+    SrcMod := Pitch - Src.w * Format.BytesPerPixel;
+    TransparentColor := Format.colorkey;
+  end;
+  with DestSurface^ do
+  begin
+    DestAddr := cardinal( Pixels ) + UInt32( Dest.y ) * Pitch + UInt32( Dest.x ) *
+      Format.BytesPerPixel;
+    DestMod := Pitch - Dest.w * Format.BytesPerPixel;
+    BPP := DestSurface.Format.BytesPerPixel;
+  end;
+  SDL_LockSurface( SrcSurface );
+  SDL_LockSurface( DestSurface );
+  WorkY := Src.h;
+  case BPP of
+    1 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            SrcColor := PUInt8( SrcAddr )^;
+            if SrcColor <> TransparentColor then
+              PUInt8( DestAddr )^ := SrcColor;
+            inc( SrcAddr );
+            inc( DestAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    2 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            SrcColor := PUInt16( SrcAddr )^;
+            if SrcColor <> TransparentColor then
+              PUInt16( DestAddr )^ := SrcColor;
+            inc( SrcAddr );
+            inc( DestAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    3 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            SrcColor := PUInt32( SrcAddr )^ and $FFFFFF;
+            if SrcColor <> TransparentColor then
+              PUInt32( DestAddr )^ := ( PUInt32( DestAddr )^ and $FFFFFF ) or SrcColor;
+            inc( SrcAddr );
+            inc( DestAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    4 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            SrcColor := PUInt32( SrcAddr )^;
+            if SrcColor <> TransparentColor then
+              PUInt32( DestAddr )^ := SrcColor;
+            inc( SrcAddr );
+            inc( DestAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+  end;
+  SDL_UnlockSurface( SrcSurface );
+  SDL_UnlockSurface( DestSurface );
+end;
+// TextureRect.w and TextureRect.h are not used.
+// The TextureSurface's size MUST larger than the drawing rectangle!!!
+
+procedure SDL_TexturedSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect;
+  DestSurface : PSDL_Surface; DestRect : PSDL_Rect; Texture : PSDL_Surface;
+  TextureRect : PSDL_Rect );
+var
+  Src, Dest    : TSDL_Rect;
+  Diff         : integer;
+  SrcAddr, DestAddr, TextAddr : cardinal;
+  _ebx, _esi, _edi, _esp : cardinal;
+  WorkX, WorkY : word;
+  SrcMod, DestMod, TextMod : cardinal;
+  SrcColor, TransparentColor, TextureColor : cardinal;
+  BPP          : cardinal;
+begin
+  if ( SrcSurface = nil ) or ( DestSurface = nil ) then
+    exit; // Remove this to make it faster
+  if ( SrcSurface.Format.BitsPerPixel <> DestSurface.Format.BitsPerPixel ) then
+    exit; // Remove this to make it faster
+  if SrcRect = nil then
+  begin
+    with Src do
+    begin
+      x := 0;
+      y := 0;
+      w := SrcSurface.w;
+      h := SrcSurface.h;
+    end;
+  end
+  else
+    Src := SrcRect^;
+  if DestRect = nil then
+  begin
+    Dest.x := 0;
+    Dest.y := 0;
+  end
+  else
+    Dest := DestRect^;
+  Dest.w := Src.w;
+  Dest.h := Src.h;
+  with DestSurface.Clip_Rect do
+  begin
+    // Source's right side is greater than the dest.cliprect
+    if Dest.x + Src.w > x + w then
+    begin
+      smallint( Src.w ) := x + w - Dest.x;
+      smallint( Dest.w ) := x + w - Dest.x;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's bottom side is greater than the dest.clip
+    if Dest.y + Src.h > y + h then
+    begin
+      smallint( Src.h ) := y + h - Dest.y;
+      smallint( Dest.h ) := y + h - Dest.y;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+    // Source's left side is less than the dest.clip
+    if Dest.x < x then
+    begin
+      Diff := x - Dest.x;
+      Src.x := Src.x + Diff;
+      smallint( Src.w ) := smallint( Src.w ) - Diff;
+      Dest.x := x;
+      smallint( Dest.w ) := smallint( Dest.w ) - Diff;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's Top side is less than the dest.clip
+    if Dest.y < y then
+    begin
+      Diff := y - Dest.y;
+      Src.y := Src.y + Diff;
+      smallint( Src.h ) := smallint( Src.h ) - Diff;
+      Dest.y := y;
+      smallint( Dest.h ) := smallint( Dest.h ) - Diff;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+  end;
+  with SrcSurface^ do
+  begin
+    SrcAddr := cardinal( Pixels ) + UInt32( Src.y ) * Pitch + UInt32( Src.x ) *
+      Format.BytesPerPixel;
+    SrcMod := Pitch - Src.w * Format.BytesPerPixel;
+    TransparentColor := format.colorkey;
+  end;
+  with DestSurface^ do
+  begin
+    DestAddr := cardinal( Pixels ) + UInt32( Dest.y ) * Pitch + UInt32( Dest.x ) *
+      Format.BytesPerPixel;
+    DestMod := Pitch - Dest.w * Format.BytesPerPixel;
+    BPP := DestSurface.Format.BitsPerPixel;
+  end;
+  with Texture^ do
+  begin
+    TextAddr := cardinal( Pixels ) + UInt32( TextureRect.y ) * Pitch +
+      UInt32( TextureRect.x ) * Format.BytesPerPixel;
+    TextMod := Pitch - Src.w * Format.BytesPerPixel;
+  end;
+  SDL_LockSurface( SrcSurface );
+  SDL_LockSurface( DestSurface );
+  SDL_LockSurface( Texture );
+  WorkY := Src.h;
+  case BPP of
+    1 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            SrcColor := PUInt8( SrcAddr )^;
+            if SrcColor <> TransparentColor then
+              PUInt8( DestAddr )^ := PUint8( TextAddr )^;
+            inc( SrcAddr );
+            inc( DestAddr );
+            inc( TextAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          inc( TextAddr, TextMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    2 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            SrcColor := PUInt16( SrcAddr )^;
+            if SrcColor <> TransparentColor then
+              PUInt16( DestAddr )^ := PUInt16( TextAddr )^;
+            inc( SrcAddr );
+            inc( DestAddr );
+            inc( TextAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          inc( TextAddr, TextMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    3 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            SrcColor := PUInt32( SrcAddr )^ and $FFFFFF;
+            if SrcColor <> TransparentColor then
+              PUInt32( DestAddr )^ := ( PUInt32( DestAddr )^ and $FFFFFF ) or ( PUInt32( TextAddr )^ and $FFFFFF );
+            inc( SrcAddr );
+            inc( DestAddr );
+            inc( TextAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          inc( TextAddr, TextMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    4 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            SrcColor := PUInt32( SrcAddr )^;
+            if SrcColor <> TransparentColor then
+              PUInt32( DestAddr )^ := PUInt32( TextAddr )^;
+            inc( SrcAddr );
+            inc( DestAddr );
+            inc( TextAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          inc( TextAddr, TextMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+  end;
+  SDL_UnlockSurface( SrcSurface );
+  SDL_UnlockSurface( DestSurface );
+  SDL_UnlockSurface( Texture );
+end;
+
+procedure SDL_ZoomSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DstSurface : PSDL_Surface; DstRect : PSDL_Rect );
+var
+  xc, yc       : cardinal;
+  rx, wx, ry, wy, ry16 : cardinal;
+  color        : cardinal;
+  modx, mody   : cardinal;
+begin
+  // Warning! No checks for surface pointers!!!
+  if srcrect = nil then
+    srcrect := @SrcSurface.clip_rect;
+  if dstrect = nil then
+    dstrect := @DstSurface.clip_rect;
+  if SDL_MustLock( SrcSurface ) then
+    SDL_LockSurface( SrcSurface );
+  if SDL_MustLock( DstSurface ) then
+    SDL_LockSurface( DstSurface );
+  modx := trunc( ( srcrect.w / dstrect.w ) * 65536 );
+  mody := trunc( ( srcrect.h / dstrect.h ) * 65536 );
+  //rx := srcrect.x * 65536;
+  ry := srcrect.y * 65536;
+  wy := dstrect.y;
+  for yc := 0 to dstrect.h - 1 do
+  begin
+    rx := srcrect.x * 65536;
+    wx := dstrect.x;
+    ry16 := ry shr 16;
+    for xc := 0 to dstrect.w - 1 do
+    begin
+      color := SDL_GetPixel( SrcSurface, rx shr 16, ry16 );
+      SDL_PutPixel( DstSurface, wx, wy, color );
+      rx := rx + modx;
+      inc( wx );
+    end;
+    ry := ry + mody;
+    inc( wy );
+  end;
+  if SDL_MustLock( SrcSurface ) then
+    SDL_UnlockSurface( SrcSurface );
+  if SDL_MustLock( DstSurface ) then
+    SDL_UnlockSurface( DstSurface );
+end;
+// Re-map a rectangular area into an area defined by four vertices
+// Converted from C to Pascal by KiCHY
+
+procedure SDL_WarpSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect; DstSurface : PSDL_Surface; UL, UR, LR, LL : PPoint );
+const
+  SHIFTS       = 15; // Extend ints to limit round-off error (try 2 - 20)
+  THRESH       = 1 shl SHIFTS; // Threshold for pixel size value
+  procedure CopySourceToDest( UL, UR, LR, LL : TPoint; x1, y1, x2, y2 : cardinal );
+  var
+    tm, lm, rm, bm, m : TPoint;
+    mx, my     : cardinal;
+    cr         : cardinal;
+  begin
+    // Does the destination area specify a single pixel?
+    if ( ( abs( ul.x - ur.x ) < THRESH ) and
+      ( abs( ul.x - lr.x ) < THRESH ) and
+      ( abs( ul.x - ll.x ) < THRESH ) and
+      ( abs( ul.y - ur.y ) < THRESH ) and
+      ( abs( ul.y - lr.y ) < THRESH ) and
+      ( abs( ul.y - ll.y ) < THRESH ) ) then
+    begin // Yes
+      cr := SDL_GetPixel( SrcSurface, ( x1 shr SHIFTS ), ( y1 shr SHIFTS ) );
+      SDL_PutPixel( DstSurface, ( ul.x shr SHIFTS ), ( ul.y shr SHIFTS ), cr );
+    end
+    else
+    begin // No
+      // Quarter the source and the destination, and then recurse
+      tm.x := ( ul.x + ur.x ) shr 1;
+      tm.y := ( ul.y + ur.y ) shr 1;
+      bm.x := ( ll.x + lr.x ) shr 1;
+      bm.y := ( ll.y + lr.y ) shr 1;
+      lm.x := ( ul.x + ll.x ) shr 1;
+      lm.y := ( ul.y + ll.y ) shr 1;
+      rm.x := ( ur.x + lr.x ) shr 1;
+      rm.y := ( ur.y + lr.y ) shr 1;
+      m.x := ( tm.x + bm.x ) shr 1;
+      m.y := ( tm.y + bm.y ) shr 1;
+      mx := ( x1 + x2 ) shr 1;
+      my := ( y1 + y2 ) shr 1;
+      CopySourceToDest( ul, tm, m, lm, x1, y1, mx, my );
+      CopySourceToDest( tm, ur, rm, m, mx, y1, x2, my );
+      CopySourceToDest( m, rm, lr, bm, mx, my, x2, y2 );
+      CopySourceToDest( lm, m, bm, ll, x1, my, mx, y2 );
+    end;
+  end;
+var
+  _UL, _UR, _LR, _LL : TPoint;
+  Rect_x, Rect_y, Rect_w, Rect_h : integer;
+begin
+  if SDL_MustLock( SrcSurface ) then
+    SDL_LockSurface( SrcSurface );
+  if SDL_MustLock( DstSurface ) then
+    SDL_LockSurface( DstSurface );
+  if SrcRect = nil then
+  begin
+    Rect_x := 0;
+    Rect_y := 0;
+    Rect_w := ( SrcSurface.w - 1 ) shl SHIFTS;
+    Rect_h := ( SrcSurface.h - 1 ) shl SHIFTS;
+  end
+  else
+  begin
+    Rect_x := SrcRect.x;
+    Rect_y := SrcRect.y;
+    Rect_w := ( SrcRect.w - 1 ) shl SHIFTS;
+    Rect_h := ( SrcRect.h - 1 ) shl SHIFTS;
+  end;
+  // Shift all values to help reduce round-off error.
+  _ul.x := ul.x shl SHIFTS;
+  _ul.y := ul.y shl SHIFTS;
+  _ur.x := ur.x shl SHIFTS;
+  _ur.y := ur.y shl SHIFTS;
+  _lr.x := lr.x shl SHIFTS;
+  _lr.y := lr.y shl SHIFTS;
+  _ll.x := ll.x shl SHIFTS;
+  _ll.y := ll.y shl SHIFTS;
+  CopySourceToDest( _ul, _ur, _lr, _ll, Rect_x, Rect_y, Rect_w, Rect_h );
+  if SDL_MustLock( SrcSurface ) then
+    SDL_UnlockSurface( SrcSurface );
+  if SDL_MustLock( DstSurface ) then
+    SDL_UnlockSurface( DstSurface );
+end;
+
+// Draw a line between x1,y1 and x2,y2 to the given surface
+// NOTE: The surface must be locked before calling this!
+
+procedure SDL_DrawLine( DstSurface : PSDL_Surface; x1, y1, x2, y2 : integer; Color :
+  cardinal );
+var
+  dx, dy, sdx, sdy, x, y, px, py : integer;
+begin
+  dx := x2 - x1;
+  dy := y2 - y1;
+  if dx < 0 then
+    sdx := -1
+  else
+    sdx := 1;
+  if dy < 0 then
+    sdy := -1
+  else
+    sdy := 1;
+  dx := sdx * dx + 1;
+  dy := sdy * dy + 1;
+  x := 0;
+  y := 0;
+  px := x1;
+  py := y1;
+  if dx >= dy then
+  begin
+    for x := 0 to dx - 1 do
+    begin
+      SDL_PutPixel( DstSurface, px, py, Color );
+      y := y + dy;
+      if y >= dx then
+      begin
+        y := y - dx;
+        py := py + sdy;
+      end;
+      px := px + sdx;
+    end;
+  end
+  else
+  begin
+    for y := 0 to dy - 1 do
+    begin
+      SDL_PutPixel( DstSurface, px, py, Color );
+      x := x + dx;
+      if x >= dy then
+      begin
+        x := x - dy;
+        px := px + sdx;
+      end;
+      py := py + sdy;
+    end;
+  end;
+end;
+
+// Draw a dashed line between x1,y1 and x2,y2 to the given surface
+// NOTE: The surface must be locked before calling this!
+
+procedure SDL_DrawDashedLine( DstSurface : PSDL_Surface; x1, y1, x2, y2 : integer; Color :
+  cardinal; DashLength, DashSpace : byte ); 
+var
+  dx, dy, sdx, sdy, x, y, px, py, counter : integer; drawdash : boolean;
+begin
+  counter := 0;
+  drawdash := true; //begin line drawing with dash
+
+  //Avoid invalid user-passed dash parameters
+  if ( DashLength < 1 )
+    then
+    DashLength := 1;
+  if ( DashSpace < 1 )
+    then
+    DashSpace := 0;
+
+  dx := x2 - x1;
+  dy := y2 - y1;
+  if dx < 0 then
+    sdx := -1
+  else
+    sdx := 1;
+  if dy < 0 then
+    sdy := -1
+  else
+    sdy := 1;
+  dx := sdx * dx + 1;
+  dy := sdy * dy + 1;
+  x := 0;
+  y := 0;
+  px := x1;
+  py := y1;
+  if dx >= dy then
+  begin
+    for x := 0 to dx - 1 do
+    begin
+
+      //Alternate drawing dashes, or leaving spaces
+      if drawdash then
+      begin
+        SDL_PutPixel( DstSurface, px, py, Color );
+        inc( counter );
+        if ( counter > DashLength - 1 ) and ( DashSpace > 0 ) then
+        begin
+          drawdash := false;
+          counter := 0;
+        end;
+      end
+      else //space
+      begin
+        inc( counter );
+        if counter > DashSpace - 1 then
+        begin
+          drawdash := true;
+          counter := 0;
+        end;
+      end;
+
+      y := y + dy;
+      if y >= dx then
+      begin
+        y := y - dx;
+        py := py + sdy;
+      end;
+      px := px + sdx;
+    end;
+  end
+  else
+  begin
+    for y := 0 to dy - 1 do
+    begin
+
+      //Alternate drawing dashes, or leaving spaces
+      if drawdash then
+      begin
+        SDL_PutPixel( DstSurface, px, py, Color );
+        inc( counter );
+        if ( counter > DashLength - 1 ) and ( DashSpace > 0 ) then
+        begin
+          drawdash := false;
+          counter := 0;
+        end;
+      end
+      else //space
+      begin
+        inc( counter );
+        if counter > DashSpace - 1 then
+        begin
+          drawdash := true;
+          counter := 0;
+        end;
+      end;
+
+      x := x + dx;
+      if x >= dy then
+      begin
+        x := x - dy;
+        px := px + sdx;
+      end;
+      py := py + sdy;
+    end;
+  end;
+end;
+
+procedure SDL_AddLine( DstSurface : PSDL_Surface; x1, y1, x2, y2 : integer; Color :
+  cardinal );
+var
+  dx, dy, sdx, sdy, x, y, px, py : integer;
+begin
+  dx := x2 - x1;
+  dy := y2 - y1;
+  if dx < 0 then
+    sdx := -1
+  else
+    sdx := 1;
+  if dy < 0 then
+    sdy := -1
+  else
+    sdy := 1;
+  dx := sdx * dx + 1;
+  dy := sdy * dy + 1;
+  x := 0;
+  y := 0;
+  px := x1;
+  py := y1;
+  if dx >= dy then
+  begin
+    for x := 0 to dx - 1 do
+    begin
+      SDL_AddPixel( DstSurface, px, py, Color );
+      y := y + dy;
+      if y >= dx then
+      begin
+        y := y - dx;
+        py := py + sdy;
+      end;
+      px := px + sdx;
+    end;
+  end
+  else
+  begin
+    for y := 0 to dy - 1 do
+    begin
+      SDL_AddPixel( DstSurface, px, py, Color );
+      x := x + dx;
+      if x >= dy then
+      begin
+        x := x - dy;
+        px := px + sdx;
+      end;
+      py := py + sdy;
+    end;
+  end;
+end;
+
+procedure SDL_SubLine( DstSurface : PSDL_Surface; x1, y1, x2, y2 : integer; Color :
+  cardinal );
+var
+  dx, dy, sdx, sdy, x, y, px, py : integer;
+begin
+  dx := x2 - x1;
+  dy := y2 - y1;
+  if dx < 0 then
+    sdx := -1
+  else
+    sdx := 1;
+  if dy < 0 then
+    sdy := -1
+  else
+    sdy := 1;
+  dx := sdx * dx + 1;
+  dy := sdy * dy + 1;
+  x := 0;
+  y := 0;
+  px := x1;
+  py := y1;
+  if dx >= dy then
+  begin
+    for x := 0 to dx - 1 do
+    begin
+      SDL_SubPixel( DstSurface, px, py, Color );
+      y := y + dy;
+      if y >= dx then
+      begin
+        y := y - dx;
+        py := py + sdy;
+      end;
+      px := px + sdx;
+    end;
+  end
+  else
+  begin
+    for y := 0 to dy - 1 do
+    begin
+      SDL_SubPixel( DstSurface, px, py, Color );
+      x := x + dx;
+      if x >= dy then
+      begin
+        x := x - dy;
+        px := px + sdx;
+      end;
+      py := py + sdy;
+    end;
+  end;
+end;
+
+// flips a rectangle vertically on given surface
+
+procedure SDL_FlipRectV( DstSurface : PSDL_Surface; Rect : PSDL_Rect );
+var
+  TmpRect      : TSDL_Rect;
+  Locked       : boolean;
+  y, FlipLength, RowLength : integer;
+  Row1, Row2   : Pointer;
+  OneRow       : TByteArray; // Optimize it if you wish
+begin
+  if DstSurface <> nil then
+  begin
+    if Rect = nil then
+    begin // if Rect=nil then we flip the whole surface
+      TmpRect := SDLRect( 0, 0, DstSurface.w, DstSurface.h );
+      Rect := @TmpRect;
+    end;
+    FlipLength := Rect^.h shr 1 - 1;
+    RowLength := Rect^.w * DstSurface^.format.BytesPerPixel;
+    if SDL_MustLock( DstSurface ) then
+    begin
+      Locked := true;
+      SDL_LockSurface( DstSurface );
+    end
+    else
+      Locked := false;
+    Row1 := pointer( cardinal( DstSurface^.Pixels ) + UInt32( Rect^.y ) *
+      DstSurface^.Pitch );
+    Row2 := pointer( cardinal( DstSurface^.Pixels ) + ( UInt32( Rect^.y ) + Rect^.h - 1 )
+      * DstSurface^.Pitch );
+    for y := 0 to FlipLength do
+    begin
+      Move( Row1^, OneRow, RowLength );
+      Move( Row2^, Row1^, RowLength );
+      Move( OneRow, Row2^, RowLength );
+      inc( cardinal( Row1^ ), DstSurface^.Pitch );
+      dec( cardinal( Row2^ ), DstSurface^.Pitch );
+    end;
+    if Locked then
+      SDL_UnlockSurface( DstSurface );
+  end;
+end;
+
+// flips a rectangle horizontally on given surface
+
+procedure SDL_FlipRectH( DstSurface : PSDL_Surface; Rect : PSDL_Rect );
+type
+  T24bit = packed array[ 0..2 ] of byte;
+  T24bitArray = packed array[ 0..8191 ] of T24bit;
+  P24bitArray = ^T24bitArray;
+  TLongWordArray = array[ 0..8191 ] of LongWord;
+  PLongWordArray = ^TLongWordArray;
+var
+  TmpRect      : TSDL_Rect;
+  Row8bit      : PByteArray;
+  Row16bit     : PWordArray;
+  Row24bit     : P24bitArray;
+  Row32bit     : PLongWordArray;
+  y, x, RightSide, FlipLength : integer;
+  Pixel        : cardinal;
+  Pixel24      : T24bit;
+  Locked       : boolean;
+begin
+  if DstSurface <> nil then
+  begin
+    if Rect = nil then
+    begin
+      TmpRect := SDLRect( 0, 0, DstSurface.w, DstSurface.h );
+      Rect := @TmpRect;
+    end;
+    FlipLength := Rect^.w shr 1 - 1;
+    if SDL_MustLock( DstSurface ) then
+    begin
+      Locked := true;
+      SDL_LockSurface( DstSurface );
+    end
+    else
+      Locked := false;
+    case DstSurface^.format.BytesPerPixel of
+      1 :
+        begin
+          Row8Bit := pointer( cardinal( DstSurface^.pixels ) + UInt32( Rect^.y ) *
+            DstSurface^.pitch );
+          for y := 1 to Rect^.h do
+          begin
+            RightSide := Rect^.w - 1;
+            for x := 0 to FlipLength do
+            begin
+              Pixel := Row8Bit^[ x ];
+              Row8Bit^[ x ] := Row8Bit^[ RightSide ];
+              Row8Bit^[ RightSide ] := Pixel;
+              dec( RightSide );
+            end;
+            inc( Row8Bit , DstSurface^.pitch );
+          end;
+        end;
+      2 :
+        begin
+          Row16Bit := pointer( cardinal( DstSurface^.pixels ) + UInt32( Rect^.y ) *
+            DstSurface^.pitch );
+          for y := 1 to Rect^.h do
+          begin
+            RightSide := Rect^.w - 1;
+            for x := 0 to FlipLength do
+            begin
+              Pixel := Row16Bit^[ x ];
+              Row16Bit^[ x ] := Row16Bit^[ RightSide ];
+              Row16Bit^[ RightSide ] := Pixel;
+              dec( RightSide );
+            end;
+            inc( Row16Bit , DstSurface^.pitch );
+          end;
+        end;
+      3 :
+        begin
+          Row24Bit := pointer( cardinal( DstSurface^.pixels ) + UInt32( Rect^.y ) *
+            DstSurface^.pitch );
+          for y := 1 to Rect^.h do
+          begin
+            RightSide := Rect^.w - 1;
+            for x := 0 to FlipLength do
+            begin
+              Pixel24 := Row24Bit^[ x ];
+              Row24Bit^[ x ] := Row24Bit^[ RightSide ];
+              Row24Bit^[ RightSide ] := Pixel24;
+              dec( RightSide );
+            end;
+            inc( Row24Bit , DstSurface^.pitch );
+          end;
+        end;
+      4 :
+        begin
+          Row32Bit := pointer( cardinal( DstSurface^.pixels ) + UInt32( Rect^.y ) *
+            DstSurface^.pitch );
+          for y := 1 to Rect^.h do
+          begin
+            RightSide := Rect^.w - 1;
+            for x := 0 to FlipLength do
+            begin
+              Pixel := Row32Bit^[ x ];
+              Row32Bit^[ x ] := Row32Bit^[ RightSide ];
+              Row32Bit^[ RightSide ] := Pixel;
+              dec( RightSide );
+            end;
+            inc(  Row32Bit , DstSurface^.pitch );
+          end;
+        end;
+    end;
+    if Locked then
+      SDL_UnlockSurface( DstSurface );
+  end;
+end;
+
+// Use with caution! The procedure allocates memory for TSDL_Rect and return with its pointer.
+// But you MUST free it after you don't need it anymore!!!
+
+function PSDLRect( aLeft, aTop, aWidth, aHeight : integer ) : PSDL_Rect;
+var
+  Rect         : PSDL_Rect;
+begin
+  New( Rect );
+  with Rect^ do
+  begin
+    x := aLeft;
+    y := aTop;
+    w := aWidth;
+    h := aHeight;
+  end;
+  Result := Rect;
+end;
+
+function SDLRect( aLeft, aTop, aWidth, aHeight : integer ) : TSDL_Rect;
+begin
+  with result do
+  begin
+    x := aLeft;
+    y := aTop;
+    w := aWidth;
+    h := aHeight;
+  end;
+end;
+
+function SDLRect( aRect : TRect ) : TSDL_Rect;
+begin
+  with aRect do
+    result := SDLRect( Left, Top, Right - Left, Bottom - Top );
+end;
+
+procedure SDL_Stretch8( Surface, Dst_Surface : PSDL_Surface; x1, x2, y1, y2, yr, yw,
+  depth : integer );
+var
+  dx, dy, e, d, dx2 : integer;
+  src_pitch, dst_pitch : uint16;
+  src_pixels, dst_pixels : PUint8;
+begin
+  if ( yw >= dst_surface^.h ) then
+    exit;
+  dx := ( x2 - x1 );
+  dy := ( y2 - y1 );
+  dy := dy shl 1;
+  e := dy - dx;
+  dx2 := dx shl 1;
+  src_pitch := Surface^.pitch;
+  dst_pitch := dst_surface^.pitch;
+  src_pixels := PUint8( integer( Surface^.pixels ) + yr * src_pitch + y1 * depth );
+  dst_pixels := PUint8( integer( dst_surface^.pixels ) + yw * dst_pitch + x1 *
+    depth );
+  for d := 0 to dx - 1 do
+  begin
+    move( src_pixels^, dst_pixels^, depth );
+    while ( e >= 0 ) do
+    begin
+      inc( src_pixels, depth );
+      e := e - dx2;
+    end;
+    inc( dst_pixels, depth );
+    e := e + dy;
+  end;
+end;
+
+function sign( x : integer ) : integer;
+begin
+  if x > 0 then
+    result := 1
+  else
+    result := -1;
+end;
+
+// Stretches a part of a surface
+
+function SDL_ScaleSurfaceRect( SrcSurface : PSDL_Surface; SrcX1, SrcY1, SrcW, SrcH,
+  Width, Height : integer ) : PSDL_Surface;
+var
+  dst_surface  : PSDL_Surface;
+  dx, dy, e, d, dx2, srcx2, srcy2 : integer;
+  destx1, desty1 : integer;
+begin
+  srcx2 := srcx1 + SrcW;
+  srcy2 := srcy1 + SrcH;
+  result := nil;
+  destx1 := 0;
+  desty1 := 0;
+  dx := abs( integer( Height - desty1 ) );
+  dy := abs( integer( SrcY2 - SrcY1 ) );
+  e := ( dy shl 1 ) - dx;
+  dx2 := dx shl 1;
+  dy := dy shl 1;
+  dst_surface := SDL_CreateRGBSurface( SDL_HWPALETTE, width - destx1, Height -
+    desty1,
+    SrcSurface^.Format^.BitsPerPixel,
+    SrcSurface^.Format^.RMask,
+    SrcSurface^.Format^.GMask,
+    SrcSurface^.Format^.BMask,
+    SrcSurface^.Format^.AMask );
+  if ( dst_surface^.format^.BytesPerPixel = 1 ) then
+    SDL_SetColors( dst_surface, @SrcSurface^.format^.palette^.colors^[ 0 ], 0, 256 );
+  SDL_SetColorKey( dst_surface, sdl_srccolorkey, SrcSurface^.format^.colorkey );
+  if ( SDL_MustLock( dst_surface ) ) then
+    if ( SDL_LockSurface( dst_surface ) < 0 ) then
+      exit;
+  for d := 0 to dx - 1 do
+  begin
+    SDL_Stretch8( SrcSurface, dst_surface, destx1, Width, SrcX1, SrcX2, SrcY1, desty1,
+      SrcSurface^.format^.BytesPerPixel );
+    while e >= 0 do
+    begin
+      inc( SrcY1 );
+      e := e - dx2;
+    end;
+    inc( desty1 );
+    e := e + dy;
+  end;
+  if SDL_MUSTLOCK( dst_surface ) then
+    SDL_UnlockSurface( dst_surface );
+  result := dst_surface;
+end;
+
+procedure SDL_MoveLine( Surface : PSDL_Surface; x1, x2, y1, xofs, depth : integer );
+var
+  src_pixels, dst_pixels : PUint8;
+  i            : integer;
+begin
+  src_pixels := PUint8( integer( Surface^.pixels ) + Surface^.w * y1 * depth + x2 *
+    depth );
+  dst_pixels := PUint8( integer( Surface^.pixels ) + Surface^.w * y1 * depth + ( x2
+    + xofs ) * depth );
+  for i := x2 downto x1 do
+  begin
+    move( src_pixels^, dst_pixels^, depth );
+    dec( src_pixels );
+    dec( dst_pixels );
+  end;
+end;
+
+procedure SDL_ScrollY( DstSurface : PSDL_Surface; DifY : integer );
+var
+  r1, r2       : TSDL_Rect;
+  //buffer: PSDL_Surface;
+  YPos         : Integer;
+begin
+  if ( DstSurface <> nil ) and ( DifY <> 0 ) then
+  begin
+    //if DifY > 0 then // going up
+    //begin
+    ypos := 0;
+    r1.x := 0;
+    r2.x := 0;
+    r1.w := DstSurface.w;
+    r2.w := DstSurface.w;
+    r1.h := DifY;
+    r2.h := DifY;
+    while ypos < DstSurface.h do
+    begin
+      r1.y := ypos;
+      r2.y := ypos + DifY;
+      SDL_BlitSurface( DstSurface, @r2, DstSurface, @r1 );
+      ypos := ypos + DifY;
+    end;
+    //end
+    //else
+    //begin // Going Down
+      r1.y := ypos;
+      r2.y := ypos - DifY;
+      SDL_BlitSurface( DstSurface, @r2, DstSurface, @r1 );
+      ypos := ypos - DifY;
+    //end;
+  end;
+end;
+
+{
+//I assume this is correct...
+procedure SDL_ScrollY(Surface: PSDL_Surface; DifY: integer);
+var
+  r1, r2: TSDL_Rect;
+  buffer: PSDL_Surface;
+begin
+  if ( DstSurface <> nil ) and ( DifY <> 0 ) then
+  begin
+    buffer := SDL_CreateRGBSurface( SDL_HWSURFACE, ( DstSurface^.w - DifX ) * 2,
+      DstSurface^.h * 2,
+
+      DstSurface^.Format^.BitsPerPixel,
+      DstSurface^.Format^.RMask,
+      DstSurface^.Format^.GMask,
+      DstSurface^.Format^.BMask,
+      DstSurface^.Format^.AMask );
+
+    if buffer <> nil then
+    begin
+      if (buffer^.format^.BytesPerPixel = 1) then
+        SDL_SetColors(buffer, @Surface^.format^.palette^.colors^[0], 0, 256);
+      r1 := SDLRect(0, DifY, buffer^.w, buffer^.h);
+      r2 := SDLRect(0, 0, buffer^.w, buffer^.h);
+      SDL_BlitSurface(Surface, @r1, buffer, @r2);
+      SDL_BlitSurface(buffer, @r2, Surface, @r2);
+      SDL_FreeSurface(buffer);
+    end;
+  end;
+end;
+}
+
+procedure SDL_ScrollX( DstSurface : PSDL_Surface; DifX : integer );
+var
+  r1, r2       : TSDL_Rect;
+  buffer       : PSDL_Surface;
+begin
+  if ( DstSurface <> nil ) and ( DifX <> 0 ) then
+  begin
+    buffer := SDL_CreateRGBSurface( SDL_HWSURFACE, ( DstSurface^.w - DifX ) * 2,
+      DstSurface^.h * 2,
+      DstSurface^.Format^.BitsPerPixel,
+      DstSurface^.Format^.RMask,
+      DstSurface^.Format^.GMask,
+      DstSurface^.Format^.BMask,
+      DstSurface^.Format^.AMask );
+    if buffer <> nil then
+    begin
+      if ( buffer^.format^.BytesPerPixel = 1 ) then
+        SDL_SetColors( buffer, @DstSurface^.format^.palette^.colors^[ 0 ], 0, 256 );
+      r1 := SDLRect( DifX, 0, buffer^.w, buffer^.h );
+      r2 := SDLRect( 0, 0, buffer^.w, buffer^.h );
+      SDL_BlitSurface( DstSurface, @r1, buffer, @r2 );
+      SDL_BlitSurface( buffer, @r2, DstSurface, @r2 );
+      SDL_FreeSurface( buffer );
+    end;
+  end;
+end;
+
+procedure SDL_RotateRad( DstSurface, SrcSurface : PSDL_Surface; SrcRect :
+  PSDL_Rect; DestX, DestY, OffsetX, OffsetY : Integer; Angle : Single );
+var
+  aSin, aCos   : Single;
+  MX, MY, DX, DY, NX, NY, SX, SY, OX, OY, Width, Height, TX, TY, RX, RY, ROX, ROY : Integer;
+  Colour, TempTransparentColour : UInt32;
+  MAXX, MAXY   : Integer;
+begin
+  // Rotate the surface to the target surface.
+  TempTransparentColour := SrcSurface.format.colorkey;
+  {if srcRect.w > srcRect.h then
+  begin
+    Width := srcRect.w;
+    Height := srcRect.w;
+  end
+  else
+  begin
+    Width := srcRect.h;
+    Height := srcRect.h;
+  end; }
+
+  maxx := DstSurface.w;
+  maxy := DstSurface.h;
+  aCos := cos( Angle );
+  aSin := sin( Angle );
+
+  Width := round( abs( srcrect.h * acos ) + abs( srcrect.w * asin ) );
+  Height := round( abs( srcrect.h * asin ) + abs( srcrect.w * acos ) );
+
+  OX := Width div 2;
+  OY := Height div 2; ;
+  MX := ( srcRect.x + ( srcRect.x + srcRect.w ) ) div 2;
+  MY := ( srcRect.y + ( srcRect.y + srcRect.h ) ) div 2;
+  ROX := ( -( srcRect.w div 2 ) ) + Offsetx;
+  ROY := ( -( srcRect.h div 2 ) ) + OffsetY;
+  Tx := ox + round( ROX * aSin - ROY * aCos );
+  Ty := oy + round( ROY * aSin + ROX * aCos );
+  SX := 0;
+  for DX := DestX - TX to DestX - TX + ( width ) do
+  begin
+    Inc( SX );
+    SY := 0;
+    for DY := DestY - TY to DestY - TY + ( Height ) do
+    begin
+      RX := SX - OX;
+      RY := SY - OY;
+      NX := round( mx + RX * aSin + RY * aCos ); //
+      NY := round( my + RY * aSin - RX * aCos ); //
+      // Used for testing only
+     //SDL_PutPixel(DestSurface.SDLSurfacePointer,DX,DY,0);
+      if ( ( DX > 0 ) and ( DX < MAXX ) ) and ( ( DY > 0 ) and ( DY < MAXY ) ) then
+      begin
+        if ( NX >= srcRect.x ) and ( NX <= srcRect.x + srcRect.w ) then
+        begin
+          if ( NY >= srcRect.y ) and ( NY <= srcRect.y + srcRect.h ) then
+          begin
+            Colour := SDL_GetPixel( SrcSurface, NX, NY );
+            if Colour <> TempTransparentColour then
+            begin
+              SDL_PutPixel( DstSurface, DX, DY, Colour );
+            end;
+          end;
+        end;
+      end;
+      inc( SY );
+    end;
+  end;
+end;
+
+procedure SDL_RotateDeg( DstSurface, SrcSurface : PSDL_Surface; SrcRect :
+  PSDL_Rect; DestX, DestY, OffsetX, OffsetY : Integer; Angle : Integer );
+begin
+  SDL_RotateRad( DstSurface, SrcSurface, SrcRect, DestX, DestY, OffsetX, OffsetY, DegToRad( Angle ) );
+end;
+
+function ValidateSurfaceRect( DstSurface : PSDL_Surface; dstrect : PSDL_Rect ) : TSDL_Rect;
+var
+  RealRect     : TSDL_Rect;
+  OutOfRange   : Boolean;
+begin
+  OutOfRange := false;
+  if dstrect = nil then
+  begin
+    RealRect.x := 0;
+    RealRect.y := 0;
+    RealRect.w := DstSurface.w;
+    RealRect.h := DstSurface.h;
+  end
+  else
+  begin
+    if dstrect.x < DstSurface.w then
+    begin
+      RealRect.x := dstrect.x;
+    end
+    else if dstrect.x < 0 then
+    begin
+      realrect.x := 0;
+    end
+    else
+    begin
+      OutOfRange := True;
+    end;
+    if dstrect.y < DstSurface.h then
+    begin
+      RealRect.y := dstrect.y;
+    end
+    else if dstrect.y < 0 then
+    begin
+      realrect.y := 0;
+    end
+    else
+    begin
+      OutOfRange := True;
+    end;
+    if OutOfRange = False then
+    begin
+      if realrect.x + dstrect.w <= DstSurface.w then
+      begin
+        RealRect.w := dstrect.w;
+      end
+      else
+      begin
+        RealRect.w := dstrect.w - realrect.x;
+      end;
+      if realrect.y + dstrect.h <= DstSurface.h then
+      begin
+        RealRect.h := dstrect.h;
+      end
+      else
+      begin
+        RealRect.h := dstrect.h - realrect.y;
+      end;
+    end;
+  end;
+  if OutOfRange = False then
+  begin
+    result := realrect;
+  end
+  else
+  begin
+    realrect.w := 0;
+    realrect.h := 0;
+    realrect.x := 0;
+    realrect.y := 0;
+    result := realrect;
+  end;
+end;
+
+procedure SDL_FillRectAdd( DstSurface : PSDL_Surface; dstrect : PSDL_Rect; color : UInt32 );
+var
+  RealRect     : TSDL_Rect;
+  Addr         : pointer;
+  ModX, BPP    : cardinal;
+  x, y, R, G, B, SrcColor : cardinal;
+begin
+  RealRect := ValidateSurfaceRect( DstSurface, DstRect );
+  if ( RealRect.w > 0 ) and ( RealRect.h > 0 ) then
+  begin
+    SDL_LockSurface( DstSurface );
+    BPP := DstSurface.format.BytesPerPixel;
+    with DstSurface^ do
+    begin
+      Addr := pointer( UInt32( pixels ) + UInt32( RealRect.y ) * pitch + UInt32( RealRect.x ) * BPP );
+      ModX := Pitch - UInt32( RealRect.w ) * BPP;
+    end;
+    case DstSurface.format.BitsPerPixel of
+      8 :
+        begin
+          for y := 0 to RealRect.h - 1 do
+          begin
+            for x := 0 to RealRect.w - 1 do
+            begin
+              SrcColor := PUInt32( Addr )^;
+              R := SrcColor and $E0 + Color and $E0;
+              G := SrcColor and $1C + Color and $1C;
+              B := SrcColor and $03 + Color and $03;
+              if R > $E0 then
+                R := $E0;
+              if G > $1C then
+                G := $1C;
+              if B > $03 then
+                B := $03;
+              PUInt8( Addr )^ := R or G or B;
+              inc(  Addr , BPP );
+            end;
+            inc( Addr , ModX );
+          end;
+        end;
+      15 :
+        begin
+          for y := 0 to RealRect.h - 1 do
+          begin
+            for x := 0 to RealRect.w - 1 do
+            begin
+              SrcColor := PUInt32( Addr )^;
+              R := SrcColor and $7C00 + Color and $7C00;
+              G := SrcColor and $03E0 + Color and $03E0;
+              B := SrcColor and $001F + Color and $001F;
+              if R > $7C00 then
+                R := $7C00;
+              if G > $03E0 then
+                G := $03E0;
+              if B > $001F then
+                B := $001F;
+              PUInt16( Addr )^ := R or G or B;
+              inc( Addr , BPP );
+            end;
+            inc( Addr , ModX );
+          end;
+        end;
+      16 :
+        begin
+          for y := 0 to RealRect.h - 1 do
+          begin
+            for x := 0 to RealRect.w - 1 do
+            begin
+              SrcColor := PUInt32( Addr )^;
+              R := SrcColor and $F800 + Color and $F800;
+              G := SrcColor and $07C0 + Color and $07C0;
+              B := SrcColor and $001F + Color and $001F;
+              if R > $F800 then
+                R := $F800;
+              if G > $07C0 then
+                G := $07C0;
+              if B > $001F then
+                B := $001F;
+              PUInt16( Addr )^ := R or G or B;
+              inc( Addr , BPP );
+            end;
+            inc( Addr , ModX );
+          end;
+        end;
+      24 :
+        begin
+          for y := 0 to RealRect.h - 1 do
+          begin
+            for x := 0 to RealRect.w - 1 do
+            begin
+              SrcColor := PUInt32( Addr )^;
+              R := SrcColor and $00FF0000 + Color and $00FF0000;
+              G := SrcColor and $0000FF00 + Color and $0000FF00;
+              B := SrcColor and $000000FF + Color and $000000FF;
+              if R > $FF0000 then
+                R := $FF0000;
+              if G > $00FF00 then
+                G := $00FF00;
+              if B > $0000FF then
+                B := $0000FF;
+              PUInt32( Addr )^ := SrcColor and $FF000000 or R or G or B;
+              inc( Addr , BPP );
+            end;
+            inc( Addr , ModX );
+          end;
+        end;
+      32 :
+        begin
+          for y := 0 to RealRect.h - 1 do
+          begin
+            for x := 0 to RealRect.w - 1 do
+            begin
+              SrcColor := PUInt32( Addr )^;
+              R := SrcColor and $00FF0000 + Color and $00FF0000;
+              G := SrcColor and $0000FF00 + Color and $0000FF00;
+              B := SrcColor and $000000FF + Color and $000000FF;
+              if R > $FF0000 then
+                R := $FF0000;
+              if G > $00FF00 then
+                G := $00FF00;
+              if B > $0000FF then
+                B := $0000FF;
+              PUInt32( Addr )^ := R or G or B;
+              inc( Addr , BPP );
+            end;
+            inc( Addr , ModX );
+          end;
+        end;
+    end;
+    SDL_UnlockSurface( DstSurface );
+  end;
+end;
+
+procedure SDL_FillRectSub( DstSurface : PSDL_Surface; dstrect : PSDL_Rect; color : UInt32 );
+var
+  RealRect     : TSDL_Rect;
+  Addr         : pointer;
+  ModX, BPP    : cardinal;
+  x, y, R, G, B, SrcColor : cardinal;
+begin
+  RealRect := ValidateSurfaceRect( DstSurface, DstRect );
+  if ( RealRect.w > 0 ) and ( RealRect.h > 0 ) then
+  begin
+    SDL_LockSurface( DstSurface );
+    BPP := DstSurface.format.BytesPerPixel;
+    with DstSurface^ do
+    begin
+      Addr := pointer( UInt32( pixels ) + UInt32( RealRect.y ) * pitch + UInt32( RealRect.x ) * BPP );
+      ModX := Pitch - UInt32( RealRect.w ) * BPP;
+    end;
+    case DstSurface.format.BitsPerPixel of
+      8 :
+        begin
+          for y := 0 to RealRect.h - 1 do
+          begin
+            for x := 0 to RealRect.w - 1 do
+            begin
+              SrcColor := PUInt32( Addr )^;
+              R := SrcColor and $E0 - Color and $E0;
+              G := SrcColor and $1C - Color and $1C;
+              B := SrcColor and $03 - Color and $03;
+              if R > $E0 then
+                R := 0;
+              if G > $1C then
+                G := 0;
+              if B > $03 then
+                B := 0;
+              PUInt8( Addr )^ := R or G or B;
+              inc( Addr , BPP );
+            end;
+            inc( Addr , ModX );
+          end;
+        end;
+      15 :
+        begin
+          for y := 0 to RealRect.h - 1 do
+          begin
+            for x := 0 to RealRect.w - 1 do
+            begin
+              SrcColor := PUInt32( Addr )^;
+              R := SrcColor and $7C00 - Color and $7C00;
+              G := SrcColor and $03E0 - Color and $03E0;
+              B := SrcColor and $001F - Color and $001F;
+              if R > $7C00 then
+                R := 0;
+              if G > $03E0 then
+                G := 0;
+              if B > $001F then
+                B := 0;
+              PUInt16( Addr )^ := R or G or B;
+              inc( Addr , BPP );
+            end;
+            inc(  Addr , ModX );
+          end;
+        end;
+      16 :
+        begin
+          for y := 0 to RealRect.h - 1 do
+          begin
+            for x := 0 to RealRect.w - 1 do
+            begin
+              SrcColor := PUInt32( Addr )^;
+              R := SrcColor and $F800 - Color and $F800;
+              G := SrcColor and $07C0 - Color and $07C0;
+              B := SrcColor and $001F - Color and $001F;
+              if R > $F800 then
+                R := 0;
+              if G > $07C0 then
+                G := 0;
+              if B > $001F then
+                B := 0;
+              PUInt16( Addr )^ := R or G or B;
+              inc( Addr , BPP );
+            end;
+            inc( Addr , ModX );
+          end;
+        end;
+      24 :
+        begin
+          for y := 0 to RealRect.h - 1 do
+          begin
+            for x := 0 to RealRect.w - 1 do
+            begin
+              SrcColor := PUInt32( Addr )^;
+              R := SrcColor and $00FF0000 - Color and $00FF0000;
+              G := SrcColor and $0000FF00 - Color and $0000FF00;
+              B := SrcColor and $000000FF - Color and $000000FF;
+              if R > $FF0000 then
+                R := 0;
+              if G > $00FF00 then
+                G := 0;
+              if B > $0000FF then
+                B := 0;
+              PUInt32( Addr )^ := SrcColor and $FF000000 or R or G or B;
+              inc( Addr , BPP );
+            end;
+            inc( Addr , ModX );
+          end;
+        end;
+      32 :
+        begin
+          for y := 0 to RealRect.h - 1 do
+          begin
+            for x := 0 to RealRect.w - 1 do
+            begin
+              SrcColor := PUInt32( Addr )^;
+              R := SrcColor and $00FF0000 - Color and $00FF0000;
+              G := SrcColor and $0000FF00 - Color and $0000FF00;
+              B := SrcColor and $000000FF - Color and $000000FF;
+              if R > $FF0000 then
+                R := 0;
+              if G > $00FF00 then
+                G := 0;
+              if B > $0000FF then
+                B := 0;
+              PUInt32( Addr )^ := R or G or B;
+              inc(  Addr , BPP );
+            end;
+            inc( Addr , ModX );
+          end;
+        end;
+    end;
+    SDL_UnlockSurface( DstSurface );
+  end;
+end;
+
+procedure SDL_GradientFillRect( DstSurface : PSDL_Surface; const Rect : PSDL_Rect; const StartColor, EndColor : TSDL_Color; const Style : TGradientStyle );
+var
+  FBC          : array[ 0..255 ] of Cardinal;
+  // temp vars
+  i, YR, YG, YB, SR, SG, SB, DR, DG, DB : Integer;
+
+  TempStepV, TempStepH : Single;
+  TempLeft, TempTop, TempHeight, TempWidth : integer;
+  TempRect     : TSDL_Rect;
+
+begin
+  // calc FBC
+  YR := StartColor.r;
+  YG := StartColor.g;
+  YB := StartColor.b;
+  SR := YR;
+  SG := YG;
+  SB := YB;
+  DR := EndColor.r - SR;
+  DG := EndColor.g - SG;
+  DB := EndColor.b - SB;
+
+  for i := 0 to 255 do
+  begin
+    FBC[ i ] := SDL_MapRGB( DstSurface.format, YR, YG, YB );
+    YR := SR + round( DR / 255 * i );
+    YG := SG + round( DG / 255 * i );
+    YB := SB + round( DB / 255 * i );
+  end;
+
+  //  if aStyle = 1 then begin
+  TempStepH := Rect.w / 255;
+  TempStepV := Rect.h / 255;
+  TempHeight := Trunc( TempStepV + 1 );
+  TempWidth := Trunc( TempStepH + 1 );
+  TempTop := 0;
+  TempLeft := 0;
+  TempRect.x := Rect.x;
+  TempRect.y := Rect.y;
+  TempRect.h := Rect.h;
+  TempRect.w := Rect.w;
+
+  case Style of
+    gsHorizontal :
+      begin
+        TempRect.h := TempHeight;
+        for i := 0 to 255 do
+        begin
+          TempRect.y := Rect.y + TempTop;
+          SDL_FillRect( DstSurface, @TempRect, FBC[ i ] );
+          TempTop := Trunc( TempStepV * i );
+        end;
+      end;
+    gsVertical :
+      begin
+        TempRect.w := TempWidth;
+        for i := 0 to 255 do
+        begin
+          TempRect.x := Rect.x + TempLeft;
+          SDL_FillRect( DstSurface, @TempRect, FBC[ i ] );
+          TempLeft := Trunc( TempStepH * i );
+        end;
+      end;
+  end;
+end;
+
+procedure SDL_2xBlit( Src, Dest : PSDL_Surface );
+var
+  ReadAddr, WriteAddr, ReadRow, WriteRow : UInt32;
+  SrcPitch, DestPitch, x, y : UInt32;
+begin
+  if ( Src = nil ) or ( Dest = nil ) then
+    exit;
+  if ( Src.w shl 1 ) < Dest.w then
+    exit;
+  if ( Src.h shl 1 ) < Dest.h then
+    exit;
+
+  if SDL_MustLock( Src ) then
+    SDL_LockSurface( Src );
+  if SDL_MustLock( Dest ) then
+    SDL_LockSurface( Dest );
+
+  ReadRow := UInt32( Src.Pixels );
+  WriteRow := UInt32( Dest.Pixels );
+
+  SrcPitch := Src.pitch;
+  DestPitch := Dest.pitch;
+
+  case Src.format.BytesPerPixel of
+    1 : for y := 1 to Src.h do
+      begin
+        ReadAddr := ReadRow;
+        WriteAddr := WriteRow;
+        for x := 1 to Src.w do
+        begin
+          PUInt8( WriteAddr )^ := PUInt8( ReadAddr )^;
+          PUInt8( WriteAddr + 1 )^ := PUInt8( ReadAddr )^;
+          PUInt8( WriteAddr + DestPitch )^ := PUInt8( ReadAddr )^;
+          PUInt8( WriteAddr + DestPitch + 1 )^ := PUInt8( ReadAddr )^;
+          inc( ReadAddr );
+          inc( WriteAddr, 2 );
+        end;
+        inc( UInt32( ReadRow ), SrcPitch );
+        inc( UInt32( WriteRow ), DestPitch * 2 );
+      end;
+    2 : for y := 1 to Src.h do
+      begin
+        ReadAddr := ReadRow;
+        WriteAddr := WriteRow;
+        for x := 1 to Src.w do
+        begin
+          PUInt16( WriteAddr )^ := PUInt16( ReadAddr )^;
+          PUInt16( WriteAddr + 2 )^ := PUInt16( ReadAddr )^;
+          PUInt16( WriteAddr + DestPitch )^ := PUInt16( ReadAddr )^;
+          PUInt16( WriteAddr + DestPitch + 2 )^ := PUInt16( ReadAddr )^;
+          inc( ReadAddr, 2 );
+          inc( WriteAddr, 4 );
+        end;
+        inc( UInt32( ReadRow ), SrcPitch );
+        inc( UInt32( WriteRow ), DestPitch * 2 );
+      end;
+    3 : for y := 1 to Src.h do
+      begin
+        ReadAddr := ReadRow;
+        WriteAddr := WriteRow;
+        for x := 1 to Src.w do
+        begin
+          PUInt32( WriteAddr )^ := ( PUInt32( WriteAddr )^ and $FF000000 ) or ( PUInt32( ReadAddr )^ and $00FFFFFF );
+          PUInt32( WriteAddr + 3 )^ := ( PUInt32( WriteAddr + 3 )^ and $FF000000 ) or ( PUInt32( ReadAddr )^ and $00FFFFFF );
+          PUInt32( WriteAddr + DestPitch )^ := ( PUInt32( WriteAddr + DestPitch )^ and $FF000000 ) or ( PUInt32( ReadAddr )^ and $00FFFFFF );
+          PUInt32( WriteAddr + DestPitch + 3 )^ := ( PUInt32( WriteAddr + DestPitch + 3 )^ and $FF000000 ) or ( PUInt32( ReadAddr )^ and $00FFFFFF );
+          inc( ReadAddr, 3 );
+          inc( WriteAddr, 6 );
+        end;
+        inc( UInt32( ReadRow ), SrcPitch );
+        inc( UInt32( WriteRow ), DestPitch * 2 );
+      end;
+    4 : for y := 1 to Src.h do
+      begin
+        ReadAddr := ReadRow;
+        WriteAddr := WriteRow;
+        for x := 1 to Src.w do
+        begin
+          PUInt32( WriteAddr )^ := PUInt32( ReadAddr )^;
+          PUInt32( WriteAddr + 4 )^ := PUInt32( ReadAddr )^;
+          PUInt32( WriteAddr + DestPitch )^ := PUInt32( ReadAddr )^;
+          PUInt32( WriteAddr + DestPitch + 4 )^ := PUInt32( ReadAddr )^;
+          inc( ReadAddr, 4 );
+          inc( WriteAddr, 8 );
+        end;
+        inc( UInt32( ReadRow ), SrcPitch );
+        inc( UInt32( WriteRow ), DestPitch * 2 );
+      end;
+  end;
+
+  if SDL_MustLock( Src ) then
+    SDL_UnlockSurface( Src );
+  if SDL_MustLock( Dest ) then
+    SDL_UnlockSurface( Dest );
+end;
+
+procedure SDL_Scanline2xBlit( Src, Dest : PSDL_Surface );
+var
+  ReadAddr, WriteAddr, ReadRow, WriteRow : UInt32;
+  SrcPitch, DestPitch, x, y : UInt32;
+begin
+  if ( Src = nil ) or ( Dest = nil ) then
+    exit;
+  if ( Src.w shl 1 ) < Dest.w then
+    exit;
+  if ( Src.h shl 1 ) < Dest.h then
+    exit;
+
+  if SDL_MustLock( Src ) then
+    SDL_LockSurface( Src );
+  if SDL_MustLock( Dest ) then
+    SDL_LockSurface( Dest );
+
+  ReadRow := UInt32( Src.Pixels );
+  WriteRow := UInt32( Dest.Pixels );
+
+  SrcPitch := Src.pitch;
+  DestPitch := Dest.pitch;
+
+  case Src.format.BytesPerPixel of
+    1 : for y := 1 to Src.h do
+      begin
+        ReadAddr := ReadRow;
+        WriteAddr := WriteRow;
+        for x := 1 to Src.w do
+        begin
+          PUInt8( WriteAddr )^ := PUInt8( ReadAddr )^;
+          PUInt8( WriteAddr + 1 )^ := PUInt8( ReadAddr )^;
+          inc( ReadAddr );
+          inc( WriteAddr, 2 );
+        end;
+        inc( UInt32( ReadRow ), SrcPitch );
+        inc( UInt32( WriteRow ), DestPitch * 2 );
+      end;
+    2 : for y := 1 to Src.h do
+      begin
+        ReadAddr := ReadRow;
+        WriteAddr := WriteRow;
+        for x := 1 to Src.w do
+        begin
+          PUInt16( WriteAddr )^ := PUInt16( ReadAddr )^;
+          PUInt16( WriteAddr + 2 )^ := PUInt16( ReadAddr )^;
+          inc( ReadAddr, 2 );
+          inc( WriteAddr, 4 );
+        end;
+        inc( UInt32( ReadRow ), SrcPitch );
+        inc( UInt32( WriteRow ), DestPitch * 2 );
+      end;
+    3 : for y := 1 to Src.h do
+      begin
+        ReadAddr := ReadRow;
+        WriteAddr := WriteRow;
+        for x := 1 to Src.w do
+        begin
+          PUInt32( WriteAddr )^ := ( PUInt32( WriteAddr )^ and $FF000000 ) or ( PUInt32( ReadAddr )^ and $00FFFFFF );
+          PUInt32( WriteAddr + 3 )^ := ( PUInt32( WriteAddr + 3 )^ and $FF000000 ) or ( PUInt32( ReadAddr )^ and $00FFFFFF );
+          inc( ReadAddr, 3 );
+          inc( WriteAddr, 6 );
+        end;
+        inc( UInt32( ReadRow ), SrcPitch );
+        inc( UInt32( WriteRow ), DestPitch * 2 );
+      end;
+    4 : for y := 1 to Src.h do
+      begin
+        ReadAddr := ReadRow;
+        WriteAddr := WriteRow;
+        for x := 1 to Src.w do
+        begin
+          PUInt32( WriteAddr )^ := PUInt32( ReadAddr )^;
+          PUInt32( WriteAddr + 4 )^ := PUInt32( ReadAddr )^;
+          inc( ReadAddr, 4 );
+          inc( WriteAddr, 8 );
+        end;
+        inc( UInt32( ReadRow ), SrcPitch );
+        inc( UInt32( WriteRow ), DestPitch * 2 );
+      end;
+  end;
+
+  if SDL_MustLock( Src ) then
+    SDL_UnlockSurface( Src );
+  if SDL_MustLock( Dest ) then
+    SDL_UnlockSurface( Dest );
+end;
+
+procedure SDL_50Scanline2xBlit( Src, Dest : PSDL_Surface );
+var
+  ReadAddr, WriteAddr, ReadRow, WriteRow : UInt32;
+  SrcPitch, DestPitch, x, y, Color : UInt32;
+begin
+  if ( Src = nil ) or ( Dest = nil ) then
+    exit;
+  if ( Src.w shl 1 ) < Dest.w then
+    exit;
+  if ( Src.h shl 1 ) < Dest.h then
+    exit;
+
+  if SDL_MustLock( Src ) then
+    SDL_LockSurface( Src );
+  if SDL_MustLock( Dest ) then
+    SDL_LockSurface( Dest );
+
+  ReadRow := UInt32( Src.Pixels );
+  WriteRow := UInt32( Dest.Pixels );
+
+  SrcPitch := Src.pitch;
+  DestPitch := Dest.pitch;
+
+  case Src.format.BitsPerPixel of
+    8 : for y := 1 to Src.h do
+      begin
+        ReadAddr := ReadRow;
+        WriteAddr := WriteRow;
+        for x := 1 to Src.w do
+        begin
+          Color := PUInt8( ReadAddr )^;
+          PUInt8( WriteAddr )^ := Color;
+          PUInt8( WriteAddr + 1 )^ := Color;
+          Color := ( Color shr 1 ) and $6D; {%01101101}
+          PUInt8( WriteAddr + DestPitch )^ := Color;
+          PUInt8( WriteAddr + DestPitch + 1 )^ := Color;
+          inc( ReadAddr );
+          inc( WriteAddr, 2 );
+        end;
+        inc( UInt32( ReadRow ), SrcPitch );
+        inc( UInt32( WriteRow ), DestPitch * 2 );
+      end;
+    15 : for y := 1 to Src.h do
+      begin
+        ReadAddr := ReadRow;
+        WriteAddr := WriteRow;
+        for x := 1 to Src.w do
+        begin
+          Color := PUInt16( ReadAddr )^;
+          PUInt16( WriteAddr )^ := Color;
+          PUInt16( WriteAddr + 2 )^ := Color;
+          Color := ( Color shr 1 ) and $3DEF; {%0011110111101111}
+          PUInt16( WriteAddr + DestPitch )^ := Color;
+          PUInt16( WriteAddr + DestPitch + 2 )^ := Color;
+          inc( ReadAddr, 2 );
+          inc( WriteAddr, 4 );
+        end;
+        inc( UInt32( ReadRow ), SrcPitch );
+        inc( UInt32( WriteRow ), DestPitch * 2 );
+      end;
+    16 : for y := 1 to Src.h do
+      begin
+        ReadAddr := ReadRow;
+        WriteAddr := WriteRow;
+        for x := 1 to Src.w do
+        begin
+          Color := PUInt16( ReadAddr )^;
+          PUInt16( WriteAddr )^ := Color;
+          PUInt16( WriteAddr + 2 )^ := Color;
+          Color := ( Color shr 1 ) and $7BEF; {%0111101111101111}
+          PUInt16( WriteAddr + DestPitch )^ := Color;
+          PUInt16( WriteAddr + DestPitch + 2 )^ := Color;
+          inc( ReadAddr, 2 );
+          inc( WriteAddr, 4 );
+        end;
+        inc( UInt32( ReadRow ), SrcPitch );
+        inc( UInt32( WriteRow ), DestPitch * 2 );
+      end;
+    24 : for y := 1 to Src.h do
+      begin
+        ReadAddr := ReadRow;
+        WriteAddr := WriteRow;
+        for x := 1 to Src.w do
+        begin
+          Color := ( PUInt32( WriteAddr )^ and $FF000000 ) or ( PUInt32( ReadAddr )^ and $00FFFFFF );
+          PUInt32( WriteAddr )^ := Color;
+          PUInt32( WriteAddr + 3 )^ := Color;
+          Color := ( Color shr 1 ) and $007F7F7F; {%011111110111111101111111}
+          PUInt32( WriteAddr + DestPitch )^ := Color;
+          PUInt32( WriteAddr + DestPitch + 3 )^ := Color;
+          inc( ReadAddr, 3 );
+          inc( WriteAddr, 6 );
+        end;
+        inc( UInt32( ReadRow ), SrcPitch );
+        inc( UInt32( WriteRow ), DestPitch * 2 );
+      end;
+    32 : for y := 1 to Src.h do
+      begin
+        ReadAddr := ReadRow;
+        WriteAddr := WriteRow;
+        for x := 1 to Src.w do
+        begin
+          Color := PUInt32( ReadAddr )^;
+          PUInt32( WriteAddr )^ := Color;
+          PUInt32( WriteAddr + 4 )^ := Color;
+          Color := ( Color shr 1 ) and $7F7F7F7F;
+          PUInt32( WriteAddr + DestPitch )^ := Color;
+          PUInt32( WriteAddr + DestPitch + 4 )^ := Color;
+          inc( ReadAddr, 4 );
+          inc( WriteAddr, 8 );
+        end;
+        inc( UInt32( ReadRow ), SrcPitch );
+        inc( UInt32( WriteRow ), DestPitch * 2 );
+      end;
+  end;
+
+  if SDL_MustLock( Src ) then
+    SDL_UnlockSurface( Src );
+  if SDL_MustLock( Dest ) then
+    SDL_UnlockSurface( Dest );
+end;
+
+function SDL_PixelTestSurfaceVsRect( SrcSurface1 : PSDL_Surface; SrcRect1 :
+  PSDL_Rect; SrcRect2 : PSDL_Rect; Left1, Top1, Left2, Top2 : integer ) :
+  boolean;
+var
+  Src_Rect1, Src_Rect2 : TSDL_Rect;
+  right1, bottom1 : integer;
+  right2, bottom2 : integer;
+  Scan1Start, {Scan2Start,} ScanWidth, ScanHeight : cardinal;
+  Mod1         : cardinal;
+  Addr1        : cardinal;
+  BPP          : cardinal;
+  Pitch1       : cardinal;
+  TransparentColor1 : cardinal;
+  tx, ty       : cardinal;
+  StartTick    : cardinal;
+  Color1       : cardinal;
+begin
+  Result := false;
+  if SrcRect1 = nil then
+  begin
+    with Src_Rect1 do
+    begin
+      x := 0;
+      y := 0;
+      w := SrcSurface1.w;
+      h := SrcSurface1.h;
+    end;
+  end
+  else
+    Src_Rect1 := SrcRect1^;
+
+  Src_Rect2 := SrcRect2^;
+  with Src_Rect1 do
+  begin
+    Right1 := Left1 + w;
+    Bottom1 := Top1 + h;
+  end;
+  with Src_Rect2 do
+  begin
+    Right2 := Left2 + w;
+    Bottom2 := Top2 + h;
+  end;
+  if ( Left1 >= Right2 ) or ( Right1 <= Left2 ) or ( Top1 >= Bottom2 ) or ( Bottom1 <= Top2 ) then
+    exit;
+  if Left1 <= Left2 then
+  begin
+    // 1. left, 2. right
+    Scan1Start := Src_Rect1.x + Left2 - Left1;
+    //Scan2Start := Src_Rect2.x;
+    ScanWidth := Right1 - Left2;
+    with Src_Rect2 do
+      if ScanWidth > w then
+        ScanWidth := w;
+  end
+  else
+  begin
+    // 1. right, 2. left
+    Scan1Start := Src_Rect1.x;
+    //Scan2Start := Src_Rect2.x + Left1 - Left2;
+    ScanWidth := Right2 - Left1;
+    with Src_Rect1 do
+      if ScanWidth > w then
+        ScanWidth := w;
+  end;
+  with SrcSurface1^ do
+  begin
+    Pitch1 := Pitch;
+    Addr1 := cardinal( Pixels );
+    inc( Addr1, Pitch1 * UInt32( Src_Rect1.y ) );
+    with format^ do
+    begin
+      BPP := BytesPerPixel;
+      TransparentColor1 := colorkey;
+    end;
+  end;
+
+  Mod1 := Pitch1 - ( ScanWidth * BPP );
+
+  inc( Addr1, BPP * Scan1Start );
+
+  if Top1 <= Top2 then
+  begin
+    // 1. up, 2. down
+    ScanHeight := Bottom1 - Top2;
+    if ScanHeight > Src_Rect2.h then
+      ScanHeight := Src_Rect2.h;
+    inc( Addr1, Pitch1 * UInt32( Top2 - Top1 ) );
+  end
+  else
+  begin
+    // 1. down, 2. up
+    ScanHeight := Bottom2 - Top1;
+    if ScanHeight > Src_Rect1.h then
+      ScanHeight := Src_Rect1.h;
+
+  end;
+  case BPP of
+    1 :
+      for ty := 1 to ScanHeight do
+      begin
+        for tx := 1 to ScanWidth do
+        begin
+          if ( PByte( Addr1 )^ <> TransparentColor1 ) then
+          begin
+            Result := true;
+            exit;
+          end;
+          inc( Addr1 );
+
+        end;
+        inc( Addr1, Mod1 );
+
+      end;
+    2 :
+      for ty := 1 to ScanHeight do
+      begin
+        for tx := 1 to ScanWidth do
+        begin
+          if ( PWord( Addr1 )^ <> TransparentColor1 ) then
+          begin
+            Result := true;
+            exit;
+          end;
+          inc( Addr1, 2 );
+
+        end;
+        inc( Addr1, Mod1 );
+
+      end;
+    3 :
+      for ty := 1 to ScanHeight do
+      begin
+        for tx := 1 to ScanWidth do
+        begin
+          Color1 := PLongWord( Addr1 )^ and $00FFFFFF;
+
+          if ( Color1 <> TransparentColor1 )
+            then
+          begin
+            Result := true;
+            exit;
+          end;
+          inc( Addr1, 3 );
+
+        end;
+        inc( Addr1, Mod1 );
+
+      end;
+    4 :
+      for ty := 1 to ScanHeight do
+      begin
+        for tx := 1 to ScanWidth do
+        begin
+          if ( PLongWord( Addr1 )^ <> TransparentColor1 ) then
+          begin
+            Result := true;
+            exit;
+          end;
+          inc( Addr1, 4 );
+
+        end;
+        inc( Addr1, Mod1 );
+
+      end;
+  end;
+end;
+
+procedure SDL_ORSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect;
+  DestSurface : PSDL_Surface; DestRect : PSDL_Rect );
+var
+  R, G, B, Pixel1, Pixel2, TransparentColor : cardinal;
+  Src, Dest    : TSDL_Rect;
+  Diff         : integer;
+  SrcAddr, DestAddr : cardinal;
+  WorkX, WorkY : word;
+  SrcMod, DestMod : cardinal;
+  Bits         : cardinal;
+begin
+  if ( SrcSurface = nil ) or ( DestSurface = nil ) then
+    exit; // Remove this to make it faster
+  if ( SrcSurface.Format.BitsPerPixel <> DestSurface.Format.BitsPerPixel ) then
+    exit; // Remove this to make it faster
+  if SrcRect = nil then
+  begin
+    with Src do
+    begin
+      x := 0;
+      y := 0;
+      w := SrcSurface.w;
+      h := SrcSurface.h;
+    end;
+  end
+  else
+    Src := SrcRect^;
+  if DestRect = nil then
+  begin
+    Dest.x := 0;
+    Dest.y := 0;
+  end
+  else
+    Dest := DestRect^;
+  Dest.w := Src.w;
+  Dest.h := Src.h;
+  with DestSurface.Clip_Rect do
+  begin
+    // Source's right side is greater than the dest.cliprect
+    if Dest.x + Src.w > x + w then
+    begin
+      smallint( Src.w ) := x + w - Dest.x;
+      smallint( Dest.w ) := x + w - Dest.x;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's bottom side is greater than the dest.clip
+    if Dest.y + Src.h > y + h then
+    begin
+      smallint( Src.h ) := y + h - Dest.y;
+      smallint( Dest.h ) := y + h - Dest.y;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+    // Source's left side is less than the dest.clip
+    if Dest.x < x then
+    begin
+      Diff := x - Dest.x;
+      Src.x := Src.x + Diff;
+      smallint( Src.w ) := smallint( Src.w ) - Diff;
+      Dest.x := x;
+      smallint( Dest.w ) := smallint( Dest.w ) - Diff;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's Top side is less than the dest.clip
+    if Dest.y < y then
+    begin
+      Diff := y - Dest.y;
+      Src.y := Src.y + Diff;
+      smallint( Src.h ) := smallint( Src.h ) - Diff;
+      Dest.y := y;
+      smallint( Dest.h ) := smallint( Dest.h ) - Diff;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+  end;
+  with SrcSurface^ do
+  begin
+    SrcAddr := cardinal( Pixels ) + UInt32( Src.y ) * Pitch + UInt32( Src.x ) *
+      Format.BytesPerPixel;
+    SrcMod := Pitch - Src.w * Format.BytesPerPixel;
+    TransparentColor := Format.colorkey;
+  end;
+  with DestSurface^ do
+  begin
+    DestAddr := cardinal( Pixels ) + UInt32( Dest.y ) * Pitch + UInt32( Dest.x ) *
+      Format.BytesPerPixel;
+    DestMod := Pitch - Dest.w * Format.BytesPerPixel;
+    Bits := Format.BitsPerPixel;
+  end;
+  SDL_LockSurface( SrcSurface );
+  SDL_LockSurface( DestSurface );
+  WorkY := Src.h;
+  case bits of
+    8 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt8( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt8( DestAddr )^;
+              PUInt8( DestAddr )^ := Pixel2 or Pixel1;
+            end;
+            inc( SrcAddr );
+            inc( DestAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    15 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt16( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt16( DestAddr )^;
+
+              PUInt16( DestAddr )^ := Pixel2 or Pixel1;
+
+            end;
+            inc( SrcAddr, 2 );
+            inc( DestAddr, 2 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    16 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt16( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt16( DestAddr )^;
+
+              PUInt16( DestAddr )^ := Pixel2 or Pixel1;
+
+            end;
+            inc( SrcAddr, 2 );
+            inc( DestAddr, 2 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    24 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt32( SrcAddr )^ and $00FFFFFF;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt32( DestAddr )^ and $00FFFFFF;
+
+              PUInt32( DestAddr )^ := PUInt32( DestAddr )^ and $FF000000 or Pixel2 or Pixel1;
+            end;
+            inc( SrcAddr, 3 );
+            inc( DestAddr, 3 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    32 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt32( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt32( DestAddr )^;
+
+              PUInt32( DestAddr )^ := Pixel2 or Pixel1;
+            end;
+            inc( SrcAddr, 4 );
+            inc( DestAddr, 4 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+  end;
+  SDL_UnlockSurface( SrcSurface );
+  SDL_UnlockSurface( DestSurface );
+end;
+
+procedure SDL_ANDSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect;
+  DestSurface : PSDL_Surface; DestRect : PSDL_Rect );
+var
+  R, G, B, Pixel1, Pixel2, TransparentColor : cardinal;
+  Src, Dest    : TSDL_Rect;
+  Diff         : integer;
+  SrcAddr, DestAddr : cardinal;
+  WorkX, WorkY : word;
+  SrcMod, DestMod : cardinal;
+  Bits         : cardinal;
+begin
+  if ( SrcSurface = nil ) or ( DestSurface = nil ) then
+    exit; // Remove this to make it faster
+  if ( SrcSurface.Format.BitsPerPixel <> DestSurface.Format.BitsPerPixel ) then
+    exit; // Remove this to make it faster
+  if SrcRect = nil then
+  begin
+    with Src do
+    begin
+      x := 0;
+      y := 0;
+      w := SrcSurface.w;
+      h := SrcSurface.h;
+    end;
+  end
+  else
+    Src := SrcRect^;
+  if DestRect = nil then
+  begin
+    Dest.x := 0;
+    Dest.y := 0;
+  end
+  else
+    Dest := DestRect^;
+  Dest.w := Src.w;
+  Dest.h := Src.h;
+  with DestSurface.Clip_Rect do
+  begin
+    // Source's right side is greater than the dest.cliprect
+    if Dest.x + Src.w > x + w then
+    begin
+      smallint( Src.w ) := x + w - Dest.x;
+      smallint( Dest.w ) := x + w - Dest.x;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's bottom side is greater than the dest.clip
+    if Dest.y + Src.h > y + h then
+    begin
+      smallint( Src.h ) := y + h - Dest.y;
+      smallint( Dest.h ) := y + h - Dest.y;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+    // Source's left side is less than the dest.clip
+    if Dest.x < x then
+    begin
+      Diff := x - Dest.x;
+      Src.x := Src.x + Diff;
+      smallint( Src.w ) := smallint( Src.w ) - Diff;
+      Dest.x := x;
+      smallint( Dest.w ) := smallint( Dest.w ) - Diff;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's Top side is less than the dest.clip
+    if Dest.y < y then
+    begin
+      Diff := y - Dest.y;
+      Src.y := Src.y + Diff;
+      smallint( Src.h ) := smallint( Src.h ) - Diff;
+      Dest.y := y;
+      smallint( Dest.h ) := smallint( Dest.h ) - Diff;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+  end;
+  with SrcSurface^ do
+  begin
+    SrcAddr := cardinal( Pixels ) + UInt32( Src.y ) * Pitch + UInt32( Src.x ) *
+      Format.BytesPerPixel;
+    SrcMod := Pitch - Src.w * Format.BytesPerPixel;
+    TransparentColor := Format.colorkey;
+  end;
+  with DestSurface^ do
+  begin
+    DestAddr := cardinal( Pixels ) + UInt32( Dest.y ) * Pitch + UInt32( Dest.x ) *
+      Format.BytesPerPixel;
+    DestMod := Pitch - Dest.w * Format.BytesPerPixel;
+    Bits := Format.BitsPerPixel;
+  end;
+  SDL_LockSurface( SrcSurface );
+  SDL_LockSurface( DestSurface );
+  WorkY := Src.h;
+  case bits of
+    8 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt8( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt8( DestAddr )^;
+              PUInt8( DestAddr )^ := Pixel2 and Pixel1;
+            end;
+            inc( SrcAddr );
+            inc( DestAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    15 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt16( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt16( DestAddr )^;
+
+              PUInt16( DestAddr )^ := Pixel2 and Pixel1;
+
+            end;
+            inc( SrcAddr, 2 );
+            inc( DestAddr, 2 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    16 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt16( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt16( DestAddr )^;
+
+              PUInt16( DestAddr )^ := Pixel2 and Pixel1;
+
+            end;
+            inc( SrcAddr, 2 );
+            inc( DestAddr, 2 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    24 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt32( SrcAddr )^ and $00FFFFFF;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt32( DestAddr )^ and $00FFFFFF;
+
+              PUInt32( DestAddr )^ := PUInt32( DestAddr )^ and $FF000000 or Pixel2 and Pixel1;
+            end;
+            inc( SrcAddr, 3 );
+            inc( DestAddr, 3 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    32 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt32( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt32( DestAddr )^;
+
+              PUInt32( DestAddr )^ := Pixel2 and Pixel1;
+            end;
+            inc( SrcAddr, 4 );
+            inc( DestAddr, 4 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+  end;
+  SDL_UnlockSurface( SrcSurface );
+  SDL_UnlockSurface( DestSurface );
+end;
+
+
+
+procedure SDL_GTSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect;
+  DestSurface : PSDL_Surface; DestRect : PSDL_Rect );
+var
+  R, G, B, Pixel1, Pixel2, TransparentColor : cardinal;
+  Src, Dest    : TSDL_Rect;
+  Diff         : integer;
+  SrcAddr, DestAddr : cardinal;
+  WorkX, WorkY : word;
+  SrcMod, DestMod : cardinal;
+  Bits         : cardinal;
+begin
+  if ( SrcSurface = nil ) or ( DestSurface = nil ) then
+    exit; // Remove this to make it faster
+  if ( SrcSurface.Format.BitsPerPixel <> DestSurface.Format.BitsPerPixel ) then
+    exit; // Remove this to make it faster
+  if SrcRect = nil then
+  begin
+    with Src do
+    begin
+      x := 0;
+      y := 0;
+      w := SrcSurface.w;
+      h := SrcSurface.h;
+    end;
+  end
+  else
+    Src := SrcRect^;
+  if DestRect = nil then
+  begin
+    Dest.x := 0;
+    Dest.y := 0;
+  end
+  else
+    Dest := DestRect^;
+  Dest.w := Src.w;
+  Dest.h := Src.h;
+  with DestSurface.Clip_Rect do
+  begin
+    // Source's right side is greater than the dest.cliprect
+    if Dest.x + Src.w > x + w then
+    begin
+      smallint( Src.w ) := x + w - Dest.x;
+      smallint( Dest.w ) := x + w - Dest.x;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's bottom side is greater than the dest.clip
+    if Dest.y + Src.h > y + h then
+    begin
+      smallint( Src.h ) := y + h - Dest.y;
+      smallint( Dest.h ) := y + h - Dest.y;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+    // Source's left side is less than the dest.clip
+    if Dest.x < x then
+    begin
+      Diff := x - Dest.x;
+      Src.x := Src.x + Diff;
+      smallint( Src.w ) := smallint( Src.w ) - Diff;
+      Dest.x := x;
+      smallint( Dest.w ) := smallint( Dest.w ) - Diff;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's Top side is less than the dest.clip
+    if Dest.y < y then
+    begin
+      Diff := y - Dest.y;
+      Src.y := Src.y + Diff;
+      smallint( Src.h ) := smallint( Src.h ) - Diff;
+      Dest.y := y;
+      smallint( Dest.h ) := smallint( Dest.h ) - Diff;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+  end;
+  with SrcSurface^ do
+  begin
+    SrcAddr := cardinal( Pixels ) + UInt32( Src.y ) * Pitch + UInt32( Src.x ) *
+      Format.BytesPerPixel;
+    SrcMod := Pitch - Src.w * Format.BytesPerPixel;
+    TransparentColor := Format.colorkey;
+  end;
+  with DestSurface^ do
+  begin
+    DestAddr := cardinal( Pixels ) + UInt32( Dest.y ) * Pitch + UInt32( Dest.x ) *
+      Format.BytesPerPixel;
+    DestMod := Pitch - Dest.w * Format.BytesPerPixel;
+    Bits := Format.BitsPerPixel;
+  end;
+  SDL_LockSurface( SrcSurface );
+  SDL_LockSurface( DestSurface );
+  WorkY := Src.h;
+  case bits of
+    8 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt8( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt8( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+                if Pixel2 and $E0 > Pixel1 and $E0 then
+                  R := Pixel2 and $E0
+                else
+                  R := Pixel1 and $E0;
+                if Pixel2 and $1C > Pixel1 and $1C then
+                  G := Pixel2 and $1C
+                else
+                  G := Pixel1 and $1C;
+                if Pixel2 and $03 > Pixel1 and $03 then
+                  B := Pixel2 and $03
+                else
+                  B := Pixel1 and $03;
+
+                if R > $E0 then
+                  R := $E0;
+                if G > $1C then
+                  G := $1C;
+                if B > $03 then
+                  B := $03;
+                PUInt8( DestAddr )^ := R or G or B;
+              end
+              else
+                PUInt8( DestAddr )^ := Pixel1;
+            end;
+            inc( SrcAddr );
+            inc( DestAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    15 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt16( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt16( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+
+                if Pixel2 and $7C00 > Pixel1 and $7C00 then
+                  R := Pixel2 and $7C00
+                else
+                  R := Pixel1 and $7C00;
+                if Pixel2 and $03E0 > Pixel1 and $03E0 then
+                  G := Pixel2 and $03E0
+                else
+                  G := Pixel1 and $03E0;
+                if Pixel2 and $001F > Pixel1 and $001F then
+                  B := Pixel2 and $001F
+                else
+                  B := Pixel1 and $001F;
+
+                PUInt16( DestAddr )^ := R or G or B;
+              end
+              else
+                PUInt16( DestAddr )^ := Pixel1;
+            end;
+            inc( SrcAddr, 2 );
+            inc( DestAddr, 2 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    16 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt16( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt16( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+
+                if Pixel2 and $F800 > Pixel1 and $F800 then
+                  R := Pixel2 and $F800
+                else
+                  R := Pixel1 and $F800;
+                if Pixel2 and $07E0 > Pixel1 and $07E0 then
+                  G := Pixel2 and $07E0
+                else
+                  G := Pixel1 and $07E0;
+                if Pixel2 and $001F > Pixel1 and $001F then
+                  B := Pixel2 and $001F
+                else
+                  B := Pixel1 and $001F;
+
+                PUInt16( DestAddr )^ := R or G or B;
+              end
+              else
+                PUInt16( DestAddr )^ := Pixel1;
+            end;
+            inc( SrcAddr, 2 );
+            inc( DestAddr, 2 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    24 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt32( SrcAddr )^ and $00FFFFFF;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt32( DestAddr )^ and $00FFFFFF;
+              if Pixel2 > 0 then
+              begin
+
+                if Pixel2 and $FF0000 > Pixel1 and $FF0000 then
+                  R := Pixel2 and $FF0000
+                else
+                  R := Pixel1 and $FF0000;
+                if Pixel2 and $00FF00 > Pixel1 and $00FF00 then
+                  G := Pixel2 and $00FF00
+                else
+                  G := Pixel1 and $00FF00;
+                if Pixel2 and $0000FF > Pixel1 and $0000FF then
+                  B := Pixel2 and $0000FF
+                else
+                  B := Pixel1 and $0000FF;
+
+                PUInt32( DestAddr )^ := PUInt32( DestAddr )^ and $FF000000 or ( R or G or B );
+              end
+              else
+                PUInt32( DestAddr )^ := PUInt32( DestAddr )^ and $FF000000 or Pixel1;
+            end;
+            inc( SrcAddr, 3 );
+            inc( DestAddr, 3 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    32 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt32( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt32( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+
+                if Pixel2 and $FF0000 > Pixel1 and $FF0000 then
+                  R := Pixel2 and $FF0000
+                else
+                  R := Pixel1 and $FF0000;
+                if Pixel2 and $00FF00 > Pixel1 and $00FF00 then
+                  G := Pixel2 and $00FF00
+                else
+                  G := Pixel1 and $00FF00;
+                if Pixel2 and $0000FF > Pixel1 and $0000FF then
+                  B := Pixel2 and $0000FF
+                else
+                  B := Pixel1 and $0000FF;
+
+                PUInt32( DestAddr )^ := R or G or B;
+              end
+              else
+                PUInt32( DestAddr )^ := Pixel1;
+            end;
+            inc( SrcAddr, 4 );
+            inc( DestAddr, 4 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+  end;
+  SDL_UnlockSurface( SrcSurface );
+  SDL_UnlockSurface( DestSurface );
+end;
+
+
+procedure SDL_LTSurface( SrcSurface : PSDL_Surface; SrcRect : PSDL_Rect;
+  DestSurface : PSDL_Surface; DestRect : PSDL_Rect );
+var
+  R, G, B, Pixel1, Pixel2, TransparentColor : cardinal;
+  Src, Dest    : TSDL_Rect;
+  Diff         : integer;
+  SrcAddr, DestAddr : cardinal;
+  WorkX, WorkY : word;
+  SrcMod, DestMod : cardinal;
+  Bits         : cardinal;
+begin
+  if ( SrcSurface = nil ) or ( DestSurface = nil ) then
+    exit; // Remove this to make it faster
+  if ( SrcSurface.Format.BitsPerPixel <> DestSurface.Format.BitsPerPixel ) then
+    exit; // Remove this to make it faster
+  if SrcRect = nil then
+  begin
+    with Src do
+    begin
+      x := 0;
+      y := 0;
+      w := SrcSurface.w;
+      h := SrcSurface.h;
+    end;
+  end
+  else
+    Src := SrcRect^;
+  if DestRect = nil then
+  begin
+    Dest.x := 0;
+    Dest.y := 0;
+  end
+  else
+    Dest := DestRect^;
+  Dest.w := Src.w;
+  Dest.h := Src.h;
+  with DestSurface.Clip_Rect do
+  begin
+    // Source's right side is greater than the dest.cliprect
+    if Dest.x + Src.w > x + w then
+    begin
+      smallint( Src.w ) := x + w - Dest.x;
+      smallint( Dest.w ) := x + w - Dest.x;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's bottom side is greater than the dest.clip
+    if Dest.y + Src.h > y + h then
+    begin
+      smallint( Src.h ) := y + h - Dest.y;
+      smallint( Dest.h ) := y + h - Dest.y;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+    // Source's left side is less than the dest.clip
+    if Dest.x < x then
+    begin
+      Diff := x - Dest.x;
+      Src.x := Src.x + Diff;
+      smallint( Src.w ) := smallint( Src.w ) - Diff;
+      Dest.x := x;
+      smallint( Dest.w ) := smallint( Dest.w ) - Diff;
+      if smallint( Dest.w ) < 1 then
+        exit;
+    end;
+    // Source's Top side is less than the dest.clip
+    if Dest.y < y then
+    begin
+      Diff := y - Dest.y;
+      Src.y := Src.y + Diff;
+      smallint( Src.h ) := smallint( Src.h ) - Diff;
+      Dest.y := y;
+      smallint( Dest.h ) := smallint( Dest.h ) - Diff;
+      if smallint( Dest.h ) < 1 then
+        exit;
+    end;
+  end;
+  with SrcSurface^ do
+  begin
+    SrcAddr := cardinal( Pixels ) + UInt32( Src.y ) * Pitch + UInt32( Src.x ) *
+      Format.BytesPerPixel;
+    SrcMod := Pitch - Src.w * Format.BytesPerPixel;
+    TransparentColor := Format.colorkey;
+  end;
+  with DestSurface^ do
+  begin
+    DestAddr := cardinal( Pixels ) + UInt32( Dest.y ) * Pitch + UInt32( Dest.x ) *
+      Format.BytesPerPixel;
+    DestMod := Pitch - Dest.w * Format.BytesPerPixel;
+    Bits := Format.BitsPerPixel;
+  end;
+  SDL_LockSurface( SrcSurface );
+  SDL_LockSurface( DestSurface );
+  WorkY := Src.h;
+  case bits of
+    8 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt8( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt8( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+                if Pixel2 and $E0 < Pixel1 and $E0 then
+                  R := Pixel2 and $E0
+                else
+                  R := Pixel1 and $E0;
+                if Pixel2 and $1C < Pixel1 and $1C then
+                  G := Pixel2 and $1C
+                else
+                  G := Pixel1 and $1C;
+                if Pixel2 and $03 < Pixel1 and $03 then
+                  B := Pixel2 and $03
+                else
+                  B := Pixel1 and $03;
+
+                if R > $E0 then
+                  R := $E0;
+                if G > $1C then
+                  G := $1C;
+                if B > $03 then
+                  B := $03;
+                PUInt8( DestAddr )^ := R or G or B;
+              end
+              else
+                PUInt8( DestAddr )^ := Pixel1;
+            end;
+            inc( SrcAddr );
+            inc( DestAddr );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    15 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt16( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt16( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+
+                if Pixel2 and $7C00 < Pixel1 and $7C00 then
+                  R := Pixel2 and $7C00
+                else
+                  R := Pixel1 and $7C00;
+                if Pixel2 and $03E0 < Pixel1 and $03E0 then
+                  G := Pixel2 and $03E0
+                else
+                  G := Pixel1 and $03E0;
+                if Pixel2 and $001F < Pixel1 and $001F then
+                  B := Pixel2 and $001F
+                else
+                  B := Pixel1 and $001F;
+
+                PUInt16( DestAddr )^ := R or G or B;
+              end
+              else
+                PUInt16( DestAddr )^ := Pixel1;
+            end;
+            inc( SrcAddr, 2 );
+            inc( DestAddr, 2 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    16 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt16( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt16( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+
+                if Pixel2 and $F800 < Pixel1 and $F800 then
+                  R := Pixel2 and $F800
+                else
+                  R := Pixel1 and $F800;
+                if Pixel2 and $07E0 < Pixel1 and $07E0 then
+                  G := Pixel2 and $07E0
+                else
+                  G := Pixel1 and $07E0;
+                if Pixel2 and $001F < Pixel1 and $001F then
+                  B := Pixel2 and $001F
+                else
+                  B := Pixel1 and $001F;
+
+                PUInt16( DestAddr )^ := R or G or B;
+              end
+              else
+                PUInt16( DestAddr )^ := Pixel1;
+            end;
+            inc( SrcAddr, 2 );
+            inc( DestAddr, 2 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    24 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt32( SrcAddr )^ and $00FFFFFF;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt32( DestAddr )^ and $00FFFFFF;
+              if Pixel2 > 0 then
+              begin
+
+                if Pixel2 and $FF0000 < Pixel1 and $FF0000 then
+                  R := Pixel2 and $FF0000
+                else
+                  R := Pixel1 and $FF0000;
+                if Pixel2 and $00FF00 < Pixel1 and $00FF00 then
+                  G := Pixel2 and $00FF00
+                else
+                  G := Pixel1 and $00FF00;
+                if Pixel2 and $0000FF < Pixel1 and $0000FF then
+                  B := Pixel2 and $0000FF
+                else
+                  B := Pixel1 and $0000FF;
+
+                PUInt32( DestAddr )^ := PUInt32( DestAddr )^ and $FF000000 or ( R or G or B );
+              end
+              else
+                PUInt32( DestAddr )^ := PUInt32( DestAddr )^ and $FF000000 or Pixel1;
+            end;
+            inc( SrcAddr, 3 );
+            inc( DestAddr, 3 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+    32 :
+      begin
+        repeat
+          WorkX := Src.w;
+          repeat
+            Pixel1 := PUInt32( SrcAddr )^;
+            if ( Pixel1 <> TransparentColor ) and ( Pixel1 <> 0 ) then
+            begin
+              Pixel2 := PUInt32( DestAddr )^;
+              if Pixel2 > 0 then
+              begin
+
+                if Pixel2 and $FF0000 < Pixel1 and $FF0000 then
+                  R := Pixel2 and $FF0000
+                else
+                  R := Pixel1 and $FF0000;
+                if Pixel2 and $00FF00 < Pixel1 and $00FF00 then
+                  G := Pixel2 and $00FF00
+                else
+                  G := Pixel1 and $00FF00;
+                if Pixel2 and $0000FF < Pixel1 and $0000FF then
+                  B := Pixel2 and $0000FF
+                else
+                  B := Pixel1 and $0000FF;
+
+                PUInt32( DestAddr )^ := R or G or B;
+              end
+              else
+                PUInt32( DestAddr )^ := Pixel1;
+            end;
+            inc( SrcAddr, 4 );
+            inc( DestAddr, 4 );
+            dec( WorkX );
+          until WorkX = 0;
+          inc( SrcAddr, SrcMod );
+          inc( DestAddr, DestMod );
+          dec( WorkY );
+        until WorkY = 0;
+      end;
+  end;
+  SDL_UnlockSurface( SrcSurface );
+  SDL_UnlockSurface( DestSurface );
+end;
+
+// Will clip the x1,x2,y1,x2 params to the ClipRect provided
+
+function SDL_ClipLine( var x1, y1, x2, y2 : Integer; ClipRect : PSDL_Rect ) : boolean;
+var
+  tflag, flag1, flag2 : word;
+  txy, xedge, yedge : Integer;
+  slope        : single;
+
+  function ClipCode( x, y : Integer ) : word;
+  begin
+    Result := 0;
+    if x < ClipRect.x then
+      Result := 1;
+    if x >= ClipRect.w + ClipRect.x then
+      Result := Result or 2;
+    if y < ClipRect.y then
+      Result := Result or 4;
+    if y >= ClipRect.h + ClipRect.y then
+      Result := Result or 8;
+  end;
+
+begin
+  flag1 := ClipCode( x1, y1 );
+  flag2 := ClipCode( x2, y2 );
+  result := true;
+
+  while true do
+  begin
+    if ( flag1 or flag2 ) = 0 then
+      Exit; // all in
+
+    if ( flag1 and flag2 ) <> 0 then
+    begin
+      result := false;
+      Exit; // all out
+    end;
+
+    if flag2 = 0 then
+    begin
+      txy := x1; x1 := x2; x2 := txy;
+      txy := y1; y1 := y2; y2 := txy;
+      tflag := flag1; flag1 := flag2; flag2 := tflag;
+    end;
+
+    if ( flag2 and 3 ) <> 0 then
+    begin
+      if ( flag2 and 1 ) <> 0 then
+        xedge := ClipRect.x
+      else
+        xedge := ClipRect.w + ClipRect.x - 1; // back 1 pixel otherwise we end up in a loop
+
+      slope := ( y2 - y1 ) / ( x2 - x1 );
+      y2 := y1 + Round( slope * ( xedge - x1 ) );
+      x2 := xedge;
+    end
+    else
+    begin
+      if ( flag2 and 4 ) <> 0 then
+        yedge := ClipRect.y
+      else
+        yedge := ClipRect.h + ClipRect.y - 1; // up 1 pixel otherwise we end up in a loop
+
+      slope := ( x2 - x1 ) / ( y2 - y1 );
+      x2 := x1 + Round( slope * ( yedge - y1 ) );
+      y2 := yedge;
+    end;
+
+    flag2 := ClipCode( x2, y2 );
+  end;
+end;
+
 
 end.
 

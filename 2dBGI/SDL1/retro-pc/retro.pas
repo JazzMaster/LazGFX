@@ -13,18 +13,18 @@ Most libGraphs units do not take into account several things.
 
    Pallettes are NOT FIXED. Everyone assumed they were.
 
-
 6- CPU optimizations - using on i8088, i286, i386--or i486(go32v2)??
         This is both build-time and compile time derived.
 
 7- teensy resolutions allowed "Stack smashing recursive floodfills" - and other nasty code hacks
-8- DPMI. Most libGraph units dont use VESA (or LFB) when available- thats an addon unit.
-        Modern day OSes DO.
+8- DPMI. Most libGraph units dont use VESA (or LFB) when available-  Modern day OSes DO.
 
 9- Driver accelleration??
 10- memory segmentation (requires this unit be split out)
 
-I will have to look at i8086 graphics unit before I add things here.
+I will have to look at fpc i8086 graphics unit before I add things here.
+
+Most routines may be fine-except for the "stack smashers".
 
 }
 

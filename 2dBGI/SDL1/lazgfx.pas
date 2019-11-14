@@ -41,6 +41,7 @@ moreso if they are "expanding the reach" of SDL using a language "without much l
 
 interface
 {
+
 -DONT RUN A LIBRARY..link to it.
 -Anonymous C kernel dev (that runs a library)
 
@@ -57,17 +58,9 @@ Everything is mutable."
 ---
 Some notes before we begin:
 
-There are two ways to invoke this-
-1- with GUI and Lazarus
 
-Project-> Application (kiss writeln() and readln() goodbye)
-You can only log output.
-
---Im going to try to port the code so that this isnt needed.
-
-
-2- without GUI/Lazarus as a Console Application
-(when running you may get crash help)
+without GUI/Lazarus as a Console Application
+(when running you may get crash help-full debugging support)
 
 Project-> Console App or
 Project-> Program
@@ -75,14 +68,31 @@ Project-> Program
 Set Run Parameters:
 "Use Launcher" -to enable runwait.sh and console output (otherwise you might not see it)
 
--This was the old school "compiler output window" in DOS Days.
--Yes, Im that old.
+--
 
+fp:
 
-While Id reccommend the 2nd method- Lord knows what you are using this for.
+set paths as folows:
+
+unices:
+
+    /usr/lib/fpc/<version>/units/$fpctarget
+    /usr/lib/fpc/<version>/units/$fpctarget/*
+    /usr/lib/fpc/<version>/units/$fpctarget/rtl
+<point to sdl file Ive included- or -put it here:  /usr/lib/fpc/<version>/units/SDL>
+
+windows:
+
+    C:\fpc\<version>\units\$fpctarget
+    C:\fpc\<version>\units\$fpctarget\*
+    C:\fpc\<version>\units\$fpctarget\rtl
+<point to sdl file Ive included- or -put it here:  C:\fpc\<version>\units\SDL>
+
+---
 Most Games (and Game consoles dont have a debugging output window)
 
--THIS CODE WILL CHECK WHICH IS USED and log accordingly.
+-This code can check for the LCL- but you wont be able to use it WITH the LCL.
+(shoot self in foot twice, Laz DEVS!!)
 
 ---
 
@@ -351,7 +361,7 @@ bounds:
 
 
 on 2d games...you are effectively preloading the fore and aft areas on the 'level' like mario.
-there are ways to reduce flickering -control renderClear and RenderPresent. 
+there are ways to reduce flickering -control renderClear and Flip. 
 
 the damn thing should be loaded in memory anyhoo..
 what.. 64K for a level? cmon....ITS ZOOMED IN....
@@ -388,12 +398,18 @@ The BGI was SIMPLE.
 }
 
 
+{$IFDEF DARWIN} //OSX
+    {$modeswitch objectivec1} //version 2 is above OSX 10.5- use with SDL2. This excludes PPC arch.
+    {$linklib gcc}
+    {$linklib SDLmain}
+{$ENDIF}
+
 uses
 
 //Threads requires baseunix unit
 //cthreads has to be the first unit in this case-it so happens to support the C version.
 
-{$IFDEF UNIX}
+{$IFDEF UNIX} //if coming from dos- sysutils is the equivalent unit.
       cthreads,cmem,sysUtils,baseunix,
     
 {$ENDIF}
@@ -455,9 +471,12 @@ uses
 
 
 //FPC generic units(OS independent)
-  SDL,strings,typinfo,uos,logger
+  SDL,strings,typinfo,logger
 
-//Logger was the unit "throwing EIO errors" all over...FNF- I reset instead of reWrote...
+//uos
+
+//Logger was the unit "throwing -EIO- errors" all over...FNF- I reset instead of reWrote...
+
 
 //stipple is what dashes lines are called
 
@@ -466,10 +485,13 @@ uses
 {$IFDEF debug} ,heaptrc {$ENDIF} 
 
 //Carbon is OS 8 and 9 to OSX API
-{$IFDEF mac} 
+{$IFDEF macos} 
   ,MacOSAll
 {$ENDIF}
 
+{$IFDEF Darwin}
+  ,CocoaAll, Files
+{$ENDIF}
 ;
 
 {
@@ -650,13 +672,13 @@ most computers support up to 1080p output..it will take some more lotta years fo
 var
   thick:thickness;
   bpp:integer; //byte
-  mode:PSDL_DisplayMode;
+//  mode:PSDL_DisplayMode;
+
 
 //This is for updating sections or "viewports".
 //I doubt we need much more than 4 viewports. Dialogs are handled seperately(and then removed)
   texBounds: array [0..4] of PSDL_Rect;
-  textures: array [0..4] of PSDL_Texture;
-
+ 
   windownumber:byte;
   somelineType:thickness;
 //you only scroll,etc within a viewport- you cant escape from it without help.
@@ -697,6 +719,9 @@ These are the types of events.
 }
 
 const
+   {$IFDEF mswindows} //I have my Own implementaion of this- works for win32 apps.
+        IsConsole:boolean;
+   {$ENDIF}
    //Analog joystick dead zone 
    JOYSTICK_DEAD_ZONE = 8000;
    //joysticks seem to be slow to respond in some games....
@@ -704,22 +729,21 @@ const
 var
     _graphresult:integer;
     Xaspect,YAspect:byte;
+
     eventLock: PSDL_Mutex;
     eventWait: PSDL_Cond;
     video_timer_id: TSDL_TimerID;
 
     palette:PSDL_Palette;
     where:Twhere;
-	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop,LoadlibSVGA:boolean;
+	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop,NeedFrameBuffer:boolean;
     nogoautorefresh:boolean;
     X,Y:integer;
     _grResult:grErrortype;
     
     gGameController:PSDL_Joystick;
 
-    Renderer:PSDL_Renderer; export;
     MainSurface,FontSurface : PSDL_Surface; //TnL mostly at this point, and for hacks
-    window:PSDL_Window; //A window... heh..."windows" he he...
 
     srcR,destR,TextRect:PSDL_Rect;
     //rmask,gmask,bmask,amask:longword;
@@ -812,7 +836,6 @@ Atari modes, etc. were removed. (double the res and pixelSize and we will talk)
    
   himode,lomode:integer;
 
-  CurrentMode:PSDL_DisplayMode; //^SDL_DisplayMode
   r,g,b,a:PUInt8; //^Byte
 
   //TextureFormat
@@ -823,17 +846,14 @@ Atari modes, etc. were removed. (double the res and pixelSize and we will talk)
 //our data may differ from SDLs.
 type 
 //the lists..
-  Pmodelist=^TmodeList;
 
 //wants graphics_modes??
-  TmodeList=array [0 .. 31] of TMode;
 
-  PSDLmodeList=^TSDLmodeList;
-  TSDLmodeList=array [0 .. 31] of TSDL_DisplayMode;
+  Pmodelist=^TmodeList;
+  TmodeList=array [0 .. 31] of TMode;
 
 //single mode
   Pmode=^TMode;
-  PSDLmode=^TSDL_DisplayMode;
 
 var
 
@@ -842,16 +862,13 @@ var
 //pointers
 //single modes
 
-    SDLmodePointer:PSDLMode;
-    modePointer:Pmode;
+     modePointer:Pmode;
 
 //list
-    SDLmodeList:PSDLmodeList;
     modeListpointer:PmodeList;
 
 //arrays
 	ModeArray:TmodeList;
-	SDLModeArray:TSDLmodeList;
 
 //forward declared defines
 
@@ -881,22 +898,16 @@ function GetX:word;
 function GetY:word;
 function GetXY:longint; 
 
-function initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean):PSDL_Renderer;
+function initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean):PSDL_Surface;
 procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
 
-
-//this is like Update_Rect() in SDL v1.
-procedure renderTexture( tex:PSDL_Texture;  ren:PSDL_Renderer;  x,y:integer;  clip:PSDL_Rect);
-//(use SDL_RenderCopy otherwise)
+//SDL Internal: Update_Rect()
 
 function getgraphmode:string; 
 procedure restorecrtmode;
 
 function getmaxX:word;
 function getmaxY:word;
-
-function GetPixel(x,y:integer):DWord;
-Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
 
 function getdrivername:string;
 Function detectGraph:byte;
@@ -919,7 +930,7 @@ procedure PlotPixelWithNeighbors(thick:thickness; x,y:integer);
 
 procedure SaveBMPImage(filename:string);
 
-//pull a Rect (off the renderer-back to a surface-then kick out a 1D array of SDL_Colors from inside the Rect)
+//pull a Rect off the surface-then kick out a pointer (to) a 1D array of SDL_Colors from inside the Rect
 function GetPixels(Rect:PSDL_Rect):pointer;
 
 procedure IntHandler; //we should have fpforked and kick started....
@@ -1663,7 +1674,7 @@ tfsGWhite
 
 TRec16=record
   
-	colors:TSDL_COLORS; 
+	colors:PSDL_COLOR; 
 
 {SDL defines this is as:
 
@@ -1674,7 +1685,7 @@ end;
 
 }
 
-	DWords:array [0..15] of DWord;
+	DWords:DWord;
 
 end;
 
@@ -1692,7 +1703,7 @@ end;
 
 TRec256=record
 
-  colors:TSDL_COLORS; //this is setup later on. 
+  colors:TSDL_COLOR; //this is setup later on. 
   DWords:array [0..255] of DWord;
 
 end;
@@ -1706,11 +1717,12 @@ var
   valuelist16: array [0..48] of byte;
   valuelist256: array [0..767] of byte;
 
-  TPalette16:TRec16;
-  TPalette16Grey:TRec16;
+  TPalette16: array [0..15] of TRec16;
+  TPalette16Grey:array [0..15] of TRec16;
 
-  TPalette256:TRec256;
-  TPalette256Grey:TRec256;
+  TPalette256:array [0..255] of TRec256;
+  TPalette256Grey:array [0..255] of TRec256;
+
 
 function GetRGBfromIndex(index:byte):PSDL_Color; 
 function GetDWordfromIndex(index:byte):DWord; 
@@ -1743,6 +1755,23 @@ function RGBAToDWord(somecolor:PSDL_Color):DWord;
 implementation
 
 {
+
+There is one hardspec'd hack going on:
+
+        Get/PutPixel.
+
+SDL routines require SDL_Get/PutPixel, however- as written- it is co-dependendent on a lot of code here.
+This is unavaoidable.
+
+There is one way-and only one way to fix this. Make the units co-dependant at build time.
+The linker will merge the code for us- just make sure that use of SDL/SDL2 has this unit present--or using it will fail.
+
+The alternative is to remm out the routines in the SDL units- and require the code here. That would break SDL.
+Many internal routines- such as Line, Circle, Rect, etc. require Get- or-Put Pixel ops.
+
+I would rather keep SDL sane. Its half-assed enough- as it is.
+
+
 greyscale palettes are required for either loading or displaying in BW, or some subset thereof.
 this isnt "exactly" duplicated code
 
@@ -1762,7 +1791,10 @@ the only guaranteed perfect palette code is (m)CGA -tweaked by me, and Greyscale
 256 should mimic xterm colors IF the endianess is correct and I dont need DWord hex math ops
 
 the question becomes- do we really need to set the DWords by hand.. (such a PITA)
-while I did this thinking YES, possibly no. AYE AYE AYE!
+while I did this thinking YES, possibly no. 
+We DO NEED the SDL subcomponents, however.
+
+AYE AYE AYE!
 
 SDL performs the bit-flapping for us. so- if we set the Grey256 color value as a RGBA record/struct(c) entry 
 then we should be able to pull it back as a unknown DWord(in theory).
@@ -1771,7 +1803,10 @@ and doesnt need to use bitdepth checks)
 
 }
 
+//standalone routines. get/putPixel takes care of the conversion for you.
+//I like my implementation better.
 
+//16bit from 24bit
 function Word16_from_RGB(red,green, blue:byte):Word; //Word=GLShort
 //565 16bit color
 
@@ -1785,6 +1820,7 @@ begin
   Word16_from_RGB:= (red shl 11) or (green shl 5) or blue;
 end;
 
+//15bit from 24bit
 function Word15_from_RGB(red,green, blue:byte):Word; //Word=GLShort
 //555[1] 16bit color
 
@@ -1800,14 +1836,336 @@ begin
 end;
 
 
+
+//SDLv1 code- JEDI team doesnt do it right, and only in SDL2_GFX unit.
+
+//Normally you lock and Unlock Surfaces for batch ops.
+//RLE Surfaces (accelerated) MUST be locked prior to pixel ops- and are the only ones-where locking is required.
+//REPEATED calls to lock/unlock slow things down
+
+
+
+//PtrUInt is a hack- specify length of data to fetch.
+
+//bpp is a global- half this unit is.
+function SDL_GetPixel( SrcSurface : PSDL_Surface; x : integer; y : integer ) : PtrUInt; export;
+
+var
+
+i:integer;
+index:LongWord;
+
+{$IFDEF Borland } 
+//probly needs more borland tweaks to compile- this is a start
+    Location:Byte; 
+{$ENDIF}
+
+{$IFDEF FPC } 
+    Location:^Longword; //location in 1D array
+{$ENDIF}
+
+    temp15,tempPixel:Longword; //byte[0,1,2,3]
+    pixel:longword;
+    fetched:^longword;
+
+begin
+    if (SDL_MUSTLOCK(SrcSurface)) then
+        SDL_LockSurface(SrcSurface);
+
+    bpp:=SrcSurface^.format^.BytesPerPixel;
+
+//location is a confusing misnomer- it should contain a value(DWord), based on screen co-ordinates in 1d
+//-we interpret said value.
+    Location:=(SrcSurface^.pixels+(y*SrcSurface^.pitch+x) * bpp );
+    
+
+//CGA: To fetch the data- we need to know - from which (mode and palette). 
+// This is More complex than it initially presents(like college algebra).
+
+//if using BP/TP7- this is less of a concern.
+
+    case bpp of
+//<8bpp arent supported, emulate
+
+        //Paletted. Determine Mode and use Mode to leverage which Palette to use.
+        //cannot return a longword(yet)- as we dont know from which palette.        
+
+       8:begin //max assigned 256 color palette
+        //now take the longword output 
+
+          //4bpp
+          if MaxColors=4 then begin //CGA
+            {$IFDEF Borland }
+                if (SDL_MUSTLOCK(SrcSurface)) then
+                    SDL_UnLockSurface(SrcSurface);
+
+                Result:=Byte(Location);
+                exit;
+            {$ENDIF}  
+            //check mode to find the correct palette
+            
+      	     i:=0;
+             index:=0;
+	         while (i<3) do begin
+//dont assume 4a, check mode...
+		        if (Tpalette4a.dwords[i] = location) then //did we find a match?
+ 			        index:=Tpalette4a.colors[i];
+				inc(i);  //no
+             end;
+	         //error:no match found
+             if index=0  then exit;
+             if (SDL_MUSTLOCK(SrcSurface)) then
+                    SDL_UnLockSurface(SrcSurface);
+
+             Result:=longword(Tpalette4a.Dwords[index]);
+
+          end;
+
+          if MaxColors=16 then begin  //EGA
+             //compare byte index array (modded, not fixed) to pixel data- bail if doesnt match.
+
+      	     i:=0;
+             index:=0;
+	         while (i<15) do begin
+		        if (Tpalette16[i].dwords = location^) then //did we find a match?
+ 			        index:=Tpalette16[i].DWords;
+				inc(i);  //no
+             end;
+	         //error:no match found
+             if index=0  then exit;
+             if (SDL_MUSTLOCK(SrcSurface)) then
+                    SDL_UnLockSurface(SrcSurface);
+
+             Result:=longword(Tpalette16.Dwords[index]);
+          end;
+
+          //ok safely in 256 colors mode
+          if MaxColors=256 then begin
+
+      	     i:=0;
+             index:=0;
+	         while (i<255) do begin
+		        if (Tpalette256.dwords[i] = location^) then //did we find a match?
+ 			        index:=Tpalette256.Dwords[i];
+				inc(i);  //no
+             end;
+	         //error:no match found
+             if index=0  then exit;
+             if (SDL_MUSTLOCK(SrcSurface)) then
+                    SDL_UnLockSurface(SrcSurface);
+
+             Result:=longword(Tpalette256.Dwords[index]);
+          end;
+          
+       end;
+
+        //special case
+        15: begin 
+            //extremely undocumented info
+            //either we bump up to 32 from 16, then back down to 15..or we hack our way thru things.
+
+            //red and green need to shift.
+
+            temp15:=LongWord(location); //pull 32bit data (hackish, should pull 16)
+
+                //courtesy microsoft
+                //mask it off
+
+            //(x86, talos is little endian, powerpc is big endian)
+            if (SDL_BYTEORDER = SDL_LIL_ENDIAN) then begin
+
+                Fetched[0]:=(temp15 and $7c00) shr 10;
+                Fetched[1]:=(temp15 and $3E0) shr 5;
+                Fetched[2]:=(temp15 and $1f);
+
+                if (SDL_MUSTLOCK(SrcSurface)) then
+                    SDL_UnLockSurface(SrcSurface);
+          
+                //repack it (m$ft!! touche! a bug...10 and 4..)
+                Result:=(Word(Fetched[0] shl 10 or Fetched[1] shl 4 or Fetched[2]));
+            
+            end else begin
+
+                //mask it off
+                Fetched[0]:=(temp15 and $1f);
+                Fetched[1]:=(temp15 and $3E0) shr 5;
+                Fetched[2]:=(temp15 and $7c00) shr 10;
+
+                if (SDL_MUSTLOCK(SrcSurface)) then
+                    SDL_UnLockSurface(SrcSurface);
+
+                Result:=(Word(Fetched[2] shl 10 or Fetched[1] shl 4 or Fetched[0]));
+            end;
+
+        end;
+
+        16:begin //if we hacked 15bpp, why not hack 16?
+            temp15:=LongWord(Location); //hackish
+
+            if (SDL_BYTEORDER = SDL_LIL_ENDIAN) then begin
+
+                Fetched[0]:=(temp15 and $f800) shr 10;
+                Fetched[1]:=(temp15 and $7E0) shr 5;
+                Fetched[2]:=(temp15 and $1f);
+
+                if (SDL_MUSTLOCK(SrcSurface)) then
+                    SDL_UnLockSurface(SrcSurface);
+
+                Result:=Word((Fetched[0] shl 11) or (Fetched[1] shl 5) or Fetched[2]);
+            
+            end else begin
+
+                //mask it off
+                Fetched[0]:=(temp15 and $1f);
+                Fetched[1]:=(temp15 and $3E0) shr 5;
+                Fetched[2]:=(temp15 and $7c00) shr 10;
+
+                if (SDL_MUSTLOCK(SrcSurface)) then
+                    SDL_UnLockSurface(SrcSurface);
+
+                Result:=Word( (Fetched[2] shl 11) or (Fetched[1] shl 5) or Fetched[0]);
+
+            end;
+
+        end;
+        24: begin //tuple to longword- leave some bits as ??
+//            Location[3]:=$ff;
+
+            if (SDL_BYTEORDER = SDL_BIG_ENDIAN) then
+                Result:= (Longword (location[2] shl 24 or location[1] shl 16 or location[0] shl 8 shr 8))
+             else           
+                Result:=(Longword(location[0] shl 24 or location[1] shl 16 or location[2] shl 8 shr 8));
+        end;
+        32: begin
+            if (SDL_MUSTLOCK(SrcSurface)) then
+                    SDL_UnLockSurface(SrcSurface);
+            
+            Result:= Longword(Location);
+        end else
+            LogLn('Invalid bit Depth to get Pixel from.');
+    end; //case    
+end;
+
+
+//PtrUInt is a hack- specify length of data provided. Works, but dodgy code.
+procedure SDL_PutPixel( DstSurface : PSDL_Surface; x : integer; y : integer; pixel : PtrUInt ); export;
+var
+{$IFDEF Borland } 
+    Location:Byte; 
+{$ENDIF}
+
+{$IFDEF FPC } 
+    Location:^LongWord;
+{$ENDIF}
+
+    tempPixel:^Longword; //byte[0,1,2,3]
+    indexcolor:byte;
+
+begin
+//dont worry about returning anything, go set the surface pixel at location to value provided
+
+    bpp:=DstSurface^.format^.BytesPerPixel;
+    Location:=(DstSurface^.pixels+(y*DstSurface^.pitch+x) * bpp );
+    case bpp of
+    //A-bit is ignored up to 32bpp, as it should be.(used for blending)
+
+   //4 and 8 bpp are Paletted. Determine Mode and use Mode to leverage which Palette to use.
+   //cannot return a longword(yet)- as we dont know from which palette. 
+   //Palette intentionally contains longwords. Color (Bytes) is an index to said, not a fixed color.
+
+//FIXME: this code will be tweaked when properly incorporated into the lazgfx unit.
+ 
+       
+        8: begin //256 palette actions done different ways.
+            indexColor:=Byte(Pixel);
+            if MaxColors=4 then begin
+              {$IFDEF Borland } 
+                   Location:=indexcolor; 
+              {$ENDIF}
+              //check mode set...
+              Location^:=Tpalette4a.dwords[indexColor];
+            end;
+            if MaxColors=16 then begin
+ 			        Location^:=Tpalette16.dwords[indexColor];
+            end;
+            if MaxColors=256 then begin
+ 			        Location^:=Tpalette256.dwords[indexColor];
+            end;
+
+        end; 
+
+        //15 ,16, and 24 bpp must output shifted words, derived from longwords
+        //you have to break the pixel apart(RGBA), then reassemble it - it get it to fit
+        
+
+        15: begin //555
+
+            if (SDL_BYTEORDER= SDL_BIG_ENDIAN) then begin                
+
+                tempPixel[0]:= (pixel shr 3) and $ff;
+                tempPixel[1]:= (pixel shr 3) and $ff;
+                tempPixel[2]:= (pixel  shr 3) and $ff;
+                tempPixel[3]:= $ff;                    
+                Location^:= (tempPixel[0] shl 10 or tempPixel[1] shl 4 or tempPixel[2]);                
+                
+                end else begin
+                tempPixel[0]:= $ff;
+                tempPixel[1]:= (pixel shr 3) and $ff;
+                tempPixel[2]:= (pixel  shr 3) and $ff;
+                tempPixel[3]:= (pixel shr 3) and $ff;                    
+                Location^:=(tempPixel[0] shl 10 or tempPixel[1] shl 4 or tempPixel[2]);
+           end;
+        end;
+        16: begin //565
+              if (SDL_BYTEORDER= SDL_BIG_ENDIAN) then begin
+                tempPixel[0]:= (pixel shr 3) and $ff;
+                tempPixel[1]:= (pixel shr 2) and $ff;
+                tempPixel[2]:= (pixel  shr 3) and $ff;
+                tempPixel[3]:= $ff;                    
+                Location^:=(tempPixel[0] shl 11 or tempPixel[1] shl 5 or tempPixel[2]); //should be packed properly now.
+              end else begin
+                tempPixel[0]:= $ff;
+                tempPixel[1]:= (pixel shr 3) and $ff;
+                tempPixel[2]:= (pixel  shr 2) and $ff;
+                tempPixel[3]:= (pixel shr 3) and $ff;                    
+                Location^:=longword(tempPixel[3] shl 11 or tempPixel[2] shl 5 or tempPixel[1] ); //should be packed properly now.
+           end;
+
+        end;
+        24: begin //tuple to longword
+
+                //the C "is fucked here" - this should read location:=pixel[0,1,2] (ignore A bit)
+                //instead of locaion[0,1,2]- impossible as location is a longword.               
+                if (SDL_BYTEORDER= SDL_BIG_ENDIAN) then begin                
+                    tempPixel[0]:= (pixel shr 16) and $ff;
+                    tempPixel[1]:= (pixel shr 8) and $ff;
+                    tempPixel[2]:= pixel and $ff;
+                    tempPixel[3]:= $ff;                    
+                    location^:=longword(tempPixel[0] or tempPixel[1] or tempPixel[2]); //already a longword, but set size anyways
+                end else begin
+                    tempPixel[0]:= $ff;
+                    tempPixel[1]:= pixel and $ff;
+                    tempPixel[2]:= (pixel shr 8) and $ff;
+                    tempPixel[3]:= (pixel shr 16) and $ff;                    
+                    location^:=longword(tempPixel[3] or tempPixel[2] or tempPixel[1]); //already a longword, but set size anyways
+                end;
+
+                location^:=longword(tempPixel[0] or tempPixel[1] or tempPixel[2]); //already a longword, but set size anyways
+
+        end;
+        32: Location^:=Longword(Pixel);
+        else
+            LogLn('Invalid bit Depth to gset Pixel to.');
+    end; //case    
+end;
+
+
+
 //rect size could be 1px for all we know- or the entire rendering surface...
 //note this function is "slow ASS"
 
-
-//HACKME:
-//renderer and texture ops need to be reworked back to the SDLv1 variants w "MainSurface"
-
-procedure GEtPixels(Rect:PSDL_Rect);
+{
+function GEtPixels(Rect:PSDL_Rect):pointer;
 var
 
   pitch:integer;
@@ -1824,12 +2182,13 @@ begin
 //pixels and pitch will be returned for the given rect in SDL_Color format given by our set definition
 //rect is Nil to copy the entire rendering target
 
-   AttemptRead:= SDL_RenderReadPixels( renderer, rect, format, pixels, pitch);
-   if AttemptRead=0 then
+//   Getpixels:= SDL_RenderReadPixels( renderer, rect, format, pixels, pitch);
+
+   if AttemptRead=Nil then
      exit;
 
 end;
-
+}
 
 
 procedure initPaletteGrey16;
@@ -1892,10 +2251,10 @@ valuelist16[47]:=$ff;
    i:=0;
    num:=0; 
    repeat 
-      Tpalette16.colors[num]^.r:=valuelist16[i];
-      Tpalette16.colors[num]^.g:=valuelist16[i+1];
-      Tpalette16.colors[num]^.b:=valuelist16[i+2];
-      Tpalette16.colors[num]^.a:=$ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
+      Tpalette16[num].colors^.r:=valuelist16[i];
+      Tpalette16[num].colors^.g:=valuelist16[i+1];
+      Tpalette16[num].colors^.b:=valuelist16[i+2];
+      Tpalette16[num].colors^.a:=$ff; //rbgi technically but this is for SDL, not CGA VGA VESA ....
       inc(i,3);
       inc(num); 
   until num=15;
@@ -4684,7 +5043,7 @@ begin
    param:=Nil; //not used
    
    if (not Paused) then begin //if paused then ignore screen updates
-           SDL_RenderPresent(Renderer);
+           SDL_Flip(Renderer);
    end;
   
    videoCallback := interval; //we have to return something-the what, WE should be defining.
@@ -4721,12 +5080,51 @@ begin
   pathToDriver:='';  //unused- code compatibility
   iconpath:='./sdlbgi.bmp'; //sdl2.0 doesnt use this.
 
-//this has to be done inline to the running code, unfortunately
-  case(graphmode) of 
-	     mCGA:begin
+  case(graphmode) of
+
+//lower resolutions than this are tiny on newer hardware, only effective on older 8088.
+//removed for now.
+ 
+	     mCGA:begin 
+{
+         we have full frame LFB now- planar storage doesnt make sense, is very bit-wise...
+         -and very hard to do animations with.
+
+         bitshifting is significantly faster than math operations, however. Not everyone took this into account.
+
+         SDL becomes slow on put/getpixel ops due to repeated "one shot" operations instead of batches(buffered ops/surfaces)
+         each get/putPixel operation *may* have to shift colors- AND was slowed down further by a (now removed) Pixel Mask(BGI).
+
+         SDL_RenderDrawPoint() IMHO should not exist. 
+         You should batch the call thru a surface- you dont know how youre being called. 
+
+         Hardware surfaces add wait times during copy operations between graphics hardware and memory.
+         Despite the GPU being several orders (10x?) of magnitude faster than the CPU. GPU ops must also be "byte aligned".
+         -In this case, 32 bits.
+
+         How 24bit is natively supported, nobody will ever know. Probably like I do 15bit modes.
+
+         Despite rumors- 
+                CGA is 4COLOR, 4Mode Graphics. 
+                EGA is 16 color.
+
+        You probably remember some text mode hack- or use of text mode symbols, like MegaZuex (openmzx) uses.
+
+}
 			MaxX:=320;
 			MaxY:=240;
-			bpp:=4; 
+			bpp:=8; //yes, 8bpp- its hackish.... SDL BUG.
+			MaxColors:=4;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+		end;
+
+	     EGA:begin 
+			MaxX:=320;
+			MaxY:=240;
+			bpp:=8; 
 			MaxColors:=16;
             NonPalette:=false;
 		    TrueColor:=false;	
@@ -4755,7 +5153,7 @@ begin
 		VGAHi:begin
             MaxX:=640;
 			MaxY:=480;
-			bpp:=4; 
+			bpp:=8; 
 			MaxColors:=16;
             NonPalette:=false;
     		TrueColor:=false;	
@@ -4805,7 +5203,7 @@ begin
 		m800x600x16:begin
             MaxX:=800;
 			MaxY:=600;
-			bpp:=4; 
+			bpp:=8; 
 			MaxColors:=16;
             NonPalette:=false;
 		    TrueColor:=false;	
@@ -5241,7 +5639,7 @@ $F-
 		writeln('you will have to manually update surfaces and the renderer.');
     end;
 //    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL cant set video callback timer.Manually update surface.','OK',NIL);
-    NoGoAutoRefresh:=true; //Now we can call Initgraph and check, even if quietly(game) If we need to issue RenderPresent calls.
+    NoGoAutoRefresh:=true; //Now we can call Initgraph and check, even if quietly(game) If we need to issue Flip calls.
   end;
 }
   
@@ -5590,19 +5988,51 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
     writeln('bpp: ',bpp);
 //    writeln('Full screen requested: ',wantfullscreen);
 
+
+//FIXME: Lazarus and SDL2, not 1.
    
          //posX,PosY,sizeX,sizeY,flags
+         {$IFNDEF LCL}
          window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
     	 if (window = Nil) then begin
  			if IsConsoleInvoked then begin
 	    	   	writeln('Something Fishy. No hardware render support and cant create a window.');
 	    	   	writeln('SDL reports: '+' '+ SDL_GetError);      
 	    	end;
+         {$ENDIF}
+
+//Handle -> Application.MainForm.Handle as per the forums
+
+         {$IFDEF LCL}
+            {$IFDEF mswindows}
+                window:=SDL_CreateWindowFrom(Pointer(Application.MainForm.Handle));
+            {$ENDIF}
+            {$IFDEF unix} 
+                {$IFDEF LCLGTK} //GTK- never assume                
+                    window:=SDL_CreateWindowFrom(Pointer(GDK_WINDOW_XWINDOW(PGTKWidget(PtrUInt(Application.MainForm.Handle))^.window)));
+                {$ENDIF}
+
+//untested- similar to OSX
+            //    {$IFDEF LCLQt} //QT- never assume                
+            //        window:=SDL_CreateWindowFrom(Pointer(PQtWidget(PtrUInt(Application.MainForm.Handle))^.widget));
+            //    {$ENDIF}
+
+                //ELSE:  X11Core
+                GetXHandle(Application.MainForm.Handle);
+            {$ENDIF}
+            //MacOSX
+            {$IFDEF Darwin}
+                    window:=SDL_CreateWindowFrom(Pointer(TCarbonWidget(PtrUInt(Application.MainForm.Handle))^.widget));  
+            {$ENDIF}
+
+         {$ENDIF}
+
 	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy','I cant make a window. BYE..',NIL);
 			
 			_grResult:=GenError;
 	    	closegraph;
          end;
+
         writeln('initgraph: Window is online.');
 
        //Hide, mouse.
@@ -5780,7 +6210,7 @@ and various ways of combining the source and destination data.
     --apply the shifted palette to the blit
         BLIT
         RenderCopy 
-        reset the palette and renderPresent
+        reset the palette and Flip
 
         //xorBlit
         //andBlit
@@ -5813,212 +6243,6 @@ Polygons:
 
 }
 
-function GetPixel(x,y:integer):DWord;
-
-// this function is "inconsistently fucked" from C...so lets standardize it...
-// this works, its hackish -but it works..SDL_GetPixel is for Surfaces/screens, not renderers.
-var
-  format:longword;
-  TempSurface:PSDL_Surface;
-  bpp:byte;
-  p:pointer; //the pixel data we want 
-  GotColor:PSDL_Color;
-  pewpew:longword; //DWord....
-  pointpew:PtrUInt;
-  r,g,b,a:PUInt8;
-  index:byte;
-  someDWord:DWord;
-
-
-begin
-	rect^.x:=x;
-    rect^.y:=y;
-	rect^.h:=1;
-	rect^.w:=1;
-    case bpp of
-		8: begin
-			    if maxColors=256 then format:=SDL_PIXELFORMAT_INDEX8
-				else if maxColors=16 then format:=SDL_PIXELFORMAT_INDEX4MSB; 
-		end;
-		15: format:=SDL_PIXELFORMAT_RGB555;
-
-//we assume on 16bit that we are in 565 not 5551, we should not assume
-		16: begin
-			
-			format:=SDL_PIXELFORMAT_RGB565;
-
-        end;
-		24: format:=SDL_PIXELFORMAT_RGB888;
-		32: format:=SDL_PIXELFORMAT_RGBA8888;
-
-    end;
-
-
-    //(we do this backwards....rendered to surface of the size of 1 pixel)
-    if ((MaxColors=256) or (MaxColors=16)) then TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 8, format) 
-    //its weird...get 4bit indexed colors list in longword format but force me into 256 color mode???
-
-    else if (MaxColors>256) then begin
-        case (bpp) of
-		    15: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 15, format); 
-			16: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 16, format); 
-			24: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 24, format); 
-			32: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 32, format); 
-			else begin
-				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Wrong bpp given to get a pixel. I dont how you did this.','OK',NIL);
-				 if IsConsoleInvoked then
-                writeln('Wrong bpp given to get a pixel. I dont how you did this.');
-			end;
-
-		end;
-     end;
-
-    //read a 1x1 rectangle....
-    SDL_RenderReadPixels(renderer, rect, format, TempSurface^.pixels, TempSurface^.pitch);
-
-
-    p:=TempSurface^.pixels;  
-    bpp := TempSurface^.format^.BytesPerPixel; 
-    //The C is flawed! 15bpp not taken into account.
-    //ignorance is stupidity and laziness!
-
-    // Here TempSurface^.pixels is the address to the pixel data (1px) we want to retrieve
-    
-
-{
-
-"nuking the problem" (unnessessary overcomplication)
- the problem - not well documented for surfaces in C-
-
-is thusly:
-
-  P can be of any size up to 32bit values (because sdl doesnt support 64bit modes)
-
-  is P a byte? (16/256 colors)
-  is P a Word? NO. NEVER.Not enough BPP data returned.
-  is P a partial DWord? (15/16bit/24bit colors) - spew SDL_Color data (for each byte inside P), 
-      then fetch an appropriate DWord from that
-      (this is a bitwise operation, so we need the DWord inside the pointer to work with the data)
-
-  is P a DWord? (32bit colors)
-
-no type conversion is needed as pointers are flexible
-however endianness, although it should be checked for (ALWALYS) plays no role in how P is interpreted.
-
--and people wonder why thier data coming back from P is flawed?? mhm...
-
--you nuked it!
-
-}
-    case (bpp) of 
-       8:begin //256 colors
-        //now take the longword output 
-
-          //check for the hidden 4bpp modes we made available
-          if MaxColors=16 then begin
-             index:=ord(Byte(^p));
-             GetPixel:=Tpalette16.Dwords[index];
-          end;
-
-          //ok safely in 256 colors mode
-          if MaxColors=256 then begin
-             index:=ord(Byte(^p));
-             GetPixel:=Tpalette256.Dwords[index];
-          end;
-          exit;
-      end;
-
-//these three need some work
-//not its not a trick, we need the alpha-bit set to FF on non 32bit colors.
-//its ignored but its also "padded data"
-
-      15: begin //15bit
-            //to do this one- we split out the RGB pairs, shift them,then recombine them.
-            SDL_GetRGB(Longword(^p),TempSurface^.format,r,g,b);
-
-			//play fetch            
-
-             gotcolor^.r:=(byte(^r) );
-		     gotcolor^.g:=(byte(^g) );;
-	         gotcolor^.b:=(byte(^b) );
-
-            //shift adjust me
-			gotcolor^.r:= (gotcolor^.r shr 3);
-			gotcolor^.g:= (gotcolor^.g shr 3);
-			gotcolor^.b:= (gotcolor^.b shr 3) ;
-
-            //repack
-            someDWord:= SDL_MapRGB(TempSurface^.format,gotcolor^.r,gotcolor^.g,gotcolor^.b);
-            GetPixel:=someDWord;
-            exit;
-      end;
-      16: begin //16bit-565
-        //    if (TempSurface^.format=SDL_PIXELFORMAT_RGB565) then begin
-
-            SDL_GetRGB(Longword(^p),TempSurface^.format,r,g,b);
-
-			//play fetch            
-
-             gotcolor^.r:=(byte(^r) );
-		     gotcolor^.g:=(byte(^g) );;
-	         gotcolor^.b:=(byte(^b) );
-
-            //shift adjust me
-			gotcolor^.r:= (gotcolor^.r shr 3);
-			gotcolor^.g:= (gotcolor^.g shr 2);
-			gotcolor^.b:= (gotcolor^.b shr 3) ;
-
-           //repack
-            someDWord:= SDL_MapRGB(TempSurface^.format,gotcolor^.r,gotcolor^.g,gotcolor^.b);
-            GetPixel:=someDWord;
-      		exit;
-      end;
-
-
-      24: begin //24bit
-            SDL_GetRGB(Longword(^p),TempSurface^.format,r,g,b);
-
-			//play fetch            
-
-             gotcolor^.r:=(byte(^r) );
-		     gotcolor^.g:=(byte(^g) );
-	         gotcolor^.b:=(byte(^b) );
-           //repack
-            someDWord:= SDL_MapRGB(TempSurface^.format,gotcolor^.r,gotcolor^.g,gotcolor^.b);
-            GetPixel:=someDWord;
-			exit;
-      end;
-      32: //32bit
-
-	        GetPixel:=DWord(p);
-   
-      else
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get Pixel values...','OK',NIL);
-         if IsConsoleInvoked then
-                writeln('Cant Put Pixel values...');
-    end; //case
-
-    SDL_FreeSurface(Tempsurface);
-    
-end;
-
-
-Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
-
-begin
-//SDL_renderDrawPoint uses _fgcolor set with SDL_SetRenderDrawColor
-
-  if (bpp<4) or (bpp >32) then
- 
-  begin
-    		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Put Pixel values...','OK',NIL);
-            if IsConsoleInvoked then
-                writeln('Cant Put Pixel values...');
-			exit;
-  end;
-  SDL_RenderDrawPoint( Renderer, X, Y );
-  
-end;
 
 
 function getdrivername:string;
@@ -6280,7 +6504,7 @@ begin
         Textures[windownumber]:=nil; //Destroy the current Texture
 
         SDL_RenderCopy(renderer,Textures[windownumber-1],Nil,LastRect);
-        SDL_RenderPresent(renderer);
+        SDL_Flip(renderer);
 
 		SDL_RenderSetViewport( Renderer, LastRect ); 
         dec(windownumber);
@@ -6295,7 +6519,7 @@ begin
    // and update with old data on the "overlayed area".
 
    SDL_RenderCopy(Renderer,Textures[0],nil,LastRect);
-   SDL_RenderPresent(renderer); //and update back to the old screen before the viewports came here.
+   SDL_Flip(renderer); //and update back to the old screen before the viewports came here.
 
    LastRect^.X:=0;
    LastRect^.Y:=0;
@@ -6462,7 +6686,7 @@ end;
 
 //note this function is "slow ASS"
 
-
+{
 function GetPixels(Rect:PSDL_Rect):pointer;
 //this does NOT return a single pixel by default and is written intentionally that way.
 //GetPixel checks also the output pointer length and fudges it into a single "SDL_Color".
@@ -6475,7 +6699,7 @@ var
   pitch:integer;
   pixels:pointer; //^array [0..x*y] of SDL_Color
 
-{
+//
   the array size is dependant on current screen resoluton- I can only give MAXIMUM defaults if I set this value.
   This is an SDL_Color limitation. If it were me, Id just copy the array in 2D, not 1D.
   Yes, technically, even kernel write to screen are stored in VRAM(or buffers) as:
@@ -6486,7 +6710,7 @@ var
   NOTE: 
      You probly CANNOT directly write here.. (blame X11 or Windows or Apple)
      (Because youre staring at the array right now, reading this.)
-}
+//
 
   AttemptRead:integer;
 
@@ -6537,7 +6761,7 @@ begin
    end;
    GetPixels:=pixels;
 end;
-
+}
 
 
 
@@ -6547,7 +6771,7 @@ begin  //main()
 {$IFDEF unix}
 IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
 
-  if (GetEnvironmentVariable('DISPLAY') = '') then LoadlibSVGA:=true; //we have no X11 loaded.
+  if (GetEnvironmentVariable('DISPLAY') = '') then NeedFrameBuffer:=true; //we have no X11 loaded.
 
 {
   libSVGA note:

@@ -88,8 +88,20 @@ There are two ways to invoke this-
 Project-> Application (kiss writeln() and readln() goodbye)
 You can only log output.
 
---Im going to try to port the code so that this isnt needed.
 
+**WARNING WARNING WARNING **
+
+Incorporating Lazarus(Qt/GTK) adds another callback layer- both must run at the same time
+-- further --
+video output must be on a callback timer (sync of sorts) so that it doesnt block IO and events,
+thereby locking up input (and error) event handling.
+
+Therefore all LCL(Lazarus applications) using these libraries need to add SDL_Event checks 
+                INSIDE the IDLE routine.
+
+The rest is just good practice- render only one frame at a time.
+
+If we could write these routines more low-level, this may not be a problem.
 
 
 2- without GUI/Lazarus as a Console Application
@@ -451,18 +463,35 @@ SemiDirect MultiMedia OverLayer - should be the unit name.
 }
 
 
+{$IFDEF DARWIN} //OSX
+//Hackish...Determine whether we are on a PPC by the CPU endian-ness since we know
+//that support stopped at 10.5 for PPC arch- and switched to Intel.
+    {$IFDEF ENDIAN_BIG}
+        {$modeswitch objectivec1}
+    {$ELSE}
+        //version 2 is => OSX 10.5(Leopard). This excludes PPC arch.
+        {$modeswitch objectivec2} 
+    {$ENDIF}
+
+	{$linkframework Cocoa}
+//SDL2??
+    {$linklib SDLimg}
+    {$linklib SDLttf}
+    {$linklib SDLnet}
+	{$linklib SDLmain}
+	{$linklib gcc}
+
+
+{$ENDIF}
+
 uses
 
 //Threads requires baseunix unit
 //cthreads has to be the first unit in this case-it so happens to support the C version.
 
-{$IFDEF UNIX}
+{$IFDEF UNIX} //if coming from dos- sysutils is the equivalent unit.
       cthreads,cmem,sysUtils,baseunix,
     
- {$IFDEF fallback} 
-	 X, XLib,	//X11CorePrimitives
- {$ENDIF}
-
 {$ENDIF}
 
     ctypes,classes,
@@ -473,10 +502,6 @@ uses
 
 {$IFDEF MSWINDOWS} //as if theres a non-MS WINDOWS?
     Windows,MMsystem, //audio subsystem
-
-	 {$IFDEF fallback}
-		WinGraph, //WinAPI-needs rework
-	 {$endif}
 
 {$ENDIF}
 
@@ -526,61 +551,30 @@ uses
 
 
 //FPC generic units(OS independent)
-  SDL2,SDL2_TTF,strings,typinfo,SDL2_Image,uos,logger
+//uos is a substitute for SDL2_sound- use that if you like.
+//sdl2_gfx is in rewrite and ticks isnt used yet.
 
+  SDL2,SDL2_ttf,SDL2_Image,strings,typinfo,logger
+
+//sdl2_net,uos
 //Logger was the unit "throwing EIO errors" all over...FNF- I reset instead of reWrote...
 
-{for 3d:
+//stipple is what dashes lines are called
 
-I can pull in GL- however- the cross-combination is up to you.
-GL may be overkill for what you want.
-
-I still need to fix some "rendering bugs" with OGL.
-
-
-
-STIPPLE(borrowed from GL):
--- -- -- -- -- -- (and lines like that)
-
-    when drawing a line- this is supposed to dictate if the line is dashed or not
-    AND how thick it is. We can fake by isolating chunk percentages (not drawing)-
-    -or-
-    what we can do is: modify the new demo code with the "pixelled line" in it ...
-
-dotted and dashed lines are stipple, center uses other math
-
-}
-
-
-
-//SDL2_gfx is untested as of yet. functions start with GPU_ not SDL_. 
-// gfx is "specific optimized routines"
 
 //lets be fair to the compiler..
 {$IFDEF debug} ,heaptrc {$ENDIF} 
 
-//Carbon is OS 8 and 9 to OSX API
-{$IFDEF mac} 
-  ,MacOSAll
+{$IFDEF Darwin}
+  CarbonPrivate,CocoaAll //, Files
 {$ENDIF}
+;
 
-//Cocoa (OBJ-C) is the new API
-//OSX 10.5+
-{$IFDEF darwin}
-	{$linkframework Cocoa}
-    {$linklib SDLimg}
-    {$linklib SDLttf}
-    {$linklib SDLnet}
-	{$linklib SDLmain}
-	{$linklib gcc}
-
-{$modeswitch objectivec2}
 
 //iFruits, iTVs, etc:
 // {linkframework CocoaTouch} -- but go kick apple in the ass for not letting us link to it.
 // not legally, anyway....
 
-{$ENDIF}
 
 
 //Altogether- we are talking PCs running OSX, Windows(down to XP), and most unices.
@@ -588,7 +582,7 @@ dotted and dashed lines are stipple, center uses other math
 
 //and Some android (as a unice sub-derivative)
 
-;
+
 
 {
 NOTES on units used:
@@ -832,7 +826,7 @@ var
 
     palette:PSDL_Palette;
     where:Twhere;
-	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop,LoadlibSVGA:boolean;
+	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop,NeedFrameBuffer:boolean;
     nogoautorefresh:boolean;
     X,Y:integer;
     _grResult:grErrortype;
@@ -1867,11 +1861,11 @@ var
   valuelist16: array [0..48] of byte;
   valuelist256: array [0..767] of byte;
 
-  TPalette16:TRec16;
-  TPalette16Grey:TRec16;
+  TPalette16: array [0..15] of TRec16;
+  TPalette16Grey:array [0..15] of TRec16;
 
-  TPalette256:TRec256;
-  TPalette256Grey:TRec256;
+  TPalette256:array [0..255] of TRec256;
+  TPalette256Grey:array [0..255] of TRec256;
 
 function GetRGBfromIndex(index:byte):PSDL_Color; 
 function GetDWordfromIndex(index:byte):DWord; 
@@ -5920,12 +5914,41 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 
    
          //posX,PosY,sizeX,sizeY,flags
+         {$IFNDEF LCL}
          window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
     	 if (window = Nil) then begin
  			if IsConsoleInvoked then begin
 	    	   	writeln('Something Fishy. No hardware render support and cant create a window.');
 	    	   	writeln('SDL reports: '+' '+ SDL_GetError);      
 	    	end;
+         {$ENDIF}
+
+//Handle -> Application.MainForm.Handle as per the forums
+
+         {$IFDEF LCL}
+            {$IFDEF mswindows}
+                window:=SDL_CreateWindowFrom(Pointer(Application.MainForm.Handle));
+            {$ENDIF}
+            {$IFDEF unix} 
+                {$IFDEF LCLGTK} //GTK- never assume                
+                    window:=SDL_CreateWindowFrom(Pointer(GDK_WINDOW_XWINDOW(PGTKWidget(PtrUInt(Application.MainForm.Handle))^.window)));
+                {$ENDIF}
+
+//untested- similar to OSX
+            //    {$IFDEF LCLQt} //QT- never assume                
+            //        window:=SDL_CreateWindowFrom(Pointer(PQtWidget(PtrUInt(Application.MainForm.Handle))^.widget));
+            //    {$ENDIF}
+
+                //ELSE:  X11Core
+                GetXHandle(Application.MainForm.Handle);
+            {$ENDIF}
+            //MacOSX
+            {$IFDEF Darwin}
+                    window:=SDL_CreateWindowFrom(Pointer(TCarbonWidget(PtrUInt(Application.MainForm.Handle))^.widget));  
+            {$ENDIF}
+
+         {$ENDIF}
+
 	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy','I cant make a window. BYE..',NIL);
 			
 			_grResult:=GenError;
@@ -6964,7 +6987,7 @@ begin  //main()
 {$IFDEF unix}
 IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
 
-  if (GetEnvironmentVariable('DISPLAY') = '') then LoadlibSVGA:=true;
+  if (GetEnvironmentVariable('DISPLAY') = '') then NeedFrameBuffer:=true;
 
 {
   libSVGA note:

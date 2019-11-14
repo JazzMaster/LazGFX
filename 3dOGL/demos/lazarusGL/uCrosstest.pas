@@ -8,13 +8,12 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  dglOpenGL, GLContext,gdk2x, gtk2, gdk2;
+  dglOpenGL, GLContext; //gdk2x, gtk2, gdk2;
 
 //since using GTK- give us some control back
 var
-  widget:PGtkWidget;
-  pixmap:PGdkPixmap;
   LastBoundTexID:Cardinal;
+
 type
 
   { TForm1 }
