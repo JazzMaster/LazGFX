@@ -1,4 +1,12 @@
-begin
+Unit SDL2BGI;
+//from the professors C. Home-work, prob-a-bly...
+
+//(not for me)
+
+//the only things left seem to be translating the functions/procedures and then updating the headers to match.
+//This is very basic and lacking.
+
+//-Jazz
 
 interface
 
@@ -24,7 +32,7 @@ Decision= ( NO, YES );
 
 // BGI fonts
 
-// only DEFAULT_FONT (8x8) is implemented, Rest are TTF Loaded
+// only DEFAULT_FONT (8x8) is implemented, Rest are TTF Loaded. BGI used to selectively link them in.
 Fonts= (
   DEFAULT_FONT, TRIPLEX_FONT, SANSSERIF_FONT,
   GOTHIC_FONT, SCRIPT_FONT, SIMPLEX_FONT , SERIF_FONT
@@ -131,31 +139,31 @@ QUIT          =  SDL_QUIT;
 modes=(
   DETECT = -1,
   grOk = 0, SDL = 0,
-  // all modes @ 320x200 
-  SDL_320x200 = 1, SDL_CGALO = 1, CGA = 1, CGAC0 = 1, CGAC1 = 1,
+  // all modes @ 32$200 
+  SDL_32$200 = 1, SDL_CGALO = 1, CGA = 1, CGAC0 = 1, CGAC1 = 1,
   CGAC2 = 1, CGAC3 = 1, MCGAC0 = 1, MCGAC1 = 1, MCGAC2 = 1,
   MCGAC3 = 1, ATT400C0 = 1, ATT400C1 = 1, ATT400C2 = 1, ATT400C3 = 1,
-  // all modes @ 640x200
-  SDL_640x200 = 2, SDL_CGAHI = 2, CGAHI = 2, MCGAMED = 2,
+  // all modes @ 64$200
+  SDL_64$200 = 2, SDL_CGAHI = 2, CGAHI = 2, MCGAMED = 2,
   EGALO = 2, EGA64LO = 2,
-  // all modes @ 640x350
-  SDL_640x350 = 3, SDL_EGA = 3, EGA = 3, EGAHI = 3,
+  // all modes @ 64$350
+  SDL_64$350 = 3, SDL_EGA = 3, EGA = 3, EGAHI = 3,
   EGA64HI = 3, EGAMONOHI = 3,
-  // all modes @ 640x480
-  SDL_640x480 = 4, SDL_VGA = 4, VGA = 4, MCGAHI = 4, VGAHI = 4,
+  // all modes @ 64$480
+  SDL_64$480 = 4, SDL_VGA = 4, VGA = 4, MCGAHI = 4, VGAHI = 4,
   IBM8514LO = 4,
-  // all modes @ 720x348
-  SDL_720x348 = 5, SDL_HERC = 5,
-  // all modes @ 720x350
-  SDL_720x350 = 6, SDL_PC3270 = 6, HERCMONOHI = 6,
-  // all modes @ 800x600
-  SDL_800x600 = 7, SDL_SVGALO = 7, SVGA = 7,
+  // all modes @ 72$348
+  SDL_72$348 = 5, SDL_HERC = 5,
+  // all modes @ 72$350
+  SDL_72$350 = 6, SDL_PC3270 = 6, HERCMONOHI = 6,
+  // all modes @ 80$600
+  SDL_80$600 = 7, SDL_SVGALO = 7, SVGA = 7,
   // all modes @ 1024x768
   SDL_1024x768 = 8, SDL_SVGAMED1 = 8,
   // all modes @ 1152x900
   SDL_1152x900 = 9, SDL_SVGAMED2 = 9,
-  // all modes @ 1280x1024
-  SDL_1280x1024 = 10, SDL_SVGAHI = 10,
+  // all modes @ 128$1024
+  SDL_128$1024 = 10, SDL_SVGAHI = 10,
   // all modes @ 1366x768
   SDL_1366x768 = 11, SDL_WXGA = 11,
   // other
@@ -171,17 +179,17 @@ X11_CGAHI    =   2;
 X11_EGA      =   3;
 X11          =   0;
 X11_VGA      =   4;
-X11_640x480  =   4;
+X11_64$480  =   4;
 X11_HERC     =   5;
 X11_PC3270   =   6;
 X11_SVGALO   =   7;
-X11_800x600  =   7;
+X11_80$600  =   7;
 X11_SVGAMED1 =   8;
 X11_1024x768 =   8;
 X11_SVGAMED2 =   9;
 X11_1152x900 =   9;
 X11_SVGAHI    =  10;
-X11_1280x1024 =  10;
+X11_128$1024 =  10;
 X11_WXGA      =  11;
 X11_1366x768  =  11;
 X11_USER      =  12;
@@ -350,76 +358,76 @@ procedure writeimagefile (char *, int, int, int, int);
 
 // SDL_bgi extensions
 
-int  ALPHA_VALUE (int);
-int  BLUE_VALUE (int);
-void closewindow (int);
-int  COLOR (int, int, int);
-int  event ;
-int event_type ;
-void freeimage (void *);
-int  getcurrentwindow ;
-int  getevent ;
-void getmouseclick (int, int *, int *);
-int  GREEN_VALUE (int);
-void initwindow (int, int);
-int  IS_BGI_COLOR (int color);
-int  ismouseclick (int);
-int  IS_RGB_COLOR (int color);
-int  mouseclick ;
-int  mousex ;
-int  mousey ;
-void _putpixel (int, int);
-int  RED_VALUE (int );
-void refresh ;
-void sdlbgiauto ;
-void sdlbgifast ;
-void sdlbgislow ;
-void setalpha (int, Uint8);
-void setbkrgbcolor (int);
-void setblendmode (int);
-void setcurrentwindow (int);
-void setrgbcolor (int);
-void setrgbpalette (int, int, int, int);
-void setwinoptions (char *, int, int, Uint32);
-void showerrorbox (const char *);
-void swapbuffers ;
-int  xkbhit ;
+function  ALPHA_VALUE (int):integer;
+function  BLUE_VALUE (int):integer;
+procedure closewindow (int);
+function COLOR (int, int, int):integer;
+function  event:integer ;
+function event_type:integer ;
+function freeimage (image:pointer);
+function getcurrentwindow:integer ;
+function  getevent:integer ;
+procedure getmouseclick (int, int *, int *);
+function  GREEN_VALUE (int):integer;
+procedure initwindow (int, int);
+function  IS_BGI_COLOR (int color):integer;
+function  ismouseclick (int):integer;
+function  IS_RGB_COLOR (int color):integer;
+function  mouseclick:integer ;
+function  mousex:integer ;
+function  mousey:integer ;
+procedure _putpixel (int, int);
+function  RED_VALUE (int ):integer;
+procedure refresh ;
+procedure sdlbgiauto ;
+procedure sdlbgifast ;
+procedure sdlbgislow ;
+procedure setalpha (int, Uint8);
+procedure setbkrgbcolor (int);
+procedure setblendmode (int);
+procedure setcurrentwindow (int);
+procedure setrgbcolor (int);
+procedure setrgbpalette (int, int, int, int);
+procedure setwinoptions (char *, int, int, Uint32);
+procedure showerrorbox (const char *);
+procedure swapbuffers ;
+function  xkbhit:integer ;
 
 implementation
 
-SDL_Window   *bgi_window;
-SDL_Renderer *bgi_renderer;
-SDL_Texture  *bgi_texture;
+var
+
+   bgi_window:PSDL_Window;
+   bgi_renderer:PSDL_Renderer;
+   bgi_texture:PSDL_Texture;
 
 //SDL v1: Mainsurface,Surface(x)
 
-static SDL_Window   *bgi_win[NUM_BGI_WIN];
-static SDL_Renderer *bgi_rnd[NUM_BGI_WIN];
-static SDL_Texture  *bgi_txt[NUM_BGI_WIN];
+  bgi_win: PSDL_Window =[NUM_BGI_WIN];
+  bgi_rnd:PSDL_Renderer  =[NUM_BGI_WIN];
+  bgi_txt: PSDL_Texture =[NUM_BGI_WIN];
 
-static short int
-  current_window = -1, // id of current window
-  num_windows = 0;     // number of created windows
 
-static int
-  active_windows[NUM_BGI_WIN];
+  current_window:word = -1, // id of current window
+  num_windows:word = 0;     // number of created windows
+
+  active_windows:integer =[NUM_BGI_WIN];
 
 // explanation: up to NUM_BGI_WIN windows can be created and deleted
 // as needed. 'active_windows[]' keeps track of created (1) and closed (0)
 // windows; 'current_window' is the ID of the current (= being drawn on)
 // window; 'num_windows' keeps track of the current number of windows
 
-static SDL_Surface
-  *bgi_vpage[VPAGES]; // array of visual pages; single window only
+  bgi_vpage: = array [0..VPAGES] of PSDL_Surface; // array of visual pages; single window only
 
 // Note: 'Uint32' and 'int' are the same on modern machines
 
 // pixel data of active and visual pages
 
-static Uint32
-  *bgi_activepage[NUM_BGI_WIN], // active (= being drawn on) page;
+
+  bgi_activepage:PtrUInt =[NUM_BGI_WIN]  // active (= being drawn on) page;
                                 // may be hidden
-  *bgi_visualpage[NUM_BGI_WIN]; // visualised page
+  bgi_visualpage:PtrUInt =[NUM_BGI_WIN]; // visualised page
 
 // This is how we draw stuff on the screen. Pixels pointed to by
 // bgi_activepage (a pointer to pixel data in the active surface)
@@ -431,483 +439,464 @@ static Uint32
 // then three entries for temporary fg, bg, and fill ARGB colors
 // allocated with COLOR(); then user-defined ARGB colors
 
-#define BGI_COLORS  MAXCOLORS + 1
-#define TMP_COLORS  3
+const
+   BGI_COLORS = MAXCOLORS + 1;
+   TMP_COLORS =  3;
 
-static Uint32
-  palette[BGI_COLORS + TMP_COLORS + PALETTE_SIZE]; // all colors
+  palette:longword  =[BGI_COLORS + TMP_COLORS + PALETTE_SIZE]; // all colors
 
-static Uint32
-  bgi_palette[1 + MAXCOLORS] = begin // 0 - 15
+type //colors by index value- but stored in hex
+  bgi_palette=( 
     // ARGB
-    0xff000000, // BLACK
-    0xff0000ff, // BLUE
-    0xff00ff00, // GREEN
-    0xff00ffff, // CYAN
-    0xffff0000, // RED
-    0xffff00ff, // MAGENTA
-    0xffa52a2a, // BROWN
-    0xffd3d3d3, // LIGHTGRAY
-    0xffa9a9a9, // DARKGRAY
-    0xffadd8e6, // LIGHTBLUE
-    0xff90ee90, // LIGHTGREEN
-    0xffe0ffff, // LIGHTCYAN
-    0xfff08080, // LIGHTRED
-    0xffdb7093, // LIGHTMAGENTA
-    0xffffff00, // YELLOW
-    0xffffffff  // WHITE
-  end;;
+    $ff000000, // BLACK
+    $ff0000ff, // BLUE
+    $ff00ff00, // GREEN
+    $ff00ffff, // CYAN
+    $ffff0000, // RED
+    $ffff00ff, // MAGENTA
+    $ffa52a2a, // BROWN
+    $ffd3d3d3, // LIGHTGRAY
+    $ffa9a9a9, // DARKGRAY
+    $ffadd8e6, // LIGHTBLUE
+    $ff90ee90, // LIGHTGREEN
+    $ffe0ffff, // LIGHTCYAN
+    $fff08080, // LIGHTRED
+    $ffdb7093, // LIGHTMAGENTA
+    $ffffff00, // YELLOW
+    $ffffffff  // WHITE
+  );
 
-static Uint16
-  line_patterns[1 + USERBIT_LINE] =
-  begin0xffff,  // SOLID_LINE  = 1111111111111111
-   0xcccc,  // DOTTED_LINE = 1100110011001100
-   0xf1f8,  // CENTER_LINE = 1111000111111000
-   0xf8f8,  // DASHED_LINE = 1111100011111000
-   0xffffend;; // USERBIT_LINE
+  line_patterns=(
+   $ffff,  // SOLID_LINE  = 1111111111111111
+   $cccc,  // DOTTED_LINE = 1100110011001100
+   $f1f8,  // CENTER_LINE = 1111000111111000
+   $f8f8,  // DASHED_LINE = 1111100011111000
+   $ffff   // USERBIT_LINE  
+  );  
 
-static Uint32
-  bgi_tmp_color_argb,     // temporary color set up by COLOR()
-  window_flags = 0;       // window flags
+  bgi_tmp_color_argb:longword;     // temporary color set up by COLOR()
+  window_flags:longword = 0;       // window flags
 
-static int
-  window_x =              // window initial position
-    SDL_WINDOWPOS_CENTERED,
-  window_y =
-    SDL_WINDOWPOS_CENTERED,
-  bgi_fg_color = WHITE,   // index of BGI foreground color
-  bgi_bg_color = BLACK,   // index of BGI background color
-  bgi_fill_color = WHITE, // index of BGI fill color
-  bgi_mouse_x,            // coordinates of last mouse click
-  bgi_mouse_y,
-  bgi_font_width = 8,     // default font width and height
-  bgi_font_height = 8,
-  bgi_fast_mode = 1,      // needs screen update?
-  bgi_last_event = 0,     // mouse click, keyboard event, or QUIT
-  bgi_cp_x = 0,           // current position
-  bgi_cp_y = 0,
-  bgi_maxx,               // screen size
-  bgi_maxy,
-  bgi_gm,                 // graphics mode
-  bgi_argb_mode = NO,   // BGI or ARGB colors
-  bgi_writemode,          // plotting method (COPY_PUT, XOR_PUT...)
-  bgi_blendmode =
-    SDL_BLENDMODE_BLEND,  // blending mode
-  bgi_ap,                 // active page number
-  bgi_vp,                 // visual page number
-  bgi_np = 0,             // # of actual pages
-  refresh_needed = NO,  // update callback should be called
-  refresh_rate = 0;       // window refresh rate
+  bgi_mouse_x:integer;            // coordinates of last mouse click
+  bgi_mouse_y:integer;
+  bgi_ap:integer;                 // active page number
+  bgi_vp:integer;                 // visual page number
+  bgi_maxx:integer;       // screen size
+  bgi_maxy:integer;
+  bgi_gm:integer;                 // graphics mode
+
+  bgi_writemode:word;          // plotting method (COPY_PUT, XOR_PUT...)
+
+  window_x :integer=  SDL_WINDOWPOS_CENTERED;            // window initial position    
+  window_y :integer=  SDL_WINDOWPOS_CENTERED;
+  bgi_fg_color :integer= WHITE;   // index of BGI foreground color
+  bgi_bg_color :integer= BLACK;   // index of BGI background color
+  bgi_fill_color :integer= WHITE; // index of BGI fill color
+  bgi_font_width :integer= 8;    // default font width and height
+  bgi_font_height :integer= 8;
+  bgi_fast_mode :integer= 1;     // needs screen update?
+  bgi_last_event :integer= 0;     // mouse click, keyboard event, or QUIT
+  bgi_cp_x :integer= 0;           // current position
+  bgi_cp_y :integer= 0;
+  bgi_argb_mode :boolean= false;   // BGI or ARGB colors
+  bgi_blendmode :integer=    SDL_BLENDMODE_BLEND;  // blending mode
+  bgi_np :integer= 0;             // # of actual pages
+  refresh_needed :boolean= false;  // update callback should be called
+  refresh_rate :integer= 0;       // window refresh rate
 
 // mutex for update timer/thread
-static SDL_mutex
-  *update_mutex = NULL;
+
+  update_mutex :PSDL_mutex= NULL;
 
 // BGI window title
-char
-  bgi_win_title[BGI_WINTITLE_LEN] = "SDL_bgi";
+  bgi_win_title:Pchar = "SDL_bgi";
 
 // booleans
-static int
-  window_is_hidden = NO,
-  key_pressed = NO,
-  xkey_pressed = NO;
+  window_is_hidden :boolean= NO,
+  key_pressed :boolean= NO,
+  xkey_pressed :boolean= NO;
 
-static float
-  bgi_font_mag_x = 1.0,  // font magnification
-  bgi_font_mag_y = 1.0;
+  bgi_font_mag_x :single= 1.0,  // font magnification
+  bgi_font_mag_y :single= 1.0;
 
 // pointer to font array. Should I add more (ugly) bitmap fonts?
 
 // 8x8 font definition
 
-/*  ZLIB (c) A. Schiffler 2012 */
+conswt GFX_FONTDATAMAX= (8*256)
 
-#define GFX_FONTDATAMAX (8*256)
+gfxPrimitivesFontdata: array [0..GFX_FONTDATAMAX] of byte=(
 
-static unsigned char gfxPrimitivesFontdata[GFX_FONTDATAMAX] = begin
+  $00,$00,$00,$00,$00,$00,$00,$00, // 0 $00 '^@'
+  $7e,$81,$a5,$81,$bd,$99,$81,$7e, // 1 $01 '^A'
+  $7e,$ff,$db,$ff,$c3,$e7,$ff,$7e, // 2 $02 '^B'
+  $6c,$fe,$fe,$fe,$7c,$38,$10,$00, // 3 $03 '^C'
+  $10,$38,$7c,$fe,$7c,$38,$10,$00, // 4 $04 '^D'
+  $38,$7c,$38,$fe,$fe,$d6,$10,$38, // 5 $05 '^E'
+  $10,$38,$7c,$fe,$fe,$7c,$10,$38, // 6 $06 '^F'
+  $00,$00,$18,$3c,$3c,$18,$00,$00, // 7 $07 '^G'
+  $ff,$ff,$e7,$c3,$c3,$e7,$ff,$ff, // 8 $08 '^H'
+  $00,$3c,$66,$42,$42,$66,$3c,$00, // 9 $09 '^I'
+  $ff,$c3,$99,$bd,$bd,$99,$c3,$ff, // 10 $0a '^J'
+  $0f,$07,$0f,$7d,$cc,$cc,$cc,$78, // 11 $0b '^K'
+  $3c,$66,$66,$66,$3c,$18,$7e,$18, // 12 $0c '^L'
+  $3f,$33,$3f,$30,$30,$70,$f0,$e0, // 13 $0d '^M'
+  $7f,$63,$7f,$63,$63,$67,$e6,$c0, // 14 $0e '^N'
+  $18,$db,$3c,$e7,$e7,$3c,$db,$18, // 15 $0f '^O'
+  $80,$e0,$f8,$fe,$f8,$e0,$80,$00, // 16 $10 '^P'
+  $02,$0e,$3e,$fe,$3e,$0e,$02,$00, // 17 $11 '^Q'
+  $18,$3c,$7e,$18,$18,$7e,$3c,$18, // 18 $12 '^R'
+  $66,$66,$66,$66,$66,$00,$66,$00, // 19 $13 '^S'
+  $7f,$db,$db,$7b,$1b,$1b,$1b,$00, // 20 $14 '^T'
+  $3e,$61,$3c,$66,$66,$3c,$86,$7c, // 21 $15 '^U'
+  $00,$00,$00,$00,$7e,$7e,$7e,$00, // 22 $16 '^V'
+  $18,$3c,$7e,$18,$7e,$3c,$18,$ff, // 23 $17 '^W'
+  $18,$3c,$7e,$18,$18,$18,$18,$00, // 24 $18 '^X'
+  $18,$18,$18,$18,$7e,$3c,$18,$00, // 25 $19 '^Y'
+  $00,$18,$0c,$fe,$0c,$18,$00,$00, // 26 $1a '^Z'
+  $00,$30,$60,$fe,$60,$30,$00,$00, // 27 $1b '^['
+  $00,$00,$c0,$c0,$c0,$fe,$00,$00, // 28 $1c '^\'
+  $00,$24,$66,$ff,$66,$24,$00,$00, // 29 $1d '^]'
+  $00,$18,$3c,$7e,$ff,$ff,$00,$00, // 30 $1e '^^'
+  $00,$ff,$ff,$7e,$3c,$18,$00,$00, // 31 $1f '^_'
+  $00,$00,$00,$00,$00,$00,$00,$00, // 32 $20 ' '
+  $18,$3c,$3c,$18,$18,$00,$18,$00, // 33 $21 '!'
+  $66,$66,$24,$00,$00,$00,$00,$00, // 34 $22 '"'
+  $6c,$6c,$fe,$6c,$fe,$6c,$6c,$00, // 35 $23 '#'
+  $18,$3e,$60,$3c,$06,$7c,$18,$00, // 36 $24 '$'
+  $00,$c6,$cc,$18,$30,$66,$c6,$00, // 37 $25 '%'
+  $38,$6c,$38,$76,$dc,$cc,$76,$00, // 38 $26 '&'
+  $18,$18,$30,$00,$00,$00,$00,$00, // 39 $27 '''
+  $0c,$18,$30,$30,$30,$18,$0c,$00, // 40 $28 '('
+  $30,$18,$0c,$0c,$0c,$18,$30,$00, // 41 $29 ')'
+  $00,$66,$3c,$ff,$3c,$66,$00,$00, // 42 $2a '*'
+  $00,$18,$18,$7e,$18,$18,$00,$00, // 43 $2b '+'
+  $00,$00,$00,$00,$00,$18,$18,$30, // 44 $2c ','
+  $00,$00,$00,$7e,$00,$00,$00,$00, // 45 $2d '-'
+  $00,$00,$00,$00,$00,$18,$18,$00, // 46 $2e '.'
+  $06,$0c,$18,$30,$60,$c0,$80,$00, // 47 $2f '/'
+  $38,$6c,$c6,$d6,$c6,$6c,$38,$00, // 48 $30 '0'
+  $18,$38,$18,$18,$18,$18,$7e,$00, // 49 $31 '1'
+  $7c,$c6,$06,$1c,$30,$66,$fe,$00, // 50 $32 '2'
+  $7c,$c6,$06,$3c,$06,$c6,$7c,$00, // 51 $33 '3'
+  $1c,$3c,$6c,$cc,$fe,$0c,$1e,$00, // 52 $34 '4'
+  $fe,$c0,$c0,$fc,$06,$c6,$7c,$00, // 53 $35 '5'
+  $38,$60,$c0,$fc,$c6,$c6,$7c,$00, // 54 $36 '6'
+  $fe,$c6,$0c,$18,$30,$30,$30,$00, // 55 $37 '7'
+  $7c,$c6,$c6,$7c,$c6,$c6,$7c,$00, // 56 $38 '8'
+  $7c,$c6,$c6,$7e,$06,$0c,$78,$00, // 57 $39 '9'
+  $00,$18,$18,$00,$00,$18,$18,$00, // 58 $3a ':'
+  $00,$18,$18,$00,$00,$18,$18,$30, // 59 $3b ';'
+  $06,$0c,$18,$30,$18,$0c,$06,$00, // 60 $3c '<'
+  $00,$00,$7e,$00,$00,$7e,$00,$00, // 61 $3d '='
+  $60,$30,$18,$0c,$18,$30,$60,$00, // 62 $3e '>'
+  $7c,$c6,$0c,$18,$18,$00,$18,$00, // 63 $3f '?'
+  $7c,$c6,$de,$de,$de,$c0,$78,$00, // 64 $40 '@'
+  $38,$6c,$c6,$fe,$c6,$c6,$c6,$00, // 65 $41 'A'
+  $fc,$66,$66,$7c,$66,$66,$fc,$00, // 66 $42 'B'
+  $3c,$66,$c0,$c0,$c0,$66,$3c,$00, // 67 $43 'C'
+  $f8,$6c,$66,$66,$66,$6c,$f8,$00, // 68 $44 'D'
+  $fe,$62,$68,$78,$68,$62,$fe,$00, // 69 $45 'E'
+  $fe,$62,$68,$78,$68,$60,$f0,$00, // 70 $46 'F'
+  $3c,$66,$c0,$c0,$ce,$66,$3a,$00, // 71 $47 'G'
+  $c6,$c6,$c6,$fe,$c6,$c6,$c6,$00, // 72 $48 'H'
+  $3c,$18,$18,$18,$18,$18,$3c,$00, // 73 $49 'I'
+  $1e,$0c,$0c,$0c,$cc,$cc,$78,$00, // 74 $4a 'J'
+  $e6,$66,$6c,$78,$6c,$66,$e6,$00, // 75 $4b 'K'
+  $f0,$60,$60,$60,$62,$66,$fe,$00, // 76 $4c 'L'
+  $c6,$ee,$fe,$fe,$d6,$c6,$c6,$00, // 77 $4d 'M'
+  $c6,$e6,$f6,$de,$ce,$c6,$c6,$00, // 78 $4e 'N'
+  $7c,$c6,$c6,$c6,$c6,$c6,$7c,$00, // 79 $4f 'O'
+  $fc,$66,$66,$7c,$60,$60,$f0,$00, // 80 $50 'P'
+  $7c,$c6,$c6,$c6,$c6,$ce,$7c,$0e, // 81 $51 'Q'
+  $fc,$66,$66,$7c,$6c,$66,$e6,$00, // 82 $52 'R'
+  $3c,$66,$30,$18,$0c,$66,$3c,$00, // 83 $53 'S'
+  $7e,$7e,$5a,$18,$18,$18,$3c,$00, // 84 $54 'T'
+  $c6,$c6,$c6,$c6,$c6,$c6,$7c,$00, // 85 $55 'U'
+  $c6,$c6,$c6,$c6,$c6,$6c,$38,$00, // 86 $56 'V'
+  $c6,$c6,$c6,$d6,$d6,$fe,$6c,$00, // 87 $57 'W'
+  $c6,$c6,$6c,$38,$6c,$c6,$c6,$00, // 88 $58 'X'
+  $66,$66,$66,$3c,$18,$18,$3c,$00, // 89 $59 'Y'
+  $fe,$c6,$8c,$18,$32,$66,$fe,$00, // 90 $5a 'Z'
+  $3c,$30,$30,$30,$30,$30,$3c,$00, // 91 $5b '['
+  $c0,$60,$30,$18,$0c,$06,$02,$00, // 92 $5c '\'
+  $3c,$0c,$0c,$0c,$0c,$0c,$3c,$00, // 93 $5d ']'
+  $10,$38,$6c,$c6,$00,$00,$00,$00, // 94 $5e '^'
+  $00,$00,$00,$00,$00,$00,$00,$ff, // 95 $5f '_'
+  $30,$18,$0c,$00,$00,$00,$00,$00, // 96 $60 '`'
+  $00,$00,$78,$0c,$7c,$cc,$76,$00, // 97 $61 'a'
+  $e0,$60,$7c,$66,$66,$66,$dc,$00, // 98 $62 'b'
+  $00,$00,$7c,$c6,$c0,$c6,$7c,$00, // 99 $63 'c'
+  $1c,$0c,$7c,$cc,$cc,$cc,$76,$00, // 100 $64 'd'
+  $00,$00,$7c,$c6,$fe,$c0,$7c,$00, // 101 $65 'e'
+  $3c,$66,$60,$f8,$60,$60,$f0,$00, // 102 $66 'f'
+  $00,$00,$76,$cc,$cc,$7c,$0c,$f8, // 103 $67 'g'
+  $e0,$60,$6c,$76,$66,$66,$e6,$00, // 104 $68 'h'
+  $18,$00,$38,$18,$18,$18,$3c,$00, // 105 $69 'i'
+  $06,$00,$06,$06,$06,$66,$66,$3c, // 106 $6a 'j'
+  $e0,$60,$66,$6c,$78,$6c,$e6,$00, // 107 $6b 'k'
+  $38,$18,$18,$18,$18,$18,$3c,$00, // 108 $6c 'l'
+  $00,$00,$ec,$fe,$d6,$d6,$d6,$00, // 109 $6d 'm'
+  $00,$00,$dc,$66,$66,$66,$66,$00, // 110 $6e 'n'
+  $00,$00,$7c,$c6,$c6,$c6,$7c,$00, // 111 $6f 'o'
+  $00,$00,$dc,$66,$66,$7c,$60,$f0, // 112 $70 'p'
+  $00,$00,$76,$cc,$cc,$7c,$0c,$1e, // 113 $71 'q'
+  $00,$00,$dc,$76,$60,$60,$f0,$00, // 114 $72 'r'
+  $00,$00,$7e,$c0,$7c,$06,$fc,$00, // 115 $73 's'
+  $30,$30,$fc,$30,$30,$36,$1c,$00, // 116 $74 't'
+  $00,$00,$cc,$cc,$cc,$cc,$76,$00, // 117 $75 'u'
+  $00,$00,$c6,$c6,$c6,$6c,$38,$00, // 118 $76 'v'
+  $00,$00,$c6,$d6,$d6,$fe,$6c,$00, // 119 $77 'w'
+  $00,$00,$c6,$6c,$38,$6c,$c6,$00, // 120 $78 'x'
+  $00,$00,$c6,$c6,$c6,$7e,$06,$fc, // 121 $79 'y'
+  $00,$00,$7e,$4c,$18,$32,$7e,$00, // 122 $7a 'z'
+  $0e,$18,$18,$70,$18,$18,$0e,$00, // 123 $7b 'begin'
+  $18,$18,$18,$18,$18,$18,$18,$00, // 124 $7c '|'
+  $70,$18,$18,$0e,$18,$18,$70,$00, // 125 $7d 'end;'
+  $76,$dc,$00,$00,$00,$00,$00,$00, // 126 $7e '~'
+  $00,$10,$38,$6c,$c6,$c6,$fe,$00, // 127 $7f ''
+  $7c,$c6,$c0,$c0,$c6,$7c,$0c,$78, // 128 $80 ''
+  $cc,$00,$cc,$cc,$cc,$cc,$76,$00, // 129 $81 ''
+  $0c,$18,$7c,$c6,$fe,$c0,$7c,$00, // 130 $82 ''
+  $7c,$82,$78,$0c,$7c,$cc,$76,$00, // 131 $83 ''
+  $c6,$00,$78,$0c,$7c,$cc,$76,$00, // 132 $84 ''
+  $30,$18,$78,$0c,$7c,$cc,$76,$00, // 133 $85 ''
+  $30,$30,$78,$0c,$7c,$cc,$76,$00, // 134 $86 ''
+  $00,$00,$7e,$c0,$c0,$7e,$0c,$38, // 135 $87 ''
+  $7c,$82,$7c,$c6,$fe,$c0,$7c,$00, // 136 $88 ''
+  $c6,$00,$7c,$c6,$fe,$c0,$7c,$00, // 137 $89 ''
+  $30,$18,$7c,$c6,$fe,$c0,$7c,$00, // 138 $8a ''
+  $66,$00,$38,$18,$18,$18,$3c,$00, // 139 $8b ''
+  $7c,$82,$38,$18,$18,$18,$3c,$00, // 140 $8c ''
+  $30,$18,$00,$38,$18,$18,$3c,$00, // 141 $8d ''
+  $c6,$38,$6c,$c6,$fe,$c6,$c6,$00, // 142 $8e ''
+  $38,$6c,$7c,$c6,$fe,$c6,$c6,$00, // 143 $8f ''
+  $18,$30,$fe,$c0,$f8,$c0,$fe,$00, // 144 $90 ''
+  $00,$00,$7e,$18,$7e,$d8,$7e,$00, // 145 $91 ''
+  $3e,$6c,$cc,$fe,$cc,$cc,$ce,$00, // 146 $92 ''
+  $7c,$82,$7c,$c6,$c6,$c6,$7c,$00, // 147 $93 ''
+  $c6,$00,$7c,$c6,$c6,$c6,$7c,$00, // 148 $94 ''
+  $30,$18,$7c,$c6,$c6,$c6,$7c,$00, // 149 $95 ''
+  $78,$84,$00,$cc,$cc,$cc,$76,$00, // 150 $96 ''
+  $60,$30,$cc,$cc,$cc,$cc,$76,$00, // 151 $97 ''
+  $c6,$00,$c6,$c6,$c6,$7e,$06,$fc, // 152 $98 ''
+  $c6,$38,$6c,$c6,$c6,$6c,$38,$00, // 153 $99 ''
+  $c6,$00,$c6,$c6,$c6,$c6,$7c,$00, // 154 $9a ''
+  $18,$18,$7e,$c0,$c0,$7e,$18,$18, // 155 $9b ''
+  $38,$6c,$64,$f0,$60,$66,$fc,$00, // 156 $9c ''
+  $66,$66,$3c,$7e,$18,$7e,$18,$18, // 157 $9d ''
+  $f8,$cc,$cc,$fa,$c6,$cf,$c6,$c7, // 158 $9e ''
+  $0e,$1b,$18,$3c,$18,$d8,$70,$00, // 159 $9f ''
+  $18,$30,$78,$0c,$7c,$cc,$76,$00, // 160 $a0 ' '
+  $0c,$18,$00,$38,$18,$18,$3c,$00, // 161 $a1 '¡'
+  $0c,$18,$7c,$c6,$c6,$c6,$7c,$00, // 162 $a2 '¢'
+  $18,$30,$cc,$cc,$cc,$cc,$76,$00, // 163 $a3 '£'
+  $76,$dc,$00,$dc,$66,$66,$66,$00, // 164 $a4 '¤'
+  $76,$dc,$00,$e6,$f6,$de,$ce,$00, // 165 $a5 '¥'
+  $3c,$6c,$6c,$3e,$00,$7e,$00,$00, // 166 $a6 '¦'
+  $38,$6c,$6c,$38,$00,$7c,$00,$00, // 167 $a7 '§'
+  $18,$00,$18,$18,$30,$63,$3e,$00, // 168 $a8 '¨'
+  $00,$00,$00,$fe,$c0,$c0,$00,$00, // 169 $a9 '©'
+  $00,$00,$00,$fe,$06,$06,$00,$00, // 170 $aa 'ª'
+  $63,$e6,$6c,$7e,$33,$66,$cc,$0f, // 171 $ab '«'
+  $63,$e6,$6c,$7a,$36,$6a,$df,$06, // 172 $ac '¬'
+  $18,$00,$18,$18,$3c,$3c,$18,$00, // 173 $ad '­'
+  $00,$33,$66,$cc,$66,$33,$00,$00, // 174 $ae '®'
+  $00,$cc,$66,$33,$66,$cc,$00,$00, // 175 $af '¯'
+  $22,$88,$22,$88,$22,$88,$22,$88, // 176 $b0 '°'
+  $55,$aa,$55,$aa,$55,$aa,$55,$aa, // 177 $b1 '±'
+  $77,$dd,$77,$dd,$77,$dd,$77,$dd, // 178 $b2 '²'
+  $18,$18,$18,$18,$18,$18,$18,$18, // 179 $b3 '³'
+  $18,$18,$18,$18,$f8,$18,$18,$18, // 180 $b4 '´'
+  $18,$18,$f8,$18,$f8,$18,$18,$18, // 181 $b5 'µ'
+  $36,$36,$36,$36,$f6,$36,$36,$36, // 182 $b6 '¶'
+  $00,$00,$00,$00,$fe,$36,$36,$36, // 183 $b7 '·'
+  $00,$00,$f8,$18,$f8,$18,$18,$18, // 184 $b8 '¸'
+  $36,$36,$f6,$06,$f6,$36,$36,$36, // 185 $b9 '¹'
+  $36,$36,$36,$36,$36,$36,$36,$36, // 186 $ba 'º'
+  $00,$00,$fe,$06,$f6,$36,$36,$36, // 187 $bb '»'
+  $36,$36,$f6,$06,$fe,$00,$00,$00, // 188 $bc '¼'
+  $36,$36,$36,$36,$fe,$00,$00,$00, // 189 $bd '½'
+  $18,$18,$f8,$18,$f8,$00,$00,$00, // 190 $be '¾'
+  $00,$00,$00,$00,$f8,$18,$18,$18, // 191 $bf '¿'
+  $18,$18,$18,$18,$1f,$00,$00,$00, // 192 $c0 'À'
+  $18,$18,$18,$18,$ff,$00,$00,$00, // 193 $c1 'Á'
+  $00,$00,$00,$00,$ff,$18,$18,$18, // 194 $c2 'Â'
+  $18,$18,$18,$18,$1f,$18,$18,$18, // 195 $c3 'Ã'
+  $00,$00,$00,$00,$ff,$00,$00,$00, // 196 $c4 'Ä'
+  $18,$18,$18,$18,$ff,$18,$18,$18, // 197 $c5 'Å'
+  $18,$18,$1f,$18,$1f,$18,$18,$18, // 198 $c6 'Æ'
+  $36,$36,$36,$36,$37,$36,$36,$36, // 199 $c7 'Ç'
+  $36,$36,$37,$30,$3f,$00,$00,$00, // 200 $c8 'È'
+  $00,$00,$3f,$30,$37,$36,$36,$36, // 201 $c9 'É'
+  $36,$36,$f7,$00,$ff,$00,$00,$00, // 202 $ca 'Ê'
+  $00,$00,$ff,$00,$f7,$36,$36,$36, // 203 $cb 'Ë'
+  $36,$36,$37,$30,$37,$36,$36,$36, // 204 $cc 'Ì'
+  $00,$00,$ff,$00,$ff,$00,$00,$00, // 205 $cd 'Í'
+  $36,$36,$f7,$00,$f7,$36,$36,$36, // 206 $ce 'Î'
+  $18,$18,$ff,$00,$ff,$00,$00,$00, // 207 $cf 'Ï'
+  $36,$36,$36,$36,$ff,$00,$00,$00, // 208 $d0 'Ð'
+  $00,$00,$ff,$00,$ff,$18,$18,$18, // 209 $d1 'Ñ'
+  $00,$00,$00,$00,$ff,$36,$36,$36, // 210 $d2 'Ò'
+  $36,$36,$36,$36,$3f,$00,$00,$00, // 211 $d3 'Ó'
+  $18,$18,$1f,$18,$1f,$00,$00,$00, // 212 $d4 'Ô'
+  $00,$00,$1f,$18,$1f,$18,$18,$18, // 213 $d5 'Õ'
+  $00,$00,$00,$00,$3f,$36,$36,$36, // 214 $d6 'Ö'
+  $36,$36,$36,$36,$ff,$36,$36,$36, // 215 $d7 '×'
+  $18,$18,$ff,$18,$ff,$18,$18,$18, // 216 $d8 'Ø'
+  $18,$18,$18,$18,$f8,$00,$00,$00, // 217 $d9 'Ù'
+  $00,$00,$00,$00,$1f,$18,$18,$18, // 218 $da 'Ú'
+  $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, // 219 $db 'Û'
+  $00,$00,$00,$00,$ff,$ff,$ff,$ff, // 220 $dc 'Ü'
+  $f0,$f0,$f0,$f0,$f0,$f0,$f0,$f0, // 221 $dd 'Ý'
+  $0f,$0f,$0f,$0f,$0f,$0f,$0f,$0f, // 222 $de 'Þ'
+  $ff,$ff,$ff,$ff,$00,$00,$00,$00, // 223 $df 'ß'
+  $00,$00,$76,$dc,$c8,$dc,$76,$00, // 224 $e0 'à'
+  $78,$cc,$cc,$d8,$cc,$c6,$cc,$00, // 225 $e1 'á'
+  $fe,$c6,$c0,$c0,$c0,$c0,$c0,$00, // 226 $e2 'â'
+  $00,$00,$fe,$6c,$6c,$6c,$6c,$00, // 227 $e3 'ã'
+  $fe,$c6,$60,$30,$60,$c6,$fe,$00, // 228 $e4 'ä'
+  $00,$00,$7e,$d8,$d8,$d8,$70,$00, // 229 $e5 'å'
+  $00,$00,$66,$66,$66,$66,$7c,$c0, // 230 $e6 'æ'
+  $00,$76,$dc,$18,$18,$18,$18,$00, // 231 $e7 'ç'
+  $7e,$18,$3c,$66,$66,$3c,$18,$7e, // 232 $e8 'è'
+  $38,$6c,$c6,$fe,$c6,$6c,$38,$00, // 233 $e9 'é'
+  $38,$6c,$c6,$c6,$6c,$6c,$ee,$00, // 234 $ea 'ê'
+  $0e,$18,$0c,$3e,$66,$66,$3c,$00, // 235 $eb 'ë'
+  $00,$00,$7e,$db,$db,$7e,$00,$00, // 236 $ec 'ì'
+  $06,$0c,$7e,$db,$db,$7e,$60,$c0, // 237 $ed 'í'
+  $1e,$30,$60,$7e,$60,$30,$1e,$00, // 238 $ee 'î'
+  $00,$7c,$c6,$c6,$c6,$c6,$c6,$00, // 239 $ef 'ï'
+  $00,$fe,$00,$fe,$00,$fe,$00,$00, // 240 $f0 'ð'
+  $18,$18,$7e,$18,$18,$00,$7e,$00, // 241 $f1 'ñ'
+  $30,$18,$0c,$18,$30,$00,$7e,$00, // 242 $f2 'ò'
+  $0c,$18,$30,$18,$0c,$00,$7e,$00, // 243 $f3 'ó'
+  $0e,$1b,$1b,$18,$18,$18,$18,$18, // 244 $f4 'ô'
+  $18,$18,$18,$18,$18,$d8,$d8,$70, // 245 $f5 'õ'
+  $00,$18,$00,$7e,$00,$18,$00,$00, // 246 $f6 'ö'
+  $00,$76,$dc,$00,$76,$dc,$00,$00, // 247 $f7 '÷'
+  $38,$6c,$6c,$38,$00,$00,$00,$00, // 248 $f8 'ø'
+  $00,$00,$00,$18,$18,$00,$00,$00, // 249 $f9 'ù'
+  $00,$00,$00,$18,$00,$00,$00,$00, // 250 $fa 'ú'
+  $0f,$0c,$0c,$0c,$ec,$6c,$3c,$1c, // 251 $fb 'û'
+  $6c,$36,$36,$36,$36,$00,$00,$00, // 252 $fc 'ü'
+  $78,$0c,$18,$30,$7c,$00,$00,$00, // 253 $fd 'ý'
+  $00,$00,$3c,$3c,$3c,$3c,$00,$00, // 254 $fe 'þ'
+  $00,$00,$00,$00,$00,$00,$00,$00, // 255 $ff ' '
 
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 0 0x00 '^@'
-  0x7e,0x81,0xa5,0x81,0xbd,0x99,0x81,0x7e, // 1 0x01 '^A'
-  0x7e,0xff,0xdb,0xff,0xc3,0xe7,0xff,0x7e, // 2 0x02 '^B'
-  0x6c,0xfe,0xfe,0xfe,0x7c,0x38,0x10,0x00, // 3 0x03 '^C'
-  0x10,0x38,0x7c,0xfe,0x7c,0x38,0x10,0x00, // 4 0x04 '^D'
-  0x38,0x7c,0x38,0xfe,0xfe,0xd6,0x10,0x38, // 5 0x05 '^E'
-  0x10,0x38,0x7c,0xfe,0xfe,0x7c,0x10,0x38, // 6 0x06 '^F'
-  0x00,0x00,0x18,0x3c,0x3c,0x18,0x00,0x00, // 7 0x07 '^G'
-  0xff,0xff,0xe7,0xc3,0xc3,0xe7,0xff,0xff, // 8 0x08 '^H'
-  0x00,0x3c,0x66,0x42,0x42,0x66,0x3c,0x00, // 9 0x09 '^I'
-  0xff,0xc3,0x99,0xbd,0xbd,0x99,0xc3,0xff, // 10 0x0a '^J'
-  0x0f,0x07,0x0f,0x7d,0xcc,0xcc,0xcc,0x78, // 11 0x0b '^K'
-  0x3c,0x66,0x66,0x66,0x3c,0x18,0x7e,0x18, // 12 0x0c '^L'
-  0x3f,0x33,0x3f,0x30,0x30,0x70,0xf0,0xe0, // 13 0x0d '^M'
-  0x7f,0x63,0x7f,0x63,0x63,0x67,0xe6,0xc0, // 14 0x0e '^N'
-  0x18,0xdb,0x3c,0xe7,0xe7,0x3c,0xdb,0x18, // 15 0x0f '^O'
-  0x80,0xe0,0xf8,0xfe,0xf8,0xe0,0x80,0x00, // 16 0x10 '^P'
-  0x02,0x0e,0x3e,0xfe,0x3e,0x0e,0x02,0x00, // 17 0x11 '^Q'
-  0x18,0x3c,0x7e,0x18,0x18,0x7e,0x3c,0x18, // 18 0x12 '^R'
-  0x66,0x66,0x66,0x66,0x66,0x00,0x66,0x00, // 19 0x13 '^S'
-  0x7f,0xdb,0xdb,0x7b,0x1b,0x1b,0x1b,0x00, // 20 0x14 '^T'
-  0x3e,0x61,0x3c,0x66,0x66,0x3c,0x86,0x7c, // 21 0x15 '^U'
-  0x00,0x00,0x00,0x00,0x7e,0x7e,0x7e,0x00, // 22 0x16 '^V'
-  0x18,0x3c,0x7e,0x18,0x7e,0x3c,0x18,0xff, // 23 0x17 '^W'
-  0x18,0x3c,0x7e,0x18,0x18,0x18,0x18,0x00, // 24 0x18 '^X'
-  0x18,0x18,0x18,0x18,0x7e,0x3c,0x18,0x00, // 25 0x19 '^Y'
-  0x00,0x18,0x0c,0xfe,0x0c,0x18,0x00,0x00, // 26 0x1a '^Z'
-  0x00,0x30,0x60,0xfe,0x60,0x30,0x00,0x00, // 27 0x1b '^['
-  0x00,0x00,0xc0,0xc0,0xc0,0xfe,0x00,0x00, // 28 0x1c '^\'
-  0x00,0x24,0x66,0xff,0x66,0x24,0x00,0x00, // 29 0x1d '^]'
-  0x00,0x18,0x3c,0x7e,0xff,0xff,0x00,0x00, // 30 0x1e '^^'
-  0x00,0xff,0xff,0x7e,0x3c,0x18,0x00,0x00, // 31 0x1f '^_'
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 32 0x20 ' '
-  0x18,0x3c,0x3c,0x18,0x18,0x00,0x18,0x00, // 33 0x21 '!'
-  0x66,0x66,0x24,0x00,0x00,0x00,0x00,0x00, // 34 0x22 '"'
-  0x6c,0x6c,0xfe,0x6c,0xfe,0x6c,0x6c,0x00, // 35 0x23 '#'
-  0x18,0x3e,0x60,0x3c,0x06,0x7c,0x18,0x00, // 36 0x24 '$'
-  0x00,0xc6,0xcc,0x18,0x30,0x66,0xc6,0x00, // 37 0x25 '%'
-  0x38,0x6c,0x38,0x76,0xdc,0xcc,0x76,0x00, // 38 0x26 '&'
-  0x18,0x18,0x30,0x00,0x00,0x00,0x00,0x00, // 39 0x27 '''
-  0x0c,0x18,0x30,0x30,0x30,0x18,0x0c,0x00, // 40 0x28 '('
-  0x30,0x18,0x0c,0x0c,0x0c,0x18,0x30,0x00, // 41 0x29 ')'
-  0x00,0x66,0x3c,0xff,0x3c,0x66,0x00,0x00, // 42 0x2a '*'
-  0x00,0x18,0x18,0x7e,0x18,0x18,0x00,0x00, // 43 0x2b '+'
-  0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x30, // 44 0x2c ','
-  0x00,0x00,0x00,0x7e,0x00,0x00,0x00,0x00, // 45 0x2d '-'
-  0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x00, // 46 0x2e '.'
-  0x06,0x0c,0x18,0x30,0x60,0xc0,0x80,0x00, // 47 0x2f '/'
-  0x38,0x6c,0xc6,0xd6,0xc6,0x6c,0x38,0x00, // 48 0x30 '0'
-  0x18,0x38,0x18,0x18,0x18,0x18,0x7e,0x00, // 49 0x31 '1'
-  0x7c,0xc6,0x06,0x1c,0x30,0x66,0xfe,0x00, // 50 0x32 '2'
-  0x7c,0xc6,0x06,0x3c,0x06,0xc6,0x7c,0x00, // 51 0x33 '3'
-  0x1c,0x3c,0x6c,0xcc,0xfe,0x0c,0x1e,0x00, // 52 0x34 '4'
-  0xfe,0xc0,0xc0,0xfc,0x06,0xc6,0x7c,0x00, // 53 0x35 '5'
-  0x38,0x60,0xc0,0xfc,0xc6,0xc6,0x7c,0x00, // 54 0x36 '6'
-  0xfe,0xc6,0x0c,0x18,0x30,0x30,0x30,0x00, // 55 0x37 '7'
-  0x7c,0xc6,0xc6,0x7c,0xc6,0xc6,0x7c,0x00, // 56 0x38 '8'
-  0x7c,0xc6,0xc6,0x7e,0x06,0x0c,0x78,0x00, // 57 0x39 '9'
-  0x00,0x18,0x18,0x00,0x00,0x18,0x18,0x00, // 58 0x3a ':'
-  0x00,0x18,0x18,0x00,0x00,0x18,0x18,0x30, // 59 0x3b ';'
-  0x06,0x0c,0x18,0x30,0x18,0x0c,0x06,0x00, // 60 0x3c '<'
-  0x00,0x00,0x7e,0x00,0x00,0x7e,0x00,0x00, // 61 0x3d '='
-  0x60,0x30,0x18,0x0c,0x18,0x30,0x60,0x00, // 62 0x3e '>'
-  0x7c,0xc6,0x0c,0x18,0x18,0x00,0x18,0x00, // 63 0x3f '?'
-  0x7c,0xc6,0xde,0xde,0xde,0xc0,0x78,0x00, // 64 0x40 '@'
-  0x38,0x6c,0xc6,0xfe,0xc6,0xc6,0xc6,0x00, // 65 0x41 'A'
-  0xfc,0x66,0x66,0x7c,0x66,0x66,0xfc,0x00, // 66 0x42 'B'
-  0x3c,0x66,0xc0,0xc0,0xc0,0x66,0x3c,0x00, // 67 0x43 'C'
-  0xf8,0x6c,0x66,0x66,0x66,0x6c,0xf8,0x00, // 68 0x44 'D'
-  0xfe,0x62,0x68,0x78,0x68,0x62,0xfe,0x00, // 69 0x45 'E'
-  0xfe,0x62,0x68,0x78,0x68,0x60,0xf0,0x00, // 70 0x46 'F'
-  0x3c,0x66,0xc0,0xc0,0xce,0x66,0x3a,0x00, // 71 0x47 'G'
-  0xc6,0xc6,0xc6,0xfe,0xc6,0xc6,0xc6,0x00, // 72 0x48 'H'
-  0x3c,0x18,0x18,0x18,0x18,0x18,0x3c,0x00, // 73 0x49 'I'
-  0x1e,0x0c,0x0c,0x0c,0xcc,0xcc,0x78,0x00, // 74 0x4a 'J'
-  0xe6,0x66,0x6c,0x78,0x6c,0x66,0xe6,0x00, // 75 0x4b 'K'
-  0xf0,0x60,0x60,0x60,0x62,0x66,0xfe,0x00, // 76 0x4c 'L'
-  0xc6,0xee,0xfe,0xfe,0xd6,0xc6,0xc6,0x00, // 77 0x4d 'M'
-  0xc6,0xe6,0xf6,0xde,0xce,0xc6,0xc6,0x00, // 78 0x4e 'N'
-  0x7c,0xc6,0xc6,0xc6,0xc6,0xc6,0x7c,0x00, // 79 0x4f 'O'
-  0xfc,0x66,0x66,0x7c,0x60,0x60,0xf0,0x00, // 80 0x50 'P'
-  0x7c,0xc6,0xc6,0xc6,0xc6,0xce,0x7c,0x0e, // 81 0x51 'Q'
-  0xfc,0x66,0x66,0x7c,0x6c,0x66,0xe6,0x00, // 82 0x52 'R'
-  0x3c,0x66,0x30,0x18,0x0c,0x66,0x3c,0x00, // 83 0x53 'S'
-  0x7e,0x7e,0x5a,0x18,0x18,0x18,0x3c,0x00, // 84 0x54 'T'
-  0xc6,0xc6,0xc6,0xc6,0xc6,0xc6,0x7c,0x00, // 85 0x55 'U'
-  0xc6,0xc6,0xc6,0xc6,0xc6,0x6c,0x38,0x00, // 86 0x56 'V'
-  0xc6,0xc6,0xc6,0xd6,0xd6,0xfe,0x6c,0x00, // 87 0x57 'W'
-  0xc6,0xc6,0x6c,0x38,0x6c,0xc6,0xc6,0x00, // 88 0x58 'X'
-  0x66,0x66,0x66,0x3c,0x18,0x18,0x3c,0x00, // 89 0x59 'Y'
-  0xfe,0xc6,0x8c,0x18,0x32,0x66,0xfe,0x00, // 90 0x5a 'Z'
-  0x3c,0x30,0x30,0x30,0x30,0x30,0x3c,0x00, // 91 0x5b '['
-  0xc0,0x60,0x30,0x18,0x0c,0x06,0x02,0x00, // 92 0x5c '\'
-  0x3c,0x0c,0x0c,0x0c,0x0c,0x0c,0x3c,0x00, // 93 0x5d ']'
-  0x10,0x38,0x6c,0xc6,0x00,0x00,0x00,0x00, // 94 0x5e '^'
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff, // 95 0x5f '_'
-  0x30,0x18,0x0c,0x00,0x00,0x00,0x00,0x00, // 96 0x60 '`'
-  0x00,0x00,0x78,0x0c,0x7c,0xcc,0x76,0x00, // 97 0x61 'a'
-  0xe0,0x60,0x7c,0x66,0x66,0x66,0xdc,0x00, // 98 0x62 'b'
-  0x00,0x00,0x7c,0xc6,0xc0,0xc6,0x7c,0x00, // 99 0x63 'c'
-  0x1c,0x0c,0x7c,0xcc,0xcc,0xcc,0x76,0x00, // 100 0x64 'd'
-  0x00,0x00,0x7c,0xc6,0xfe,0xc0,0x7c,0x00, // 101 0x65 'e'
-  0x3c,0x66,0x60,0xf8,0x60,0x60,0xf0,0x00, // 102 0x66 'f'
-  0x00,0x00,0x76,0xcc,0xcc,0x7c,0x0c,0xf8, // 103 0x67 'g'
-  0xe0,0x60,0x6c,0x76,0x66,0x66,0xe6,0x00, // 104 0x68 'h'
-  0x18,0x00,0x38,0x18,0x18,0x18,0x3c,0x00, // 105 0x69 'i'
-  0x06,0x00,0x06,0x06,0x06,0x66,0x66,0x3c, // 106 0x6a 'j'
-  0xe0,0x60,0x66,0x6c,0x78,0x6c,0xe6,0x00, // 107 0x6b 'k'
-  0x38,0x18,0x18,0x18,0x18,0x18,0x3c,0x00, // 108 0x6c 'l'
-  0x00,0x00,0xec,0xfe,0xd6,0xd6,0xd6,0x00, // 109 0x6d 'm'
-  0x00,0x00,0xdc,0x66,0x66,0x66,0x66,0x00, // 110 0x6e 'n'
-  0x00,0x00,0x7c,0xc6,0xc6,0xc6,0x7c,0x00, // 111 0x6f 'o'
-  0x00,0x00,0xdc,0x66,0x66,0x7c,0x60,0xf0, // 112 0x70 'p'
-  0x00,0x00,0x76,0xcc,0xcc,0x7c,0x0c,0x1e, // 113 0x71 'q'
-  0x00,0x00,0xdc,0x76,0x60,0x60,0xf0,0x00, // 114 0x72 'r'
-  0x00,0x00,0x7e,0xc0,0x7c,0x06,0xfc,0x00, // 115 0x73 's'
-  0x30,0x30,0xfc,0x30,0x30,0x36,0x1c,0x00, // 116 0x74 't'
-  0x00,0x00,0xcc,0xcc,0xcc,0xcc,0x76,0x00, // 117 0x75 'u'
-  0x00,0x00,0xc6,0xc6,0xc6,0x6c,0x38,0x00, // 118 0x76 'v'
-  0x00,0x00,0xc6,0xd6,0xd6,0xfe,0x6c,0x00, // 119 0x77 'w'
-  0x00,0x00,0xc6,0x6c,0x38,0x6c,0xc6,0x00, // 120 0x78 'x'
-  0x00,0x00,0xc6,0xc6,0xc6,0x7e,0x06,0xfc, // 121 0x79 'y'
-  0x00,0x00,0x7e,0x4c,0x18,0x32,0x7e,0x00, // 122 0x7a 'z'
-  0x0e,0x18,0x18,0x70,0x18,0x18,0x0e,0x00, // 123 0x7b 'begin'
-  0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x00, // 124 0x7c '|'
-  0x70,0x18,0x18,0x0e,0x18,0x18,0x70,0x00, // 125 0x7d 'end;'
-  0x76,0xdc,0x00,0x00,0x00,0x00,0x00,0x00, // 126 0x7e '~'
-  0x00,0x10,0x38,0x6c,0xc6,0xc6,0xfe,0x00, // 127 0x7f ''
-  0x7c,0xc6,0xc0,0xc0,0xc6,0x7c,0x0c,0x78, // 128 0x80 ''
-  0xcc,0x00,0xcc,0xcc,0xcc,0xcc,0x76,0x00, // 129 0x81 ''
-  0x0c,0x18,0x7c,0xc6,0xfe,0xc0,0x7c,0x00, // 130 0x82 ''
-  0x7c,0x82,0x78,0x0c,0x7c,0xcc,0x76,0x00, // 131 0x83 ''
-  0xc6,0x00,0x78,0x0c,0x7c,0xcc,0x76,0x00, // 132 0x84 ''
-  0x30,0x18,0x78,0x0c,0x7c,0xcc,0x76,0x00, // 133 0x85 ''
-  0x30,0x30,0x78,0x0c,0x7c,0xcc,0x76,0x00, // 134 0x86 ''
-  0x00,0x00,0x7e,0xc0,0xc0,0x7e,0x0c,0x38, // 135 0x87 ''
-  0x7c,0x82,0x7c,0xc6,0xfe,0xc0,0x7c,0x00, // 136 0x88 ''
-  0xc6,0x00,0x7c,0xc6,0xfe,0xc0,0x7c,0x00, // 137 0x89 ''
-  0x30,0x18,0x7c,0xc6,0xfe,0xc0,0x7c,0x00, // 138 0x8a ''
-  0x66,0x00,0x38,0x18,0x18,0x18,0x3c,0x00, // 139 0x8b ''
-  0x7c,0x82,0x38,0x18,0x18,0x18,0x3c,0x00, // 140 0x8c ''
-  0x30,0x18,0x00,0x38,0x18,0x18,0x3c,0x00, // 141 0x8d ''
-  0xc6,0x38,0x6c,0xc6,0xfe,0xc6,0xc6,0x00, // 142 0x8e ''
-  0x38,0x6c,0x7c,0xc6,0xfe,0xc6,0xc6,0x00, // 143 0x8f ''
-  0x18,0x30,0xfe,0xc0,0xf8,0xc0,0xfe,0x00, // 144 0x90 ''
-  0x00,0x00,0x7e,0x18,0x7e,0xd8,0x7e,0x00, // 145 0x91 ''
-  0x3e,0x6c,0xcc,0xfe,0xcc,0xcc,0xce,0x00, // 146 0x92 ''
-  0x7c,0x82,0x7c,0xc6,0xc6,0xc6,0x7c,0x00, // 147 0x93 ''
-  0xc6,0x00,0x7c,0xc6,0xc6,0xc6,0x7c,0x00, // 148 0x94 ''
-  0x30,0x18,0x7c,0xc6,0xc6,0xc6,0x7c,0x00, // 149 0x95 ''
-  0x78,0x84,0x00,0xcc,0xcc,0xcc,0x76,0x00, // 150 0x96 ''
-  0x60,0x30,0xcc,0xcc,0xcc,0xcc,0x76,0x00, // 151 0x97 ''
-  0xc6,0x00,0xc6,0xc6,0xc6,0x7e,0x06,0xfc, // 152 0x98 ''
-  0xc6,0x38,0x6c,0xc6,0xc6,0x6c,0x38,0x00, // 153 0x99 ''
-  0xc6,0x00,0xc6,0xc6,0xc6,0xc6,0x7c,0x00, // 154 0x9a ''
-  0x18,0x18,0x7e,0xc0,0xc0,0x7e,0x18,0x18, // 155 0x9b ''
-  0x38,0x6c,0x64,0xf0,0x60,0x66,0xfc,0x00, // 156 0x9c ''
-  0x66,0x66,0x3c,0x7e,0x18,0x7e,0x18,0x18, // 157 0x9d ''
-  0xf8,0xcc,0xcc,0xfa,0xc6,0xcf,0xc6,0xc7, // 158 0x9e ''
-  0x0e,0x1b,0x18,0x3c,0x18,0xd8,0x70,0x00, // 159 0x9f ''
-  0x18,0x30,0x78,0x0c,0x7c,0xcc,0x76,0x00, // 160 0xa0 ' '
-  0x0c,0x18,0x00,0x38,0x18,0x18,0x3c,0x00, // 161 0xa1 '¡'
-  0x0c,0x18,0x7c,0xc6,0xc6,0xc6,0x7c,0x00, // 162 0xa2 '¢'
-  0x18,0x30,0xcc,0xcc,0xcc,0xcc,0x76,0x00, // 163 0xa3 '£'
-  0x76,0xdc,0x00,0xdc,0x66,0x66,0x66,0x00, // 164 0xa4 '¤'
-  0x76,0xdc,0x00,0xe6,0xf6,0xde,0xce,0x00, // 165 0xa5 '¥'
-  0x3c,0x6c,0x6c,0x3e,0x00,0x7e,0x00,0x00, // 166 0xa6 '¦'
-  0x38,0x6c,0x6c,0x38,0x00,0x7c,0x00,0x00, // 167 0xa7 '§'
-  0x18,0x00,0x18,0x18,0x30,0x63,0x3e,0x00, // 168 0xa8 '¨'
-  0x00,0x00,0x00,0xfe,0xc0,0xc0,0x00,0x00, // 169 0xa9 '©'
-  0x00,0x00,0x00,0xfe,0x06,0x06,0x00,0x00, // 170 0xaa 'ª'
-  0x63,0xe6,0x6c,0x7e,0x33,0x66,0xcc,0x0f, // 171 0xab '«'
-  0x63,0xe6,0x6c,0x7a,0x36,0x6a,0xdf,0x06, // 172 0xac '¬'
-  0x18,0x00,0x18,0x18,0x3c,0x3c,0x18,0x00, // 173 0xad '­'
-  0x00,0x33,0x66,0xcc,0x66,0x33,0x00,0x00, // 174 0xae '®'
-  0x00,0xcc,0x66,0x33,0x66,0xcc,0x00,0x00, // 175 0xaf '¯'
-  0x22,0x88,0x22,0x88,0x22,0x88,0x22,0x88, // 176 0xb0 '°'
-  0x55,0xaa,0x55,0xaa,0x55,0xaa,0x55,0xaa, // 177 0xb1 '±'
-  0x77,0xdd,0x77,0xdd,0x77,0xdd,0x77,0xdd, // 178 0xb2 '²'
-  0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18, // 179 0xb3 '³'
-  0x18,0x18,0x18,0x18,0xf8,0x18,0x18,0x18, // 180 0xb4 '´'
-  0x18,0x18,0xf8,0x18,0xf8,0x18,0x18,0x18, // 181 0xb5 'µ'
-  0x36,0x36,0x36,0x36,0xf6,0x36,0x36,0x36, // 182 0xb6 '¶'
-  0x00,0x00,0x00,0x00,0xfe,0x36,0x36,0x36, // 183 0xb7 '·'
-  0x00,0x00,0xf8,0x18,0xf8,0x18,0x18,0x18, // 184 0xb8 '¸'
-  0x36,0x36,0xf6,0x06,0xf6,0x36,0x36,0x36, // 185 0xb9 '¹'
-  0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36, // 186 0xba 'º'
-  0x00,0x00,0xfe,0x06,0xf6,0x36,0x36,0x36, // 187 0xbb '»'
-  0x36,0x36,0xf6,0x06,0xfe,0x00,0x00,0x00, // 188 0xbc '¼'
-  0x36,0x36,0x36,0x36,0xfe,0x00,0x00,0x00, // 189 0xbd '½'
-  0x18,0x18,0xf8,0x18,0xf8,0x00,0x00,0x00, // 190 0xbe '¾'
-  0x00,0x00,0x00,0x00,0xf8,0x18,0x18,0x18, // 191 0xbf '¿'
-  0x18,0x18,0x18,0x18,0x1f,0x00,0x00,0x00, // 192 0xc0 'À'
-  0x18,0x18,0x18,0x18,0xff,0x00,0x00,0x00, // 193 0xc1 'Á'
-  0x00,0x00,0x00,0x00,0xff,0x18,0x18,0x18, // 194 0xc2 'Â'
-  0x18,0x18,0x18,0x18,0x1f,0x18,0x18,0x18, // 195 0xc3 'Ã'
-  0x00,0x00,0x00,0x00,0xff,0x00,0x00,0x00, // 196 0xc4 'Ä'
-  0x18,0x18,0x18,0x18,0xff,0x18,0x18,0x18, // 197 0xc5 'Å'
-  0x18,0x18,0x1f,0x18,0x1f,0x18,0x18,0x18, // 198 0xc6 'Æ'
-  0x36,0x36,0x36,0x36,0x37,0x36,0x36,0x36, // 199 0xc7 'Ç'
-  0x36,0x36,0x37,0x30,0x3f,0x00,0x00,0x00, // 200 0xc8 'È'
-  0x00,0x00,0x3f,0x30,0x37,0x36,0x36,0x36, // 201 0xc9 'É'
-  0x36,0x36,0xf7,0x00,0xff,0x00,0x00,0x00, // 202 0xca 'Ê'
-  0x00,0x00,0xff,0x00,0xf7,0x36,0x36,0x36, // 203 0xcb 'Ë'
-  0x36,0x36,0x37,0x30,0x37,0x36,0x36,0x36, // 204 0xcc 'Ì'
-  0x00,0x00,0xff,0x00,0xff,0x00,0x00,0x00, // 205 0xcd 'Í'
-  0x36,0x36,0xf7,0x00,0xf7,0x36,0x36,0x36, // 206 0xce 'Î'
-  0x18,0x18,0xff,0x00,0xff,0x00,0x00,0x00, // 207 0xcf 'Ï'
-  0x36,0x36,0x36,0x36,0xff,0x00,0x00,0x00, // 208 0xd0 'Ð'
-  0x00,0x00,0xff,0x00,0xff,0x18,0x18,0x18, // 209 0xd1 'Ñ'
-  0x00,0x00,0x00,0x00,0xff,0x36,0x36,0x36, // 210 0xd2 'Ò'
-  0x36,0x36,0x36,0x36,0x3f,0x00,0x00,0x00, // 211 0xd3 'Ó'
-  0x18,0x18,0x1f,0x18,0x1f,0x00,0x00,0x00, // 212 0xd4 'Ô'
-  0x00,0x00,0x1f,0x18,0x1f,0x18,0x18,0x18, // 213 0xd5 'Õ'
-  0x00,0x00,0x00,0x00,0x3f,0x36,0x36,0x36, // 214 0xd6 'Ö'
-  0x36,0x36,0x36,0x36,0xff,0x36,0x36,0x36, // 215 0xd7 '×'
-  0x18,0x18,0xff,0x18,0xff,0x18,0x18,0x18, // 216 0xd8 'Ø'
-  0x18,0x18,0x18,0x18,0xf8,0x00,0x00,0x00, // 217 0xd9 'Ù'
-  0x00,0x00,0x00,0x00,0x1f,0x18,0x18,0x18, // 218 0xda 'Ú'
-  0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // 219 0xdb 'Û'
-  0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff, // 220 0xdc 'Ü'
-  0xf0,0xf0,0xf0,0xf0,0xf0,0xf0,0xf0,0xf0, // 221 0xdd 'Ý'
-  0x0f,0x0f,0x0f,0x0f,0x0f,0x0f,0x0f,0x0f, // 222 0xde 'Þ'
-  0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00, // 223 0xdf 'ß'
-  0x00,0x00,0x76,0xdc,0xc8,0xdc,0x76,0x00, // 224 0xe0 'à'
-  0x78,0xcc,0xcc,0xd8,0xcc,0xc6,0xcc,0x00, // 225 0xe1 'á'
-  0xfe,0xc6,0xc0,0xc0,0xc0,0xc0,0xc0,0x00, // 226 0xe2 'â'
-  0x00,0x00,0xfe,0x6c,0x6c,0x6c,0x6c,0x00, // 227 0xe3 'ã'
-  0xfe,0xc6,0x60,0x30,0x60,0xc6,0xfe,0x00, // 228 0xe4 'ä'
-  0x00,0x00,0x7e,0xd8,0xd8,0xd8,0x70,0x00, // 229 0xe5 'å'
-  0x00,0x00,0x66,0x66,0x66,0x66,0x7c,0xc0, // 230 0xe6 'æ'
-  0x00,0x76,0xdc,0x18,0x18,0x18,0x18,0x00, // 231 0xe7 'ç'
-  0x7e,0x18,0x3c,0x66,0x66,0x3c,0x18,0x7e, // 232 0xe8 'è'
-  0x38,0x6c,0xc6,0xfe,0xc6,0x6c,0x38,0x00, // 233 0xe9 'é'
-  0x38,0x6c,0xc6,0xc6,0x6c,0x6c,0xee,0x00, // 234 0xea 'ê'
-  0x0e,0x18,0x0c,0x3e,0x66,0x66,0x3c,0x00, // 235 0xeb 'ë'
-  0x00,0x00,0x7e,0xdb,0xdb,0x7e,0x00,0x00, // 236 0xec 'ì'
-  0x06,0x0c,0x7e,0xdb,0xdb,0x7e,0x60,0xc0, // 237 0xed 'í'
-  0x1e,0x30,0x60,0x7e,0x60,0x30,0x1e,0x00, // 238 0xee 'î'
-  0x00,0x7c,0xc6,0xc6,0xc6,0xc6,0xc6,0x00, // 239 0xef 'ï'
-  0x00,0xfe,0x00,0xfe,0x00,0xfe,0x00,0x00, // 240 0xf0 'ð'
-  0x18,0x18,0x7e,0x18,0x18,0x00,0x7e,0x00, // 241 0xf1 'ñ'
-  0x30,0x18,0x0c,0x18,0x30,0x00,0x7e,0x00, // 242 0xf2 'ò'
-  0x0c,0x18,0x30,0x18,0x0c,0x00,0x7e,0x00, // 243 0xf3 'ó'
-  0x0e,0x1b,0x1b,0x18,0x18,0x18,0x18,0x18, // 244 0xf4 'ô'
-  0x18,0x18,0x18,0x18,0x18,0xd8,0xd8,0x70, // 245 0xf5 'õ'
-  0x00,0x18,0x00,0x7e,0x00,0x18,0x00,0x00, // 246 0xf6 'ö'
-  0x00,0x76,0xdc,0x00,0x76,0xdc,0x00,0x00, // 247 0xf7 '÷'
-  0x38,0x6c,0x6c,0x38,0x00,0x00,0x00,0x00, // 248 0xf8 'ø'
-  0x00,0x00,0x00,0x18,0x18,0x00,0x00,0x00, // 249 0xf9 'ù'
-  0x00,0x00,0x00,0x18,0x00,0x00,0x00,0x00, // 250 0xfa 'ú'
-  0x0f,0x0c,0x0c,0x0c,0xec,0x6c,0x3c,0x1c, // 251 0xfb 'û'
-  0x6c,0x36,0x36,0x36,0x36,0x00,0x00,0x00, // 252 0xfc 'ü'
-  0x78,0x0c,0x18,0x30,0x7c,0x00,0x00,0x00, // 253 0xfd 'ý'
-  0x00,0x00,0x3c,0x3c,0x3c,0x3c,0x00,0x00, // 254 0xfe 'þ'
-  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 255 0xff ' '
+);
 
-end;;
+var
+   fontptr:pointer = gfxPrimitivesFontdata;
+   bgi_last_arc:arccoords_type;
 
-static const Uint8 *fontptr = gfxPrimitivesFontdata;
+   bgi_fill_style:fillsettings_type;
+   bgi_line_style:linesettings_type;
 
-static struct arccoords_type bgi_last_arc;
-static struct fillsettings_type bgi_fill_style;
-static struct linesettings_type bgi_line_style;
-static struct textsettings_type bgi_txt_style;
-static struct viewport_type vp;
-static struct palette_type pal;
+   bgi_txt_style:textsettings_type;
+   vp:viewport_type;
+   pal:palette_type;
 
+type
 // utility functions
 
-static void initpalette      ;
-static void putpixel_copy    (int, int, Uint32);
-static void putpixel_xor     (int, int, Uint32);
-static void putpixel_and     (int, int, Uint32);
-static void putpixel_or      (int, int, Uint32);
-static void putpixel_not     (int, int, Uint32);
-static void ff_putpixel      (int x, int);
-static Uint32 getpixel_raw   (int, int);
+//why not use normal declarations??? C is fucked up sometimes. Of course, so was older Pascal....
+initpalette=procedure      ;
+putpixel_copy=procedure    (int, int, Uint32);
+putpixel_xor=procedure     (int, int, Uint32);
+putpixel_and=procedure     (int, int, Uint32);
+putpixel_or=procedure      (int, int, Uint32);
+putpixel_not=procedure     (int, int, Uint32);
+ff_putpixel=procedure      (int x, int);
+getpixel_raw=function   (int, int):longword;
 
-static void line_copy        (int, int, int, int);
-static void line_xor         (int, int, int, int);
-static void line_and         (int, int, int, int);
-static void line_or          (int, int, int, int);
-static void line_not         (int, int, int, int);
-static void line_fill        (int, int, int, int);
-static void _floodfill       (int, int, int);
+line_copy=procedure        (int, int, int, int);
+line_xor=procedure         (int, int, int, int);
+line_and=procedure         (int, int, int, int);
+line_or=procedure          (int, int, int, int);
+line_not=procedure         (int, int, int, int);
+line_fill=procedure        (int, int, int, int);
+_floodfill=procedure       (int, int, int);
 
-static void line_fast        (int, int, int, int);
-static void updaterect       (int, int, int, int);
-static void update	     ;
-static void update_pixel     (int, int);
+line_fast=procedure        (int, int, int, int);
+updaterect=procedure       (int, int, int, int);
+update=procedure	     ;
+update_pixel=procedure     (int, int);
 
-static void unimplemented    (char *);
-static int  is_in_range      (int, int, int);
-static void swap_if_greater  (int *, int *);
-static void circle_bresenham (int, int, int);
-static int  octant           (int, int);
-static void refresh_window   ;
+unimplemented=procedure    (char *);
+is_in_range=function      (int, int, int):integer;
+swap_if_greater=procedure  (int *, int *);
+circle_bresenham=procedure (int, int, int);
+octant=function           (int, int):integer;
+ refresh_window=procedure   ;
 
-// -----
 
-// unimplemented stuff
-
-static void unimplemented (char *msg)
+procedure unimplemented (char *msg)
 begin
   fprintf (stderr, "%s() is not yet implemented.\n", msg);
 end;
 
-// -----
-
-void _graphfreemem (void *ptr, unsigned int size)
+procedure _graphfreemem (void *ptr, unsigned int size)
 begin
 
   unimplemented ("_graphfreemem");
 
-end; // _graphfreemem ()
+end; 
 
-// -----
-
-void _graphgetmem (unsigned int size)
+procedure _graphgetmem (unsigned int size)
 begin
 
   unimplemented ("_graphgetmem");
 
-end; // _graphgetmem ()
+end; 
 
-// -----
-
-int installuserdriver (char *name, int (*detect))
+function installuserdriver (name:PChar; detect:PtrUInt):integer
 begin
 
   unimplemented ("installuserdriver");
   return 0;
 
-end; // installuserdriver ()
+end; 
 
-// -----
 
-int installuserfont (char *name)
+function installuserfont (char *name):integer
 begin
 
   unimplemented ("installuserfont");
   return 0;
 
-end; // installuserfont ()
+end; 
 
-// -----
 
-int registerbgidriver (void (*driver))
+function registerbgidriver (driver:pointer):integer
 begin
 
   unimplemented ("registerbgidriver");
   return 0;
 
-end; // registerbgidriver ()
+end; 
 
-// -----
 
-int registerbgifont (void (*font))
+function registerbgifont (font:PChar):integer;
 begin
 
   unimplemented ("registerbgifont");
   return 0;
 
-end; // registerbgifont ()
+end; 
 
-// -----
-
-unsigned int setgraphbufsize (unsigned bufsize)
+function setgraphbufsize (unsigned bufsize):Word;
 begin
 
   unimplemented ("setgraphbufsize");
   return 0;
 
-end; // setgraphbufsize ()
+end; 
 
-// -----
+const
+   PI_CONV =(3.1415926 mod 180.0);
 
-// ----- implemented stuff starts here -----
-
-#define PI_CONV (3.1415926 / 180.0)
+---
 
 void arc (int x, int y, int stangle, int endangle, int radius)
 begin
@@ -1020,7 +1009,7 @@ int ALPHA_VALUE (int color)
 begin
   // Returns the alpha (transparency) component of an ARGB color.
 
-  return ((palette[BGI_COLORS + TMP_COLORS + color] >> 24) & 0xFF);
+  return ((palette[BGI_COLORS + TMP_COLORS + color] >> 24) & $FF);
 
 end; // ALPHA_VALUE ()
 
@@ -1030,7 +1019,7 @@ int RED_VALUE (int color)
 begin
   // Returns the red component of 'color' in the extended palette
 
-  return ((palette[BGI_COLORS + TMP_COLORS + color] >> 16) & 0xFF);
+  return ((palette[BGI_COLORS + TMP_COLORS + color] >> 16) & $FF);
 
 end; // RED_VALUE ()
 
@@ -1040,7 +1029,7 @@ int GREEN_VALUE (int color)
 begin
   // Returns the green component of 'color' in the extended palette
 
-  return ((palette[BGI_COLORS + TMP_COLORS + color] >> 8) & 0xFF);
+  return ((palette[BGI_COLORS + TMP_COLORS + color] >> 8) & $FF);
 
 end; // GREEN_VALUE ()
 
@@ -1050,7 +1039,7 @@ int BLUE_VALUE (int color)
 begin
   // Returns the blue component 'color' in the extended palette
 
-  return (palette[BGI_COLORS + TMP_COLORS + color] & 0xFF);
+  return (palette[BGI_COLORS + TMP_COLORS + color] & $FF);
 
 end; // BLUE_VALUE ()
 
@@ -1196,7 +1185,7 @@ begin
   // to set an ARGB color.
 
   // set up the temporary color
-  bgi_tmp_color_argb = 0xff000000 | r << 16 | g << 8 | b;
+  bgi_tmp_color_argb = $ff000000 | r << 16 | g << 8 | b;
   return -1;
 
 end; // COLOR ()
@@ -1614,19 +1603,19 @@ end; // fillpoly ()
 // Taken from TurboC, http://www.sandroid.org/TurboC/
 
 static Uint8 fill_patterns[1 + USER_FILL][8] = begin
-  begin0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00end;, // EMPTY_FILL
-  begin0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xffend;, // SOLID_FILL
-  begin0xff, 0xff, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00end;, // LINE_FILL
-  begin0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80end;, // LTSLASH_FILL
-  begin0x03, 0x06, 0x0c, 0x18, 0x30, 0x60, 0xc0, 0x81end;, // SLASH_FILL
-  begin0xc0, 0x60, 0x30, 0x18, 0x0c, 0x06, 0x03, 0x81end;, // BKSLASH_FILL
-  begin0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01end;, // LTBKSLASH_FILL
-  begin0x22, 0x22, 0xff, 0x22, 0x22, 0x22, 0xff, 0x22end;, // HATCH_FILL
-  begin0x81, 0x42, 0x24, 0x18, 0x18, 0x24, 0x42, 0x81end;, // XHATCH_FILL
-  begin0x11, 0x44, 0x11, 0x44, 0x11, 0x44, 0x11, 0x44end;, // INTERLEAVE_FILL
-  begin0x10, 0x00, 0x01, 0x00, 0x10, 0x00, 0x01, 0x00end;, // WIDE_DOT_FILL
-  begin0x11, 0x00, 0x44, 0x00, 0x11, 0x00, 0x44, 0x00end;, // CLOSE_DOT_FILL
-  begin0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xffend;  // USER_FILL
+  begin$00, $00, $00, $00, $00, $00, $00, $00end;, // EMPTY_FILL
+  begin$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ffend;, // SOLID_FILL
+  begin$ff, $ff, $00, $00, $ff, $ff, $00, $00end;, // LINE_FILL
+  begin$01, $02, $04, $08, $10, $20, $40, $80end;, // LTSLASH_FILL
+  begin$03, $06, $0c, $18, $30, $60, $c0, $81end;, // SLASH_FILL
+  begin$c0, $60, $30, $18, $0c, $06, $03, $81end;, // BKSLASH_FILL
+  begin$80, $40, $20, $10, $08, $04, $02, $01end;, // LTBKSLASH_FILL
+  begin$22, $22, $ff, $22, $22, $22, $ff, $22end;, // HATCH_FILL
+  begin$81, $42, $24, $18, $18, $24, $42, $81end;, // XHATCH_FILL
+  begin$11, $44, $11, $44, $11, $44, $11, $44end;, // INTERLEAVE_FILL
+  begin$10, $00, $01, $00, $10, $00, $01, $00end;, // WIDE_DOT_FILL
+  begin$11, $00, $44, $00, $11, $00, $44, $00end;, // CLOSE_DOT_FILL
+  begin$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ffend;  // USER_FILL
 end;;
 
 static void ff_putpixel (int x, int y)
@@ -2176,8 +2165,8 @@ begin
     return "SDL_1152x900";
     break;
 
-  case SDL_1280x1024:
-    return "SDL_1280x1024";
+  case SDL_128$1024:
+    return "SDL_128$1024";
     break;
 
   case SDL_1366x768:
@@ -2193,8 +2182,8 @@ begin
     break;
 
   default:
-  case SDL_800x600:
-    return "SDL_800x600";
+  case SDL_80$600:
+    return "SDL_80$600";
     break;
 
   end; // switch
@@ -2283,7 +2272,7 @@ begin
     if (tmp = palette[col])
       return col;
 
-  // if it's not a BGI color, just return the 0xAARRGGBB value
+  // if it's not a BGI color, just return the $AARRGGBB value
   return tmp;
 
 end; // getpixel ()
@@ -2447,31 +2436,31 @@ begin
   if (NULL != graphmode)
     bgi_gm = *graphmode;
   else
-    bgi_gm = SDL_800x600; // default
+    bgi_gm = SDL_80$600; // default
 
   switch (bgi_gm) begin
 
-  case SDL_320x200:
+  case SDL_32$200:
     initwindow (320, 200);
     break;
 
-  case SDL_640x200:
+  case SDL_64$200:
     initwindow (640, 200);
     break;
 
-  case SDL_640x350:
+  case SDL_64$350:
     initwindow (640, 350);
     break;
 
-  case SDL_640x480:
+  case SDL_64$480:
     initwindow (640, 480);
     break;
 
-  case SDL_720x348:
+  case SDL_72$348:
     initwindow (720, 348);
     break;
 
-  case SDL_720x350:
+  case SDL_72$350:
     initwindow (720, 350);
     break;
 
@@ -2483,7 +2472,7 @@ begin
     initwindow (1152, 900);
     break;
 
-  case SDL_1280x1024:
+  case SDL_128$1024:
     initwindow (1280, 1024);
     break;
 
@@ -2496,7 +2485,7 @@ begin
     break;
 
   default:
-  case SDL_800x600:
+  case SDL_80$600:
     initwindow (800, 600);
     break;
 
@@ -3359,7 +3348,7 @@ begin
 
     for (j = 0; j < 8; j++)
 
-      if ( (k << j) & 0x80) begin // bit set to 1
+      if ( (k << j) & $80) begin // bit set to 1
         if (HORIZ_DIR = bgi_txt_style.direction) begin
           x = bgi_cp_x + j * bgi_font_mag_x;
           y = bgi_cp_y + i * bgi_font_mag_y;
@@ -3648,7 +3637,7 @@ begin
       return;
 
   bgi_activepage[current_window][y * (bgi_maxx + 1) + x] ^=
-    (pixel & 0x00ffffff);
+    (pixel & $00ffffff);
 
 end; // putpixel_xor ()
 
@@ -3686,7 +3675,7 @@ begin
       return;
 
   bgi_activepage[current_window][y * (bgi_maxx + 1) + x] |=
-    (pixel & 0x00ffffff);
+    (pixel & $00ffffff);
 
 end; // putpixel_or ()
 
@@ -3705,7 +3694,7 @@ begin
       return;
 
   bgi_activepage[current_window][y * (bgi_maxx + 1) + x] = ~
-    (pixel & 0x00ffffff);
+    (pixel & $00ffffff);
 
 end; // putpixel_not ()
 
@@ -3736,6 +3725,7 @@ begin
     tmpcolor = color;
   end;
 
+//this is SLOW-ASS!
   switch (bgi_writemode) begin
 
   case XOR_PUT:
@@ -3827,7 +3817,7 @@ begin
   for (int y = dest_rect.y; y < dest_rect.y + dest_rect.h; y++)
     for (int x = dest_rect.x; x < dest_rect.x + dest_rect.w; x++)
       bgi_activepage[current_window][y * (bgi_maxx + 1) + x] =
-    pixels[y * (bgi_maxx + 1) + x] | 0xff000000;
+    pixels[y * (bgi_maxx + 1) + x] | $ff000000;
 
   refresh_window ();
   SDL_FreeSurface (bm_surface);
@@ -4311,7 +4301,7 @@ begin
   // and b components.
 
   palette[BGI_COLORS + TMP_COLORS + colornum] =
-    0xff000000 | red << 16 | green << 8 | blue;
+    $ff000000 | red << 16 | green << 8 | blue;
 
 end; // setrgbpalette ()
 
