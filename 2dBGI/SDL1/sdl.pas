@@ -43,9 +43,12 @@ unit sdl;
 { --------------                                                               }
 { Tom Jones <tigertomjones@gmx.de>  His Project inspired this conversion       }
 { Matthias Thoma <ma.thoma@gmx.de>                                             }
-{ Richard Jasmin (code cleanup)  hollowmaster95@gmail.com                      }
+{ Richard Jasmin (code cleanup)  hollowmaster95@gmail.com      
+                }
 { Obtained through:                                                            }
 { Joint Endeavour of Delphi Innovators ( Project JEDI )                        }
+
+
 {                                                                              }
 { This software is basically abandoned - Jazz                                  }
 { The contents of this file are used with permission, subject to               }
@@ -116,104 +119,6 @@ unit sdl;
                       use instead of "{$IFNDEF CLR} {$IFDEF MSWINDOWS}" constructs
 
 
-- Feature Directives
-
-  The features directives are used to test if the compiler supports specific
-  features, such as method overloading, and adjust the sources accordingly. Use
-  of these directives is preferred over the use of the DELPHI and COMPILER
-  directives.
-
-  Directive              Description
-  ------------------------------------------------------------------------------
-  SUPPORTS_CONSTPARAMS           Compiler supports const parameters (D1+)
-  SUPPORTS_SINGLE                Compiler supports the Single type (D1+)
-  SUPPORTS_DOUBLE                Compiler supports the Double type (D1+)
-  SUPPORTS_EXTENDED              Compiler supports the Extended type (D1+)
-  SUPPORTS_CURRENCY              Compiler supports the Currency type (D2+)
-  SUPPORTS_THREADVAR             Compiler supports threadvar declarations (D2+)
-  SUPPORTS_OUTPARAMS             Compiler supports out parameters (D3+)
-  SUPPORTS_VARIANT               Compiler supports variant (D2+)
-  SUPPORTS_WIDECHAR              Compiler supports the WideChar type (D2+)
-  SUPPORTS_WIDESTRING            Compiler supports the WideString type (D3+/BCB3+)
-  SUPPORTS_INTERFACE             Compiler supports interfaces (D3+/BCB3+)
-  SUPPORTS_DISPINTERFACE         Compiler supports dispatch interfaces (D3+/BCB3+)
-  SUPPORTS_DISPID                Compiler supports dispatch ids (D3+/BCB3+/FPC)
-  SUPPORTS_EXTSYM                Compiler supports the $EXTERNALSYM directive (D4+/BCB3+)
-  SUPPORTS_NODEFINE              Compiler supports the $NODEFINE directive (D4+/BCB3+)
-  SUPPORTS_LONGWORD              Compiler supports the LongWord type (unsigned 32 bit) (D4+/BCB4+)
-  SUPPORTS_INT64                 Compiler supports the Int64 type (D4+/BCB4+)
-  SUPPORTS_UINT64                Compiler supports the UInt64 type (D7+)
-  SUPPORTS_DYNAMICARRAYS         Compiler supports dynamic arrays (D4+/BCB4+)
-  SUPPORTS_DEFAULTPARAMS         Compiler supports default parameters (D4+/BCB4+)
-  SUPPORTS_OVERLOAD              Compiler supports overloading (D4+/BCB4+)
-  SUPPORTS_IMPLEMENTS            Compiler supports implements (D4+/BCB4+)
-  SUPPORTS_DEPRECATED            Compiler supports the deprecated directive (D6+/BCB6+)
-  SUPPORTS_PLATFORM              Compiler supports the platform directive (D6+/BCB6+)
-  SUPPORTS_LIBRARY               Compiler supports the library directive (D6+/BCB6+/FPC)
-  SUPPORTS_LOCAL                 Compiler supports the local directive (D6+/BCB6+)
-  SUPPORTS_SETPEFLAGS            Compiler supports the SetPEFlags directive (D6+/BCB6+)
-  SUPPORTS_EXPERIMENTAL_WARNINGS Compiler supports the WARN SYMBOL_EXPERIMENTAL and WARN UNIT_EXPERIMENTAL directives (D6+/BCB6+)
-  SUPPORTS_INLINE                Compiler supports the inline directive (D9+/FPC)
-  SUPPORTS_FOR_IN                Compiler supports for in loops (D9+)
-  SUPPORTS_NESTED_CONSTANTS      Compiler supports nested constants (D9+)
-  SUPPORTS_NESTED_TYPES          Compiler supports nested types (D9+)
-  SUPPORTS_REGION                Compiler supports the REGION and ENDREGION directives (D9+)
-  SUPPORTS_ENHANCED_RECORDS      Compiler supports class [operator|function|procedure] for record types (D9.NET, D10+)
-  SUPPORTS_CLASS_FIELDS          Compiler supports class fields (D9.NET, D10+)
-  SUPPORTS_CLASS_HELPERS         Compiler supports class helpers (D9.NET, D10+)
-  SUPPORTS_CLASS_OPERATORS       Compiler supports class operators (D9.NET, D10+)
-  SUPPORTS_CLASS_CTORDTORS       Compiler supports class contructors/destructors (D14+)
-  SUPPORTS_STRICT                Compiler supports strict keyword (D9.NET, D10+)
-  SUPPORTS_STATIC                Compiler supports static keyword (D9.NET, D10+)
-  SUPPORTS_FINAL                 Compiler supports final keyword (D9.NET, D10+)
-  SUPPORTS_METHODINFO            Compiler supports the METHODINFO directives (D10+)
-  SUPPORTS_GENERICS              Compiler supports generic implementations (D11.NET, D12+)
-  SUPPORTS_DEPRECATED_DETAILS    Compiler supports additional text for the deprecated directive (D11.NET, D12+)
-  ACCEPT_DEPRECATED              Compiler supports or ignores the deprecated directive (D6+/BCB6+/FPC)
-  ACCEPT_PLATFORM                Compiler supports or ignores the platform directive (D6+/BCB6+/FPC)
-  ACCEPT_LIBRARY                 Compiler supports or ignores the library directive (D6+/BCB6+)
-  SUPPORTS_CUSTOMVARIANTS        Compiler supports custom variants (D6+/BCB6+)
-  SUPPORTS_VARARGS               Compiler supports varargs (D6+/BCB6+)
-  SUPPORTS_ENUMVALUE             Compiler supports assigning ordinalities to values of enums (D6+/BCB6+)
-  SUPPORTS_DEPRECATED_WARNINGS   Compiler supports deprecated warnings (D6+/BCB6+)
-  SUPPORTS_LIBRARY_WARNINGS      Compiler supports library warnings (D6+/BCB6+)
-  SUPPORTS_PLATFORM_WARNINGS     Compiler supports platform warnings (D6+/BCB6+)
-  SUPPORTS_UNSAFE_WARNINGS       Compiler supports unsafe warnings (D7)
-  SUPPORTS_WEAKPACKAGEUNIT       Compiler supports the WEAKPACKAGEUNIT directive
-  SUPPORTS_COMPILETIME_MESSAGES  Compiler supports the MESSAGE directive
-  SUPPORTS_PACKAGES              Compiler supports Packages
-  HAS_UNIT_LIBC                  Unit Libc exists (Kylix, FPC on Linux/x86)
-  HAS_UNIT_RTLCONSTS             Unit RTLConsts exists (D6+/BCB6+/FPC)
-  HAS_UNIT_TYPES                 Unit Types exists (D6+/BCB6+/FPC)
-  HAS_UNIT_VARIANTS              Unit Variants exists (D6+/BCB6+/FPC)
-  HAS_UNIT_STRUTILS              Unit StrUtils exists (D6+/BCB6+/FPC)
-  HAS_UNIT_DATEUTILS             Unit DateUtils exists (D6+/BCB6+/FPC)
-  HAS_UNIT_CONTNRS               Unit contnrs exists (D6+/BCB6+/FPC)
-  HAS_UNIT_HTTPPROD              Unit HTTPProd exists (D9+)
-  HAS_UNIT_GIFIMG                Unit GifImg exists (D11+)
-  HAS_UNIT_ANSISTRINGS           Unit AnsiStrings exists (D12+)
-  HAS_UNIT_PNGIMAGE              Unit PngImage exists (D12+)
-  HAS_UNIT_CHARACTER             Unit Character exists (D12+)
-  XPLATFORM_RTL                  The RTL supports crossplatform function names (e.g. RaiseLastOSError) (D6+/BCB6+/FPC)
-  SUPPORTS_UNICODE               string type is aliased to an unicode string (WideString or UnicodeString) (DX.NET, D12+)
-  SUPPORTS_UNICODE_STRING        Compiler supports UnicodeString (D12+)
-  SUPPORTS_INT_ALIASES           Types Int8, Int16, Int32, UInt8, UInt16 and UInt32 are defined in the unit System (D12+)
-  HAS_UNIT_RTTI                  Unit RTTI is available (D14+)
-  SUPPORTS_CAST_INTERFACE_TO_OBJ The compiler supports casts from interfaces to objects (D14+)
-  SUPPORTS_DELAYED_LOADING       The compiler generates stubs for delaying imported function loads (D14+)
-  HAS_UNIT_REGULAREXPRESSIONSAPI Unit RegularExpressionsAPI is available (D15+)
-  HAS_UNIT_SYSTEM_UITYPES        Unit System.UITypes is available (D16+)
-  HAS_UNIT_SYSTEM_ACTIONS        Unit System.Actions is available (D17+)
-  DEPRECATED_SYSUTILS_ANSISTRINGS  AnsiString functions from SysUtils are deprecated and moved to System.AnsiStrings (D18+)
-  HAS_PROPERTY_STYLEELEMENTS     TControl has a StyleElements property (D17+)
-  HAS_AUTOMATIC_DB_FIELDS        Database fields are automatically created/refreshed (D20+)
-  HAS_EARGUMENTEXCEPTION         Exception class EArgumentException is available (D14+)
-  HAS_ENOTIMPLEMENTED            Exception class ENotImplemented is available (D15+)
-  HAS_UNIT_VCL_THEMES            Unit Vcl.Themes is available (D16+)
-  HAS_UNIT_UXTHEME               Unit (Vcl.)UxTheme is available (D7+)
-  HAS_EXCEPTION_STACKTRACE       Exception class has the StackTrace propery (D12+)
-
-
 - Compiler Settings
 
   The compiler settings directives indicate whether a specific compiler setting
@@ -247,7 +152,7 @@ unit sdl;
 
 { Set FreePascal to Delphi mode }
 {$IFDEF FPC}
-  {$MODE DELPHI}
+  {$MODE objfpc}
   {$ASMMODE Intel}
   {$DEFINE CPUASM}
    // FPC defines CPU32, CPU64 and Unix automatically
@@ -4416,8 +4321,8 @@ begin
     begin
       x := 0;
       y := 0;
-      w := SrcSurface1.w;
-      h := SrcSurface1.h;
+      w := SrcSurface1^.w;
+      h := SrcSurface1^.h;
     end;
   end
   else
@@ -4428,8 +4333,8 @@ begin
     begin
       x := 0;
       y := 0;
-      w := SrcSurface2.w;
-      h := SrcSurface2.h;
+      w := SrcSurface2^.w;
+      h := SrcSurface2^.h;
     end;
   end
   else
@@ -4480,7 +4385,7 @@ begin
   end;
   with SrcSurface2^ do
   begin
-    TransparentColor2 := format.colorkey;
+    TransparentColor2 := format^.colorkey;
     Pitch2 := Pitch;
     Addr2 := cardinal( Pixels );
     inc( Addr2, Pitch2 * UInt32( Src_Rect2.y ) );
@@ -4579,8 +4484,7 @@ begin
   end;
 end;
 
-procedure SDL_AddPixel( DstSurface : PSDL_Surface; x : cardinal; y : cardinal; Color :
-  cardinal );
+procedure SDL_AddPixel( DstSurface : PSDL_Surface; x : cardinal; y : cardinal; Color : cardinal );
 var
   SrcColor     : cardinal;
   Addr         : cardinal;
@@ -4590,9 +4494,9 @@ begin
     exit;
   with DstSurface^ do
   begin
-    Addr := cardinal( Pixels ) + y * Pitch + x * format.BytesPerPixel;
+    Addr := LongWord( Pixels ) + y * Pitch + x * format^.BytesPerPixel;
     SrcColor := PUInt32( Addr )^;
-    case format.BitsPerPixel of
+    case format^.BitsPerPixel of
       8 :
         begin
           R := SrcColor and $E0 + Color and $E0;

@@ -19,11 +19,57 @@ SDL unifies and simplifies programming for DirectX(D2D), Quartz2D, and X11.
 Therefore- it become easier to write code for these platforms.
 However- the syntax is unfamiliar to most to be of use. Hence the "BGI port".
 
-The only SDL unit needed is SDL Pascal unit I have provided-(I merged all of the headers) it may need to be "broken back out"
-due to "compiler issues for small platforms". (FPC on modern systems is not affected by this.)
+The only SDL unit needed is SDL Pascal unit I have provided-
+smaller platforms wil need to 'break out the headers'. (FPC on modern systems is not affected by this.)
+
+(I am writing this on AMD64 Quad and OCTO core system >2.5Ghz with gigabytes of RAM and VRAM at my disposal)
+
+
+GDI/GDI+ and core X11 Primitive ops(prior to XOrg merge) are excrutiatingly slow.
+(Please write code for DX7+ or a newer X11).
+
+Byte/SmallInt are 8bit references
+Word/Integer are 16bit references
+Longword are 32bit references
+QuadWords are 64bit references
+
+**Code Intentionally uses forced 32bit references.**
+
+Too many shortcuts are taken with most BGI graphics units.
+This is the 'most complete' version that I have found. As far as compatibility- I am porting some C here- to fix this.
+A lot was added.
+
+--Jazz
 
 
 Apache/Mozilla licensed(FREED).
+
+Sections from FPC unit are from Jonas Maebe-and other where noted.
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+
+--
+
+This unit is for compatiblility -FPC can pull in this unit - if done correctly- bypassing 
+FPCs ANCIENT libSVGA unit version of libGraph and "compensating for using X11" these days.
+
+That old FPC libSVGA unit "may be useful" once we get Framebuffer or KMS functional-
+either as a fallback- or for RasPi.
+
 
 Commercial software is allowed- I would like the backported changes and modifications.
 I dont care what you use the source code for- just give me credit.
@@ -35,8 +81,16 @@ Although designed "for games programming"..the integration involved by the USE, 
 of SDL and X11Core/WinAPI highlights so many OS internals its not even funny.
 
 Anyone serious enough to work with SDL on an ongoing basis- is doing some SERIOUS development,
-moreso if they are "expanding the reach" of SDL using a language "without much love" such as FreePascal/Lazarus.
+moreso if they are "expanding the reach" of SDL using a language "without much love" such as FreePascal.
 
+LCL/Lazarus references will be removed- Lazarus is NOT compatible with the Window/Graphical Context hooks provided here.
+IT IS COMPATIBLE with 3D OpenGL ones. Until Windows/MacOSX/X11 hooks can be pulled thru correctly- this cannot be fixed.
+SDL provides no way of doing this correctly in a 'sensible PASCAL manner'.
+
+-If you figure out how to do this on modern hardware, with recent code- Im all ears.
+
+
+Its easier to fix my code than patch the SDL headers, which appear flawed at the moment. Im working on fixing this.
 }
 
 interface
