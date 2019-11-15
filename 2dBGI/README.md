@@ -225,13 +225,23 @@ They are a real PITA to write code for, even with DPMI and LFB/VESA available.
 ---
 
 14 Nov 2019:
-SDL2 Palette Modes remain untested, partially implemented.
+SDL2 Palette Modes remain untested, partially implemented.<br>
+Most Palettes are at least defined, the code to use them may not be fully implemented yet.
 
-(Look for CGA modes 1-4)
+SDL2 units should build, SDL1 is being worked on.
 
-SDL1 headers will need some work to get this section working correctly.
-By default SDL team DOES NOT IMPLEMENT Get/PutPixel, which is required.
+SDL1 - the SDL UNIT code is patched from FPC devs online- THEY ARE MODIFIED JEDI HEADERS.<br>
+The original code has difficulty building, moreso with sdlutils unit, which we need functions from.<br>
+It has to be patched for 64bit systems.
 
+By default SDL main unit DOES NOT IMPLEMENT Get/PutPixel, which is required.<br>
+SDLUtils unit has these routines.
+
+The CGA palettes are here- but as of tonight, the entire palette code us fubar(yes I made changes)...nothing unexpected.<br>
+I made a decision and 5000 lines of code depend on that decision, one way - or another.<br>
+(Lesser of two evils.) I copied the code and split it between SDL1 and SDL2 when I wrote these routines.(OOPS)
+
+--Jazz
 
 ---
 
