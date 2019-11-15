@@ -224,6 +224,17 @@ They are a real PITA to write code for, even with DPMI and LFB/VESA available.
 
 ---
 
+14 Nov 2019:
+SDL2 Palette Modes remain untested, partially implemented.
+
+(Look for CGA modes 1-4)
+
+SDL1 headers will need some work to get this section working correctly.
+By default SDL team DOES NOT IMPLEMENT Get/PutPixel, which is required.
+
+
+---
+
 #### The Boat Demo
 
 In case youre wondering- this demo is from a book.<br>
