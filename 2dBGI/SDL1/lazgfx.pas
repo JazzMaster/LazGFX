@@ -5562,7 +5562,43 @@ begin
   end;{case}
 
 //once is enough with this list...its more of a nightmare than you know.
-//(its assigned before entries are checked)
+
+{
+If this 'chunk' isnt set- our output probably isnt accelerated as we would like it...
+Thanks, folks, for not pointing this out....
+There are claims that DX and HW Surfaces arent worth the headache- I say:
+		Stop being a lazy fuck- and optimise your code.
+
+Although I may not know these low-level APIs, someone in the SDL community seems to.
+Lets use WHAT WE WANT, DAMNIT.
+}
+
+{$IFDEF mswindows}
+	SDL_putenv("SDL_VIDEODRIVER=directx"); //Use DirectX, dont use GDI
+	SDL_putenv("SDL_AUDIODRIVER=dsound"); //Fuck it, use direct sound, too.
+{$ENDIF}
+
+{$IFDEF mac}
+	SDL_putenv("SDL_VIDEODRIVER=DSp"); //DrawSprockets- I chose this on purpose. Dig for the OS9 Extensions.
+	SDL_putenv("SDL_AUDIODRIVER=sndmgr"); //The OLD Mac Audio SubSystem
+{$ENDIF}
+
+{$IFDEF darwin}
+	SDL_putenv("SDL_VIDEODRIVER=quartz"); //Quartz2D
+	SDL_putenv("SDL_AUDIODRIVER=coreaudio"); //The new OSX Audio Subsystem
+{$ENDIF}
+
+{$IFDEF unix}
+    {$IFNDEF console}
+	   //Pretty deFacto Standard stuff
+	   SDL_putenv("SDL_VIDEODRIVER=x11");
+	   SDL_putenv("SDL_AUDIODRIVER=pulse"); 
+    {$ENDIF}
+       //Were in a TTY, NO x11...
+	   SDL_putenv("SDL_VIDEODRIVER=svgalib"); //svgalib on FB (FPC has working-albeit tiny- Graphics unit for this.)
+	   SDL_putenv("SDL_AUDIODRIVER=alsa"); //Guessing here- should be available.        
+{$ENDIF}
+//Note this does not use OpenGL on purpose. You can still get 2D acceleration.
 
 
    //"usermode" must match available resolutions etc etc etc
@@ -6235,6 +6271,13 @@ end;
 
 Blitter, Blittering, Blits, BitBlit (or RenderCopy- with a maybe on freeSurface..)
 
+This code is REQUIRED for proper GAMES Programming, Im not there yet.
+A lot of variables have to be end user supplied -and checked.
+
+(Yes, There are some parts of SDL hat you need to know, but the BGI Interface API greatly shortens the learning curve,
+especially if you can see what Im doing here...)
+
+
 Wikipedia-
 
 A blitter is a circuit, sometimes as a coprocessor or a logic block on a microprocessor, 
@@ -6271,10 +6314,8 @@ and various ways of combining the source and destination data.
         //orBlit
         //notBlit(inverted colors)
 
-//GetSurface from Renderer (or Create SurfaceFromRenderer) 
 SDL_ScrollX(Surface,DifX);
 SDL_ScrollY(Surface,DifY);
-//Then renderCopy it back as a "texture"
 
 
 procedure BatchRenderPixels;
@@ -6293,10 +6334,10 @@ end;
 
 
 Polygons:
+    //like: (polyPts,num)
     SDL_RenderDrawLines(renderer,LineData,numLines);
 
 }
-
 
 
 function getdrivername:string;
@@ -6307,91 +6348,115 @@ begin
 end;
 
 
-//FIXME:dont use Graphics_mode=detect for the moment.
-//(reqd fix for version 1.0)
+//Return a Mode, the list, something...let me check the C...
+Function DetectGraph(WantsFullScreenModes:boolean):byte;
 
-//we should limit detectGraph calls also and allow quick checks if libGfx is already active.
-
-Function detectGraph:byte; //should return max mode supported(enum value) -but cant be negative
 //called *once* per "graphics init"-which is only called if not active.
 
 //we detected a mode or we didnt. If we failed, exit. (we should have at least one graphics mode)
-//if we succeeeded- get the highest mode.
-
-//we only need the entire list (enum) while probing. The DATA is in the initgraph subroutine.
-
-var
-
-    i,testbpp:integer;
-
-begin
+//if we succeeeded- get the highest mode. Ignore the rest.
 
 //if InitGraph then...
 //(AND ONLY WHILE INITing....initgraph needs to call us)
 
+
+type 
+  ModeRect=array of SDL_Rect;
+  ModeRectPtr=^ModeRect;
+
+var
+  i:integer;
+  modes:ModeRectPtr; //pointer to an arry of SDL_Rect
+  format:SDL_PixelFormat;
+  testFormat: array [0..3] of SDL_PixelFormat;
+  testBpp: array [0..3] of byte;  
+
+begin
+
 {
-BAD C detected!
 
-this is the "shove a byte where a boolean goes bug" in C...(boolean words etc..)
-if its zero then its not ok. we dont want any other mode or similar mode...
-in this case-
-    if its 1, we found the mode.
+Probe these:
 
-the trick is to prevent SDL from setting "whatever is closest"..we want this mode and only this...
-most people dont usually care but with the BGI -WE DO.
+32 (4+ million colors - 24bpp+ "Alpha blends")
+24 (1.2 milion colors)
+16 (64K colors)
+15 (32K colors) - circa 1996?
 
-SDL_VideoModeOK:
-    this is SDLv1.2 code
-    IT also assumes that you want to switch physical screen modes(we dont) 
-        (like telling X11 to drop to 320x240x256-we dont want this)
-        -we will stretch for higher resolutions, or use a window for lower resolutions
+Below this should be emulated or natively supported(by platform)
+(circa pre-1994)- do not probe unless in DOS environments.
 
-SDL2:
+(Probe resolution if you do)
 
-    How do we scan the unknown? 
-    1- ask SDL for supported list of Modes supported (solve X by providing it)
-    2- we have to compare it to something. This is the puzzle-to what? 
-        we are set higher than the mode we want. (We WANT the unsupported modes and depths)
+--
+Set these modes by hand- dont probe them.
+Circa 1993-1995(win31,95 era machines--in DOS??)
+(I wont support this hardware-i8086/8088 fpc port is a hack at best)
 
-so- we get the current screen resolution and check if requested mode is smaller-if so, GOOD.
-(if its bigger, then we have a problem. DROP one mode with same color depth.)
+SDL 8 (8bpp) (256 color)
 
+Below this could be "XColorMap Defined by hand"
+SDL doesnt natively support below 8bpp- must be emulated, or partial palette filled.
+
+SDL 8 (4bpp) (16 color)
+SDL 8 (2bpp) (4 color)
+SDL 8 (1bpp) (BW)
 
 }
 
-{    i:=(Ord(High(Graphics_Modes))-1)
+//looped 4x- once per mode, descending order
 
-    //CurrentMode:=SDL_GetCurrentMode	 
-	repeat
+  i:=0;
 
-   		testbpp:=SDL_VideoModeOK(modelist.width[i], modelist.height[i], modelist.bpp[i], _initflag); //flags from initgraph
+//check endian-ness-this code assumes
+  testFormat[0]:=SDL_PIXELFORMAT_RGBA8888;
+  testBpp[0]:=32;  
 
-        //if Currentmode=ModeRequested (testbpp=1) then...
-	 
-        if (testbpp=1) then begin 
-            
-            //initGraph just wants the number of the enum value, which we check for
-            DetectGraph:=byte(i); 
-            exit;
-    	end;
-		dec(i);
-	until i:=1;
-    //there is still one mode remaining.
-	testbpp:=SDL_VideoModeOK(modelist.width[i], modelist.height[i], modelist.bpp[i], _initflag);		         
-	if (testbpp=0) then begin //did we run out of modes?
-        if IsConsoleInvoked then
-            writeln('We ran out of modes to check.');
-            //writeln('We ran out of modes to check.');
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There are no graphics modes available to set. Bailing..','OK',NIL);
-		CloseGraph; 
-	end;
-	DetectGraph:=byte(i);
+  testFormat[1]:=SDL_PIXELFORMAT_RGB888;
+  testBpp[1]:=24;  
+
+  testFormat[2]:=SDL_PIXELFORMAT_RGB565;
+  testBpp[2]:=16;  
+
+  testFormat[3]:=SDL_PIXELFORMAT_RGB555;
+  testBpp[3]:=15;  
+
+	repeat 
+		format^.format:= testFormat[i];
+		format^.BitsPerPixel:=testBpp[i];
+
+	// Get available fullscreen/hardware modes from specified bpp (and color mode)
+
+		if WantsFullScreenModes then
+			modes:=SDL_ListModes(format, SDL_FULLSCREEN or SDL_HWSURFACE);
+		else
+			modes:=SDL_ListModes(format, SDL_HWSURFACE);
+
+	// Check is there are any modes available 
+		if(modes = 0)then 
+		  WriteLn('No modes available for depth: ',ord(testbpp));
+
+	// Check if our resolution is restricted 
+		if(modes<> -1) then begin
+
+		// Print valid modes 
+  			WriteLn('Available Modes: ');
+  			j:0;
+  			while modes[j]<> Nil do begin
+    			WriteLn(modes[j]^.w,' x ', modes[j]^.h,' x ',ord(testbpp));
+				//Put this mode into an array, grab the highest one, and bail.
+    			inc(j);
+  			end;
+		end;
+
+		inc(i);
+	until ((i:=4) or (modes[j]<>Nil));
+
+//	DetectGraph:=modes[j];
 
 	//usermode should be within these parameters, however, since that cant be checked for...
 	//why not just remove it(usermode)? [enforce sanity]
     //otherwise we need to see if its valid data too....or skew up SDL window output and rendering.....
     //-which is wrong.
-}
 
 end; //detectGraph
 

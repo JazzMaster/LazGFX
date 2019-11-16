@@ -5478,7 +5478,40 @@ begin
   end;{case}
 
 //once is enough with this list...its more of a nightmare than you know.
-//(its assigned before entries are checked)
+
+{
+If this 'chunk' isnt set- our output probably isnt accelerated as we would like it...
+Thanks, folks, for not pointing this out....
+There are claims that DX and HW Surfaces arent worth the headache- I say:
+		Stop being a lazy fuck- and optimise your code.
+
+Although I may not know these low-level APIs, someone in the SDL community seems to.
+Lets use WHAT WE WANT, DAMNIT.
+}
+
+{$IFDEF mswindows}
+	SDL_putenv("SDL_VIDEODRIVER=directx"); //Use DirectX, dont use GDI
+	SDL_putenv("SDL_AUDIODRIVER=dsound"); //Fuck it, use direct sound, too.
+{$ENDIF}
+
+//OS9 support removed in SDL v1.3+
+
+{$IFDEF darwin}
+	SDL_putenv("SDL_VIDEODRIVER=quartz"); //Quartz2D
+	SDL_putenv("SDL_AUDIODRIVER=coreaudio"); //The new OSX Audio Subsystem
+{$ENDIF}
+
+{$IFDEF unix}
+    {$IFNDEF console}
+	   //Pretty deFacto Standard stuff
+	   SDL_putenv("SDL_VIDEODRIVER=x11");
+	   SDL_putenv("SDL_AUDIODRIVER=pulse"); 
+    {$ENDIF}
+       //Were in a TTY, NO x11...
+	   SDL_putenv("SDL_VIDEODRIVER=svgalib"); //svgalib on FB (FPC has working-albeit tiny- Graphics unit for this.)
+	   SDL_putenv("SDL_AUDIODRIVER=alsa"); //Guessing here- should be available.        
+{$ENDIF}
+//Note this does not use OpenGL on purpose. You can still get 2D acceleration.
 
 
    //"usermode" must match available resolutions etc etc etc
