@@ -1,9 +1,19 @@
 Unit LazGFX; 
+
+//this is an FPC unit, not a Delphi or Borland one. Compile accordingly.
+
+{$IFNDEF fpc}
+ {$Fatal FPC Compiler not used, extended Pascal syntax (OBJ-P) is required.} 
+{$ENDIF}
+
 {$mode objfpc}
 
 //Range and overflow checks =ON
 {$Q+}
 {$R+}
+
+//TypeInfo(required)
+{$M+}
 
 {$IFDEF debug}
 //memory tracing, along with heap.
@@ -112,9 +122,8 @@ Everything is mutable."
 ---
 Some notes before we begin:
 
-
-without GUI/Lazarus as a Console Application
-(when running you may get crash help-full debugging support)
+In LAzarus but writing without GUI/Lazarus (as a Console Application)
+(some of you prefer this environment)
 
 Project-> Console App or
 Project-> Program
@@ -122,9 +131,7 @@ Project-> Program
 Set Run Parameters:
 "Use Launcher" -to enable runwait.sh and console output (otherwise you might not see it)
 
---
-
-fp:
+For fp(TUI IDE) binary(windows/dos this ends in .exe):
 
 set paths as folows:
 
@@ -168,16 +175,17 @@ How to write good games:
 SDL1.2 (learn to page flip)
 SDL2.0 (renderer and "render to textures as surfaces")
 
-OGL (straight--has rendering issues)
+OGL (straight)
 
-uOS (sound)
-Synapse/Synaser (net)
+aux libs:
+
+	uOS (sound)
+	Synapse/Synaser (net)
 
 You need to know:
 
         event-driven input and rendering loops (forget the console and ReadKEY)
          
-
 ---
 
 There is a lot of plugins for SDL/SDLv2 and that initially confused the heck out of me.
@@ -185,19 +193,11 @@ Most of those were ported to FPC by JEDI team. I have cleaned that mess up, exce
 
 
 SDL_Image is JPEG, TIF, PNG support (BMP is in SDL(core))
-However, THE MAIN THING is that we can use them as soon as the "INTERFACE" code is written(HERE).
-
-Nexiuz and Postal use SDL.
-Postal2 uses unreal engine.
-Hedgewars uses SDL v1.2, iirc...
+(you will likely want this unit)
 
 
 Circle/ellippse:
 The difference between an ellipse and a circle is that "an ellipse is corrected for the aspect ratio".
-
-
-    get tris and circles and elippses working
-    aspect stretching??? (SDL can handle some of this internally)
 
 FONTS:
 
@@ -207,18 +207,12 @@ FONTS:
     In many ways this is better.
 
 
-Lazarus TCanvas unit(s) (graph, graphics) are severely lacking. Most DO NOT utilize openGl.
-They utilize X11CorePrimitives instead. 
-
-
-So you might as well be using THIS unit--since we already use:
-
-D2D(directX)
-Quartz2D
-and X11Coreprimitives
+Lazarus TCanvas unit(s) (graph, graphics) are severely lacking. There is another project being brought alongsie this one to fix TCanvas.
 
 The FPC devs assume you can understand OpenGL right away...thats bad.
 I dont agree w "basic drawing primitives" being an "objectified mess".
+
+OpenGL is NOT DESIGNED FOR 2D OPERATIONS.
 
 
 HELP:
@@ -230,14 +224,10 @@ SDL and JEDI have been poorly documented.
 
 2- The "pascal/lazarus graphics unit" changes as per the HOST OS. 
 Usually not a problem unless doing kernel development -but its an objective Pascal nightmare.
-(too many functions are wrapped). 
-
--SDL fixes this for us. 
 
 
 uOS support adds "wave, mp3, etc" sounds instead of PC speaker beeping
 (see the 'beep' command and enable the module -its blacklisted-on Linux) 
-and adds mouse and joystick, even haptic/VR feedback support.
 
 SDL_Audio "licensing issues" (Fraunhoffer/MP3 is a cash cow) -as with qb64, which also uses SDL- wreak havoc on us. 
 (Yes- I Have a merge tree of qb64 that builds, just ask...)
@@ -261,9 +251,9 @@ This was only possible on CGA screen sby hacking the text mode ASCII character s
 Apparently the SDL/JEDI never got the 64-bit bugfix(GitHub, people...).
 (A longword is not a longword- when its a QWord...)
 
-USER FIXME: Error 216 usually indicates BOUNDS errors(memory alloc and not FREE--a "memory leak")
-USER FIXME: SDL and OpenGL can fire errors with no debugging info and leave you clueless as 
-    to where to start debugging.(c units have not been compiled w debug support)
+USER FIXME: Error 216 usually indicates SDL BOUNDS errors(memory alloc and not FREE--a "memory leak")
+SDL and OpenGL can fire errors with no debugging info and leave you clueless as to where to start debugging.
+(c units have not been compiled w debug support)
 
 ----
 
@@ -357,8 +347,6 @@ We have to "lock pixels" to work with them, then "unlock pixels" and "pageFlip".
 Our ops are restricted, even yet to "pixels" and not groups of them.
 TandL is a "pixel-based operation".
 
-**There may be bugs in my math. I havent checked yet.**
-
 
 MessageBox:
 
@@ -374,14 +362,15 @@ FPC team is refusing to fix TVision bugs.
 
         This is wrong.
 
-That is like sayingFPC DEVS dont support Win16(FPC DOES NOW) apps and programming.
+That is like saying: 
+	FPC DEVS dont support Win16 apps and programming(they do now).
 
 
 Logging will be forced in the folowing conditions:
 
-    under windows LCL is checked for- this is a known Lazarus issue.
-    under linux with LCL compiled in-caller isnt a console or VT or Xerm (usually)
-
+    under windows with LCL(no terminal)
+    under linux with LCL compiled in
+	Terminal(tty) ox XTerm calls us(background process under linux, not available with windows LCL-just dont use the LCL)
 
 Code upgraded from the following:
 
@@ -447,7 +436,13 @@ The BGI was SIMPLE.
 
 "SemiDirect MultiMedia OverLayer" - should be the unit name.
 
- --Jazz (comments -and code- by me unless otherwise noted)
+SDL should be replaced with language specific routines(pull them out of SDL) instead to optimise the code. This will remove the need to export the GC.
+As far as LCL GOES- it adds a mainloop input layer- this cannot be avoided. (should it? perhaps we can ask for input in another way from the console?)
+
+
+This darn SDLv1 backporting(from 2) is confusing the heck out of me (and breaking this unit).
+
+--Jazz (comments -and code- by me unless otherwise noted)
 
 }
 
@@ -461,78 +456,37 @@ The BGI was SIMPLE.
 uses
 
 //Threads requires baseunix unit
-//cthreads has to be the first unit in this case-it so happens to support the C version.
+//cthreads has to be the first unit in this case-fpc so happens to support the C version.
+//we are linking with C, not writing an independent unit.
 
-{$IFDEF UNIX} //if coming from dos- sysutils is the equivalent unit.
-      cthreads,cmem,sysUtils,baseunix,
-    
+
+{$IFDEF UNIX} //if coming from dos- use sysutils instead of the dos unit.
+      cthreads,cmem,sysUtils,baseunix,    
 {$ENDIF}
 
     ctypes,classes,
 
 //ctypes: cint,uint,PTRUint,PTR-USINT,sint...etc.
+//classes: ensure the object-mode define(not oop code) attaches error handlers(and so we can also use them)
 
 // A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust "console" logging...
 
 {$IFDEF MSWINDOWS} //as if theres a non-MS WINDOWS?
-    Windows,MMsystem, //audio subsystem
-
-{$ENDIF}
-
-{$IFDEF LCL}
-	{$IFDEF LCLGTK2}
-		gtk2,
-	{$ENDIF}
-
-	{$IFDEF LCLQT}
-		qtwidgets,
-	{$ENDIF}
-
-	  //works on Linux+Qt but not windows??? I have WINE and a VM- lets figure it out.
-      LazUtils,  Interfaces, Dialogs, LCLType,Forms,Controls, 
-    {$IFDEF MSWINDOWS}
-       //we will check if this is set later.
+    Windows,MMsystem, //audio subsystem, use if DX audio fails. ONLY THEN. WAV support only.
       {$DEFINE NOCONSOLE }
-    {$ENDIF}
-
 {$ENDIF}
-
-
-//its possible to have a Windows "console app" thru FPC,
-//just not thru Lazarus. Debugging thru console environment, however, IS supported on windows.
 
 {$IFNDEF NOCONSOLE}
     crt,crtstuff,
 {$ENDIF}
-
-//if you build with the LCL --you get rid of the ugly ass SDL dialogs
-
-//Linux NOTE:
-//  Lazarus Menu:  "View" menu, under "Debug Windows" there is an entry for a "console output" 
-
-//however, if you are in a input loop or waiting for keypress- 
-// you will not get output until your program is complete (and has stopped execution)
-
-
-// In this case- Lazarus Menu:   Run -> Run Parameters, then check the box for "Use launching application".
-// (You may have to 'chmod +x' that script.)
-
-// you will have to setup and manage "windows" yourself, and handle dialogs accordingly.
-//HINT: (its the window with the dots on it inside Lazarus)
-
-//the backend is straight pascal w hooks for "Lazarus windowed objects".
-//(QtCreator(QT) uses similar for C/C++.)
-
 
 //FPC generic units(OS independent)
   SDL,strings,typinfo,logger
 
 //uos
 
-//Logger was the unit "throwing -EIO- errors" all over...FNF- I reset instead of reWrote...
 
-
-//stipple is what dashes lines are called
+//stipple is what "dashed lines" are called. Like the "stipple on your face".
 
 
 //lets be fair to the compiler..
@@ -544,6 +498,7 @@ uses
 {$ENDIF}
 
 {$IFDEF Darwin}
+   {$Warning Why are you using SDL1 on OSX?}   
   ,CocoaAll, Files
 {$ENDIF}
 ;
@@ -559,7 +514,7 @@ crtstuff is MY enhanced dialog unit
 FPC Devs: "It might be wise to include cmem for speedups"
 "The uses clause definition of cthreads, enables theaded applications"
 
-
+(internal to SDL right now)
 mutex(es):
 
 The idea is to talk when you have the rubber chicken or to request it or wait until others are done.
@@ -575,6 +530,9 @@ only so many can do it at once, first come- first served
 
 }
 
+
+//FIXME: Nov 2019 modelist and palette PATCH needed
+
 type
 
 	graphics_modes=(
@@ -589,13 +547,13 @@ m1280x1024x256,m1280x1024x32k,m1280x1024x64k,m1280x1024xMil,
 m1366x768x256,m1366x768x32k,m1366x768x64k,m1366x768xMil,
 m1920x1080x256,m1920x1080x32k,m1920x1080x64k,m1920x1080xMil);
 
-//data is in the main unit Init routines.
+//data is in the main unit InitGraph routine.
 
 Tmode=record
 //non-negative and some values are yuuge
 	ModeNumber:byte;
   	ModeName:string;
- 	MaxColors:DWord; //LongWord??
+ 	MaxColors:DWord; //LongWord or QWord?
     bpp:byte;
   	MaxX:Word;
     MaxY:Word;
@@ -605,21 +563,11 @@ Tmode=record
 end; //record
 
 
-
-
 type  
 
-
 //direct center of screen modded by half length of the line in each direction.
-//verticle line: use y, not x
-//centered: (((x mod 2),(y mod 2)) - ((x1-x2) mod 2))
-
-//this is per Pixel line ops.
-//line types:  line_styles=( SOLID_LINE, DOTTED_LINE, CENTER_LINE, DASHED_LINE, USERBIT_LINE );
-
-
-//drawing width of lines in pixels
-//due to changes in pixel sizes- I let them get very FAT.
+//For verticle line: use y, not x
+//centeredHLine: (((x mod 2),(y mod 2)) - ((x1-x2) mod 2))
 
 //how BIG is a pixel? its smaller than you think. 
 
@@ -629,7 +577,7 @@ type
 
 
 //when drawing a line- this is supposed to dictate if the line is dashed or not
-//AND how thick it is.
+//AND how thick it is. Cdentered is not what you think it means.
 
   LineStyle=(solid,dotted,center,dashed);
   Thickness=(normalwidth=1,thickwidth=3,superthickwidth=5,ultimateThickwidth=7);
@@ -639,22 +587,18 @@ type
 
 
 {
+SURFACE: 
+
 This is a "buffer copy" of all written string to the screen.
 As long as we have this- we can print, and we can copy screen contents.
 
-Another "hackish trick":
-
-
-(allow for space between 'font chars' )
--Now take one char off both axis.
-
+OutText:
 MaxFontChars:=(Screen/viewportwidth / FontWidth *1.5)  - FontWidth;
 MaxFontLines:=(Screen/viewportHeight / FontHeight *1.5) - FontHeight;
 
 ScreenTextBuffer: array [0..MaxFontChars,0..MaxFontLines]of char;
 ScreenLineBuffer: array [0..MaxFontChars]of char;
 
-MOD:
 -OutText writes one char here until full- goes onto next line.
 -OutTextLine just writes the whole array
 
@@ -684,6 +628,8 @@ Think of Text like a "Transparent Label" or "clear sticker".
      x,y:word;
   end;
 
+//CHECKME:
+
  //   PTTF_Font=^TTF_Font;
     //TTF_Font
 
@@ -697,9 +643,7 @@ Think of Text like a "Transparent Label" or "clear sticker".
 	graphics_driver=(DETECT, CGA, VGA,VESA); //cga,vga,vesa,hdmi,hdmi1.2
 
 
-//This is a 8x8 (or 8x12) Font pattern (in HEX) according to the BGI sources
-//(A BLITTER BITMAP in SDL)
-
+//This is a 8x8 (or 8x12) Font pattern (in HEX) according to the BGI sources(A BLITTER BITMAP in SDL)
 //X11- at least has this already implemented, SDL2_BGI mimicks those routines.
 
    FillSettingsType = (clear,lines,slashes,THslashes,THBackSlashes,BackSlashes,SMBoxes,rhombus,wall,widePTs,DensePTS);
@@ -719,6 +663,8 @@ Y not 4K modes?
 1080p is reasonable stopping point until consumers buy better hardware...which takes years...
 most computers support up to 1080p output..it will take some more lotta years for that to change.
 
+primary reason: SDL stops at 32bit longwords. It was never designed for 64bits.
+Reason being: systems didnt exist yet.
 
 }
 
@@ -735,6 +681,7 @@ var
  
   windownumber:byte;
   somelineType:thickness;
+
 //you only scroll,etc within a viewport- you cant escape from it without help.
 //you can flip between them, however.
 
@@ -743,13 +690,7 @@ var
 
 { 
 
-I think Im going to leave this as an excercise to the user rather than dictate archane methods.
-
-SDL Events fire after EVENT variable is assigned a pointer and either polling or event checking is enabled.
-NOT UTIL- so we should be "safe" to not check input until the user program calling us needs it.
-
-SDL will close the app and at the window managers request(I hope) without direct code intervention.
-But- its unsafe to assume things.
+INPUT:
 
 This is like "interrupt based kernel programming"- DO NOT code as if "waiting on input"- 
     pray it happens, continue on- if it doesnt.
@@ -770,15 +711,18 @@ These are the types of events.
 	MaximizedDefault:Maximized; //resume
 	FocusedDefault:Focused; //resume
 	Lost_FocusDefault:Lost_Focus; //pause
+
+The newer SDL2 BGI rewrite (from the professor) seems to tackle this in a weird, but efficient way.
+I will try to mimic (and test) his code.
+
 }
 
 const
    {$IFDEF mswindows} //I have my Own implementaion of this- works for win32 apps.
         IsConsole:boolean;
    {$ENDIF}
-   //Analog joystick dead zone 
+   //Analog joystick dead zone -joysticks seem to be slow to respond in some games....
    JOYSTICK_DEAD_ZONE = 8000;
-   //joysticks seem to be slow to respond in some games....
 
 var
     _graphresult:integer;
@@ -797,7 +741,7 @@ var
     
     gGameController:PSDL_Joystick;
 
-    MainSurface,FontSurface : PSDL_Surface; //TnL mostly at this point, and for hacks
+    MainSurface,FontSurface : PSDL_Surface; //Fonts and TnL mostly at this point
 
     srcR,destR,TextRect:PSDL_Rect;
     //rmask,gmask,bmask,amask:longword;
@@ -820,13 +764,14 @@ Most OSes have a default of:
 
 and as a result, some basic fonts are also included. (Royalty FREE-in case youre wondering)
 
+These were originally compiled in fonts, like object code.
+
 }
 
     font_size:integer; 
     style:byte; //BOLD,ITALIC,etc.
     outline:longint;
     grErrorStrings: array [0 .. 7] of string; //or typinfo value thereof..
-    AspectRatio:real; //computed from (AspectX mod AspectY)
 
 {
 older modes are not used, so y keep them in the list??
@@ -839,18 +784,14 @@ Atari modes, etc. were removed. (double the res and pixelSize and we will talk)
 
 }
 
-  MaxColors:LongWord; //positive only!!
   ClipPixels: Boolean=true; //always clip, never an option "not to".
 
   WantsJoyPad:boolean;
   screenshots:longint;
 
-//CDROM access is very limited.
+//CDROM access is very limited. LibUos tries to fix this.
 
 //Used mostly for Audio CDs and RedBook Audio Games.
-//This said- I have some emulators(in C) that access the Linux CDROM device....
-//the code is old (Red Hat v7? vs RHEL v7) but builds "with a few hacks".
-
 //such games have "CDROM Modeswitch delays" in accessing data while playing audio tracks(game skippage).
 
 //Descent II(PC) and SonicCD(PC and SEGA CD Emu) come to mind.
@@ -863,8 +804,9 @@ Atari modes, etc. were removed. (double the res and pixelSize and we will talk)
   MaxX,MaxY:word;
 
   _fgcolor, _bgcolor:DWord;	//this is modified due to hi and true color support.
-  //do not use old school index numbers. FETCH the index based DWord instead.  
-  
+  //do not use old school index numbers. FETCH the "index based DWord" instead.  
+  IndexedColor:Byte;  
+
   flip_timer_ms:Longint; //Time in MS between Render calls. (longint orlongword) -in C.
 
   //ideally ignore this and use GetTicks estimates with "Deltas"
@@ -878,13 +820,9 @@ Atari modes, etc. were removed. (double the res and pixelSize and we will talk)
   LIBGRAPHICS_ACTIVE:boolean;
   LIBGRAPHICS_INIT:boolean;
   RenderingDone:boolean; //did you want to pageflip now(or wait)?
-
+  ForceSWSurface:boolean;
   IsConsoleInvoked,CantDoAudio:boolean; //will audio init? and the other is tripped NOT if in X11.
   //can we modeset in a framebuffer graphics mode? YES. 
-
-
-//This should help converting some of the SDL C:
-//^SDL_Surface (PSDL_Surface) => ^TSDL_Surface
 
   Event:PSDL_Event; //^SDL_Event
    
@@ -896,12 +834,12 @@ Atari modes, etc. were removed. (double the res and pixelSize and we will talk)
   format:LongInt;
 
 //this pre-definition shit is a ~PITA~
-
 //our data may differ from SDLs.
+
 type 
 //the lists..
 
-//wants graphics_modes??
+//want graphics_modes??
 
   Pmodelist=^TmodeList;
   TmodeList=array [0 .. 31] of TMode;
@@ -916,7 +854,7 @@ var
 //pointers
 //single modes
 
-     modePointer:Pmode;
+    modePointer:Pmode;
 
 //list
     modeListpointer:PmodeList;
@@ -924,8 +862,9 @@ var
 //arrays
 	ModeArray:TmodeList;
 
-//forward declared defines
+//-----
 
+//procedure defines
 function FetchModeList:Tmodelist;
 
 procedure RoughSteinbergDither(filename,filename2:string);
@@ -934,10 +873,6 @@ procedure RoughSteinbergDither(filename,filename2:string);
 //surfaceOps
 procedure lock;
 procedure unlock;
-
-
-//videoCallback
-
 
 procedure clearscreen; 
 procedure clearscreen(index:byte); overload;
@@ -952,10 +887,9 @@ function GetX:word;
 function GetY:word;
 function GetXY:longint; 
 
-function initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean):PSDL_Surface;
+procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
 procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
 
-//SDL Internal: Update_Rect()
 
 function getgraphmode:string; 
 procedure restorecrtmode;
@@ -975,10 +909,9 @@ procedure InstallUserDriver(Name: string; AutoDetectPtr: Pointer);
 procedure RegisterBGIDriver(driver: pointer);
 
 function GetMaxColor: word;
-{
+
 procedure LoadImage(filename:PChar; Rect:PSDL_Rect);
 procedure LoadImageStretched(filename:PChar);
-}
 
 procedure PlotPixelWithNeighbors(thick:thickness; x,y:integer);
 
@@ -1035,29 +968,28 @@ this gets harder as we go along but this is the "last indexed mode".
 
 colors (indexes) above 255 should throw an error(undefined --and out of bounds). 
 
-(technically they are rgb(a) colors and have no index anymore)
-(so we are in true colors and straight rgb/rgba after this.....)
+technically they are rgb(a) colors and have no index anymore
+so we are in true colors and straight rgb/rgba after this.....
 
 You need (full) DWords or RGB data for TRUE color modes.
  
 'A' bit affects transparency and completes the 'DWord'.
-The default setting is to ignore it(FF).
-This is what is set.
+The default setting is to ignore it(FF). This is what is set.
+
+You only change this for 32bit blends.
 
 Most bitmap or blitter or renderer or opengl based code uses some sort of shader(or composite image).
 This isnt covered here.
 
-This is for drawing "primitives" on the "surface".....
-"advanced primitives" require alpha bit hacking or TRUE COLOR MODE.
 
 -One step at a time.
 
 each 256 SDL_color= r,g,b,a whereas in range of 0-255(FF FF) per color.
-for 16 color modes we use 0-16(FF)
+for 16 color modes we use 0-16(FF) normally. I dont. I use a LUT instead.
  
 16 color mode is technically a wonky spec:
 	officially this is composed of:  RGB plus I(light/dark) modes.
-	in relaity thi is: RGB+CMY whereas W+K are seperate colors- its not quite CMYK nor RGB with two intensities(7 or F)
+	in relaity this is: RGB+CMY colors whereas W+K colors are seperate- its not quite CMYK nor RGB with two intensities(7 or F)
 
 CMYK isnt really a video color standard normally because pixels are RGB. 
 CMYK is for printing. The reason has to do with color gamut and other huffy-puff.
@@ -1065,30 +997,22 @@ CMYK is for printing. The reason has to do with color gamut and other huffy-puff
  
 CGA modes threw us this curveball:
 	4 color , 4 palette hi bit resolution modes that are half ass documented. 
-	Theres no need for those modes anymore.(think t shirt half-tones for screen printing)
+	(think t shirt half-tones for screen printing)
 
-this is the best I can implement this data given that specs are all over the place- 
-	and I want this standardized as much as pssible given that we have very high color setings available
-	
 VGA/SVGA (Video gate array / super video gate array) and VESA (video electronic standards association) modes are available now.
 
 -of course SDL just simulates all of this (inside a window)
 
-}
+
+we can use SetColor(SkyBlue3); in 256 modes with this- since we know which color index it is.
+
+this is only for the default palette of course- if you muck with it.....
+ and only up to 256 colors....sorry.
 
 
-//we can use SetColor(SkyBlue3); in 256 modes with this- since we know which color index it is.
+blink is a "text attribute" ..a feature...
+(write..wait.erase..wait..rewrite..)just like the blinking cursor..
 
-//this is only for the default palette of course- if you muck with it.....
-// and only up to 256 colors....sorry.
-
-// you have no idea how hard to find and hard to put into code this shit is.
-
-
-//blink is a "text attribute" ..a feature...
-//write..wait.erase..wait..rewrite..just like the blinking cursor..
-
-{
 
 colors: 
 
@@ -1100,6 +1024,7 @@ colors:
 	         and restore the colors before rendering again
 			 then render something else
 }
+
 type
 
 
@@ -1108,8 +1033,7 @@ type
 
 
 //iirc - its ...RED,BLUE,GREEN... on the ol 8088s...
-// K-R-B-G-C-M-Br Gy-Gyd R-B-G-C-M-Y-W (CGA)
-// vs K-B-G-C-R-M-Br Gy-Gyd- B-G-C-R-M-Y-W (wikipedia) 
+// K-R-B-G-C-M-Br Gy-Gyd R-B-G-C-M-Y-W (CGA) vs K-B-G-C-R-M-Br Gy-Gyd- B-G-C-R-M-Y-W (wikipedia) 
 //the xterm 256 spec reflects this- oddly.
 
 
@@ -1726,6 +1650,15 @@ tfsGWhite
 
 );
 
+{
+To get the red value of color 5:
+Palette16[5].colors^.r;
+
+TO get its DWord:
+
+Palette16[5].DWords;
+
+}
 TRec16=record
   
 	colors:PSDL_COLOR; 
@@ -1734,7 +1667,6 @@ TRec16=record
 
 SDL_Color=record
 	r,g,b,a:byte;
-	...some other stuff we dont need to use.
 end;
 
 }
@@ -1852,7 +1784,7 @@ AYE AYE AYE!
 
 SDL performs the bit-flapping for us. so- if we set the Grey256 color value as a RGBA record/struct(c) entry 
 then we should be able to pull it back as a unknown DWord(in theory).
-(SDL_Map and SDL_Get RGB/RGBA are here for this purpose bu tour version is faster-
+(SDL_Map and SDL_Get RGB/RGBA are here for this purpose but our version is faster-
 and doesnt need to use bitdepth checks)
 
 }
@@ -1899,9 +1831,7 @@ end;
 
 
 
-//PtrUInt is a hack- specify length of data to fetch.
-
-//bpp is a global- half this unit is.
+//PtrUInt is a C hack- specify length of data to fetch.
 function SDL_GetPixel( SrcSurface : PSDL_Surface; x : integer; y : integer ) : PtrUInt; export;
 
 var
@@ -1909,15 +1839,7 @@ var
 i:integer;
 index:LongWord;
 
-{$IFDEF Borland } 
-//probly needs more borland tweaks to compile- this is a start
-    Location:Byte; 
-{$ENDIF}
-
-{$IFDEF FPC } 
     Location:^Longword; //location in 1D array
-{$ENDIF}
-
     temp15,tempPixel:Longword; //byte[0,1,2,3]
     pixel:longword;
     fetched:^longword;
@@ -1949,13 +1871,7 @@ begin
 
           //4bpp
           if MaxColors=4 then begin //CGA
-            {$IFDEF Borland }
-                if (SDL_MUSTLOCK(SrcSurface)) then
-                    SDL_UnLockSurface(SrcSurface);
 
-                Result:=Byte(Location);
-                exit;
-            {$ENDIF}  
             //check mode to find the correct palette
             
       	     i:=0;
@@ -2082,13 +1998,12 @@ begin
             end;
 
         end;
-        24: begin //tuple to longword- leave some bits as ??
-//            Location[3]:=$ff;
+        24: begin //tuple to longword- leave some bits as FF
 
             if (SDL_BYTEORDER = SDL_BIG_ENDIAN) then
-                Result:= (Longword (location[2] shl 24 or location[1] shl 16 or location[0] shl 8 shr 8))
+                Result:= ((Longword (location[2] shl 24 or location[1] shl 16 or location[0] shl 8) shr 8))
              else           
-                Result:=(Longword(location[0] shl 24 or location[1] shl 16 or location[2] shl 8 shr 8));
+                Result:=(Longword((location[0] shl 24 or location[1] shl 16 or location[2] shl 8) shr 8));
         end;
         32: begin
             if (SDL_MUSTLOCK(SrcSurface)) then
@@ -2104,14 +2019,8 @@ end;
 //PtrUInt is a hack- specify length of data provided. Works, but dodgy code.
 procedure SDL_PutPixel( DstSurface : PSDL_Surface; x : integer; y : integer; pixel : PtrUInt ); export;
 var
-{$IFDEF Borland } 
-    Location:Byte; 
-{$ENDIF}
 
-{$IFDEF FPC } 
     Location:^LongWord;
-{$ENDIF}
-
     tempPixel:^Longword; //byte[0,1,2,3]
     indexcolor:byte;
 
@@ -2133,9 +2042,6 @@ begin
         8: begin //256 palette actions done different ways.
             indexColor:=Byte(Pixel);
             if MaxColors=4 then begin
-              {$IFDEF Borland } 
-                   Location:=indexcolor; 
-              {$ENDIF}
               //check mode set...
               Location^:=Tpalette4a.dwords[indexColor];
             end;
@@ -2213,35 +2119,42 @@ begin
     end; //case    
 end;
 
-
-
-//rect size could be 1px for all we know- or the entire rendering surface...
-//note this function is "slow ASS"
-
 {
-function GEtPixels(Rect:PSDL_Rect):pointer;
-var
+rect size could be 1px for all we know- or the entire rendering surface...
+note this function is "slow ASS"
 
-  pitch:integer;
-  AttemptRead:longint;
-  pixels:pointer;
+see also saveBMP(for the entire surface(is this what we want?)
+
+
+function GetPixels(Rect:PSDL_Rect):pointer;
+var
+	pixelpointer: array of SDL_Color; //unspecified amount of pixels
 
 begin
-   pixels:=Nil;
-   pitch:=0;
 
-//case format of...
+//j,k are the 2d array coords- dont confuse me, always inc the "pixel number"
+//how many pixels are here? do we care?
 
-//format and rect we already can derive
-//pixels and pitch will be returned for the given rect in SDL_Color format given by our set definition
-//rect is Nil to copy the entire rendering target
+//if needed fetch sizeof((rect.x to rect.w) * (rect.y to rect.h))
 
-//   Getpixels:= SDL_RenderReadPixels( renderer, rect, format, pixels, pitch);
+	j:=0
+	with Rect do begin
 
-   if AttemptRead=Nil then
-     exit;
-
+	repeat
+		repeat
+			pixeldata^[num]:=readpixels(x,y);
+			inc(num);
+			inc(j);
+		until x = w;
+	    inc(k);
+		j:=0;
+	until k=h;
+	end;
+    GetPixels:=PixelData;
 end;
+
+PutPixels(a blit w updateRect/flip) is the opposite of this- either read the file into a 2d buffer- or copy it (from another surface).
+
 }
 
 
@@ -2313,6 +2226,7 @@ valuelist16[47]:=$ff;
       inc(num); 
   until num=15;
 
+//here is the code that needs to be patched. wrong sequence.
 
 TPalette16GRey.DWords[0]:=$000000ff;
 TPalette16GRey.DWords[1]:=$111111ff;
@@ -4029,7 +3943,7 @@ begin
     GetRGBFromIndex:=somecolor;
   end else begin
     if IsConsoleInvoked then
-		writeln('Attempt to fetch RGB from non-Indexed color.Wrong routine called.');
+		LogLn('Attempt to fetch RGB from non-Indexed color.Wrong routine called.');
    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to fetch RGB from non-Indexed color.Wrong routine called.','OK',NIL); 
    
     exit;
@@ -4052,7 +3966,7 @@ begin
    GetDWordFromIndex:=somecolor;
   end else begin
       if IsConsoleInvoked then
-	    	writeln('Attempt to fetch indexed DWord from non-indexed color');
+	    	LogLn('Attempt to fetch indexed DWord from non-indexed color');
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to fetch indexed DWord from non-indexed color','OK',NIL); 
       exit;
 
@@ -4100,8 +4014,8 @@ begin
   end else if (bpp >8) then begin
   
        if IsConsoleInvoked then begin
-             writeln('Wrong routine called. Try: TrueColorGetRGBfromHex');
-             writeln('Wrong routine called. Try: TrueColorGetRGBfromHex');
+             LogLn('Wrong routine called. Try: TrueColorGetRGBfromHex');
+             LogLn('Wrong routine called. Try: TrueColorGetRGBfromHex');
        end;
        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Wrong routine called. Try: TrueColorGetRGBfromHex','OK',NIL); 
  end;
@@ -4152,7 +4066,7 @@ var
 begin
    if (bpp <=8) then begin
          if IsConsoleInvoked then
-			writeln('Cant Get RGBA data from indexed colors.');
+			LogLn('Cant Get RGBA data from indexed colors.');
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get RGBA data from indexed colors.','OK',NIL);
       exit; 
    end;
@@ -4177,7 +4091,7 @@ var
 begin
   if (MaxColors >256) then begin
        if IsConsoleInvoked then
-			writeln('Cant Get color name from an RGB mode colors.');
+			LogLn('Cant Get color name from an RGB mode colors.');
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get color name from an RGB mode colors.','OK',NIL);
       exit; 
   end;
@@ -4234,7 +4148,7 @@ var
 begin
   if (MaxColors >256) then begin
       if IsConsoleInvoked then
-			writeln('Cant Get color name from an RGB mode colors.');
+			LogLn('Cant Get color name from an RGB mode colors.');
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get color name from an RGB mode colors.','OK',NIL);
       exit; 
   end;
@@ -4301,7 +4215,7 @@ begin
    if (MaxColors> 256) then begin
 
       If IsConsoleInvoked then
-			Writeln('Cant Get color name from an RGB mode colors.');
+			LogLn('Cant Get color name from an RGB mode colors.');
 	  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get color name from an RGB mode colors.','OK',NIL);
 	  exit;
    end;
@@ -4330,7 +4244,7 @@ begin
    if (MaxColors> 256) then begin
 
       If IsConsoleInvoked then
-			Writeln('Cant Get color name from an RGB mode colors.');
+			LogLn('Cant Get color name from an RGB mode colors.');
 	  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get color name from an RGB mode colors.','OK',NIL);
 	  exit;
    end;
@@ -4381,7 +4295,7 @@ begin
 
 	 end else begin
 		If IsConsoleInvoked then
-			Writeln('Cant Get index from an RGB mode (or non-palette) colors.');
+			LogLn('Cant Get index from an RGB mode (or non-palette) colors.');
 	    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get index from an RGB mode (or non-palette) colors.','OK',NIL);
 		exit;
 	 end;
@@ -4425,7 +4339,7 @@ begin
 
 	 end else begin
 		If IsConsoleInvoked then
-			Writeln('Cant Get index from an RGB mode colors.');
+			LogLn('Cant Get index from an RGB mode colors.');
 
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get index from an RGB mode colors.','OK',NIL);
 		exit;
@@ -4624,8 +4538,8 @@ begin
 //really rare case
     if (MaxColors<=255) then exit; //use the other function for this
        if IsConsoleInvoked then begin
-          writeln('Trying to fetch background color -when we have it- in Paletted mode.');
-          writeln('We have the background color in paletted modes!');
+          LogLn('Trying to fetch background color -when we have it- in Paletted mode.');
+          LogLn('We have the background color in paletted modes!');
           exit;
        end;
        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'We already have the Background Color in Paletted mode.','OK',NIL);
@@ -4690,12 +4604,12 @@ var
 
 begin
    display_count := SDL_GetNumVideoDisplays; //1->display0
-   writeln('Number of displays: '+ intTOstr(display_count));
+   LogLn('Number of displays: '+ intTOstr(display_count));
    display_index := 0;
 
 //for each monitor do..
 while  (display_index <= display_count) do begin
-    writeln('Display: '+intTOstr(display_index));
+    LogLn('Display: '+intTOstr(display_index));
 
     modes_count := SDL_GetNumDisplayModes(display_index); //max number of supported modes
     mode_index:= 0;
@@ -4714,7 +4628,7 @@ while  (display_index <= display_count) do begin
         if (SDL_GetDisplayMode(display_index, mode_index, SDLmodePointer) = 0) then begin //mode supported
 
             //Log: pixelFormat(bpp)MaxX,MaXy,refrsh_rate            
-            writeln(IntToStr(SDL_BITSPERPIXEL(SDLmodePointer^.format))+' bpp'+ IntToStr(SDLmodePointer^.w)+ ' x '+IntToStr(SDLmodePointer^.h)+ '@ '+IntToStr(SDLmodePointer^.refresh_rate)+' Hz ');
+            LogLn(IntToStr(SDL_BITSPERPIXEL(SDLmodePointer^.format))+' bpp'+ IntToStr(SDLmodePointer^.w)+ ' x '+IntToStr(SDLmodePointer^.h)+ '@ '+IntToStr(SDLmodePointer^.refresh_rate)+' Hz ');
 
             //store data in a modeList array
 
@@ -4815,7 +4729,7 @@ begin
       end;  //case
 
    end; //input loop
-   // writeln('event handled: ',event^.type_);
+   // LogLn('event handled: ',event^.type_);
   end; //mainloop
   closegraph;
 end;
@@ -4981,9 +4895,9 @@ var
 begin
     if MaxColors>256 then begin
         if IsConsoleInvoked then
-           writeln('ERROR: i cant do that. not indexed.');
+           LogLn('ERROR: i cant do that. not indexed.');
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempting to clearscreen(index) with non-indexed data.','OK',NIL);   
-        writeln('Attempting to clearscreen(index) with non-indexed data.');           
+        LogLn('Attempting to clearscreen(index) with non-indexed data.');           
         exit; 
     end;
     if MaxColors=16 then
@@ -5105,7 +5019,11 @@ end;
 
 
 //NEW: do you want fullscreen or not?
-function initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean):PSDL_renderer;
+procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
+//I dunno where I got the idea to turn this into a function. SPEC says this is a procedure.
+//This code only works a certain way- thats why languages "lacking globals" cannot compile this code.
+
+//you would only kick-back a renderer or mainSurface anyway, never a sub-surface. YOU **SHOULD** BE EXPORTING THE GC pointer (by default).
 
 {
 
@@ -5126,7 +5044,7 @@ begin
 
   if LIBGRAPHICS_ACTIVE then begin
     if ISConsoleInvoked then begin
-        writeln('Graphics already active.');
+        LogLn('Graphics already active.');
     end;
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Initgraph: Graphics already active.','OK',NIL);	
     exit;
@@ -5565,67 +5483,78 @@ begin
 
 {
 If this 'chunk' isnt set- our output probably isnt accelerated as we would like it...
+
 Thanks, folks, for not pointing this out....
 There are claims that DX and HW Surfaces arent worth the headache- I say:
 		Stop being a lazy fuck- and optimise your code.
 
 Although I may not know these low-level APIs, someone in the SDL community seems to.
-Lets use WHAT WE WANT, DAMNIT.
+Lets use WHAT WE WANT, DAMNIT. (I will purge the flawed SDL C later.)
 }
 
 {$IFDEF mswindows}
 	SDL_putenv("SDL_VIDEODRIVER=directx"); //Use DirectX, dont use GDI
 	SDL_putenv("SDL_AUDIODRIVER=dsound"); //Fuck it, use direct sound, too.
+    //unless below XP:
+    ForceSWSurface:=False;
 {$ENDIF}
 
 {$IFDEF mac}
 	SDL_putenv("SDL_VIDEODRIVER=DSp"); //DrawSprockets- I chose this on purpose. Dig for the OS9 Extensions.
 	SDL_putenv("SDL_AUDIODRIVER=sndmgr"); //The OLD Mac Audio SubSystem
+    //force software surfaces on older hardware(faster)
+    ForceSWSurface:=True;
 {$ENDIF}
 
 {$IFDEF darwin}
 	SDL_putenv("SDL_VIDEODRIVER=quartz"); //Quartz2D
 	SDL_putenv("SDL_AUDIODRIVER=coreaudio"); //The new OSX Audio Subsystem
+    ForceSWSurface:=False;
 {$ENDIF}
 
 {$IFDEF unix}
     {$IFNDEF console}
 	   //Pretty deFacto Standard stuff
 	   SDL_putenv("SDL_VIDEODRIVER=x11");
-	   SDL_putenv("SDL_AUDIODRIVER=pulse"); 
+	   SDL_putenv("SDL_AUDIODRIVER=pulse");
+       ForceSWSurface:=False; 
     {$ENDIF}
-       //Were in a TTY, NO x11...
+       //Were in a TTY, NO x11...likely no acceleration, either (possibly running on a RasPi)
 	   SDL_putenv("SDL_VIDEODRIVER=svgalib"); //svgalib on FB (FPC has working-albeit tiny- Graphics unit for this.)
-	   SDL_putenv("SDL_AUDIODRIVER=alsa"); //Guessing here- should be available.        
+	   SDL_putenv("SDL_AUDIODRIVER=alsa"); //Guessing here- should be available.
+       ForceSWSurface:=True;        
 {$ENDIF}
-//Note this does not use OpenGL on purpose. You can still get 2D acceleration.
+
+//Note this does not use OpenGL on purpose. You can still get 2D acceleration in most cases
 
 
    //"usermode" must match available resolutions etc etc etc
    //this is why I removed all of that code..."define what exactly"??
 
   //attempt to trigger SDL...on most sytems this takes a split second- and succeeds.
+  //at minimum setup a timer (TTimer?) and Video callback
   _initflag:= SDL_INIT_VIDEO or SDL_INIT_TIMER;
 
-  if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
-  if WantsJoyPad then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
-//if WantInet then SDL_Init_Net;
+  //audio on SDL1 isnt too bad, but use libuos instead
+  //if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
 
+  if WantsJoyPad then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
+//if WantInet then SDL_Init_Net; --code not written yet
+
+  //FAILED!
   if ( SDL_Init(_initflag) < 0 ) then begin
      //we cant speak- write something down.
 
      if ISConsoleInvoked then begin
-        writeln('Critical ERROR: Cant Init SDL for some reason.');
-        writeln(SDL_GetError);
+        LogLn('InitGraph Failed to Launch SDL. **GENERAL ERROR**');
+        LogLn(SDL_GetError);
      end;
      //if we cant init- dont bother with dialogs.
-
-     _grResult:=GenError; //gen error
-     halt(0); //the other routines are now useless- since we didnt init- dont just exit the routine, DIE instead.
+     LIBGRAPHICS_ACTIVE:=false; 
+     halt(162); //the other routines are now useless- since we didnt init- dont just exit the routine, DIE instead.
 
   end;
  
-{
   if wantsFullIMGSupport then begin
 
     _imgflags:= IMG_INIT_JPG or IMG_INIT_PNG or IMG_INIT_TIF;
@@ -5634,30 +5563,22 @@ Lets use WHAT WE WANT, DAMNIT.
     //not critical, as we have bmp support but now are limping very very bad...
     if((imagesON and _imgflags) <> _imgflags) then begin
        if IsConsoleInvoked then begin
-		 writeln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
-		 writeln(IMG_GetError);
+		 LogLn('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
+		 LogLn(IMG_GetError);
 	   end;
 	   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'IMG_Init: Failed to init required JPG, PNG, and TIFF support','OK',NIL);	
     end;
   end;
-}
 
 {
  im going to skip the RAM requirements code and instead haarp on proper rendering requirements.
  note that a 12 yr old notebook-try as it may- might not have enough vRAM to pull things off.
  can you squeeze the code to fit into a 486??---you are pushing it.
-(You are better off using SDLv1 instead)
 
-now- how do we check if sdl2 is supported- and fall back, given uses clauses can only launch one or the other?
 }
 
   if (graphdriver = DETECT) then begin
-	//probe for it, dumbass...NEVER ASSUME.
-
-//temporarily not available
-	   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Graphics detrection not available at this time.','Sorry',NIL);	
-
-//    Fetchgraphmode := DetectGraph; //need to kick back the higest supported mode...
+     Fetchgraphmode := DetectGraph; //need to kick back the higest supported mode...
   end;
 
   NoGoAutoRefresh:=false;
@@ -5709,7 +5630,7 @@ $F-
 
   if(SDL_GetDisplayMode(0,0, mode) <> 0) then begin
     if IsConsoleInvoked then
-			writeln('Cant get current video mode info. Non-critical error.');
+			LogLn('Cant get current video mode info. Non-critical error.');
 //    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL cant get the data for the current mode.','OK',NIL);
   end;
 
@@ -5725,8 +5646,8 @@ $F-
   video_timer_id := SDL_AddTimer(flip_timer_ms, @videoCallback, nil);
   if video_timer_id=0 then begin
     if IsConsoleInvoked then begin
-		writeln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
-		writeln('you will have to manually update surfaces and the renderer.');
+		LogLn('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
+		LogLn('you will have to manually update surfaces and the renderer.');
     end;
 //    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL cant set video callback timer.Manually update surface.','OK',NIL);
     NoGoAutoRefresh:=true; //Now we can call Initgraph and check, even if quietly(game) If we need to issue Flip calls.
@@ -5748,7 +5669,7 @@ $F-
 {  if TTF_Init = -1 then begin
     
     if IsConsoleInvoked then begin
-        writeln('I cant engage the font engine, sirs.');
+        LogLn('I cant engage the font engine, sirs.');
     end;
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: I cant engage the font engine, sirs. ','OK',NIL);
 		
@@ -5780,7 +5701,7 @@ $F-
  
     if( SDL_NumJoysticks < 1 ) then begin
         if IsConsoleInvoked then
-			writeln( 'Warning: No joysticks connected!' ); 
+			LogLn( 'Warning: No joysticks connected!' ); 
         
   		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: No joysticks connected!','OK',NIL);
         
@@ -5789,8 +5710,8 @@ $F-
     
         if( gGameController = NiL ) then begin  
 	        if IsConsoleInvoked then begin
-		    	writeln( 'Warning: Unable to open game controller! SDL Error: '+ SDL_GetError); 
-                writeln(SDL_GetError);
+		    	LogLn( 'Warning: Unable to open game controller! SDL Error: '+ SDL_GetError); 
+                LogLn(SDL_GetError);
             end;
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: Unable to open game controller!','OK',NIL);
             noJoy:=true;
@@ -5799,10 +5720,10 @@ $F-
     end; 
   end; //Joypad 
 
- //The GC:
- // writeln(longword(@MainSurface));
+ //DEBUG The GC:
+ // LogLn(longword(@MainSurface));
+ //if at any time this is Nil-> exit.
 
-  InitGraph:=renderer;
 end; //initgraph
 
 
@@ -6011,7 +5932,7 @@ begin
      
          textcolor(7); //..reset standards...
          clrscr; //text clearscreen
-         writeln;
+         LogLn;
   end;
   //unless you want to mimic the last doom screen here...usually were done....  
   //Yes you can override this function- if you need a shareware screen on exit..Hackish, but it works.
@@ -6068,15 +5989,15 @@ if (LIBGRAPHICS_INIT=false) then
 
 begin
 		
-		if IsConsoleInvoked then writeln('Call initgraph before calling setGraphMode.') 
+		if IsConsoleInvoked then LogLn('Call initgraph before calling setGraphMode.') 
 		else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'setGraphMode called too early. Call InitGraph first.','OK',NIL);
 	    exit;
 end
 else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //initgraph called us
-    writeln('MaxX: ',MaxX);
-    writeln('MaxY: ',MaxY);
-    writeln('bpp: ',bpp);
-//    writeln('Full screen requested: ',wantfullscreen);
+    LogLn('MaxX: ',MaxX);
+    LogLn('MaxY: ',MaxY);
+    LogLn('bpp: ',bpp);
+//    LogLn('Full screen requested: ',wantfullscreen);
 
 
 //FIXME: Lazarus and SDL2, not 1.
@@ -6086,8 +6007,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
          window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
     	 if (window = Nil) then begin
  			if IsConsoleInvoked then begin
-	    	   	writeln('Something Fishy. No hardware render support and cant create a window.');
-	    	   	writeln('SDL reports: '+' '+ SDL_GetError);      
+	    	   	LogLn('Something Fishy. No hardware render support and cant create a window.');
+	    	   	LogLn('SDL reports: '+' '+ SDL_GetError);      
 	    	end;
          {$ENDIF}
 
@@ -6123,7 +6044,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 	    	closegraph;
          end;
 
-        writeln('initgraph: Window is online.');
+        LogLn('initgraph: Window is online.');
 
        //Hide, mouse.
        SDL_ShowCursor(SDL_DISABLE);
@@ -6176,8 +6097,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
         if (success <> 0) then begin 
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set DisplayMode.','OK',NIL);
 	        if IsConsoleInvoked then begin
-                writeln('ERROR: SDL cannot set DisplayMode.');		
-                writeln(SDL_GetError);
+                LogLn('ERROR: SDL cannot set DisplayMode.');		
+                LogLn(SDL_GetError);
             end;
 			exit;
         end;
@@ -6232,7 +6153,7 @@ begin
 			inc(x);
 		end;
         if IsConsoleInvoked then begin
-            writeln('Cant find current mode in modelist.');
+            LogLn('Cant find current mode in modelist.');
         end;
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: Cant find current mode in modelist.','OK',NIL);        
    end;   
@@ -6243,7 +6164,7 @@ begin
   if (not LIBGRAPHICS_ACTIVE) then begin //if not in use, then dont call me...
 
 	if IsConsoleInvoked then 
-        writeln('you didnt call initGraph yet...try again?') 
+        LogLn('you didnt call initGraph yet...try again?') 
     else
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Restore WHAT exactly?','Clarify the Stupid',NIL);
   end;
@@ -6433,16 +6354,16 @@ SDL 8 (1bpp) (BW)
 
 	// Check is there are any modes available 
 		if(modes = 0)then 
-		  WriteLn('No modes available for depth: ',ord(testbpp));
+		  LogLn('No modes available for depth: ',ord(testbpp));
 
 	// Check if our resolution is restricted 
 		if(modes<> -1) then begin
 
 		// Print valid modes 
-  			WriteLn('Available Modes: ');
+  			LogLn('Available Modes: ');
   			j:0;
   			while modes[j]<> Nil do begin
-    			WriteLn(modes[j]^.w,' x ', modes[j]^.h,' x ',ord(testbpp));
+    			LogLn(modes[j]^.w,' x ', modes[j]^.h,' x ',ord(testbpp));
 				//Put this mode into an array, grab the highest one, and bail.
     			inc(j);
   			end;
@@ -6502,7 +6423,7 @@ begin
 	    	lomode:= ord(mCGA); //no less than this.
 		end else begin
 			if IsConsoleInvoked then
-				writeln('Unknown graphdriver setting.');
+				LogLn('Unknown graphdriver setting.');
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Unknown graphdriver setting.','ok',NIL);
 		end;
 	end;
@@ -6540,7 +6461,7 @@ begin
    if windownumber=8 then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to create too many viewports.','OK',NIL);
       if IsConsoleInvoked then
-        writeln('Attempt to create too many viewports.');
+        LogLn('Attempt to create too many viewports.');
       exit;
    end;
    //get viewport size and put into LastRect
@@ -6563,8 +6484,8 @@ begin
 
   if (saveSurface = NiL) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt create SDL_Surface from renderer pixel data','OK',NIL);
-      writeln('Couldnt create SDL_Surface from renderer pixel data. ');
-      writeln(SDL_GetError);
+      LogLn('Couldnt create SDL_Surface from renderer pixel data. ');
+      LogLn(SDL_GetError);
       exit;
                     
   end;
@@ -6601,7 +6522,7 @@ begin
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to remove non-existant viewport.','UH oh.',NIL);
   
     if IsConsoleInvoked then
-        writeln('Attempt to remove non-existant viewport.');
+        LogLn('Attempt to remove non-existant viewport.');
     exit; 
    end;
    if windownumber > 1 then begin
@@ -6657,14 +6578,14 @@ end;
 procedure InstallUserDriver(Name: string; AutoDetectPtr: Pointer);
 begin
    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Function No longer supported: InstallUserDriver','OK',NIL);
-   writeln('Function No longer supported: InstallUserDriver');
+   LogLn('Function No longer supported: InstallUserDriver');
 end;
 
 procedure RegisterBGIDriver(driver: pointer);
 
 begin
    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Function No longer supported: RegisterBGIDriver','OK',NIL);
-   writeln('Function No longer supported: RegisterBGIDriver');
+   LogLn('Function No longer supported: RegisterBGIDriver');
 end;
 
 
@@ -6788,8 +6709,8 @@ begin
   if (saveSurface = NiL) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt create SDL_Surface from renderer pixel data','OK',NIL);
       if IsConsoleInvoked then begin
-          writeln('Couldnt create SDL_Surface from renderer pixel data');      
-          writeln(SDL_GetError);
+          LogLn('Couldnt create SDL_Surface from renderer pixel data');      
+          LogLn(SDL_GetError);
       end;
       exit;
                     
@@ -6836,7 +6757,7 @@ var
 begin
    if ((Rect^.w=1) or (Rect^.h=1)) then begin    
      if IsConsoleInvoked then begin       
-        writeln('USE GetPixel. This routine FETCHES MORE THAN ONE');
+        LogLn('USE GetPixel. This routine FETCHES MORE THAN ONE');
      end;  
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'USE GetPixel. This routine FETCHES MORE THAN ONE','OK',NIL);
      exit;
@@ -6873,8 +6794,8 @@ begin
    if (AttemptRead<0) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to read pixel data failed.','OK',NIL);
       if IsConsoleInvoked then begin
-          writeln('Attempt to read pixel data failed.');
-          writeln(SDL_GetError);
+          LogLn('Attempt to read pixel data failed.');
+          LogLn(SDL_GetError);
       end;
      exit;
    end;

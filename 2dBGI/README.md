@@ -158,14 +158,14 @@ I dont want to hear the bickering. Could it be done, yes-and with acceleration.
                 Some games like X11 flight sims seem to use SDLv1 and crash on mode switch(X11 -GL Threads issue?? Glitch??).
 
 This is not my focus right now- but it may be soon.<br>
+
 The focus is the use of Graphics unit "under windowing environments" with "framebuffer fallback".<br>
 Unices have not had any working graphics units (if ever) since Kernel Framebuffer support was removed- and X11 in use.
 
-Certainly games and aplications have not been written with what exists.<br>
-Buggy developers assume that the Lazarus graphics unit is required- its not. Add it only when using TCanvas.<br>
 Can TCanvas be used Fullscreen? YES! 
 
-OpenGL is already implemented through FContext- theres no need to tie a Tcanvas to it.<br>
+There is hope for TCanvas- but the author, Tom Gregorovic(Tombo) , is on subversion.<br>
+The Package name is LazRGBGraphics. With some modifications- it can incorporate everything here.
 
 ## OSes Supported
 
