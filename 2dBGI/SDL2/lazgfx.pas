@@ -2505,7 +2505,7 @@ valuelist16[47]:=$ff;
       //see the remmed out notes below
       inc(i,3);
       inc(num); 
-  until num=14;;
+  until num=14;
 
 //This is the proper way to do it but we have transparencys, not just intensities now.
 //mucking w the alpha bit changes opacity levels- we dont want that.
