@@ -6682,34 +6682,16 @@ begin
 end;
 
 
-//note this function is "slow ASS"
+//note this function is "slow ASS". It uses recursive looped reads.
 
-{
+
 function GetPixels(Rect:PSDL_Rect):pointer;
 //this does NOT return a single pixel by default and is written intentionally that way.
-//GetPixel checks also the output pointer length and fudges it into a single "SDL_Color".
-
-//this routine expects YOU to handle the array of data
-//SDL_Color SDL_Color SDL_Color .....
 
 var
 
   pitch:integer;
-  pixels:pointer; //^array [0..x*y] of SDL_Color
-
-//
-  the array size is dependant on current screen resoluton- I can only give MAXIMUM defaults if I set this value.
-  This is an SDL_Color limitation. If it were me, Id just copy the array in 2D, not 1D.
-  Yes, technically, even kernel write to screen are stored in VRAM(or buffers) as:
-		[X,Y,RGBColor] however...SDL treats it as a 1D array.
-
-  I didnt design SDL, sorry. Maybe thats why its SLOW???
-  src: VGA graphics 101 - address A000, 386+ VRAM (and LFB) access.
-  NOTE: 
-     You probly CANNOT directly write here.. (blame X11 or Windows or Apple)
-     (Because youre staring at the array right now, reading this.)
-//
-
+  pixels:pointer; //^array of SDL_Color
   AttemptRead:integer;
 
 begin
@@ -6723,7 +6705,6 @@ begin
 
    pixels:=Nil;
    pitch:=0;
-
                  
     case bpp of
 		8: begin
@@ -6732,7 +6713,7 @@ begin
 		end;
 		15: format:=SDL_PIXELFORMAT_RGB555;
 
-//we assume on 16bit that we are in 565 not 5551, we should not assume
+		//we assume on 16bit that we are in 565 not 5551, we should not assume
 		16: begin
 			
 			format:=SDL_PIXELFORMAT_RGB565;
@@ -6742,24 +6723,15 @@ begin
 		32: format:=SDL_PIXELFORMAT_RGBA8888;
 
     end;
-//format and rect we already can derive
-//pixels and pitch will be returned for the given rect in SDL_Color format given by our set definition
-//rect is Nil to copy the entire rendering target
 
-   //we may have to read pixels in a 2d loop...which is why its extremely slow
-   
-   //pitch at this point could be 2,3,4,etc.. and must otherwise be taken into account.
-   if (AttemptRead<0) then begin
-      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to read pixel data failed.','OK',NIL);
-      if IsConsoleInvoked then begin
-          LogLn('Attempt to read pixel data failed.');
-          LogLn(SDL_GetError);
-      end;
-     exit;
-   end;
+   {
+    // The GetPixel loop- take into account viewport coords, do not assume fullscreen Mainsurface ops.
+
+
+   } 
    GetPixels:=pixels;
 end;
-}
+
 
 
 
