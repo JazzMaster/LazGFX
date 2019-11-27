@@ -7,17 +7,17 @@ Lazarus Graphics
 
 Function/Procedure:
 
-	InitGraph: Working<br>
-	CloseGraph:  Working <br>
-	GraphDetect: SDLv1:  Working  SDLv2:  In Progress<br> 
-    (Draw)Line:  Working <br>
-	(Draw)Rect:  Working <br>
-	PlotPixelWithNeighbors:  Working<br> 
-	PutPixel:  Working <br>
-	GetPixel:  Working <br>
-	Clearscreen/ClearDevice:  Working<br> 
-	SetBGcolor(multiple declarations):  Working<br> 
-	SetFGColor(multiple declarations):  Working <br>
+InitGraph: <font color="DarkGreen">Working</font><br>
+CloseGraph:  Working <br>
+GraphDetect: SDLv1:  Working  SDLv2:  In Progress<br> 
+(Draw)Line:  Working <br>
+(Draw)Rect:  Working <br>
+PlotPixelWithNeighbors:  Working<br> 
+PutPixel:  Working <br>
+GetPixel:  Working <br>
+Clearscreen/ClearDevice:  Working<br> 
+SetBGcolor(multiple declarations):  Working<br> 
+SetFGColor(multiple declarations):  Working <br>
 
 
 3D Completion Status:
