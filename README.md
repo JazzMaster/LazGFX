@@ -5,7 +5,7 @@ Lazarus Graphics
 2D Completion Status:
 
 
-Fuction/Procedure:
+Function/Procedure:
 
 	InitGraph: Working<br>
 	CloseGraph:  Working <br>
