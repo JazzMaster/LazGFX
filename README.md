@@ -7,7 +7,7 @@ Lazarus Graphics
 
 Function/Procedure:
 
-InitGraph: <font color="DarkGreen">Working</font><br>
+InitGraph: <p style="color:DarkGreen">Working</p>
 CloseGraph:  Working <br>
 GraphDetect: SDLv1:  Working  SDLv2:  In Progress<br> 
 (Draw)Line:  Working <br>
