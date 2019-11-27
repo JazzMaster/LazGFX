@@ -4,34 +4,29 @@ Lazarus Graphics
 
 2D Completion Status:
 
-<progress value="45" max="100">
-</progress>
-
 
 Fuction/Procedure:
 
-	InitGraph: <font color="DarkGreen"> Working </font>
-	CloseGraph: <font color="DarkGreen"> Working </font>
-	GraphDetect: SDLv1: <font color="DarkGreen"> Working </font> SDLv2: <font color="Orange"> In Progress </font>
-    (Draw)Line: <font color="DarkGreen"> Working </font>
-	(Draw)Rect: <font color="DarkGreen"> Working </font>
-	PlotPixelWithNeighbors: <font color="DarkGreen"> Working </font>
-	PutPixel: <font color="DarkGreen"> Working </font>
-	GetPixel: <font color="DarkGreen"> Working </font>
-	Clearscreen/ClearDevice: <font color="DarkGreen"> Working </font>
-	SetBGcolor(multiple declarations): <font color="DarkGreen"> Working </font>
-	SetFGColor(multiple declarations): <font color="DarkGreen"> Working </font>
+	InitGraph: Working<br>
+	CloseGraph:  Working <br>
+	GraphDetect: SDLv1:  Working  SDLv2:  In Progress<br> 
+    (Draw)Line:  Working <br>
+	(Draw)Rect:  Working <br>
+	PlotPixelWithNeighbors:  Working<br> 
+	PutPixel:  Working <br>
+	GetPixel:  Working <br>
+	Clearscreen/ClearDevice:  Working<br> 
+	SetBGcolor(multiple declarations):  Working<br> 
+	SetFGColor(multiple declarations):  Working <br>
+
 
 3D Completion Status:
 
-<progress value="18" max="100">
-</progress>
-
-	InitGraph: <font color="DarkGreen"> Working </font>
-	CloseGraph: <font color="DarkGreen"> Working </font>
-	Core GL  ops: <font color="DarkGreen"> Working, Linking OK from C </font>
-	GL DirectRendering (Drawing on the fly ops): <font color="DarkGreen"> Working </font>
-	GL Shaders(GLSL and 3D spirtes): <font color="Red"> MOSTLY BROKEN, requires C-like shader code(vertex/fragment) </font>
+	InitGraph:  Working <br>
+	CloseGraph:  Working <br>
+	Core GL  ops:  Working, Linking OK from C <br>
+	GL DirectRendering (Drawing on the fly ops):  Working <br>
+	GL Shaders(GLSL and 3D spirtes):  MOSTLY BROKEN, requires C-like shader code(vertex/fragment) <br>
 
 
 ---
@@ -74,8 +69,8 @@ SDL may port to these devices.<br>
 
 ## What happened?
 
-I took a look at some X11 code and decided that we are approaching the matter wrong.
-CodeWarrior would like us to use QuickDraw(thats ok).
+I took a look at some X11 code and decided that we are approaching the matter wrong.<br>
+CodeWarrior would like us to use QuickDraw(thats ok).<br>
 DirectDraw or D2D (DirectX) is faster than Windows GDI.
 
 ### The teardown
@@ -177,10 +172,10 @@ I code for Linux. I like the challenge. I will "port" or IFDEF the rest.
 
 ## Primary Build Targets
 
-OS9/OSX (macintosh PowerPC- Intel thru OSX 10.9 coming soon)
-Win32/64
-Lin32/64 (missing a Pascal-based Graphics API and working OpenGL routines)
-RasPi(mailroom based GPU accleration inside the framebuffer)
+		OS9/OSX (macintosh PowerPC- Intel thru OSX 10.9 coming soon)
+		Win32/64
+		Lin32/64 (missing a Pascal-based Graphics API and working OpenGL routines)
+		RasPi(mailroom based GPU accleration inside the framebuffer)
 
 
 
