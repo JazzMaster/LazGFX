@@ -2,9 +2,39 @@
 Lazarus Graphics
 -----------------
 
-The Lazarus Graphics API is now targeting for release version 3.<br>
-Release version 3 will come together much faster than previous releases-<br>
-Most of the core API is already written. The rest will be added soon.
+2D Completion Status:
+
+<progress value="45" max="100">
+</progress>
+
+<pre>
+Fuction/Procedure:
+
+	InitGraph: <font color="DarkGreen"> Working </font>
+	CloseGraph: <font color="DarkGreen"> Working </font>
+	GraphDetect: SDLv1: <font color="DarkGreen"> Working </font> SDLv2: <font color="Orange"> In Progress </font>
+    (Draw)Line: <font color="DarkGreen"> Working </font>
+	(Draw)Rect: <font color="DarkGreen"> Working </font>
+	PlotPixelWithNeighbors: <font color="DarkGreen"> Working </font>
+	PutPixel: <font color="DarkGreen"> Working </font>
+	GetPixel: <font color="DarkGreen"> Working </font>
+	Clearscreen/ClearDevice: <font color="DarkGreen"> Working </font>
+	SetBGcolor(multiple declarations): <font color="DarkGreen"> Working </font>
+	SetFGColor(multiple declarations): <font color="DarkGreen"> Working </font>
+
+3D Completion Status:
+
+<progress value="18" max="100">
+</progress>
+
+	InitGraph: <font color="DarkGreen"> Working </font>
+	CloseGraph: <font color="DarkGreen"> Working </font>
+	Core GL  ops: <font color="DarkGreen"> Working, Linking OK from C </font>
+	GL DirectRendering (Drawing on the fly ops): <font color="DarkGreen"> Working </font>
+	GL Shaders(GLSL and 3D spirtes): <font color="Red"> MOSTLY BROKEN, requires C-like shader code(vertex/fragment) </font>
+
+</pre>
+---
 
 I am not replacing every SDL function here- but I am rewriting "the Borland equivalent".<br>
 (SEE the C version of SDLBGI if want to know more.)
