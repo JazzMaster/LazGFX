@@ -7,7 +7,7 @@ Lazarus Graphics
 <progress value="45" max="100">
 </progress>
 
-<pre>
+
 Fuction/Procedure:
 
 	InitGraph: <font color="DarkGreen"> Working </font>
@@ -33,7 +33,7 @@ Fuction/Procedure:
 	GL DirectRendering (Drawing on the fly ops): <font color="DarkGreen"> Working </font>
 	GL Shaders(GLSL and 3D spirtes): <font color="Red"> MOSTLY BROKEN, requires C-like shader code(vertex/fragment) </font>
 
-</pre>
+
 ---
 
 I am not replacing every SDL function here- but I am rewriting "the Borland equivalent".<br>
