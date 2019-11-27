@@ -25,6 +25,11 @@ Unit LazGFX;
 A "fully creative rewrite" of the "Borland Graphic Interface" in SDLv1 (c) 2017-18 (and beyond) Richard Jasmin
 -with the assistance of others.
 
+** DONT OVERTHINK THIS UNIT**
+There are easy solutions to these problems imposed upon us by SDL/ lack of a BGI.
+(The BGI doesnt need AA lines...)
+
+
 SDL unifies and simplifies programming for DirectX(D2D), Quartz2D, and X11.
 Therefore- it become easier to write code for these platforms.
 However- the syntax is unfamiliar to most to be of use. Hence the "BGI port".
@@ -6689,9 +6694,9 @@ function GetPixels(Rect:PSDL_Rect):pointer;
 //this does NOT return a single pixel by default and is written intentionally that way.
 
 var
-
+  v,k,j:byte;
   pitch:integer;
-  pixels:pointer; //^array of SDL_Color
+  pixels:array of PSDL_Color;
   AttemptRead:integer;
 
 begin
@@ -6703,32 +6708,19 @@ begin
      exit;
    end;
 
-   pixels:=Nil;
-   pitch:=0;
-                 
-    case bpp of
-		8: begin
-			    if maxColors=256 then format:=SDL_PIXELFORMAT_INDEX8
-				else if maxColors=16 then format:=SDL_PIXELFORMAT_INDEX4MSB; 
-		end;
-		15: format:=SDL_PIXELFORMAT_RGB555;
-
-		//we assume on 16bit that we are in 565 not 5551, we should not assume
-		16: begin
-			
-			format:=SDL_PIXELFORMAT_RGB565;
-
-        end;
-		24: format:=SDL_PIXELFORMAT_RGB888;
-		32: format:=SDL_PIXELFORMAT_RGBA8888;
-
-    end;
-
-   {
     // The GetPixel loop- take into account viewport coords, do not assume fullscreen Mainsurface ops.
-
-
-   } 
+    j:=0;
+	k:=0;
+    v:=0;
+	repeat
+	    repeat
+            Pixels[v]:=GetPixel(Viewport[currentviewport]^.x,Viewport[currentviewport]^.y);
+            inc(v);
+	    until j= Viewport[currentviewport]^.x;
+	 	j:=0;
+	    inc(k);
+	until k=Viewport[currentviewport]^.y;
+   
    GetPixels:=pixels;
 end;
 
