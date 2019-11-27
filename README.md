@@ -6,7 +6,11 @@ Lazarus Graphics
 
 InitGraph: Working<br>
 CloseGraph:  Working <br>
-GraphDetect: SDLv1:  Working  SDLv2:  In Progress<br> 
+GraphDetect: 
+
+		SDLv1:  Working
+		SDLv2:  In Progress 
+
 (Draw)Line:  Working <br>
 (Draw)Rect:  Working <br>
 PlotPixelWithNeighbors:  Working<br> 
