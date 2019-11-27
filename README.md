@@ -4,10 +4,7 @@ Lazarus Graphics
 
 2D Completion Status:
 
-
-Function/Procedure:
-
-InitGraph: <p style="color:DarkGreen">Working</p>
+InitGraph: Working<br>
 CloseGraph:  Working <br>
 GraphDetect: SDLv1:  Working  SDLv2:  In Progress<br> 
 (Draw)Line:  Working <br>
@@ -20,13 +17,14 @@ SetBGcolor(multiple declarations):  Working<br>
 SetFGColor(multiple declarations):  Working <br>
 
 
+
 3D Completion Status:
 
-	InitGraph:  Working <br>
-	CloseGraph:  Working <br>
-	Core GL  ops:  Working, Linking OK from C <br>
-	GL DirectRendering (Drawing on the fly ops):  Working <br>
-	GL Shaders(GLSL and 3D spirtes):  MOSTLY BROKEN, requires C-like shader code(vertex/fragment) <br>
+InitGraph:  Working <br>
+CloseGraph:  Working <br>
+Core GL  ops:  Working, Linking OK from C <br>
+GL DirectRendering (Drawing on the fly ops):  Working <br>
+GL Shaders(GLSL and 3D spirtes):  MOSTLY BROKEN(code works, renders with some issues), requires wonky C-like shader code(vertex/fragment) <br>
 
 
 ---
