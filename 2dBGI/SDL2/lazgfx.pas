@@ -498,15 +498,14 @@ SemiDirect MultiMedia OverLayer - should be the unit name.
         //version 2 is => OSX 10.5(Leopard). This excludes PPC arch.
         {$modeswitch objectivec2} 
     {$ENDIF}
-
+//same with carbon?
 	{$linkframework Cocoa}
-//SDL2??
-    {$linklib SDLimg}
-    {$linklib SDLttf}
-    {$linklib SDLnet}
-	{$linklib SDLmain}
-	{$linklib gcc}
 
+    {$linklib SDL2img}
+    {$linklib SDL2ttf}
+    {$linklib SDL2net}
+	{$linklib SDL2main}
+	{$linklib gcc}
 
 {$ENDIF}
 
@@ -530,6 +529,7 @@ uses
     Windows,MMsystem, //audio subsystem
 
 {$ENDIF}
+
 
 {$IFDEF LCL}
 	{$IFDEF LCLGTK2}
@@ -580,6 +580,7 @@ uses
 //uos is a substitute for SDL2_sound- use that if you like.
 //sdl2_gfx is in rewrite and ticks isnt used yet.
 
+//ENSURE THESE ARE ALL INSTALLED OR YOU WILL GET LINKING ERRORS!
   SDL2,SDL2_ttf,SDL2_Image,strings,typinfo,logger
 
 //sdl2_net,uos
@@ -603,11 +604,10 @@ uses
 
 
 
-//Altogether- we are talking PCs running OSX, Windows(down to XP), and most unices.
-//OS 8 and 9 were kicked with sdl1.2 v14 and sdl 2.0
+//Altogether- we are talking PCs running OSX, Windows(7+), and most unices.
+//RasPis, and Some android (as a unice sub-derivative)
 
-//and Some android (as a unice sub-derivative)
-
+//(Pi and Droids are ARM CPUS)
 
 
 {
@@ -632,22 +632,52 @@ sephamores:
 these are like using a loo in a castle- 
 only so many can do it at once, first come- first served
 - but theres more than one toilet
+}
 
+//scale output(via SDL) if resolution is lower then the window canvas size-or fullscreen.
+//typically, interlacing is used - "to cheat"
+
+//wherein 320x240 can be blown up to 640x480 (as 480i)
+//if you dont want to upscale(fuzzy), but want the "lo-res feel"- set "fat pixel mode" at intended resolution (and draw with neighbors).
+
+//Droids and Pis can probably use "up to VGA modes" resolutions natively. Smaller screens= lower resolution needed.
+//after 1024, modern hardware drops support for lower resolutions (and palettes), GL doesnt support less than 24bpp.
+//I could force the issue(palettes), but why? Im using 24bpp inside the LUT.
+
+//below 320 will probably be stretched anyways, the canvas is too small on modern screens.(Let me get to this)
+
+//MAC: 640x480,800x600,1024x768 up to 24bpp is supported
+//droids and pis will have to have weird half-resolutions and bpps added in later on.
+
+//TrueColors modes (>24bpp) produce one problem: We can no longer track the maximum colors(exceeds bounds).
+{
+BitDepth	Colors 
+
+1bit B/W = 2
+2bit CGA = 4
+4bit EGA = 16
+8bit VGA = 256
+15bit = 32k
+16bit = 64k
+24bit = 16M (max addressable colors with 32bit systems is: 4Million -2)
+32bit = 4.2B (or 16M+ blends) 
+ 
 }
 
 type
 
 	graphics_modes=(
 
-mCGA, 
-VGAMed,vgaMedx256,
-vgaHi,VGAHix256,VGAHix32k,VGAHix64k,
-m800x600x16,m800x600x256,m800x600x32k,m800x800x64k,
-m1024x768x256,m1024x768x32k,m1024x768x64k,m1024x768x24,
-m1280x720x256,m1280x720x32k,m1280x720x64k,m1280x720x24,
-m1280x1024x256,m1280x1024x32k,m1280x1024x64k,m1280x1024x24,m1280x1024x32,
-m1366x768x256,m1366x768x32k,m1366x768x64k,m1366x768x24,m1366x768x32,
-m1920x1080x256,m1920x1080x32k,m1920x1080x64k,m1920x1080x24,m1920x1080x32);
+m160x100x16,
+m320x200x4,m320x200x16,m320x200x256,
+m640x200x2,m640x200x16,
+m640x480x16, m640x480x256, m640x480x32k, m640x480x64k,m640x480xMil,
+m800x600x16,m800x600x256,m800x600x32k,m800x800x64k,m800x600xMil
+m1024x768x16,m1024x768x256,m1024x768x32k,m1024x768x64k,m1024x768xMil,
+m1280x720x256,m1280x720x32k,m1280x720x64k,m1280x720xMil,
+m1280x1024x16,m1280x1024x256,m1280x1024x32k,m1280x1024x64k,m1280x1024xMil,
+m1366x768x256,m1366x768x32k,m1366x768x64k,m1366x768xMil,
+m1920x1080x256,m1920x1080x32k,m1920x1080x64k,m1920x1080xMil);
 
 //data is in the main unit Init routines.
 
@@ -979,10 +1009,10 @@ type
   Pmodelist=^TmodeList;
 
 //wants graphics_modes??
-  TmodeList=array [0 .. 31] of TMode;
+  TmodeList=array [0 .. 40] of TMode;
 
   PSDLmodeList=^TSDLmodeList;
-  TSDLmodeList=array [0 .. 31] of TSDL_DisplayMode;
+  TSDLmodeList=array [0 .. 40] of TSDL_DisplayMode;
 
 //single mode
   Pmode=^TMode;
@@ -5087,99 +5117,186 @@ begin
     exit;
   end;
   pathToDriver:='';  //unused- code compatibility
-  iconpath:='./sdlbgi.bmp'; //sdl2.0 doesnt use this.
+//  iconpath:='./sdlbgi.bmp'; sdl2.0 doesnt use this.
 
-//this has to be done inline to the running code, unfortunately
-  case(graphmode) of 
-	     mCGA:begin
-			MaxX:=320;
-			MaxY:=240;
-			bpp:=4; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:=false;	
-            XAspect:=4;
-            YAspect:=3; 
-		end;
+  case(graphmode) of
 
-        //color tv mode
-		VGAMed:begin
-            MaxX:=320;
-			MaxY:=240;
-			bpp:=8; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:=false;	
-            XAspect:=4;
-            YAspect:=3; 
+{
+         we have full frame LFB now- planar storage doesnt make sense, is very bit-wise...
+         -and very hard to do animations with.
 
-		end;
+         bitshifting is significantly faster than math operations, however. Not everyone took this into account.
 
-		//spec breaks here for Borlands VGA support(not much of a specification thx to SDL...)
-		//this is the "default VGA minimum".....since your not running below it, dont ask to set FS in it...
-        // if you did that you would have to scale the output...
-		//(more werk???)
+         SDL becomes slow on put/getpixel ops due to repeated "one shot" operations instead of batches(buffered ops/surfaces)
+         each get/putPixel operation *may* have to shift colors- AND was slowed down further by a (now removed) Pixel Mask(BGI).
+		 (this was supposed to be only for lines and pen strokes)
 
-		VGAHi:begin
-            MaxX:=640;
-			MaxY:=480;
-			bpp:=4; 
-			MaxColors:=16;
-            NonPalette:=false;
-    		TrueColor:=false;	
-            XAspect:=4;
-            YAspect:=3; 
+         Hardware surfaces add wait times during copy operations between graphics hardware and CPU memory.
+         ** SDL1 MAY NOT SUPPORT HW Surfaces on newer hardware**
+         
+         Despite the GPU being several orders (10x?) of magnitude faster than the CPU,GPU ops must also be "byte aligned".
+         -In this case, 32 bits.
 
-		end;
+         How 24bit is natively supported, nobody will ever know. Probably like I do 15bit modes.
 
-		VGAHix256:begin
-            MaxX:=640;
-			MaxY:=480;
-			bpp:=8; 
-			MaxColors:=256;
-            NonPalette:=False;
-		    TrueColor:=false;	
-            XAspect:=4;
-            YAspect:=3; 
+         Despite rumors- 
+                CGA is 4COLOR, 4Mode Graphics. 16 color mode is "extremely low resolution" on CGA systems.
+                EGA and VGA use 16 color modes.
 
-		end;
+        You probably remember some text mode hack- or use of text mode symbols, like MegaZuex (openmzx) uses.
 
-		VGAHix32k:begin //im not used to these ones (15bits)
-           MaxX:=640;
-		   MaxY:=480;
-		   bpp:=15; 
-		   MaxColors:=32768;
-           NonPalette:=true;
-           TrueColor:=false;
-           XAspect:=4;
-           YAspect:=3; 
-
-		end;
-
-		VGAHix64k:begin
-           MaxX:=640;
-		   MaxY:=480;
-		   bpp:=16; 
-		   MaxColors:=65535;
-           NonPalette:=true;
-		   TrueColor:=false;	
-           XAspect:=4;
-           YAspect:=3; 
-
-		end;
+		bpp is always set to 8 on lower bitdepths, MaxColors variable checks the actual depth(SDL bug workaround).
+		SDL supports these "LSB modes" but wont allow get/putpixel ops in these modes(why?).
+		
+		TODO: Re-add 32bpp modes (like 4? 720p and above....) which were removed in a recent mod to fix the Modelist resolutions. 
+		
+}
 
 		//standardize these as much as possible....
 
-		m800x600x16:begin
-            MaxX:=800;
-			MaxY:=600;
-			bpp:=4; 
+		//lo-res modes-try using SDL_SOFTSTRETCH()
+		
+		//CGALo
+		m160x100x16:begin
+            MaxX:=160;
+			MaxY:=100;
+			bpp:=8; 
+			MaxColors:=16;
+            NonPalette:=false;
+		    TrueColor:=false;
+		    //some of these its weird, 4x3 unless otherwise specified	
+            XAspect:=4;
+            YAspect:=3; 		
+		end;
+		
+		//CGAMed - there are 4 viable palettes in this mode
+		m320x200x4:begin
+		    MaxX:=320;
+			MaxY:=200;
+			bpp:=8; 
+			MaxColors:=4;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+		end;	
+			
+		//CGAHi
+		m640x200x2:begin
+		    MaxX:=640;
+			MaxY:=200;
+			bpp:=8; 
+			MaxColors:=2;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+		end;
+
+		//EGA
+		m320x200x16:begin
+		    MaxX:=320;
+			MaxY:=200;
+			bpp:=8; 
+			MaxColors:=16;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 		
+		end;		
+		
+		//VGALo
+		m320x200x256:begin
+			MaxX:=320;
+			MaxY:=200;
+			bpp:=8; 
+			MaxColors:=256;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+		end;
+		
+		//EGAHi (or VGAMed)
+		m640x200x16:begin
+			MaxX:=640;
+			MaxY:=200;
+			bpp:=8; 
+			MaxColors:=16;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 		
+		end;		
+
+		//end lo-res modes
+		
+		//VGAHi
+		m640x480x16:begin
+			MaxX:=640;
+			MaxY:=480;
+			bpp:=8; 
 			MaxColors:=16;
             NonPalette:=false;
 		    TrueColor:=false;	
             XAspect:=4;
             YAspect:=3; 
+		end;
 
+		m640x480x256:begin
+		    MaxX:=800;
+			MaxY:=600;
+			bpp:=8; 
+			MaxColors:=256;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+		end;
+
+		m640x480x32k:begin
+		    MaxX:=640;
+			MaxY:=480;
+			bpp:=15; 
+			MaxColors:=32768;
+            NonPalette:=True;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+		end;
+
+		m640x480x64k:begin
+		    MaxX:=640;
+			MaxY:=480;
+			bpp:=16; 
+			MaxColors:=65535;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+		end;
+
+		m640x480xMil:begin
+		    MaxX:=640;
+			MaxY:=480;
+			bpp:=24; 
+			MaxColors:=0; //no op
+            NonPalette:=True;
+		    TrueColor:=True;	
+            XAspect:=4;
+            YAspect:=3; 
+		end;
+
+		//SVGA (and VESA modes)
+		m800x600x16:begin
+            MaxX:=800;
+			MaxY:=600;
+			bpp:=8; 
+			MaxColors:=16;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
 		end;
 
 		m800x600x256:begin
@@ -5191,7 +5308,6 @@ begin
 		    TrueColor:=false;	
             XAspect:=4;
             YAspect:=3; 
-
 		end;
 
 
@@ -5204,9 +5320,28 @@ begin
 		   TrueColor:=false;	
            XAspect:=4;
            YAspect:=3; 
-
+		end;
+		m800x600xMil:begin
+           MaxX:=800;
+		   MaxY:=600;
+		   bpp:=24; 
+		   MaxColors:=0;
+           NonPalette:=true;
+		   TrueColor:=true;	
+           XAspect:=4;
+           YAspect:=3; 		
 		end;
 
+		m1024x768x16:begin
+           MaxX:=1024;
+		   MaxY:=768;
+		   bpp:=8; 
+		   MaxColors:=16;
+           NonPalette:=false;
+		   TrueColor:=false;	
+           XAspect:=4;
+           YAspect:=3; 				
+		end;
 
 		m1024x768x256:begin
             MaxX:=1024;
@@ -5241,7 +5376,17 @@ begin
 		   TrueColor:=false;	
            XAspect:=4;
            YAspect:=3; 
+		end;
 
+		m1024x768xMil:begin
+           MaxX:=1024;
+		   MaxY:=768;
+		   bpp:=24; 
+		   MaxColors:=0;
+           NonPalette:=true;
+		   TrueColor:=true;	
+           XAspect:=4;
+           YAspect:=3; 
 		end;
 
 
@@ -5281,7 +5426,7 @@ begin
 
 		end;
 
-		m1280x720x24:begin
+		m1280x720xMil:begin
 		   MaxX:=1280;
 		   MaxY:=720;
 		   bpp:=24; 
@@ -5291,6 +5436,17 @@ begin
            XAspect:=16;
            YAspect:=9; 
 
+		end;
+
+		m1280x1024x16:begin
+			MaxX:=1280;
+			MaxY:=1024;
+			bpp:=8; 
+			MaxColors:=16;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
 		end;
 
 		m1280x1024x256:begin
@@ -5329,23 +5485,11 @@ begin
 
 		end;
 
-		m1280x1024x24:begin
+		m1280x1024xMil:begin
            MaxX:=1280;
 		   MaxY:=1024;
 		   bpp:=24; 
 		   MaxColors:=16777216;
-           NonPalette:=true;
-		   TrueColor:=true;	
-           XAspect:=4;
-           YAspect:=3; 
-
-		end;
-
-		m1280x1024x32:begin
-           MaxX:=1280;
-		   MaxY:=1024;
-		   bpp:=32; 
-		   MaxColors:=4294967295;
            NonPalette:=true;
 		   TrueColor:=true;	
            XAspect:=4;
@@ -5389,7 +5533,7 @@ begin
 
 		end;
 
-		m1366x768x24:begin
+		m1366x768xMil:begin
            MaxX:=1366;
 		   MaxY:=768;
 		   bpp:=24; 
@@ -5400,19 +5544,6 @@ begin
            YAspect:=9; 
 
 		end;
-
-		m1366x768x32:begin
-           MaxX:=1366;
-		   MaxY:=768;
-		   bpp:=32; 
-		   MaxColors:=4294967295;
-           NonPalette:=true;
-		   TrueColor:=true;	
-           XAspect:=16;
-           YAspect:=9; 
-
-		end;
-
 
 		m1920x1080x256:begin
             MaxX:=1920;
@@ -5450,24 +5581,11 @@ begin
 
 		end;
 
-		m1920x1080x24:begin  
+		m1920x1080xMil:begin  
  	       MaxX:=1920;
 		   MaxY:=1080;
 		   bpp:=24; 
 		   MaxColors:=16777216;
-           NonPalette:=true;
-		   TrueColor:=true;	
-           XAspect:=16;
-           YAspect:=9; 
-
-		end;
-
-
-		m1920x1080x32: begin
- 	       MaxX:=1920;
-		   MaxY:=1080;
-		   bpp:=32; 
-		   MaxColors:=4294967295;
            NonPalette:=true;
 		   TrueColor:=true;	
            XAspect:=16;
@@ -5490,26 +5608,26 @@ Lets use WHAT WE WANT, DAMNIT.
 }
 
 {$IFDEF mswindows}
-	SDL_putenv("SDL_VIDEODRIVER=directx"); //Use DirectX, dont use GDI
-	SDL_putenv("SDL_AUDIODRIVER=dsound"); //Fuck it, use direct sound, too.
+	_putenv('SDL_VIDEODRIVER=directx'); //Use DirectX, dont use GDI
+	_putenv('SDL_AUDIODRIVER=dsound'); //Fuck it, use direct sound, too.
 {$ENDIF}
 
 //OS9 support removed in SDL v1.3+
 
 {$IFDEF darwin}
-	SDL_putenv("SDL_VIDEODRIVER=quartz"); //Quartz2D
-	SDL_putenv("SDL_AUDIODRIVER=coreaudio"); //The new OSX Audio Subsystem
+	_putenv('SDL_VIDEODRIVER=quartz'); //Quartz2D
+	_putenv('SDL_AUDIODRIVER=coreaudio'); //The new OSX Audio Subsystem
 {$ENDIF}
 
 {$IFDEF unix}
     {$IFNDEF console}
 	   //Pretty deFacto Standard stuff
-	   SDL_putenv("SDL_VIDEODRIVER=x11");
-	   SDL_putenv("SDL_AUDIODRIVER=pulse"); 
+	   _putenv('SDL_VIDEODRIVER=x11');
+	   _putenv('SDL_AUDIODRIVER=pulse'); 
     {$ENDIF}
        //Were in a TTY, NO x11...
-	   SDL_putenv("SDL_VIDEODRIVER=svgalib"); //svgalib on FB (FPC has working-albeit tiny- Graphics unit for this.)
-	   SDL_putenv("SDL_AUDIODRIVER=alsa"); //Guessing here- should be available.        
+	   _putenv('SDL_VIDEODRIVER=svgalib'); //svgalib on FB (FPC has working-albeit tiny- Graphics unit for this.)
+	   _putenv('SDL_AUDIODRIVER=alsa'); //Guessing here- should be available.        
 {$ENDIF}
 //Note this does not use OpenGL on purpose. You can still get 2D acceleration.
 
@@ -5523,6 +5641,7 @@ Lets use WHAT WE WANT, DAMNIT.
   if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
   if WantsJoyPad then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
 //if WantInet then SDL_Init_Net;
+
 
   if ( SDL_Init(_initflag) < 0 ) then begin
      //we cant speak- write something down.

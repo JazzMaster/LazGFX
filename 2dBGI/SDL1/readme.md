@@ -1,16 +1,23 @@
-SDL2 implementation of LazGfx Core(Borland replacement BGI)
+SDL1.2 implementation of LazGfx Core(Borland replacement BGI)
 
-Leave the DLLs here.
+Leave some sort of Windows DLLs here. 
+
+These are 64bit ones, 32bit ones are in the folder- 
+if you need the older compatibility ones(32bit), remove those here('rm *.dll') and put the other ones here.
+(keep your download- you might want all of the DLLs - and I need something to test with)
+
 
 When you build using fpc(lazarus cant hook SDL correctly)- 
-	SDL.pas header will require them if building on win32/64.
+
+	SDL.pas header will require the DLLs if building on win32/64.
+
 	If building on unices, it will pull the installed SDL shared0object files from the OS location
 		/usr/lib/x86_64-linux-gnu , usually 
 		-You just need to install SDL12 and SDL2 dev packages.
+		
+Distribute the DLLs when you distribute your application of LazGfx, PLEASE!<br>
+(Dont make people hunt these down.)
 
-I will aim to have both win32/win64 dlls available- 
-as SDL1.2 still builds for playstation and older powerpc macs
-(get the belkin usb grey/purple wifi stick -or similar, airport is outdated and insecure tech). 
 
 The core routines are here- 
 	I have to work on ellippses,polys, and fills- 
@@ -18,11 +25,6 @@ The core routines are here-
 
 The tricky parts are C-syncing and Line drawing.
 (Bounds checks are everywhere as well.)
-
-These units are broken out- and not a single cohesive unit.<br>
-The reason behind this is not Laziness, I had to source these seperately or something was iffy or something else...<br>
-I forget. Anyways the headers are good now, and we can combine the sub-units. SDL include (depends) recursion 
-can also be avoided.
 
 Licence updated to Apache/Mozilla "for your programming pleasure".
 
@@ -46,17 +48,9 @@ BULLSHIT. I JUST DID IT.
 
 ---		
 
-state:  WIP 0.85(buggy, see the released files)
+state:  WIP 0.58(buggy, half-assed in places)
 
----
-You wont notice much difference in code(from SDL12) as its running or called-
-	the differences should be internal.
-
-Units SDL2_BGI and LazGFX will be merged. The C needs to be translated(and backported in).
-
-#### Some SDL12 routines disappear- 
-
-	Joystick/Haptic?
+--
 
 Sound is provided by libuos(Portaudio)
 

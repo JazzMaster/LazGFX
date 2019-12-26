@@ -59,7 +59,7 @@ NONE OF WHICH WERE PROPERLY INCORPORATED HERE!
 
 (use: GL,GLU,freeGLUT)
 
-  SDLv1.2 conversion was deon by the JEDI-Team,  written by Domenique Louis and others.
+  SDLv1.2 conversion was done by the JEDI-Team,  written by Domenique Louis and others.
 
   I've changed the names of the dll for 32 & 64-Bit, so theres no conflict
   between 32 & 64 bit Libraries.
@@ -114,275 +114,6 @@ NONE OF WHICH WERE PROPERLY INCORPORATED HERE!
 {$IFDEF LINUX}
 	{$DEFINE UNIX}
 {$ENDIF}
-
-//Compiler support: WinXP and above(OGL 2.0)
-
-//borland
-{$IFDEF ver150}
-   {$DEFINE Delphi}      {Delphi 7.x}
-   {$DEFINE Delphi4UP}
-   {$DEFINE Delphi5UP}
-   {$DEFINE Delphi6UP}
-   {$DEFINE Delphi7UP}
-   {$WARN UNSAFE_TYPE OFF} {Disable warning for unsafe types}
-   {$DEFINE Has_Int64}
-   {$DEFINE Has_UInt64}
-   {$DEFINE Has_Native}
-   {$DEFINE HAS_TYPES}
-{$ENDIF ver150}
-
-{$IFDEF ver180}
-   {$DEFINE Delphi}      {Delphi / C++ Builder 2006 / 2007}
-   {$DEFINE Delphi4UP}
-   {$DEFINE Delphi5UP}
-   {$DEFINE Delphi6UP}
-   {$DEFINE Delphi7UP}
-   {$DEFINE Delphi8UP}
-   {$DEFINE Delphi9UP}
-   {$DEFINE Delphi10UP}
-   {$WARN UNSAFE_TYPE OFF} {Disable warning for unsafe types}
-   {$DEFINE Has_Int64}
-   {$DEFINE Has_UInt64}
-   {$DEFINE Has_Native}
-   {$DEFINE HAS_TYPES}
-{$ENDIF ver180}
-
-//codegear release
-{$IFDEF ver185}
-   {$DEFINE Delphi}      {Delphi / C++ Builder 2007}
-   {$DEFINE Delphi4UP}
-   {$DEFINE Delphi5UP}
-   {$DEFINE Delphi6UP}
-   {$DEFINE Delphi7UP}
-   {$DEFINE Delphi8UP}
-   {$DEFINE Delphi9UP}
-   {$DEFINE Delphi10UP}
-   {$DEFINE Delphi11UP}
-   {$WARN UNSAFE_TYPE OFF} {Disable warning for unsafe types}
-   {$DEFINE Has_Int64}
-   {$DEFINE Has_UInt64}
-   {$DEFINE Has_Native}
-   {$DEFINE HAS_TYPES}
-{$ENDIF ver185}
-
-
-{$IFDEF ver190}
-   {$DEFINE Delphi}      {Delphi / C++ Builder 2007 }
-   {$DEFINE Delphi4UP}
-   {$DEFINE Delphi5UP}
-   {$DEFINE Delphi6UP}
-   {$DEFINE Delphi7UP}
-   {$DEFINE Delphi8UP}
-   {$DEFINE Delphi9UP}
-   {$DEFINE Delphi10UP}
-   {$DEFINE Delphi11UP}
-   {$DEFINE Delphi12UP}
-   {$WARN UNSAFE_TYPE OFF} {Disable warning for unsafe types}
-   {$DEFINE Has_Int64}
-   {$DEFINE Has_UInt64}
-   {$DEFINE Has_Native}
-   {$DEFINE HAS_TYPES}
-{$ENDIF ver190}
-
-{$IFDEF ver200}
-   {$DEFINE Delphi}      {Delphi / C++ Builder 2009 }
-   {$DEFINE Delphi4UP}
-   {$DEFINE Delphi5UP}
-   {$DEFINE Delphi6UP}
-   {$DEFINE Delphi7UP}
-   {$DEFINE Delphi8UP}
-   {$DEFINE Delphi9UP}
-   {$DEFINE Delphi10UP}
-   {$DEFINE Delphi11UP}
-   {$DEFINE Delphi12UP}
-   {$DEFINE Delphi13UP}
-   {$WARN UNSAFE_TYPE OFF} {Disable warning for unsafe types}
-   {$DEFINE Has_Int64}
-   {$DEFINE Has_UInt64}
-   {$DEFINE Has_Native}
-   {$DEFINE HAS_TYPES}
-{$ENDIF ver200}
-
-{$IFDEF ver210}
-   {$DEFINE Delphi}      {Delphi / C++ Builder 2010}
-   {$DEFINE Delphi4UP}
-   {$DEFINE Delphi5UP}
-   {$DEFINE Delphi6UP}
-   {$DEFINE Delphi7UP}
-   {$DEFINE Delphi8UP}
-   {$DEFINE Delphi9UP}
-   {$DEFINE Delphi10UP}
-   {$DEFINE Delphi11UP}
-   {$DEFINE Delphi12UP}
-   {$DEFINE Delphi13UP}
-   {$DEFINE Delphi14UP}
-   {$WARN UNSAFE_TYPE OFF} {Disable warning for unsafe types}
-   {$DEFINE Has_Int64}
-   {$DEFINE Has_UInt64}
-   {$DEFINE Has_Native}
-   {$DEFINE HAS_TYPES}
-{$ENDIF ver210}
-
-//embrecardo takeover
-{$IFDEF ver220}
-   {$DEFINE Delphi}      {Delphi / C++ Builder XE}
-   {$DEFINE Delphi4UP}
-   {$DEFINE Delphi5UP}
-   {$DEFINE Delphi6UP}
-   {$DEFINE Delphi7UP}
-   {$DEFINE Delphi8UP}
-   {$DEFINE Delphi9UP}
-   {$DEFINE Delphi10UP}
-   {$DEFINE Delphi11UP}
-   {$DEFINE Delphi12UP}
-   {$DEFINE Delphi13UP}
-   {$DEFINE Delphi14UP}
-   {$DEFINE Delphi15UP}
-   {$WARN UNSAFE_TYPE OFF} {Disable warning for unsafe types}
-   {$DEFINE Has_Int64}
-   {$DEFINE Has_UInt64}
-   {$DEFINE Has_Native}
-   {$DEFINE HAS_TYPES}
-{$ENDIF ver220}
-
-{$IFDEF ver230}
-   {$DEFINE Delphi}      {Delphi / C++ Builder XE2}
-   {$DEFINE Delphi4UP}
-   {$DEFINE Delphi5UP}
-   {$DEFINE Delphi6UP}
-   {$DEFINE Delphi7UP}
-   {$DEFINE Delphi8UP}
-   {$DEFINE Delphi9UP}
-   {$DEFINE Delphi10UP}
-   {$DEFINE Delphi11UP}
-   {$DEFINE Delphi12UP}
-   {$DEFINE Delphi13UP}
-   {$DEFINE Delphi14UP}
-   {$DEFINE Delphi15UP}
-   {$DEFINE Delphi16UP}
-   {$WARN UNSAFE_TYPE OFF} {Disable warning for unsafe types}
-   {$DEFINE Has_Int64}
-   {$DEFINE Has_UInt64}
-   {$DEFINE Has_Native}
-   {$DEFINE HAS_TYPES}
-{$ENDIF ver230}
-
-{$IFDEF ver240}
-   {$DEFINE Delphi}      {Delphi / C++ Builder XE4}
-   {$DEFINE Delphi4UP}
-   {$DEFINE Delphi5UP}
-   {$DEFINE Delphi6UP}
-   {$DEFINE Delphi7UP}
-   {$DEFINE Delphi8UP}
-   {$DEFINE Delphi9UP}
-   {$DEFINE Delphi10UP}
-   {$DEFINE Delphi11UP}
-   {$DEFINE Delphi12UP}
-   {$DEFINE Delphi13UP}
-   {$DEFINE Delphi14UP}
-   {$DEFINE Delphi15UP}
-   {$DEFINE Delphi16UP}
-   {$DEFINE Delphi17UP}
-   {$WARN UNSAFE_TYPE OFF} {Disable warning for unsafe types}
-   {$DEFINE Has_Int64}
-   {$DEFINE Has_UInt64}
-   {$DEFINE Has_Native}
-   {$DEFINE HAS_TYPES}
-{$ENDIF ver240}
-
-{$IFDEF ver250}
-   {$DEFINE Delphi}      {Delphi / C++ Builder XE5}
-   {$DEFINE Delphi4UP}
-   {$DEFINE Delphi5UP}
-   {$DEFINE Delphi6UP}
-   {$DEFINE Delphi7UP}
-   {$DEFINE Delphi8UP}
-   {$DEFINE Delphi9UP}
-   {$DEFINE Delphi10UP}
-   {$DEFINE Delphi11UP}
-   {$DEFINE Delphi12UP}
-   {$DEFINE Delphi13UP}
-   {$DEFINE Delphi14UP}
-   {$DEFINE Delphi15UP}
-   {$DEFINE Delphi16UP}
-   {$DEFINE Delphi17UP}
-   {$WARN UNSAFE_TYPE OFF} {Disable warning for unsafe types}
-   {$DEFINE Has_Int64}
-   {$DEFINE Has_UInt64}
-   {$DEFINE Has_Native}
-   {$DEFINE HAS_TYPES}
-{$ENDIF ver250}
-
-{$IFDEF ver260}
-   {$DEFINE Delphi}      {Delphi / C++ Builder XE6}
-   {$DEFINE Delphi4UP}
-   {$DEFINE Delphi5UP}
-   {$DEFINE Delphi6UP}
-   {$DEFINE Delphi7UP}
-   {$DEFINE Delphi8UP}
-   {$DEFINE Delphi9UP}
-   {$DEFINE Delphi10UP}
-   {$DEFINE Delphi11UP}
-   {$DEFINE Delphi12UP}
-   {$DEFINE Delphi13UP}
-   {$DEFINE Delphi14UP}
-   {$DEFINE Delphi15UP}
-   {$DEFINE Delphi16UP}
-   {$DEFINE Delphi17UP}
-   {$WARN UNSAFE_TYPE OFF} {Disable warning for unsafe types}
-   {$DEFINE Has_Int64}
-   {$DEFINE Has_UInt64}
-   {$DEFINE Has_Native}
-   {$DEFINE HAS_TYPES}
-{$ENDIF ver260}
-
-{$IFDEF ver270}
-   {$DEFINE Delphi}      {Delphi / C++ Builder XE7}
-   {$DEFINE Delphi4UP}
-   {$DEFINE Delphi5UP}
-   {$DEFINE Delphi6UP}
-   {$DEFINE Delphi7UP}
-   {$DEFINE Delphi8UP}
-   {$DEFINE Delphi9UP}
-   {$DEFINE Delphi10UP}
-   {$DEFINE Delphi11UP}
-   {$DEFINE Delphi12UP}
-   {$DEFINE Delphi13UP}
-   {$DEFINE Delphi14UP}
-   {$DEFINE Delphi15UP}
-   {$DEFINE Delphi16UP}
-   {$DEFINE Delphi17UP}
-   {$WARN UNSAFE_TYPE OFF} {Disable warning for unsafe types}
-   {$DEFINE Has_Int64}
-   {$DEFINE Has_UInt64}
-   {$DEFINE Has_Native}
-   {$DEFINE HAS_TYPES}
-{$ENDIF ver270}
-
-{$IFNDEF FPC}	  
-{$IF CompilerVersion > 27}
-   {$DEFINE Delphi}      {Delphi / C++ Builder}
-   {$DEFINE Delphi4UP}
-   {$DEFINE Delphi5UP}
-   {$DEFINE Delphi6UP}
-   {$DEFINE Delphi7UP}
-   {$DEFINE Delphi8UP}
-   {$DEFINE Delphi9UP}
-   {$DEFINE Delphi10UP}
-   {$DEFINE Delphi11UP}
-   {$DEFINE Delphi12UP}
-   {$DEFINE Delphi13UP}
-   {$DEFINE Delphi14UP}
-   {$DEFINE Delphi15UP}
-   {$DEFINE Delphi16UP}
-   {$DEFINE Delphi17UP}
-   {$WARN UNSAFE_TYPE OFF} {Disable warning for unsafe types}
-   {$DEFINE Has_Int64}
-   {$DEFINE Has_UInt64}
-   {$DEFINE Has_Native}
-   {$DEFINE HAS_TYPES}
-{$IFEND}
-{$ENDIF}
 	  
 {$IFDEF WIN32}
     {$DEFINE 32BIT}
@@ -394,25 +125,12 @@ NONE OF WHICH WERE PROPERLY INCORPORATED HERE!
       {$DEFINE WINDOWS}
 {$ENDIF}
 
-
-{$IFDEF Delphi}
-  {$DEFINE USE_STDCALL}
-  {$IFDEF 32Bit}
-    {$DEFINE DELPHI32}
-  {$ELSE}
-    {$IFDEF 64Bit}
-	  {$DEFINE DELPHI64}
-	{$ENDIF}
-  {$ENDIF}
-  //{$ALIGN ON}
-{$ENDIF Delphi}
-
 {$IFDEF FPC}
   {$H+}
   {$PACKRECORDS C}        // Added for record
   {$PACKENUM DEFAULT}     // Added for c-like enumerators
   {$MACRO ON}             // Added For OpenGL
-  {$DEFINE Delphi}
+  {$DEFINE Delphi} //WHY?
   {$DEFINE UseAT}
   {$UNDEF USE_STDCALL}
   {$DEFINE OS_BigMem}
@@ -420,7 +138,9 @@ NONE OF WHICH WERE PROPERLY INCORPORATED HERE!
   {$DEFINE Has_UInt64}
   {$DEFINE Has_Int64}
   {$DEFINE Has_Native}
-  {$DEFINE NOCRT}
+
+  {$DEFINE NOCRT} //? getenv and putenv are libc....no crt unit??
+
   {$IFDEF UNIX}
      {$DEFINE fpc_unix}
   {$ENDIF}
@@ -693,11 +413,15 @@ procedure SDL_ClearError cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MAC
    *  Private error reporting function - used internally.
    *}
 
-    {
-#define SDL_OutOfMemory()   SDL_Error(SDL_ENOMEM)
-#define SDL_Unsupported()   SDL_Error(SDL_UNSUPPORTED)
-#define SDL_InvalidParamError(param)    SDL_SetError("Parameter '%s' is invalid", (param))
-   }
+{
+ proceedure declarations:
+ SDL_OutOfMemory()   = procedure SDL_Error(SDL_ENOMEM)
+ SDL_Unsupported()   =procedure SDL_Error(SDL_UNSUPPORTED)
+}
+
+ procedure SDL_InvalidParamError(param:string);
+
+ 
 type
   TSDL_ErrorCode = (SDL_ENOMEM,
                     SDL_EFREAD,
@@ -960,6 +684,27 @@ procedure SDL_DetachThread(thread:TSDL_Thread); cdecl; external SDL_LibName {$IF
    *   SDL_TLSGet()
    *   SDL_TLSSet()
    *}
+
+{$IFDEF WINDOWS}
+function _putenv( const variable : Pchar ): integer; cdecl;
+{$ENDIF}
+
+{$IFDEF Unix}
+function _putenv( const variable : Pchar ): integer; cdecl; external 'libc.so' name 'putenv';
+{$ENDIF}
+
+{$EXTERNALSYM putenv}
+
+{$IFDEF WINDOWS}
+function getenv( const name : Pchar ): PChar; cdecl;
+{$ENDIF}
+
+{$IFDEF Unix}
+function _getenv( const variable : Pchar ): integer; cdecl; external 'libc.so' name 'getenv';
+{$ENDIF}
+
+{$EXTERNALSYM getenv}
+   
 function SDL_TLSCreate: TSDL_TLSID cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_TLSCreate' {$ENDIF} {$ENDIF};
 
   {**
@@ -1315,14 +1060,16 @@ function SDL_TICKS_PASSED(Const A, B:UInt32):Boolean;
     SDL_PACKEDLAYOUT_1010102 = 8;
 
     {
-        //todo!!
-function SDL_DEFINE_PIXELFORMAT(type, order, layour, bit, bytes: UInt32): Result;
+       
+function SDL_DEFINE_PIXELFORMAT(_type, order, layour, bit, bytes: UInt32): Result;
+begin
+   SDL_DEFINE_PIXELFORMAT:= ((1 shl 28) or ((_type) shl 24) or ((order) shl 20) or ((layout) shl 16) or ((bits) shl 8) or ((bytes) shl 0));
+end;
 
+//todo:
 function SDL_DEFINE_PIXELFOURCC(A,B,C,D: Variant): Variant;
 
-#define SDL_DEFINE_PIXELFORMAT(type, order, layout, bits, bytes) \
-    ((1 << 28) | ((type) << 24) | ((order) << 20) | ((layout) << 16) | \
-     ((bits) << 8) | ((bytes) << 0))
+ 
     }
 
 function SDL_PIXELFLAG(X: Cardinal): Cardinal;
@@ -1331,28 +1078,40 @@ function SDL_PIXELORDER(X: Cardinal): Cardinal;
 function SDL_PIXELLAYOUT(X: Cardinal): Cardinal;
 function SDL_BITSPERPIXEL(X: Cardinal): Cardinal;
 
-     {
-#define SDL_BYTESPERPIXEL(X) \
-    (SDL_ISPIXELFORMAT_FOURCC(X) ? \
-        ((((X) == SDL_PIXELFORMAT_YUY2) || \
-          ((X) == SDL_PIXELFORMAT_UYVY) || \
-          ((X) == SDL_PIXELFORMAT_YVYU)) ? 2 : 1) : (((X) >> 0) & 0xFF))
+{ 
+ 
+Do we Import? 
+cdecl; external SDL_LibName name '_SDL_SomethingOrOther';
+ 
 
-#define SDL_ISPIXELFORMAT_INDEXED(format)   \
-    (!SDL_ISPIXELFORMAT_FOURCC(format) && \
-     ((SDL_PIXELTYPE(format) == SDL_PIXELTYPE_INDEX1) || \
-      (SDL_PIXELTYPE(format) == SDL_PIXELTYPE_INDEX4) || \
-      (SDL_PIXELTYPE(format) == SDL_PIXELTYPE_INDEX8)))
+function SDL_IsPixelFormat_FOURCC(format: Variant);
+begin
+ 
 
-#define SDL_ISPIXELFORMAT_ALPHA(format)   \
-    (!SDL_ISPIXELFORMAT_FOURCC(format) && \
-     ((SDL_PIXELORDER(format) == SDL_PACKEDORDER_ARGB) || \
-      (SDL_PIXELORDER(format) == SDL_PACKEDORDER_RGBA) || \
-      (SDL_PIXELORDER(format) == SDL_PACKEDORDER_ABGR) || \
-      (SDL_PIXELORDER(format) == SDL_PACKEDORDER_BGRA)))
+end;
 
+function SDL_BYTESPERPIXEL(X:byte):byte; //or smallInt
+var
+   test:UInt32;
+begin
+    test:=SDL_ISPIXELFORMAT_FOURCC(X); 
+        if (test = SDL_PIXELFORMAT_YUY2) or (test = SDL_PIXELFORMAT_UYVY) or (test = SDL_PIXELFORMAT_YVYU) then 
+			SDL_BYTESPERPIXEL:=2 //16bit color
+    else // T/F boolean cant be a byte, ever.
+      SDL_BYTESPERPIXEL:=((test shr 0) and $FF)); //this is = to sizeof(pixelFormat) /4 
+end;
 
-  function SDL_IsPixelFormat_FOURCC(format: Variant);
+function SDL_ISPIXELFORMAT_INDEXED(format:Variant):boolean;
+
+begin   
+    (if not SDL_ISPIXELFORMAT_FOURCC(format) and 
+     ((SDL_PIXELTYPE(format) = SDL_PIXELTYPE_INDEX1) or (SDL_PIXELTYPE(format) = SDL_PIXELTYPE_INDEX4) or (SDL_PIXELTYPE(format) = SDL_PIXELTYPE_INDEX8)));
+end;
+
+function SDL_ISPIXELFORMAT_ALPHA(format:Variant):boolean;
+begin    
+    (!SDL_ISPIXELFORMAT_FOURCC(format) and ((SDL_PIXELORDER(format) = SDL_PACKEDORDER_ARGB) or (SDL_PIXELORDER(format) = SDL_PACKEDORDER_RGBA) or (SDL_PIXELORDER(format) = SDL_PACKEDORDER_ABGR) or (SDL_PIXELORDER(format) = SDL_PACKEDORDER_BGRA)));
+end;
 
 }
   {* Note: If you modify this list, update SDL_GetPixelFormatName() *}
@@ -1821,8 +1580,8 @@ function SDL_PointInRect(const p: PSDL_Point; const r: PSDL_Rect): Boolean; Inli
    *  Returns true if the rectangle has no area.
    *}
 
-  //changed from variant(b�����h!) to TSDL_Rect
-  //maybe PSDL_Rect?
+  //changed from variant to TSDL_Rect
+  
 function SDL_RectEmpty(const r: PSDL_Rect): Boolean; inline;
 
     {**
@@ -1993,9 +1752,6 @@ type
    *}
 
 function SDL_RWFromFile(const _file: PAnsiChar; const mode: PAnsiChar): PSDL_RWops; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_RWFromFile' {$ENDIF} {$ENDIF};
-
-  {function SDL_RWFromFP(fp: file; autoclose: TSDL_Bool): PSDL_RWops; cdecl; external SDL_LibName;} //don't know if this works
-
 function SDL_RWFromFP(fp: Pointer; autoclose: TSDL_Bool): PSDL_RWops; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_RWFromFP' {$ENDIF} {$ENDIF};
 
 function SDL_RWFromMem(mem: Pointer; size: SInt32): PSDL_RWops; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_RWFromMem' {$ENDIF} {$ENDIF};
@@ -3342,8 +3098,8 @@ const
 type
   TSDL_WindowFlags = DWord;
 
-function SDL_WINDOWPOS_ISUNDEFINED(X: Variant): Variant;
-function SDL_WINDOWPOS_ISCENTERED(X: Variant): Variant;
+function SDL_WINDOWPOS_ISUNDEFINED(X: Variant): boolean;
+function SDL_WINDOWPOS_ISCENTERED(X: Variant): boolean;
 
 
 const
@@ -6971,7 +6727,7 @@ type
 
 
   {**
-   *  \brief Get the current state of the mouse, in relation to the desktop
+   *   Get the current state of the mouse, in relation to the desktop
    *
    *  This works just like SDL_GetMouseState(), but the coordinates will be
    *  reported relative to the top-left of the desktop. This can be useful if
@@ -6980,18 +6736,18 @@ type
    *  useful if you need to track the mouse while dragging a window, where
    *  coordinates relative to a window might not be in sync at all times.
    *
-   *  \note SDL_GetMouseState() returns the mouse position as SDL understands
+   *   SDL_GetMouseState() returns the mouse position as SDL understands
    *        it from the last pump of the event queue. This function, however,
    *        queries the OS for the current mouse position, and as such, might
    *        be a slightly less efficient function. Unless you know what you're
    *        doing and have a good reason to use this function, you probably want
    *        SDL_GetMouseState() instead.
    *
-   *  \param x Returns the current X coord, relative to the desktop. Can be NULL.
-   *  \param y Returns the current Y coord, relative to the desktop. Can be NULL.
-   *  \return The current button state as a bitmask, which can be tested using the SDL_BUTTON(X) macros.
+   *  param x Returns the current X coord, relative to the desktop. Can be NULL.
+   *  param y Returns the current Y coord, relative to the desktop. Can be NULL.
+   *  return The current button state as a bitmask, which can be tested using the SDL_BUTTON(X) macros.
    *
-   *  \sa SDL_GetMouseState
+   *   SDL_GetMouseState
    *}
   function SDL_GetGlobalMouseState(x, y: PSInt32): UInt32; cdecl;
     external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetGlobalMouseState' {$ENDIF}{$ENDIF};
@@ -10187,11 +9943,55 @@ function SDL_WasInit(flags: UInt32): UInt32 cdecl; external SDL_LibName {$IFDEF 
  
 procedure SDL_Quit() cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_Quit' {$ENDIF} {$ENDIF};
 
-
-
-
 implementation
 
+//mixing strings and AnsiChars/PChars in DELPHI mode? A NO-NO.
+ procedure SDL_InvalidParamError(param:string);
+ var
+	bad:string;
+ begin
+     bad:='Parameter '+param+' is invalid';
+     SDL_SetError(PChar(bad));
+ end;
+
+{$IFDEF WINDOWS}
+function _putenv( const variable : Pchar ): Integer;
+cdecl; external 'MSVCRT.DLL';
+{$ENDIF}
+
+
+function SDL_putenv(const variable: PChar): Integer;
+begin
+  {$IFDEF WINDOWS}
+  Result := _putenv(variable);
+  {$ENDIF}
+
+  {$IFDEF UNIX}
+  {$IFDEF FPC}
+  Result := _putenv(variable);
+  {$ELSE}
+  Result := libc.putenv(variable);
+  {$ENDIF}
+  {$ENDIF}
+end;
+
+{$IFDEF WINDOWS}
+function getenv( const name : Pchar ): PChar;
+cdecl; external 'MSVCRT.DLL';
+{$ENDIF}
+
+function SDL_getenv(const name: PChar): PChar;
+begin
+  {$IFDEF WINDOWS}
+  Result := getenv( name );
+  {$ELSE}
+
+  {$IFDEF UNIX}
+  Result := fpgetenv(name);
+  {$ENDIF}
+
+  {$ENDIF}
+end;
 
 //who really cares?
 procedure SDL_VERSION(Out x: TSDL_Version);
@@ -10387,24 +10187,28 @@ begin
   Result := SDL_GameControllerAddMappingsFromRW(SDL_RWFromFile(FilePath, 'rb'), 1)
 end;
 
-{**
- *  Evaluates to true if the surface needs to be locked before access.
- *}
 function SDL_MUSTLOCK(const S: PSDL_Surface): Boolean;
+//only lock surfaces requiring RLE acceleration
 begin
   Result := ((S^.flags and SDL_RLEACCEL) <> 0)
 end;
 
-function SDL_WindowPos_IsUndefined(X: Variant): Variant;
+//variant nonsence?? what are you feeding this monster?
+function SDL_WindowPos_IsUndefined(X: Variant): boolean;
 begin
-  //Result := (X and $FFFF0000) = SDL_WINDOWPOS_UNDEFINED_MASK;
+  if (X and $FFFF0000) = SDL_WINDOWPOS_UNDEFINED_MASK then
+    Result := true
+  else
+    Result:=false;
 end;
 
-function SDL_WindowPos_IsCentered(X: Variant): Variant;
+function SDL_WindowPos_IsCentered(X: Variant): boolean;
 begin
-  //Result := (X and $FFFF0000) = SDL_WINDOWPOS_CENTERED_MASK;
+  if (X and $FFFF0000) = SDL_WINDOWPOS_CENTERED_MASK then
+    Result := true
+  else
+    Result:=false;
 end;
-
 
 
 end.

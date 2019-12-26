@@ -1,6 +1,8 @@
 Unit LazGFX; 
 
 //this is an FPC unit, not a Delphi or Borland one. Compile accordingly.
+//Borland version?? EH? You must be dreaming... 
+//I could cripple this unit and still use fpc, but I have to compile a few bins first(i8086).
 
 {$IFNDEF fpc}
  {$Fatal FPC Compiler not used, extended Pascal syntax (OBJ-P) is required.} 
@@ -26,22 +28,21 @@ A "fully creative rewrite" of the "Borland Graphic Interface" in SDLv1 (c) 2017-
 -with the assistance of others.
 
 ** DONT OVERTHINK THIS UNIT**
+
 There are easy solutions to these problems imposed upon us by SDL/ lack of a BGI.
 (The BGI doesnt need AA lines...)
 
-
-SDL unifies and simplifies programming for DirectX(D2D), Quartz2D, and X11.
-Therefore- it become easier to write code for these platforms.
+SDL unifies and simplifies programming for DirectX(D2D), Quartz2D, and X11(A REAL PAIN)- but it doesnt go far enough.
 However- the syntax is unfamiliar to most to be of use. Hence the "BGI port".
 
 The only SDL unit needed is SDL Pascal unit I have provided-
 smaller platforms wil need to 'break out the headers'. (FPC on modern systems is not affected by this.)
 
-(I am writing this on AMD64 Quad and OCTO core system >2.5Ghz with gigabytes of RAM and VRAM at my disposal)
-
+(I am writing this on AMD64 Quad and OCTO core system >2.5Ghz with gigabytes of RAM -and VRAM- at my disposal)
 
 GDI/GDI+ and core X11 Primitive ops(prior to XOrg merge) are excrutiatingly slow.
-(Please write code for DX7+ or a newer X11).
+Please build on a newer X11. SDL1 cannot reliably use X11 acceleration (or 2d acceleration) using the older X11 (vs XOrg) system.
+
 
 Byte/SmallInt are 8bit references
 Word/Integer are 16bit references
@@ -51,13 +52,16 @@ QuadWords are 64bit references
 **Code Intentionally uses forced 32bit references.**
 
 Too many shortcuts are taken with most BGI graphics units.
-This is the 'most complete' version that I have found. As far as compatibility- I am porting some C here- to fix this.
-A lot was added.
+
+This is the 'most complete' version that I have found. 
+As far as compatibility- I am porting some C here- to fix this.
+A lot was added. SOME WAS CHANGED.
 
 --Jazz
 
 
-Apache/Mozilla licensed(FREED).
+Apache/Mozilla licensed(FREED). I dont want to hear bitching about the changes in license.
+
 
 Sections from FPC unit are from Jonas Maebe-and other where noted.
 
@@ -66,31 +70,26 @@ warranty. In no event will the authors be held liable for any damages
 arising from the use of this software.
 
 Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it
+*including commercial applications and resale*, and to alter it and redistribute it
 freely, subject to the following restrictions:
 
-1. The origin of this software must not be misrepresented; you must not
+1. The origin of this software *must not be misrepresented*; you must not
    claim that you wrote the original software. If you use this software
    in a product, an acknowledgment in the product documentation would be
    appreciated but is not required.
+
 2. Altered source versions must be plainly marked as such, and must not be
    misrepresented as being the original software.
+   
 3. This notice may not be removed or altered from any source distribution.
 
 --
 
-This unit is for compatiblility -FPC can pull in this unit - if done correctly- bypassing 
+This unit is for compatiblility (FPC can pull in this unit - if done correctly) bypassing 
 FPCs ANCIENT libSVGA unit version of libGraph and "compensating for using X11" these days.
 
 That old FPC libSVGA unit "may be useful" once we get Framebuffer or KMS functional-
-either as a fallback- or for RasPi.
-
-
-Commercial software is allowed- I would like the backported changes and modifications.
-I dont care what you use the source code for- just give me credit.
-
-You must cite original authors and sub authors, as appropriate(standard attribution rules).
-DO NOT CLAIM THIS CODE AS YOUR OWN and you MAY NOT remove this notice.
+either as a fallback- or for RasPi. Within X11, the code is useless (and an archaic dinosaur).
 
 Although designed "for games programming"..the integration involved by the USE, ABUSE, and REUSE-
 of SDL and X11Core/WinAPI highlights so many OS internals its not even funny.
@@ -98,14 +97,12 @@ of SDL and X11Core/WinAPI highlights so many OS internals its not even funny.
 Anyone serious enough to work with SDL on an ongoing basis- is doing some SERIOUS development,
 moreso if they are "expanding the reach" of SDL using a language "without much love" such as FreePascal.
 
-LCL/Lazarus references will be removed- Lazarus is NOT compatible with the Window/Graphical Context hooks provided here.
-IT IS COMPATIBLE with 3D OpenGL ones. Until Windows/MacOSX/X11 hooks can be pulled thru correctly- this cannot be fixed.
-SDL provides no way of doing this correctly in a 'sensible PASCAL manner'.
+True event driven applications and games REQUIRE OS (win/mac and linux internals) programming skills(min 4yr college equiv).
+Just dont think you can fake your way thru college- you code will speak to your shortcuts. 
 
--If you figure out how to do this on modern hardware, with recent code- Im all ears.
-
-
-Its easier to fix my code than patch the SDL headers, which appear flawed at the moment. Im working on fixing this.
+Its easier to fix my code than patch the SDL headers, which appear flawed at the moment. 
+YAAY FOR FLAWED CODE!
+ 
 }
 
 interface
@@ -158,7 +155,7 @@ windows:
 Most Games (and Game consoles dont have a debugging output window)
 
 -This code can check for the LCL- but you wont be able to use it WITH the LCL.
-(shoot self in foot twice, Laz DEVS!!)
+(shoot self in foot twice, Laz DEVS...hand over the window handlde and context, please....)
 
 ---
 
@@ -172,7 +169,9 @@ We will have some limits:
         The only way to work with these systems is to clear EVERYTHING REPEATEDLY or use CPU and RAM to your advantage.
         (There is a way..)
 
-Many dont understand SDLv1 use- then get thrown and force fed SDL2.x and GPU_ opcodes.
+Many dont understand SDLv1 use- then get thrown and force fed SDL2.x and GPU_ functions.
+
+
 
 How to write good games:
         -learn to thread and use callback interrupts-
@@ -185,39 +184,47 @@ OGL (straight)
 aux libs:
 
 	uOS (sound)
-	Synapse/Synaser (net)
+	Synapse/Synaser (net, pascal compatible)
 
 You need to know:
 
         event-driven input and rendering loops (forget the console and ReadKEY)
+
+I dont know how many times that Ive seen readkey used....IN "EVENT DRIVEN" APPLICATIONS and LIBRARIES.         
+DO NOT IGNORE A VERY IMPORTANT INTERRUPT-BASED PART OF YOUR OPERATING SYSTEM!!
          
 ---
 
 There is a lot of plugins for SDL/SDLv2 and that initially confused the heck out of me.
 Most of those were ported to FPC by JEDI team. I have cleaned that mess up, except for depends.
+JEDI is more like "JOKER PASCAL DEV-TEAM". A bunch of nobodys, no contact info, no nothing...and sloppy work at best.
+The code is now vaporware- as is thier website and linked data.
 
 
 SDL_Image is JPEG, TIF, PNG support (BMP is in SDL(core))
 (you will likely want this unit)
 
 
-Circle/ellippse:
+Circle/ellipse:
 The difference between an ellipse and a circle is that "an ellipse is corrected for the aspect ratio".
+(ellipses are flattened on two sides)
 
 FONTS:
 
     I have some base fonts- most likely your OS has some - but not standardized ones.
 
-    We do NOT use bitmapped fonts- we use TTF.
-    In many ways this is better.
+    **We do NOT use bitmapped fonts- we use TTF**.
+    In many ways this is better. BitMapped fonts are being removed in "new code".
 
 
-Lazarus TCanvas unit(s) (graph, graphics) are severely lacking. There is another project being brought alongsie this one to fix TCanvas.
+Lazarus TCanvas unit(s) (graph, graphics) are severely lacking. 
+There is another project being brought alongsie this one to fix TCanvas.
 
-The FPC devs assume you can understand OpenGL right away...thats bad.
+
+The FPC devs assume you can understand OpenGL right away...thats bad. GL LAz demos are also broken.
 I dont agree w "basic drawing primitives" being an "objectified mess".
 
-OpenGL is NOT DESIGNED FOR 2D OPERATIONS.
+OpenGL is NOT DESIGNED FOR 2D OPERATIONS. NOT REALLY.
 
 
 HELP:
@@ -240,53 +247,58 @@ SDL_Audio "licensing issues" (Fraunhoffer/MP3 is a cash cow) -as with qb64, whic
 The workaround is to use VLC/FFMpeg or other libraries. 
 
 Linear Framebuffer is virtually required(OS Drivers) and bank switching has had some isues in DOS.
-A lot of code back in the day(20 years ago) was written to use "banks" due to color or VRAM limitations.
+A lot of code back in the day(20 years ago) was written to use "banks"(MMU) due to color or VRAM limitations.
 The dos mouse was broken due to bank switching (at some point). 
 
 The way around it was to not need bank switching-by using a LFB. 
 
 
 CGA and EGA have been properly "emulated" by palettes.
-Your standard "Text mode hack" (16 colors) is EGA palette emulation.
-This was only possible on CGA screen sby hacking the text mode ASCII character set.(CP850)
+Your standard "Text mode hack" (16 colors) is "EGA palette emulation".
+This was only possible on CGA screens by hacking the text mode ASCII character set.(CP850)
+(This is why linux-es dont have those characters)
 
 
 **THIS CODE is written for 32 AND 64 bit systems.**
 
 Apparently the SDL/JEDI never got the 64-bit bugfix(GitHub, people...).
-(A longword is not a longword- when its a QWord...)
+(A longword is not a longword- when its a QWord- or a pointer to one...)
 
 USER FIXME: Error 216 usually indicates SDL BOUNDS errors(memory alloc and not FREE--a "memory leak")
 SDL and OpenGL can fire errors with no debugging info and leave you clueless as to where to start debugging.
-(c units have not been compiled w debug support)
+(SDL c units have not been compiled w debug support- if theres a download option-grab - or install the debugging units)
+
+Get the release units, but while testing your code- use the debug version instead. Its a HUGE help.
 
 ----
 
 Colors are bit banged to hell and back.
-32bit RGBA is assumed -and faked- in modes less than 15bits.
+
+24 bits seems to be the SDL1 limit here, according to what Im reading.
+
+Below 15bpp is an LUT emulated 24 bit array
 15 and 16bit color uses word storage(16bit aligned for speed)
-
 24 bit is an RGB tuple -padded to RGBA. A-bit is ignored, as with 15bit color(555).
-32 bit is the only true true color mode and true rgba mode.
 
-USER FIXME: SDL is limited to 32bits. Opengl is NOT. "Mind your bytes"
+USER FIXME: 
+ 
+ 		SDL is limited to 24bits. Opengl is NOT. "Mind your bytes"
 
-RGB/RGBA Color data is as accurate as possible using data from the net.
+Color data is as accurate as possible using data from the net.
 
 
-Downsizing bits:
+Downsizing color bits:
 
 -you cant put whats not there- you can only "dither down" or "fake it" by using "odd patterns".
 what this is -is tricking your eyes with "almost similar pixel data".
 
-most use down conversion routines to guess at lower depth approx colors.
-
+most people use down conversion routines to guess at lower depth approx colors.
 
 What this means is that for non-equal modes that are not "byte aligned" or "full bytes" (above 256 colors) 
 you have to do color conversion or the colors will be "off".
 
 Futher- forcing the video driver to accept non-aligned data slows things down-
-        in case of opengl- it CAN crash things.
+        in case of opengl- it WILL crash things.
 
 ---
 
@@ -316,7 +328,7 @@ Quantization is not compression- its downgrading the color sheme used in storing
 and then compensating for it by dithering.(Some 3D math algorithms are used.)
 (Beyond the scope of this code)
 
-PNG itself may or may not work as intended with a black color as a "hole".This is a known SDL issue.
+PNG/PNM itself may or may not work as intended with a black color as a "hole color".This is a known SDL issue.
 PNG-Lite may come to the rescue- but I need the Pascal headers, not the C ones.
 
 
@@ -324,18 +336,14 @@ Not all games use a full 256-color (64x64) palette
 This is even noted in SkyLander games lately with Activision.
 "Bright happy cheery" Games use colors that are often "limited palettes" in use.
 
-Most older games clear either VRAM or RAM while running (cheat) to accomplish most effects.
-        RenderClear() -does this
-
-Most FADE TO BLACK arent just visuals, they clear VRAM in the process.
-
 Fading is easy- taking away and adding color---not so much.
 However- its not impossible.
+
+TO FADE:
 
     you need two palettes for each color  :-)  and you need to step the colors used between the two values
     switching all colors (or each individual color) straight to grey wont work- the entire image would go grey.
     you want gracefully delayed steps(and block user input while doing it) over the course of nano-seconds.
-
 
 
 I havent added in Android or MacOS modes yet.
@@ -347,10 +355,10 @@ You cant support "portable Apple devices". Apple forbids it w FPC.
 
 Pixel rendering (the old school methods)
 
-We have to "lock pixels" to work with them, then "unlock pixels" and "pageFlip". 
-
 Our ops are restricted, even yet to "pixels" and not groups of them.
-TandL is a "pixel-based operation".
+BLIT LIKE HELL!
+
+TandL is a "pixel-based operation". If you use heavy TnL, expect slowdowns.
 
 
 MessageBox:
@@ -358,7 +366,7 @@ MessageBox:
 With Working messageBox(es) we dont need the console.
 
 InGame_MsgBox() routines (OVERLAYS like what Skyrim uses) still needs to be implemented.
-FurtherMore, they need to match your given palette scheme. (I can only do so much)
+FurtherMore, they need to match your given palette scheme. (I can only do so much, I can match the default bpp...)
 
 GVision, routines can now be used where they could not before.
 GVision requires Graphics modes(provided here) and TVision routines be present(or similar ones written).
@@ -398,18 +406,17 @@ manuals:
 	TurboVision(TVision) references (where I can find them and understand them.)
 
 
-to animate- screen savers, etc...you need to (page)flip/rendercopy and slow down rendering timers.
-(trust me, this works-Ive written some soon-to-be-here demos)
+to animate- screen savers, etc...you need to (page)flip/rendercopy and use DELAYED rendering timers.
 
 
 bounds:
    cap pixels at viewport
-   off screen..gets ignored but should throw an error- we should know screen bounds.
-   (zoom in or out of a bitmap- but dont exceed bounds.) 
+   off screen..gets ignored.
+   zooms need to handle the extended size to accomadate "for the zoom"
 
 
 on 2d games...you are effectively preloading the fore and aft areas on the 'level' like mario.
-there are ways to reduce flickering -control renderClear and Flip. 
+there are ways to reduce flickering -control renderClear/Flip. 
 
 the damn thing should be loaded in memory anyhoo..
 what.. 64K for a level? cmon....ITS ZOOMED IN....
@@ -423,16 +430,21 @@ or Better yet:
 
 NOTE:
 
-SDL bug:
+Some SDL BUGS are - because of stupidity and BS programmers not understanding the material.
+"EVERYTHING IS MUTABLE"
+
+SDL TEAM:
     "You must render in the same (mainloop) that handles input." (NOPE)
 EXPORT THE GRAPHICS CONTEXT and youll be FINER than A STEEL STRING GUITAR.
+Now- export the input handler routine, or map a new one.
+*PROBLEM SOLVED* 
 
 
 SDL routines require more than just dropping a routine in here- 
     you have to know how the original routine wants the data-
         get it in the right format
         call the routine
-        and if needed-catch errors.
+        and if needed-catch errors, otherwise drop the routine's output.
 
 The biggest problem with SDL is "the bloody syntax".
 
@@ -441,21 +453,35 @@ The BGI was SIMPLE.
 
 "SemiDirect MultiMedia OverLayer" - should be the unit name.
 
-SDL should be replaced with language specific routines(pull them out of SDL) instead to optimise the code. This will remove the need to export the GC.
-As far as LCL GOES- it adds a mainloop input layer- this cannot be avoided. (should it? perhaps we can ask for input in another way from the console?)
+SDL should be replaced with language specific routines(pull them out of SDL) instead- to optimise the code. 
+(This will remove the need to export the GC, possibly input routines)
 
-
-This darn SDLv1 backporting(from 2) is confusing the heck out of me (and breaking this unit).
+As far as LCL GOES- normally LCL adds an input layer (and window layer) to the mix if using SDL. 
+(should it? perhaps we can pull the applications input routine and mod it?)
 
 --Jazz (comments -and code- by me unless otherwise noted)
 
 }
 
-
 {$IFDEF DARWIN} //OSX
-    {$modeswitch objectivec1} //version 2 is above OSX 10.5- use with SDL2. This excludes PPC arch.
-    {$linklib gcc}
-    {$linklib SDLmain}
+//Hackish...Determine whether we are on a PPC by the CPU endian-ness since we know
+//that support stopped at 10.5 for PPC arch- and switched to Intel.
+    {$IFDEF ENDIAN_BIG}
+        {$modeswitch objectivec1}
+    {$ELSE}
+        //version 2 is => OSX 10.5(Leopard). This excludes PPC arch. Likely INTEL CPU model.
+        {$modeswitch objectivec2} 
+    {$ENDIF}
+//same with carbon?
+	{$linkframework Cocoa}
+
+//not sure if need to add a few units here?
+    {$linklib SDLimg}
+    {$linklib SDLttf}
+    {$linklib SDLnet}
+	{$linklib SDLmain}
+	{$linklib gcc}
+
 {$ENDIF}
 
 uses
@@ -472,9 +498,8 @@ uses
     ctypes,classes,
 
 //ctypes: cint,uint,PTRUint,PTR-USINT,sint...etc.
-//classes: ensure the object-mode define(not oop code) attaches error handlers(and so we can also use them)
+//classes: needs mode fpcobj  -ensure the object-mode define(not oop code) attaches error handlers(and so we can also use them)
 
-// A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust "console" logging...
 
 {$IFDEF MSWINDOWS} //as if theres a non-MS WINDOWS?
     Windows,MMsystem, //audio subsystem, use if DX audio fails. ONLY THEN. WAV support only.
@@ -535,20 +560,68 @@ only so many can do it at once, first come- first served
 
 }
 
+{
 
-//FIXME: Nov 2019 modelist and palette PATCH needed
+Modes and "the list":
 
+byte because we cant have "the negativity"..
+could be 5000 modes...we dont care...
+the number is tricky..since we cant setup a variable here...its a "sequential byte".
+
+yes we could do it another way...but then we have to pre-call the setup routine and do some other whacky crap.
+
+"ins and outs" (and hacks) are replaced by a better equivalent.
+
+Y not 4K modes?
+1080p is reasonable stopping point until consumers buy better hardware...which takes years...
+most computers support up to 1080p output..it will take some more lotta years for that to change.
+
+primary reason: SDL stops at 32bit longwords. It was never designed for 64bits.
+Reason being: systems didnt exist yet.
+
+}
+
+//scale output(via SDL) if resolution is lower then the window canvas size-or fullscreen.
+//typically, interlacing is used - "to cheat"
+
+//wherein 320xMil0 can be blown up to 640x480 (as 480i)
+//if you dont want to upscale(fuzzy)- set "fat pixel mode" at intended resolution (and draw with neighbors).
+
+//Droids and Pis can probably use "up to VGA modes" resolutions natively. Smaller screens= lower resolution needed.
+//after 1024, modern hardware drops support for lower resolutions (and palettes), GL doesnt support less than 24bpp.
+//I could force the issue(palettes), but why? Im using 24bpp inside the LUT.
+
+//below 320 will probably be stretched anyways, the canvas is too small on modern screens.(Let me get to this)
+
+//MAC: 640x480,800x600,1024x768 up to 24bpp is supported
+//droids and pis will have to have weird half-resolutions and bpps added in later on.
+
+//TrueColors modes (>24bpp) produce one problem: We can no longer track the maximum colors(exceeds bounds).
+{
+BitDepth	Colors 
+
+1bit B/W = 2
+2bit CGA = 4
+4bit EGA = 16
+8bit VGA = 256
+15bit = 32k
+16bit = 64k
+24bit = 16M (max addressable colors with 32bit systems is: 4Million -2)
+32bit (sadly,only supported in SDL2) = 4.2B -or (16M+blends) 
+ 
+}
 type
-
+//this is as compatible as I can make it, we dont care which standard has the mode, just that it exists and works.
 	graphics_modes=(
 
-mCGA, 
-VGAMed,vgaMedx256,
-vgaHi,VGAHix256,VGAHix32k,VGAHix64k,
-m800x600x16,m800x600x256,m800x600x32k,m800x800x64k,
-m1024x768x256,m1024x768x32k,m1024x768x64k,m1024x768xMil,
+m160x100x16,
+m320x200x4,m320x200x16,m320x200x256,
+m640x200x2,m640x200x16,
+m640x480x16, m640x480x256, m640x480x32k, m640x480x64k,m640x480xMil,
+m800x600x16,m800x600x256,m800x600x32k,m800x800x64k,m800x600xMil
+m1024x768x16,m1024x768x256,m1024x768x32k,m1024x768x64k,m1024x768xMil,
 m1280x720x256,m1280x720x32k,m1280x720x64k,m1280x720xMil,
-m1280x1024x256,m1280x1024x32k,m1280x1024x64k,m1280x1024xMil,
+m1280x1024x16,m1280x1024x256,m1280x1024x32k,m1280x1024x64k,m1280x1024xMil,
 m1366x768x256,m1366x768x32k,m1366x768x64k,m1366x768xMil,
 m1920x1080x256,m1920x1080x32k,m1920x1080x64k,m1920x1080xMil);
 
@@ -582,10 +655,14 @@ type
 
 
 //when drawing a line- this is supposed to dictate if the line is dashed or not
-//AND how thick it is. Cdentered is not what you think it means.
+//AND how thick it is. Centered is not what you think it means.
 
   LineStyle=(solid,dotted,center,dashed);
   Thickness=(normalwidth=1,thickwidth=3,superthickwidth=5,ultimateThickwidth=7);
+
+//LineStyle and ThickNess are usually used together along with PutPixelHow (andPut, NotPut,etc) methods.
+//It is extremely inefficient(unwise) to manipulate pixels in such a way otherwise.
+//This is a very confusing chunk of borland API that was never intended to be "a public method".
 
 //C style syntax-used to be a function, isnt anymore.
   grErrorType=(OK,NoGrMem,NoFontMem,FontNotFound,InvalidMode,GenError,IoError,InvalidFontType);
@@ -597,26 +674,16 @@ SURFACE:
 This is a "buffer copy" of all written string to the screen.
 As long as we have this- we can print, and we can copy screen contents.
 
-OutText:
-MaxFontChars:=(Screen/viewportwidth / FontWidth *1.5)  - FontWidth;
-MaxFontLines:=(Screen/viewportHeight / FontHeight *1.5) - FontHeight;
-
-ScreenTextBuffer: array [0..MaxFontChars,0..MaxFontLines]of char;
-ScreenLineBuffer: array [0..MaxFontChars]of char;
+There is a difference betweek MainSurface(screen) and a back-buffer. 
+Clearing the backbuffer(double buffering) does NOT clear the screen, it prepares the window for the next surface update.
+(I got confused by this at first) 
+ 
+You are used to single buffered (or directRendering function calls) with DOS-ish programming methods.
 
 -OutText writes one char here until full- goes onto next line.
 -OutTextLine just writes the whole array
 
--array is copied into the buffer- adjusted if scrolling is enabled- otherwise reset -when end of screen reached.
-If we didnt reset- our charPtr would be off of the screen- with no way to see anything else written.
-
-(This was the old DOS way)
-
--All of this- of Course- is also maintained with the "TextSurface".
-GL just has no clue how to "draw the fonts". 
-
-
-Think of Text like a "Transparent Label" or "clear sticker".
+Think of Text like a "Transparent Label" or "blitted clear sticker".
 
 }
 
@@ -647,36 +714,25 @@ Think of Text like a "Transparent Label" or "clear sticker".
 
 	graphics_driver=(DETECT, CGA, VGA,VESA); //cga,vga,vesa,hdmi,hdmi1.2
 
+//HATCHes(not hashes):
 
 //This is a 8x8 (or 8x12) Font pattern (in HEX) according to the BGI sources(A BLITTER BITMAP in SDL)
-//X11- at least has this already implemented, SDL2_BGI mimicks those routines.
+//X11- at least, has this already implemented
+
+//This was only meant for HiREs 1bit B/W CGA modes. It was not meant for color modes.
+//You could hack this using blit patterns, like Paint apps do with the "rubber stamp".
 
    FillSettingsType = (clear,lines,slashes,THslashes,THBackSlashes,BackSlashes,SMBoxes,rhombus,wall,widePTs,DensePTS);
 
-{
-
-Modes and "the list":
-
-byte because we cant have "the negativity"..
-could be 5000 modes...we dont care...
-the number is tricky..since we cant setup a variable here...its a "sequential byte".
-
-yes we could do it another way...but then we have to pre-call the setup routine and do some other whacky crap.
+//For color modes use Blends, or "blit pixels interweaved with the background every so many pixels"
 
 
-Y not 4K modes?
-1080p is reasonable stopping point until consumers buy better hardware...which takes years...
-most computers support up to 1080p output..it will take some more lotta years for that to change.
-
-primary reason: SDL stops at 32bit longwords. It was never designed for 64bits.
-Reason being: systems didnt exist yet.
-
-}
 
 
 var
+
   thick:thickness;
-  bpp:integer; //byte
+  bpp:byte; 
 //  mode:PSDL_DisplayMode;
 
 
@@ -841,16 +897,23 @@ Atari modes, etc. were removed. (double the res and pixelSize and we will talk)
 //this pre-definition shit is a ~PITA~
 //our data may differ from SDLs.
 
-type 
+{
+ 
+I dont know on this section,yet:
+ 
+
 //the lists..
-
-//want graphics_modes??
-
   Pmodelist=^TmodeList;
-  TmodeList=array [0 .. 31] of TMode;
+
+//wants graphics_modes??
+  TmodeList=array [0 .. 40] of TMode;
+
+  PSDLmodeList=^TSDLmodeList;
+  TSDLmodeList=array [0 .. 40] of TSDL_DisplayMode;
 
 //single mode
   Pmode=^TMode;
+  PSDLmode=^TSDL_DisplayMode;
 
 var
 
@@ -859,15 +922,17 @@ var
 //pointers
 //single modes
 
+    SDLmodePointer:PSDLMode;
     modePointer:Pmode;
 
 //list
+    SDLmodeList:PSDLmodeList;
     modeListpointer:PmodeList;
 
 //arrays
 	ModeArray:TmodeList;
-
-//-----
+	SDLModeArray:TSDLmodeList;
+}
 
 //procedure defines
 function FetchModeList:Tmodelist;
@@ -892,9 +957,8 @@ function GetX:word;
 function GetY:word;
 function GetXY:longint; 
 
-procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
+function initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean):PSDL_Surface;
 procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean); 
-
 
 function getgraphmode:string; 
 procedure restorecrtmode;
@@ -1030,93 +1094,86 @@ colors:
 			 then render something else
 }
 
-type
+//"color names" are Tied to Static Consts up to 256 Colors.
+// with 256Greys, its a "moot point".
+//The Palette[MaxColors].DWords holds the values, so this can be any var we want, just be consistent.
 
+//with consts, we can specify an index color as a name and we will get the index, as it were.
+//(its also easier to copy palette colors with)
+const
 
-//There IS a way to ge the Names listed here- the magic type info library
-//this cuts down on spurious string data and standardizes the palette names a bit also
+	BLACK=0;
+	RED=1;
+	BLUE=2;
+	GREEN=3;
+	CYAN=4;
+	MAGENTA=5;
+	BROWN=6;
+	LTGRAY=7;
+	GRAY=8;
+	LTRED=9;
+	LTBLUE=10;
+	LTGREEN=11;
+	LTCYAN=12;
+	LTMAGENTA=13;
+	YELLOW=14;
+	WHITE=15;
 
+	gBLACK=0;
+	g1=1;
+	g2=2;
+	g3=3;
+	g4=4;
+	g5=5;
+	g6=6;
+	g7=7;
+	g8=8;
+	g9=9;
+	g10=10;
+	g11=11;
+	g12=12;
+	g13=13;
+	g14=14;
+	gWHITE=15;
 
-//iirc - its ...RED,BLUE,GREEN... on the ol 8088s...
-// K-R-B-G-C-M-Br Gy-Gyd R-B-G-C-M-Y-W (CGA) vs K-B-G-C-R-M-Br Gy-Gyd- B-G-C-R-M-Y-W (wikipedia) 
-//the xterm 256 spec reflects this- oddly.
-
-
-//these names CANNOT overlap. If you want to change them, be my guest.
-
-//you cant fuck up the first 16- Borland INC (RIP) made that "the standard"
-TPalette16Names=(BLACK,RED,BLUE,GREEN,CYAN,MAGENTA,BROWN,LTGRAY,GRAY,LTRED,LTBLUE,LTGREEN,LTCYAN,LTMAGENTA,YELLOW,WHITE);
-TPalette16NamesGrey=(gBLACK,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11,g12,g13,g14,gWHITE);
-
-//tfs=two fifty six
 //original xterm must have these stored somewhere as string data because parts of "unused holes" and "duplicate data" exist
 
 // I can guarantee you a shade of slateBlue etc.. but not the exact shade.
 //(thank you very much whichever programmer fucked this up for us)
 
+Grey0=16;
+NavyBlue=17;
+DarkBlue=18;
+Blue3=19;
+Blue4=20;
+Blue1=21;
+DarkGreen=22;
+DeepSkyBlue4=23;
+DeepSkyBlue6=24;
+DeepSkyBlue7=25;
+DeepSkyBlue3=26;
+DodgerBlue3=27;
+DodgerBlue2=28;
+Green4=29;
+SpringGreen4=30;
+Turquoise4=31;
+DeepSkyBlue5=32;
+DeepSkyBlue2=33;
+DodgerBlue1=34;
+Green3=35;
+SpringGreen3=36;
+DarkCyan=37;
+LightSeaGreen=38;
+DeepSkyBlue1=39;
+DeepSkyBlue8=40;
 
-TPalette256Names=(
-
-tfsBLACK,
-maroon,
-tfsGREEN,
-olive,
-navy,
-purple,
-teal,
-silver,
-grey,
-tfsRED,
-lime,
-tfsYELLOW,
-tfsBLUE,
-fuchsia,
-aqua,
-tfsWHITE,
-
-Grey0,
-NavyBlue,
-DarkBlue,
-Blue3,
-Blue4,
-Blue1,
-
-DarkGreen,
-DeepSkyBlue4,
-DeepSkyBlue6,
-DeepSkyBlue7,
-DeepSkyBlue3,
-
-DodgerBlue3,
-DodgerBlue2,
-
-Green4,
-SpringGreen4,
-
-
-Turquoise4,
-DeepSkyBlue5,
-DeepSkyBlue2,
-DodgerBlue1,
-Green3,
-
-SpringGreen3,
-DarkCyan,
-LightSeaGreen,
-
-DeepSkyBlue1,
-DeepSkyBlue8,
 Green5,
-
 SpringGreen5,
 SpringGreen1,
 Cyan3,
-
 DarkTurquoise,
 Turquoise2,
-
 Green1,
-
 SpringGreen2,
 SpringGreen,
 MediumSpringGreen,
@@ -1185,7 +1242,6 @@ MediumPurple3,
 MediumPurple5,
 SlateBlue1,
 Yellow4,
-
 
 Wheat4,
 Grey53,
@@ -1363,7 +1419,7 @@ Grey78,
 Grey82,
 Grey85,
 Grey89,
-Grey93);
+Grey93
 
 
 //this one is HELL!
@@ -5090,19 +5146,16 @@ end;
 
 
 //NEW: do you want fullscreen or not?
-procedure initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean);
-//I dunno where I got the idea to turn this into a function. SPEC says this is a procedure.
+
+function initgraph(graphdriver:graphics_driver; graphmode:graphics_modes; pathToDriver:string; wantFullScreen:boolean):PSDL_Surface;
 //This code only works a certain way- thats why languages "lacking globals" cannot compile this code.
 
-//you would only kick-back a renderer or mainSurface anyway, never a sub-surface. YOU **SHOULD** BE EXPORTING THE GC pointer (by default).
+//you would only kick-back a renderer or mainSurface, the GC. 
+//YOU **SHOULD** BE EXPORTING THE GC pointer by default. 
+//This eliminates problems later on when using units instead of "raw code" in applications.
 
-{
+//If surface is Nil, we FAILED. ABORT!
 
-we are halfway there according to some Wolf3D and POSTAL devs:
-FS sets logical size but we want the window- a forced "physical" to be that size too.
-Logic size allows upscaling of smaller resolutions on our behalf.
-
-}
 var
 	i:integer;
 	_initflag,_imgflags:longword; //PSDL_Flags?? no such beast 
@@ -5115,7 +5168,7 @@ begin
 
   if LIBGRAPHICS_ACTIVE then begin
     if ISConsoleInvoked then begin
-        LogLn('Graphics already active.');
+        LogLn('Initgraph: Graphics already active. Exiting.');
     end;
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Initgraph: Graphics already active.','OK',NIL);	
     exit;
@@ -5125,10 +5178,6 @@ begin
 
   case(graphmode) of
 
-//lower resolutions than this are tiny on newer hardware, only effective on older 8088.
-//removed for now.
- 
-	     mCGA:begin 
 {
          we have full frame LFB now- planar storage doesnt make sense, is very bit-wise...
          -and very hard to do animations with.
@@ -5137,112 +5186,162 @@ begin
 
          SDL becomes slow on put/getpixel ops due to repeated "one shot" operations instead of batches(buffered ops/surfaces)
          each get/putPixel operation *may* have to shift colors- AND was slowed down further by a (now removed) Pixel Mask(BGI).
+		 (this was supposed to be only for lines and pen strokes)
 
-         SDL_RenderDrawPoint() IMHO should not exist. 
-         You should batch the call thru a surface- you dont know how youre being called. 
-
-         Hardware surfaces add wait times during copy operations between graphics hardware and memory.
-         Despite the GPU being several orders (10x?) of magnitude faster than the CPU. GPU ops must also be "byte aligned".
+         Hardware surfaces add wait times during copy operations between graphics hardware and CPU memory.
+         ** SDL1 MAY NOT SUPPORT HW Surfaces on newer hardware**
+         
+         Despite the GPU being several orders (10x?) of magnitude faster than the CPU,GPU ops must also be "byte aligned".
          -In this case, 32 bits.
 
          How 24bit is natively supported, nobody will ever know. Probably like I do 15bit modes.
 
          Despite rumors- 
-                CGA is 4COLOR, 4Mode Graphics. 
-                EGA is 16 color.
+                CGA is 4COLOR, 4Mode Graphics. 16 color mode is "extremely low resolution" on CGA systems.
+                EGA and VGA use 16 color modes.
 
         You probably remember some text mode hack- or use of text mode symbols, like MegaZuex (openmzx) uses.
 
+		bpp is always set to 8 on lower bitdepths, MaxColors variable checks the actual depth(SDL bug workaround).
+		SDL supports these "LSB modes" but wont allow get/putpixel ops in these modes(why?).
 }
-			MaxX:=320;
-			MaxY:=240;
-			bpp:=8; //yes, 8bpp- its hackish.... SDL BUG.
+
+		//standardize these as much as possible....
+
+		//lo-res modes-try using SDL_SOFTSTRETCH()
+		
+		//CGALo
+		m160x100x16:begin
+            MaxX:=160;
+			MaxY:=100;
+			bpp:=8; 
+			MaxColors:=16;
+            NonPalette:=false;
+		    TrueColor:=false;
+		    //some of these its weird, 4x3 unless otherwise specified	
+            XAspect:=4;
+            YAspect:=3; 		
+		end;
+		
+		//CGAMed - there are 4 viable palettes in this mode
+		m320x200x4:begin
+		    MaxX:=320;
+			MaxY:=200;
+			bpp:=8; 
 			MaxColors:=4;
             NonPalette:=false;
 		    TrueColor:=false;	
             XAspect:=4;
             YAspect:=3; 
+		end;	
+			
+		//CGAHi
+		m640x200x2:begin
+		    MaxX:=640;
+			MaxY:=200;
+			bpp:=8; 
+			MaxColors:=2;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
 		end;
 
-	     EGA:begin 
+		//EGA
+		m320x200x16:begin
+		    MaxX:=320;
+			MaxY:=200;
+			bpp:=8; 
+			MaxColors:=16;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 		
+		end;		
+		
+		//VGALo
+		m320x200x256:begin
 			MaxX:=320;
-			MaxY:=240;
-			bpp:=8; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:=false;	
-            XAspect:=4;
-            YAspect:=3; 
-		end;
-
-        //color tv mode
-		VGAMed:begin
-            MaxX:=320;
-			MaxY:=240;
-			bpp:=8; 
-			MaxColors:=16;
-            NonPalette:=false;
-		    TrueColor:=false;	
-            XAspect:=4;
-            YAspect:=3; 
-
-		end;
-
-		//spec breaks here for Borlands VGA support(not much of a specification thx to SDL...)
-		//this is the "default VGA minimum".....since your not running below it, dont ask to set FS in it...
-        // if you did that you would have to scale the output...
-		//(more werk???)
-
-		VGAHi:begin
-            MaxX:=640;
-			MaxY:=480;
-			bpp:=8; 
-			MaxColors:=16;
-            NonPalette:=false;
-    		TrueColor:=false;	
-            XAspect:=4;
-            YAspect:=3; 
-
-		end;
-
-		VGAHix256:begin
-            MaxX:=640;
-			MaxY:=480;
+			MaxY:=200;
 			bpp:=8; 
 			MaxColors:=256;
-            NonPalette:=False;
+            NonPalette:=false;
 		    TrueColor:=false;	
             XAspect:=4;
             YAspect:=3; 
+		end;
+		
+		//EGAHi (or VGAMed)
+		m640x200x16:begin
+			MaxX:=640;
+			MaxY:=200;
+			bpp:=8; 
+			MaxColors:=16;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 		
+		end;		
 
+		//end lo-res modes
+		
+		//VGAHi
+		m640x480x16:begin
+			MaxX:=640;
+			MaxY:=480;
+			bpp:=8; 
+			MaxColors:=16;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
 		end;
 
-		VGAHix32k:begin //im not used to these ones (15bits)
-           MaxX:=640;
-		   MaxY:=480;
-		   bpp:=15; 
-		   MaxColors:=32768;
-           NonPalette:=true;
-           TrueColor:=false;
-           XAspect:=4;
-           YAspect:=3; 
-
+		m640x480x256:begin
+		    MaxX:=800;
+			MaxY:=600;
+			bpp:=8; 
+			MaxColors:=256;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
 		end;
 
-		VGAHix64k:begin
-           MaxX:=640;
-		   MaxY:=480;
-		   bpp:=16; 
-		   MaxColors:=65535;
-           NonPalette:=true;
-		   TrueColor:=false;	
-           XAspect:=4;
-           YAspect:=3; 
-
+		m640x480x32k:begin
+		    MaxX:=640;
+			MaxY:=480;
+			bpp:=15; 
+			MaxColors:=32768;
+            NonPalette:=True;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
 		end;
 
-		//standardize these as much as possible....
+		m640x480x64k:begin
+		    MaxX:=640;
+			MaxY:=480;
+			bpp:=16; 
+			MaxColors:=65535;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+		end;
 
+		m640x480xMil:begin
+		    MaxX:=640;
+			MaxY:=480;
+			bpp:=24; 
+			MaxColors:=0; //no op
+            NonPalette:=True;
+		    TrueColor:=True;	
+            XAspect:=4;
+            YAspect:=3; 
+		end;
+
+		//SVGA (and VESA modes)
 		m800x600x16:begin
             MaxX:=800;
 			MaxY:=600;
@@ -5252,7 +5351,6 @@ begin
 		    TrueColor:=false;	
             XAspect:=4;
             YAspect:=3; 
-
 		end;
 
 		m800x600x256:begin
@@ -5264,7 +5362,6 @@ begin
 		    TrueColor:=false;	
             XAspect:=4;
             YAspect:=3; 
-
 		end;
 
 
@@ -5277,9 +5374,28 @@ begin
 		   TrueColor:=false;	
            XAspect:=4;
            YAspect:=3; 
-
+		end;
+		m800x600xMil:begin
+           MaxX:=800;
+		   MaxY:=600;
+		   bpp:=24; 
+		   MaxColors:=0;
+           NonPalette:=true;
+		   TrueColor:=true;	
+           XAspect:=4;
+           YAspect:=3; 		
 		end;
 
+		m1024x768x16:begin
+           MaxX:=1024;
+		   MaxY:=768;
+		   bpp:=8; 
+		   MaxColors:=16;
+           NonPalette:=false;
+		   TrueColor:=false;	
+           XAspect:=4;
+           YAspect:=3; 				
+		end;
 
 		m1024x768x256:begin
             MaxX:=1024;
@@ -5314,7 +5430,17 @@ begin
 		   TrueColor:=false;	
            XAspect:=4;
            YAspect:=3; 
+		end;
 
+		m1024x768xMil:begin
+           MaxX:=1024;
+		   MaxY:=768;
+		   bpp:=24; 
+		   MaxColors:=0;
+           NonPalette:=true;
+		   TrueColor:=true;	
+           XAspect:=4;
+           YAspect:=3; 
 		end;
 
 
@@ -5366,6 +5492,17 @@ begin
 
 		end;
 
+		m1280x1024x16:begin
+			MaxX:=1280;
+			MaxY:=1024;
+			bpp:=8; 
+			MaxColors:=16;
+            NonPalette:=false;
+		    TrueColor:=false;	
+            XAspect:=4;
+            YAspect:=3; 
+		end;
+
 		m1280x1024x256:begin
             MaxX:=1280;
 			MaxY:=1024;
@@ -5407,18 +5544,6 @@ begin
 		   MaxY:=1024;
 		   bpp:=24; 
 		   MaxColors:=16777216;
-           NonPalette:=true;
-		   TrueColor:=true;	
-           XAspect:=4;
-           YAspect:=3; 
-
-		end;
-
-		m1280x1024xMil2:begin
-           MaxX:=1280;
-		   MaxY:=1024;
-		   bpp:=32; 
-		   MaxColors:=4294967296;
            NonPalette:=true;
 		   TrueColor:=true;	
            XAspect:=4;
@@ -5474,19 +5599,6 @@ begin
 
 		end;
 
-		m1366x768xMil2:begin
-           MaxX:=1366;
-		   MaxY:=768;
-		   bpp:=32; 
-		   MaxColors:=4294967296;
-           NonPalette:=true;
-		   TrueColor:=true;	
-           XAspect:=16;
-           YAspect:=9; 
-
-		end;
-
-
 		m1920x1080x256:begin
             MaxX:=1920;
 			MaxY:=1080;
@@ -5534,70 +5646,51 @@ begin
            YAspect:=9; 
 
 		end;
-
-
-		m1920x1080xMil2: begin
- 	       MaxX:=1920;
-		   MaxY:=1080;
-		   bpp:=32; 
-		   MaxColors:=4294967296;
-           NonPalette:=true;
-		   TrueColor:=true;	
-           XAspect:=16;
-           YAspect:=9; 
-
-		end;
 	    
   end;{case}
 
 //once is enough with this list...its more of a nightmare than you know.
 
 {
-If this 'chunk' isnt set- our output probably isnt accelerated as we would like it...
-
-Thanks, folks, for not pointing this out....
 There are claims that DX and HW Surfaces arent worth the headache- I say:
-		Stop being a lazy fuck- and optimise your code.
+		Stop being a lazy fuck- and optimise your code. At the very least, use SDL2.
 
-Although I may not know these low-level APIs, someone in the SDL community seems to.
 Lets use WHAT WE WANT, DAMNIT. (I will purge the flawed SDL C later.)
 }
 
 {$IFDEF mswindows}
-	SDL_putenv("SDL_VIDEODRIVER=directx"); //Use DirectX, dont use GDI
-	SDL_putenv("SDL_AUDIODRIVER=dsound"); //Fuck it, use direct sound, too.
+	SDL_putenv('SDL_VIDEODRIVER=directx'); //Use DirectX, dont use GDI
+	SDL_putenv('SDL_AUDIODRIVER=dsound'); //Fuck it, use direct sound, too.
     //unless below XP:
     ForceSWSurface:=False;
 {$ENDIF}
 
 {$IFDEF mac}
-	SDL_putenv("SDL_VIDEODRIVER=DSp"); //DrawSprockets- I chose this on purpose. Dig for the OS9 Extensions.
-	SDL_putenv("SDL_AUDIODRIVER=sndmgr"); //The OLD Mac Audio SubSystem
+	SDL_putenv('SDL_VIDEODRIVER=DSp'); //DrawSprockets- I chose this on purpose. Dig for the OS9 Extensions.
+	SDL_putenv('SDL_AUDIODRIVER=sndmgr'); //The OLD Mac Audio SubSystem
     //force software surfaces on older hardware(faster)
     ForceSWSurface:=True;
 {$ENDIF}
 
 {$IFDEF darwin}
-	SDL_putenv("SDL_VIDEODRIVER=quartz"); //Quartz2D
-	SDL_putenv("SDL_AUDIODRIVER=coreaudio"); //The new OSX Audio Subsystem
+	SDL_putenv('SDL_VIDEODRIVER=quartz'); //Quartz2D
+	SDL_putenv('SDL_AUDIODRIVER=coreaudio'); //The new OSX Audio Subsystem
     ForceSWSurface:=False;
 {$ENDIF}
 
 {$IFDEF unix}
     {$IFNDEF console}
 	   //Pretty deFacto Standard stuff
-	   SDL_putenv("SDL_VIDEODRIVER=x11");
-	   SDL_putenv("SDL_AUDIODRIVER=pulse");
+	   //X11 might not have HW acceleration, except with older hardware and X11 (vs newer XOrg)
+	   SDL_putenv('SDL_VIDEODRIVER=x11'); //no OGL option (thats how OLD SDL1 is).
+	   SDL_putenv('SDL_AUDIODRIVER=pulse');
        ForceSWSurface:=False; 
     {$ENDIF}
-       //Were in a TTY, NO x11...likely no acceleration, either (possibly running on a RasPi)
-	   SDL_putenv("SDL_VIDEODRIVER=svgalib"); //svgalib on FB (FPC has working-albeit tiny- Graphics unit for this.)
-	   SDL_putenv("SDL_AUDIODRIVER=alsa"); //Guessing here- should be available.
+       //Were in a TTY, NO x11...we may have fb acceleration (possibly running on a RasPi)
+	   SDL_putenv('SDL_VIDEODRIVER=svgalib'); //svgalib on FB (FPC has working-albeit tiny- Graphics unit for this.)
+	   SDL_putenv('SDL_AUDIODRIVER=alsa'); //Guessing here- should be available(has been for awhile).
        ForceSWSurface:=True;        
 {$ENDIF}
-
-//Note this does not use OpenGL on purpose. You can still get 2D acceleration in most cases
-
 
    //"usermode" must match available resolutions etc etc etc
    //this is why I removed all of that code..."define what exactly"??
@@ -5606,13 +5699,19 @@ Lets use WHAT WE WANT, DAMNIT. (I will purge the flawed SDL C later.)
   //at minimum setup a timer (TTimer?) and Video callback
   _initflag:= SDL_INIT_VIDEO or SDL_INIT_TIMER;
 
+  //keyb and mouse are handled by default, joystick interface changes in version 2- 
+  // as does physical connection(joyport or parrallel -to USB).
+  if WantsJoyPad then _initflag:= SDL_INIT_VIDEO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
+
   //audio on SDL1 isnt too bad, but use libuos instead
-  //if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
+//  if WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER; 
+//  if WantsJoyPad and WantsAudioToo then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
 
-  if WantsJoyPad then _initflag:= SDL_INIT_VIDEO or SDL_INIT_AUDIO or SDL_INIT_TIMER or SDL_INIT_JOYSTICK;
-//if WantInet then SDL_Init_Net; --code not written yet
+//if WantInet then SDL_Init_Net; 
 
-  //FAILED!
+//turn off the parachute!!(SDL2-like)
+  _initflag:= _initflag or SDL_INIT_NOPARACHUTE;
+
   if ( SDL_Init(_initflag) < 0 ) then begin
      //we cant speak- write something down.
 

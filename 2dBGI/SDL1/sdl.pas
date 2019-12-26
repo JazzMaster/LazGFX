@@ -79,221 +79,7 @@ unit sdl;
 {   They are available from...                                                 }
 {   http://www.libsdl.org .                                                    }
 {                                                                              }
-{ Programming Notes                                                            }
-{ -----------------                                                            }
-{                                                                              }
-{                                                                              }
-{                                                                              }
-{                                                                              }
-{ Revision History                                                             }
-{ ----------------                                                             }
-{   May      08 2001 - DL : Added Keyboard  State Array ( See demos for how to }
-{                           use )                                              }
-{                           PKeyStateArr = ^TKeyStateArr;                      }
-{                           TKeyStateArr = array[0..65000] of UInt8;           }
-{                           As most games will need it.                        }
-{                                                                              }
-{   April    02 2001 - DL : Added SDL_getenv.h definitions and tested version  }
-{                           1.2.0 compatability.                               }
-{                                                                              }
-{   March    13 2001 - MT : Added Linux compatibility.                         }
-{                                                                              }
-{   March    10 2001 - MT : Added externalsyms for DEFINES                     }
-{                           Changed the license header                         }
-{                                                                              }
-{   March    09 2001 - MT : Added Kylix Ifdefs/Deleted the uses mmsystem       }
-{                                                                              }
-{   March    01 2001 - DL : Update conversion of version 1.1.8                 }
-{                                                                              }
-{   July     22 2001 - DL : Added TUInt8Array and PUIntArray after suggestions }
-{                           from Matthias Thoma and Eric Grange.               }
-{                                                                              }
-{   October  12 2001 - DL : Various changes as suggested by Matthias Thoma and }
-{                           David Acklam                                       }
-{                                                                              }
-{   October  24 2001 - DL : Added FreePascal support as per suggestions from   }
-{                           Dean Ellis.                                        }
-{                                                                              }
-{   October  27 2001 - DL : Added SDL_BUTTON macro                             }
-{                                                                              }
-{  November  08 2001 - DL : Bug fix as pointed out by Puthoon.                 }
-{                                                                              }
-{  November  29 2001 - DL : Bug fix of SDL_SetGammaRamp as pointed out by Simon}
-{                           Rushton.                                           }
-{                                                                              }
-{  November  30 2001 - DL : SDL_NOFRAME added as pointed out by Simon Rushton. }
-{                                                                              }
-{  December  11 2001 - DL : Added $WEAKPACKAGEUNIT ON to facilitate useage in  }
-{                           Components                                         }
-{                                                                              }
-{  January   05 2002 - DL : Added SDL_Swap32 function as suggested by Matthias }
-{                           Thoma and also made sure the _getenv from          }
-{                           MSVCRT.DLL uses the right calling convention       }
-{                                                                              }
-{  January   25 2002 - DL : Updated conversion of SDL_AddTimer &               }
-{                           SDL_RemoveTimer as per suggestions from Matthias   }
-{                           Thoma.                                             }
-{                                                                              }
-{  January   27 2002 - DL : Commented out exported function putenv and getenv  }
-{                           So that developers get used to using SDL_putenv    }
-{                           SDL_getenv, as they are more portable              }
-{                                                                              }
-{  March     05 2002 - DL : Added FreeAnNil procedure for Delphi 4 users.      }
-{                                                                              }
-{  October   23 2002 - DL : Added Delphi 3 Define of Win32.                    }
-{                           If you intend to you Delphi 3...                   }
-{                           ( which is officially unsupported ) make sure you  }
-{                           remove references to $EXTERNALSYM in this and other}
-{                           SDL files.                                         }
-{                                                                              }
-{ November  29 2002 - DL : Fixed bug in Declaration of SDL_GetRGBA that was    }
-{                          pointed out by Todd Lang                            }
-{                                                                              }
-{   April   03 2003 - DL : Added jedi-sdl.inc include file to support more     }
-{                          Pascal compilers. Initial support is now included   }
-{                          for GnuPascal, VirtualPascal, TMT and obviously     }
-{                          continue support for Delphi Kylix and FreePascal.   }
-{                                                                              }
-{   April   08 2003 - MK : Aka Mr Kroket - Added Better FPC support            }
-{                                                                              }
-{   April   24 2003 - DL : under instruction from Alexey Barkovoy, I have added}
-{                          better TMT Pascal support and under instruction     }
-{                          from Prof. Abimbola Olowofoyeku (The African Chief),}
-{                          I have added better Gnu Pascal support              }
-{                                                                              }
-{   April   30 2003 - DL : under instruction from David Mears AKA              }
-{                          Jason Siletto, I have added FPC Linux support.      }
-{                          This was compiled with fpc 1.1, so remember to set  }
-{                          include file path. ie. -Fi/usr/share/fpcsrc/rtl/*   }
-{                                                                              }
-{
-  $Log: sdl.pas,v $
-  Revision 1.38  2008/01/26 10:09:32  savage
-  Added SDL_BUTTON_X1 and SDL_BUTTON_X2 constants for extended mouse buttons. Now makes SDL v1.2.13 compliant.
 
-  Revision 1.37  2007/12/20 22:36:56  savage
-  Added SKYOS support, thanks to Sebastian-Torsten Tillmann
-
-  Revision 1.36  2007/12/05 22:52:04  savage
-  Better Mac OS X support for Frameworks.
-
-  Revision 1.35  2007/12/02 22:41:13  savage
-  Change for Mac OS X to link to SDL Framework
-
-  Revision 1.34  2007/08/26 23:50:53  savage
-  Jonas supplied another fix.
-
-  Revision 1.33  2007/08/26 15:59:46  savage
-  Mac OS changes as suggested by Jonas Maebe
-
-  Revision 1.32  2007/08/22 21:18:43  savage
-  Thanks to Dean for his MouseDelta patch.
-
-  Revision 1.31  2007/05/29 21:30:48  savage
-  Changes as suggested by Almindor for 64bit compatibility.
-
-  Revision 1.30  2007/05/29 19:31:03  savage
-  Fix to TSDL_Overlay structure - thanks David Pethes (aka imcold)
-
-  Revision 1.29  2007/05/20 20:29:11  savage
-  Initial Changes to Handle 64 Bits
-
-  Revision 1.26  2007/02/11 13:38:04  savage
-  Added Nintendo DS support - Thanks Dean.
-
-  Revision 1.25  2006/12/02 00:12:52  savage
-  Updated to latest version
-
-  Revision 1.24  2006/05/18 21:10:04  savage
-  Added 1.2.10 Changes
-
-  Revision 1.23  2005/12/04 23:17:52  drellis
-  Added declaration of SInt8 and PSInt8
-
-  Revision 1.22  2005/05/24 21:59:03  savage
-  Re-arranged uses clause to work on Win32 and Linux, Thanks again Michalis.
-
-  Revision 1.21  2005/05/22 18:42:31  savage
-  Changes as suggested by Michalis Kamburelis. Thanks again.
-
-  Revision 1.20  2005/04/10 11:48:33  savage
-  Changes as suggested by Michalis, thanks.
-
-  Revision 1.19  2005/01/05 01:47:06  savage
-  Changed LibName to reflect what MacOS X should have. ie libSDL*-1.2.0.dylib respectively.
-
-  Revision 1.18  2005/01/04 23:14:41  savage
-  Changed LibName to reflect what most Linux distros will have. ie libSDL*-1.2.so.0 respectively.
-
-  Revision 1.17  2005/01/03 18:40:59  savage
-  Updated Version number to reflect latest one
-
-  Revision 1.16  2005/01/01 02:02:06  savage
-  Updated to v1.2.8
-
-  Revision 1.15  2004/12/24 18:57:11  savage
-  forgot to apply Michalis Kamburelis' patch to the implementation section. now fixed
-
-  Revision 1.14  2004/12/23 23:42:18  savage
-  Applied Patches supplied by Michalis Kamburelis ( THANKS! ), for greater FreePascal compatability.
-
-  Revision 1.13  2004/09/30 22:31:59  savage
-  Updated with slightly different header comments
-
-  Revision 1.12  2004/09/12 21:52:58  savage
-  Slight changes to fix some issues with the sdl classes.
-
-  Revision 1.11  2004/08/14 22:54:30  savage
-  Updated so that Library name defines are correctly defined for MacOS X.
-
-  Revision 1.10  2004/07/20 23:57:33  savage
-  Thanks to Paul Toth for spotting an error in the SDL Audio Convertion structures.
-  In TSDL_AudioCVT the filters variable should point to and array of pointers and not what I had there previously.
-
-  Revision 1.9  2004/07/03 22:07:22  savage
-  Added Bitwise Manipulation Functions for TSDL_VideoInfo struct.
-
-  Revision 1.8  2004/05/10 14:10:03  savage
-  Initial MacOS X support. Fixed defines for MACOS ( Classic ) and DARWIN ( MacOS X ).
-
-  Revision 1.7  2004/04/13 09:32:08  savage
-  Changed Shared object names back to just the .so extension to avoid conflicts on various Linux/Unix distros. Therefore developers will need to create Symbolic links to the actual Share Objects if necessary.
-
-  Revision 1.6  2004/04/01 20:53:23  savage
-  Changed Linux Shared Object names so they reflect the Symbolic Links that are created when installing the RPMs from the SDL site.
-
-  Revision 1.5  2004/02/22 15:32:10  savage
-  SDL_GetEnv Fix so it also works on FPC/Linux. Thanks to Rodrigo for pointing this out.
-
-  Revision 1.4  2004/02/21 23:24:29  savage
-  SDL_GetEnv Fix so that it is not define twice for FPC. Thanks to Rene Hugentobler for pointing out this bug,
-
-  Revision 1.3  2004/02/18 22:35:51  savage
-  Brought sdl.pas up to 1.2.7 compatability
-  Thus...
-  Added SDL_GL_STEREO,
-      SDL_GL_MULTISAMPLEBUFFERS,
-      SDL_GL_MULTISAMPLESAMPLES
-
-  Add DLL/Shared object functions
-  function SDL_LoadObject( const sofile : PChar ) : Pointer;
-
-  function SDL_LoadFunction( handle : Pointer; const name : PChar ) : Pointer;
-
-  procedure SDL_UnloadObject( handle : Pointer );
-
-  Added function to create RWops from const memory: SDL_RWFromConstMem()
-  function SDL_RWFromConstMem(const mem: Pointer; size: Integer) : PSDL_RWops;
-
-  Ported SDL_cpuinfo.h so Now you can test for Specific CPU types.
-
-  Revision 1.2  2004/02/17 21:37:12  savage
-  Tidying up of units
-
-  Revision 1.1  2004/02/05 00:08:20  savage
-  Module 1.0 release
-
-}
 {******************************************************************************}
 
 
@@ -4283,37 +4069,22 @@ cdecl;
 {$ENDIF}
 
 {$IFDEF Unix}
-{$IFDEF FPC}
-function _putenv( const variable : Pchar ): integer;
-cdecl; external 'libc.so' name 'putenv';
-{$ENDIF}
+function _putenv( const variable : Pchar ): integer; cdecl; external 'libc.so' name 'putenv';
 {$ENDIF}
 
 { Put a variable of the form "name=value" into the environment }
-//function SDL_putenv(const variable: PChar): integer; cdecl; external {$IFNDEF NDS}{$IFDEF __GPC__}name 'SDL_Init'{$ELSE} SDLLibName{$ENDIF __GPC__}SDLLibName name '';
 function SDL_putenv(const variable: PChar): integer;
+
+//why use external? export, maybe? This is a header definition, not a pull from iniside another library file.
 {$EXTERNALSYM SDL_putenv}
 
-// The following function has been commented out to encourage developers to use
-// SDL_putenv as it it more portable
-//function putenv(const variable: PChar): integer;
-//{$EXTERNALSYM putenv}
-
 {$IFDEF WINDOWS}
-{$IFNDEF __GPC__}
-function getenv( const name : Pchar ): PChar; cdecl;
-{$ENDIF}
+function getenv( const name : Pchar ): PChar; cdecl;  external 'libc.so' name 'getenv';
 {$ENDIF}
 
 {* Retrieve a variable named "name" from the environment }
-//function SDL_getenv(const name: PChar): PChar; cdecl; external {$IFNDEF NDS}{$IFDEF __GPC__}name 'SDL_Init'{$ELSE} SDLLibName{$ENDIF __GPC__}SDLLibName name '';
 function SDL_getenv(const name: PChar): PChar;
 {$EXTERNALSYM SDL_getenv}
-
-// The following function has been commented out to encourage developers to use
-// SDL_getenv as it it more portable
-//function getenv(const name: PChar): PChar;
-//{$EXTERNALSYM getenv}
 
 {*
  * This function gives you custom hooks into the window manager information.
@@ -4571,7 +4342,7 @@ end;
 
 {$IFDEF WINDOWS}
 function _putenv( const variable : Pchar ): Integer;
-cdecl; external {$IFDEF __GPC__}name '_putenv'{$ELSE} 'MSVCRT.DLL'{$ENDIF __GPC__};
+cdecl; external 'MSVCRT.DLL';
 {$ENDIF}
 
 
@@ -4591,32 +4362,18 @@ begin
 end;
 
 {$IFDEF WINDOWS}
-{$IFNDEF __GPC__}
 function getenv( const name : Pchar ): PChar;
-cdecl; external {$IFDEF __GPC__}name 'getenv'{$ELSE} 'MSVCRT.DLL'{$ENDIF};
-{$ENDIF}
+cdecl; external 'MSVCRT.DLL';
 {$ENDIF}
 
 function SDL_getenv(const name: PChar): PChar;
 begin
   {$IFDEF WINDOWS}
-
-  {$IFDEF __GPC__}
-  Result := getenv( string( name ) );
-  {$ELSE}
   Result := getenv( name );
-  {$ENDIF}
-
   {$ELSE}
 
   {$IFDEF UNIX}
-
-  {$IFDEF FPC}
   Result := fpgetenv(name);
-  {$ELSE}
-  Result := libc.getenv(name);  
-  {$ENDIF}
-
   {$ENDIF}
 
   {$ENDIF}
@@ -4633,20 +4390,12 @@ begin
 end;
 
 procedure FreeAndNil(var Obj);
-{$IFNDEF __GPC__}
-{$IFNDEF __TMT__}
 var
   Temp: TObject;
-{$ENDIF}
-{$ENDIF}
 begin
-{$IFNDEF __GPC__}
-{$IFNDEF __TMT__}
   Temp := TObject(Obj);
   Pointer(Obj) := nil;
   Temp.Free;
-{$ENDIF}
-{$ENDIF}
 end;
 
 { Exit procedure handling }
