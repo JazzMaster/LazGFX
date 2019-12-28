@@ -1,19 +1,46 @@
 ## Notes
 
+Math units were missing.<br>
+**They are required.**
+
+Get used to tangents, cosin, and sin usage--This IS COMPUTER SCIENCE afterall....<br>
+(Gimmie sum pi...)
+
+
+FreeImage needs to be added instead of SDL_image. It replaces it and adds better features.<br>
+This will require it to be installed prior to compile time, however.
+
+IMG_ is SDL_image unit, not FreeImage. I have (german) sources for this somewhere...(another dev)
+
+(more depends hell)
+
+Range Checks are not quite where they need to be.<br>
+This is a side-effect of implementing new things, you forget sometimes- you are overburndened
+with a million other floating concepts and a billion lines of "misshappen code".
+
+Some Compiler checks are added for code sanity, but perhaps not enough.<br>
+-O3 is probably wise at this point, O4-( yes it exists) targets to YOUR PC ONLY<br>
+However, this interferes with debugging apps.
+
+
 I explicitly am targeting D2D, OpenGL(2D), and QDraw2D/Quartz2D, even through SDL.<br>
+X11 is what it is-
+
+	All apps are console apps - UNLESS the XDISPLAY envvar is set.
+	(The compiler cant check for this, it must be done at runtime)
+
+-I need another way to test for VTerms(libsvga+framebuffer) on Linux(login window var?).
+
 
 Noob notes:
 DONT PRESUME ANYTHING.EVER.
 
-
 Apparently I have to reCreate WinDos unit for Windows???<br>
-
 
 Dos:
 
 		A TRUE DOS MODE (Int21 based) FILE IO Routine Library
 		This includes ARGV and GetEnv and PutEnv processing.
-
 
 WinDos:
 
@@ -94,48 +121,39 @@ Keep in mind SDL is only 2d, anyone telling you that "SDL does 3d" is lying to y
 
 Theres no such thing as a 2D "texture"- thats a 3D "object side".<br>
 You are just looking at it differently in 3 dimensions.<br>
-(Adjust your ModelVIew matrice...)
+(Adjust your ModelView matrice...)
 
 
-### ARG! My output is corrupted!
+### ARG! My video output is corrupted!
 
-corrupted video(windows?) are due to task switching the vram out to other apps, even the window manager- that are running.<br>
-you arent clearing that corruption, when accessing the vram your app uses- youre just throwing more data at it.<br>
-**This is why things get corrupted.**
+Cause:
+
+	You probably re-wrote the event handler.
+	Your window got "overwrote" by another graphical process(it happens)
 
 To fix this:
 	
-		Some use single bufferring instead of double. Not wise.
+	Tap the Window_Expose event and "PageFlip on exposure".
 
-when double bufferring:
+Id advise also pausing once "Focus is left"- why proces in the background if its not needed?
+(Keep your timers active, just dont draw in the background, perhaps pause audio as well)
 
-		Clear, blit(update from elsewhere), then flip(or update rect).
 
-YES, both 1.2 and 2.0 have "clear" methods.
-
-SDL1:
-
-		SDL_FillRect(MainSurface,Nil,0),Blit , then (UpdateRect) flip.
-SDL2:
-
-		RenderClear,RenderCopy(Put texture to the renderer), RenderPresent
-
-Using successive Flip/Present calls (instead of clearing) is hackish.<br> 
-It accomplishes the same, but its not the right way to do it.
+#### Rendering
 
 Remember, render one frame- then bail. Come back for more.<br>
 **DO NOT RENDER IN A LOOP(render thru a videoCallback function instead)-<br>
- it blocks input processing and can lead to CPU lockups otherwise**
+ it blocks input processing and can lead to CPU lockups**
 
-
-Both JEDI hack-team and SDL team seem to have some major flaws, 
-I believe SDL(++) can be rewritten BETTER in FPC than C devs have written similar in C. 
 You have a "Lazarus limitation" for the time being.
 
 JEDI Headers are severely lacking (user :EVxyzza) and are broken in places they should not be, 
 (I am using modified ALTERNATE Pascal JEDI headers that have been patched).
 
 Network API has yet to be tested.
+
+
+#### What about Lazarus? I see the code..
 
 **Lazarus Programmers will need to WAIT until TCanvas is rewritten, unless they want OpenGL graphics(3D).**
 
@@ -153,6 +171,7 @@ We know
         Most Unices have X11- up to date OSes have newer XOrg (vs XFree)
         RasPi can use "FrameBuffer Mailbox acceleration"
         Dos has "assembler acceleration" and/or VESA. 
+
 
 ### Cant I just USE SDL2_BGI and hook the C?
 

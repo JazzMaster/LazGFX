@@ -8,25 +8,56 @@ We are using SDL (and OpenGL) here.
 Please try it- especially if you are coming from DOS-era libGraph(C) or Graph.pas(BP/TP) units.<br>
 This is a modern-day version of "that".
 
+#### Dont start the presses yet...
+
 Printing is one unit we lack.<br> 
 You need to convert the data into "postscript format"- and kick the data(output,file) into some sort of printer buffer
 or printer engine, or "print server" - to print anything.
 
-It BEEPS!<br>
-FreePascal can now "beep" at you(lazy devs)!<br>
-Whether (or not) I can get a "BASIC era Grand Piano" out of the speaker kernel module(Linux) is yet to be seen.
+#### The BLEEPING COMPUTER
+ 
+It should be beeping...(why its not is another matter)<br>
+I picked up where fpc team left off. Debian isnt beeping, Ubuntu is.<br>
+(lack of a PC speaker on my notebook?)<br>
 
+So yes, that is back(ON LINUX), Grand Piano-ish...if you want to write older sound routines..<br>
+I have docs on this , and its "sort of implemented" in my sub-units.
+
+(See Late 1980s and early 1990s BASIC refernces on this- yeah, its that old of a routine.)
+
+
+### License
+
+Lazarus Graphics units are Mozilla/Apache licensed(you can "free more" but you cant UN-FREE).<br>
+
+Various other misc units are licenced under GPL, LGPL and other Open Source parameters.<br>
+You remain free to FREE them further - however, GPL and LGPL forbid "restrictive licence changes".
+
+This is not PUBLIC DOMAIN CODE. 
+
+PUBLIC DOMAIN is ABANDONWARE- "do whatever licences" (MIT or similar).<br>
+Sometime licenses have other restrictive clauses- payment limits, etc.<br>
+Those routines, if ever used- have been removed.<br>
+They cannot be used(legal reasons), so dont add them.
+
+Microsoft, Apple, and GL (as well as MESA and X) Consortium(s) maintain the copywrights and licensure on 
+GUI APIs- but allow hooking them. That is all Ive done. I do not claim to have wrote that code, and I make no claim to.
+
+#### WARRANTY
+
+This unit uses (and links to) code from various people. 
+THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY- 
+
+		Including the merchantibility for ANY particular purpose.(It may not suit your needs)
+
+The code is "mostly sane", but do use caution.<br>
 This is WIP, but the most complete attempt that I have (built) found so far.
-
-
-
-Source code is Mozilla/Apache licensed(you can "free more" but you cant UN-FREE).
 
 ---
 
 2D Graphics(BGI) Status:
 
-**SDL1 is broken for rewrite**
+**SDL1 is an early alpha break/fix mode- not guaranteed to compile yet**
 **SDL2 is working in break/fix mode as features are tweaked and added**
 
 InitGraph: Working<br>

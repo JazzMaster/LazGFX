@@ -511,7 +511,9 @@ uses
 {$ENDIF}
 
 //FPC generic units(OS independent)
-  SDL,strings,typinfo,logger
+  SDL,strings,typinfo,logger,math
+
+//DUH! MATH....
 
 //uos
 

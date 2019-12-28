@@ -581,10 +581,9 @@ uses
 //sdl2_gfx is in rewrite and ticks isnt used yet.
 
 //ENSURE THESE ARE ALL INSTALLED OR YOU WILL GET LINKING ERRORS!
-  SDL2,SDL2_ttf,SDL2_Image,strings,typinfo,logger
+  SDL2,SDL2_ttf,strings,typinfo,logger,math
 
-//sdl2_net,uos
-//Logger was the unit "throwing EIO errors" all over...FNF- I reset instead of reWrote...
+//sdl2_net,uos,FreeImage
 
 //stipple is what dashes lines are called
 
