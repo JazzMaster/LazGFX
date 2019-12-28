@@ -2,7 +2,32 @@
 Lazarus Graphics
 -----------------
 
-2D Completion Status:
+This is the (NEW?) Graphics Core API for FPC/Lazarus.<br>
+We are using SDL (and OpenGL) here.
+
+Please try it- especially if you are coming from DOS-era libGraph(C) or Graph.pas(BP/TP) units.<br>
+This is a modern-day version of "that".
+
+Printing is one unit we lack.<br> 
+You need to convert the data into "postscript format"- and kick the data(output,file) into some sort of printer buffer
+or printer engine, or "print server" - to print anything.
+
+It BEEPS!<br>
+FreePascal can now "beep" at you(lazy devs)!<br>
+Whether (or not) I can get a "BASIC era Grand Piano" out of the speaker kernel module(Linux) is yet to be seen.
+
+This is WIP, but the most complete attempt that I have (built) found so far.
+
+
+
+Source code is Mozilla/Apache licensed(you can "free more" but you cant UN-FREE).
+
+---
+
+2D Graphics(BGI) Status:
+
+**SDL1 is broken for rewrite**
+**SDL2 is working in break/fix mode as features are tweaked and added**
 
 InitGraph: Working<br>
 CloseGraph:  Working <br>
@@ -19,42 +44,92 @@ GetPixel:  Working <br>
 Clearscreen/ClearDevice:  Working<br> 
 SetBGcolor(multiple declarations):  Working<br> 
 SetFGColor(multiple declarations):  Working <br>
+Tris: somewhat implemented<br>
+Circle(Bresnans): Should work, untested<br>
+Ellipses, Polys,Fills: Unimplemented<br>
+Line: MISSING! (fpc team..)
 
 
-
-3D Completion Status:
+3D OpenGL Status(very basic):
 
 InitGraph:  Working <br>
 CloseGraph:  Working <br>
-Core GL  ops:  Working, Linking OK from C <br>
-GL DirectRendering (Drawing on the fly ops):  Working <br>
-GL Shaders(GLSL and 3D spirtes):  MOSTLY BROKEN(code works, renders with some issues), requires wonky C-like shader code(vertex/fragment) <br>
+Core GL ops:  Working, Linking OK from C <br>
+GL "DirectRendering" (Drawing on the fly ops):  Working <br>
 
+Textures(and QUADS): UNTESTED, doesnt need "shaders" with "basic objects".<br>
+Games create objects(possibly thru shaders), then add Textures to them, like "slapping wallpaper on everything".<br>
+(You can texturize both 2d and 3d objects.)
 
 ---
 
-I am not replacing every SDL function here- but I am rewriting "the Borland equivalent".<br>
-(SEE the C version of SDLBGI if want to know more.)
+Castle Engine may provide these:
 
-ONLY accelerated APIs will be used. <br>
+GL Shaders(GLSL): MOSTLY BROKEN, possible to use<br>
+
+RENDERING ISSUES, INEFFICENT on larger scale
+
+		requires wonky C-like shader code(vertex/fragment) and "programs" to be compiled
+
+3D spirtes(OGRE/AssImp):  UNIMPLEMENTED
+SceneGraph(WorldGen,SpeedTree,etc): UNIMPLEMENTED
+Collision(Bullet) Physics: UNIMPLEMENTED
+Compressed and Advanced Texture Loading: UNIMPLEMENTED
+
+---
+
+### Depends HELL!
+
+These units have many many depends.<br>
+I have tried to source as many as possible for you, without requiring you to rebuild each and every one.
+
+**There is no way to avoid this unless you want to reprogram everything**  
+for 50+ years and have a team of programmers to do it.
+
+JPEG support alone- in Pascal is an ancient mess, most will not know decades later how to implement it.
+
+You have to co-ordinate!
+
+OpenGL would not be possible to use in Lazarus if not for FContext and DelphiGL teams
+(YW for the double threat).
+
+Yes, Id rather static build but with a library that isnt possible these days.
+
+Anyone scared of this, wanting self-libraries only...run into the worgen woods now.<br>
+I cannot- and WILL NOT- help you. You can help me by coding for DX, X11, or Quartz2D, QuickDraw.
+
+#### Just Draw
+
+I operate on the "just draw" concept. 
+
+You shouldnt have to worry about the sublayered APIs.<br>
+You want to draw, so lets make it easier!
+
+I am not replacing every SDL function here- but I am rewriting "the Borland equivalent".<br>
+You can use any "drawing method you like", once the context is operational.<br>
+Same with OpenGL.
+
+ONLY accelerated underlying APIs will be used. <br>
         
         X11(post XFree fork)
-        QDraw/QDraw GX(GameSprockets API and documentation cant be found)
+        QDraw/QDraw GX/GameSprockets 
         DirectDraw/D2D
 
-        8088-> Pentium1 can use accellerated Assembler (int 10 calls) thru "Watcom" linker 
+        8088-> Pentium1 (DOS) can use "accellerated Assembler (int 10 calls)" thru "Watcom" linker 
         
 The latter is a "port thru Linux/Windows x64" hack -there is no native fpc compiler -yet- on this platform.<br>
 (It assumes FreeDOS, not M$ft DOS.)
 
-**WE WANT THIS FAST**
+**OPENGL is reserved for 3D and 2D/3D combinations ONLY.**
 
 Theres one possible glitch:
 
-		2d ops may be using "forced software surfaces" if not using fullscreen rendering/drawing
+		2d ops may be using "forced software surfaces" 
+			-if not using fullscreen rendering/drawing
+			-if using SDL1 vs SDL2 on newer hardware
 
-This is a Hardware limitation, not so much SDL. Of course, hardware rendering is faster(if you can use it).<br>
-It also imposes its own sets of challenges.
+Of course, hardware rendering is faster(if you can use it).<br>
+DO NOT PRESUME that Accelerated drawing ops REQUIRE openGL. They DONT.
 
 
 #### Portables??
@@ -73,19 +148,17 @@ SDL may port to these devices.<br>
 
 I took a look at some X11 code and decided that we are approaching the matter wrong.<br>
 CodeWarrior would like us to use QuickDraw(thats ok).<br>
-DirectDraw or D2D (DirectX) is faster than Windows GDI.
+DirectDraw or D2D (DirectX) is faster than the (previously assumed) Windows GDI.
 
 ### The teardown
 
 This "UNIT" should compose of two major elements:
 
-        2dBGI
-        3dOpenGL
+        2d- BGI
+        3d- OpenGL
 
-Can you combine the two into one API? YES. <br>
-Can you extend this and add assIMP, etc etc....YES!!!! <br>
-
-Lets get everything in working order first.<br>
+OpenGL is EXTREMELY ADVANCED 2D/3D engine- that leave most of the work, math, (and how-to) UP TO YOU.<br>
+IT DOES NOT ASSUME ANYTHING.
 
 If you need to mix 2D and 3D ops (at the same time) use OpenGL.<br>
 I will tell you why:
@@ -93,51 +166,67 @@ I will tell you why:
         OpenGL doesnt care what view you use, if you draw in 3d onto the side of a cube, etc.
         You can mix co ordinate systems 50x time a second- and it will keep up.
 
-GL co-ordinate system is what confuses people. (Change your perspective matrix, reset it, change it again...)<br>
-(or as I like to call it- "the push it, pop it, tweak it-bop it", method)
+GL co-ordinate system is what confuses people.<br>
+Further, you need at least a basic understanding of College level "intermediate algebra" to understand the 
+co-ordinate system(x,y,z RightHand, LeftHand,etc) and how it works.
 
+Now, you can add a 2D HUD on top of all of that- AND work in 3D (at the same time), using a different
+co-ordinate calculation(without dropping a single voxel- or slowing down).
+
+(Change your "perspective" matrix, reset it, change it again...)<br>
+(or as I like to call it- "the push it, pop it, tweak it-bop it", method)
 
 "Drawing primitives" is left to the core APIs that can better accomplish the task.(2D)<br>
 Trying to rewrite these in a 3D API is proving to be hell (and hair) raising and too much headache.<br>
-So- Im just not going to do it.
+So- Im just not going to do it.(Its overkill trying)
+
+
+### 2D
+
+2D will consist of a "mimicked", Pseudo-BGI API based on what we already know about it,<br>
+Ported multi-platform (and multi-arch) thru SDL(for now).
 
 
 #### Mac OS
 
+MAC OS9 is SDL1.2 limited!
+
 OS9 doesnt support above OpenGL 1.2.1- SDL requires OpenGL version 2 or above, so as of SDL 1.2.13, OS9 was dropped.<br>
-OS9 has 16bit memory limts(2GB addressable space) due to max memory hardware limits(32bit PowerPC cpu).<br>
+OS9 has 16bit memory limts due to max memory hardware limits(32bit PowerPC cpu).<br>
 (This may be due to 080 compatibility layer provided thru OS9. Yes, you can run 68K apps!)
 
-Since OS9 is Object-Pascal, there may be a way to hack the core kernel into using a VM instead of segmented memory model, however, this may break compatibility.<br>
 There is a hack for Borland BP/TP7 that switches out the segmented memory model with a VM(x86) on-demand paging one.<br>
-You have to replace a Compiler file, somewhere- as memory serves.
+-You have to replace a Compiler file, somewhere- as memory serves.
 
+Since OS9 is Object-Pascal, there may be a way to hack the core kernel into using a VM instead of segmented memory model.
+-however, this may break compatibility.
 
-The question is how much of the OS depends on it? 
+Compatibility is actually a HUGE DEAL with MacOS.<br>
+(Snow Leopard still supports PowerPC applications- half of which are still supplied, as of SL-"PPC only" by apple)
+
+The question is how much of the OS depends this compatibility? 
 
 		The system Folder?
 		All Apps?
 		Extensions?
 
+I find that OS9 was ignored, and abandoned (often abused) when the latter moments 
+of developing on the platform actually made OS9 (and the Mac) a solid product. <br>
+
+It was too perfect.<br>
+(Much like Sony NetMD.)
+
+#### OSX (10.4+)
 
 OSX is really the way to go-
 
         However, I will do my best to support OS9 or "classic" or "sheep-shaved" installs
 
-I find that OS9 was ignored, and abandoned (often abused) when the latter moments of developing on the platform actually made OS9 (and the Mac) a solid product. <br>
-
-It was too perfect.<br>
-(Much like Sony NetMD.)
-
 If I can support the 2D API thru OSX Quartz2d- I will look into it.<br>
 (Quartz is where OSX is at these days.)
 
-Unfortunately, there is no universal anything. VESA tried and failed at this.<br>
-Nobody else has stepped up (I will look at SDLBGI -mac code- in C sources) for multiplatform, multiarch.
 
-When they did(Borland) - the API changed too much for anyone to keep up.
-
-#### 3D
+### 3D
 
 3d will be a mix of:
 
@@ -154,33 +243,29 @@ where it isnt.
 
 #### DelphiGL Caveat
 
-DGL doesnt allow (GL issue) lower than 24bpp, nor palettes.<br>
+DGL doesnt allow lower than 24bpp, nor palettes.<br>
+Implementing them requires heavy understanding of Fragment Shaders and Textures(think unreal tournament).
 
-
-If you just want modern-day graphics, then focus on 3D API here- <br>
+If you just want "modern-day graphics", then focus on 3D API- <br>
 and look at Game engines like "Castle". (OpenMorrowWind uses assImp/OGRE.)
 
-Keep in mind you are looking for "Linux based" or "Multi-platform Engines".<br>
-**I am not finding that many.** <br>
+
+#### Cheating
 
 Valve and Unity and Unreal devs "cheat compatibility"- <br>
-by using WineAPIs instead of porting the D3D code(windows) to OpenGL(universal standard).
+by using WineAPIs (instead of porting the D3D code to OpenGL).
 
 The other WineAPIs allow them to "not know" Linux-es, "to CHEAT again" by running a windows application.<br>
 There is no actual "Native Code" running- and these devs DO NOT CARE.<br>
 
-I code for Linux. I like the challenge. I will "port" or IFDEF the rest.
 
+## Build Targets
 
-## Primary Build Targets
-
-		OS9/OSX (macintosh PowerPC- Intel thru OSX 10.9 coming soon)
-		Win32/64
-		Lin32/64 (missing a Pascal-based Graphics API and working OpenGL routines)
-		RasPi(mailroom based GPU accleration inside the framebuffer)
-
-
-
+		OS9/OSX AQUA Interface and MacShell(OS9) (Intel and PowerPC macintosh)
+		Win32/64 SDL via "Command Prompt" and OpenGL via Lazarus
+		Lin32/64 X11/VTerm (currently missing a Pascal-based "Graphics API" and "working OpenGL routines")
+		RasPi (FullScreen only) VTerm(mailroom based GPU accleration)
+		Android (needs a ton of testing- and time I dont have)
 
 -Jazz
 

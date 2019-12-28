@@ -4064,8 +4064,7 @@ cdecl; external {$IFNDEF NDS}{$IFDEF __GPC__}name 'SDL_KillThread'{$ELSE} SDLLib
 { Get Environment Routines                                                     }
 {------------------------------------------------------------------------------}
 {$IFDEF WINDOWS}
-function _putenv( const variable : Pchar ): integer;
-cdecl;
+function _putenv( const variable : Pchar ): integer; cdecl;
 {$ENDIF}
 
 {$IFDEF Unix}
@@ -4341,8 +4340,7 @@ begin
 end;
 
 {$IFDEF WINDOWS}
-function _putenv( const variable : Pchar ): Integer;
-cdecl; external 'MSVCRT.DLL';
+function _putenv( const variable : Pchar ): Integer; cdecl; external 'MSVCRT.DLL';
 {$ENDIF}
 
 
@@ -4353,27 +4351,22 @@ begin
   {$ENDIF}
 
   {$IFDEF UNIX}
-  {$IFDEF FPC}
   Result := _putenv(variable);
-  {$ELSE}
-  Result := libc.putenv(variable);
-  {$ENDIF}
   {$ENDIF}
 end;
 
 {$IFDEF WINDOWS}
-function getenv( const name : Pchar ): PChar;
-cdecl; external 'MSVCRT.DLL';
+function getenv( const name : Pchar ): PChar; cdecl; external 'MSVCRT.DLL';
 {$ENDIF}
 
 function SDL_getenv(const name: PChar): PChar;
 begin
   {$IFDEF WINDOWS}
-  Result := getenv( name );
+  Result := _getenv( name );
   {$ELSE}
 
   {$IFDEF UNIX}
-  Result := fpgetenv(name);
+  Result := _getenv(name);
   {$ENDIF}
 
   {$ENDIF}

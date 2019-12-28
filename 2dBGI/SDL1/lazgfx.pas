@@ -618,7 +618,7 @@ m160x100x16,
 m320x200x4,m320x200x16,m320x200x256,
 m640x200x2,m640x200x16,
 m640x480x16, m640x480x256, m640x480x32k, m640x480x64k,m640x480xMil,
-m800x600x16,m800x600x256,m800x600x32k,m800x800x64k,m800x600xMil
+m800x600x16,m800x600x256,m800x600x32k,m800x800x64k,m800x600xMil,
 m1024x768x16,m1024x768x256,m1024x768x32k,m1024x768x64k,m1024x768xMil,
 m1280x720x256,m1280x720x32k,m1280x720x64k,m1280x720xMil,
 m1280x1024x16,m1280x1024x256,m1280x1024x32k,m1280x1024x64k,m1280x1024xMil,
@@ -687,7 +687,10 @@ Think of Text like a "Transparent Label" or "blitted clear sticker".
 
 }
 
-
+//PolyPoints, basically
+  Points=record
+	x,y:word;
+  end;
 
   TArcCoordsType = record
       x,y : word;
@@ -695,7 +698,6 @@ Think of Text like a "Transparent Label" or "blitted clear sticker".
       xend,yend : word;
   end;
 
-//for MoveRel(MoveRelative)
   Twhere=record
      x,y:word;
   end;
@@ -797,7 +799,7 @@ var
     where:Twhere;
 	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop,NeedFrameBuffer:boolean;
     nogoautorefresh:boolean;
-    X,Y:integer;
+    x,y:word;;
     _grResult:grErrortype;
     
     gGameController:PSDL_Joystick;
@@ -877,7 +879,7 @@ Atari modes, etc. were removed. (double the res and pixelSize and we will talk)
   EventThreadReturnValue:LongInt; //Threads are supposed to return a error code
 	
   Rect : PSDL_Rect;
-
+  TriPoints: array[0..2] of Points;
   LIBGRAPHICS_ACTIVE:boolean;
   LIBGRAPHICS_INIT:boolean;
   RenderingDone:boolean; //did you want to pageflip now(or wait)?
@@ -982,7 +984,7 @@ function GetMaxColor: word;
 procedure LoadImage(filename:PChar; Rect:PSDL_Rect);
 procedure LoadImageStretched(filename:PChar);
 
-procedure PlotPixelWithNeighbors(thick:thickness; x,y:integer);
+procedure PlotPixelWithNeighbors(thick:thickness; x,y:word;);
 
 procedure SaveBMPImage(filename:string);
 
@@ -1100,7 +1102,6 @@ colors:
 
 //with consts, we can specify an index color as a name and we will get the index, as it were.
 //(its also easier to copy palette colors with)
-const
 
 	BLACK=0;
 	RED=1;
@@ -1119,23 +1120,7 @@ const
 	YELLOW=14;
 	WHITE=15;
 
-	gBLACK=0;
-	g1=1;
-	g2=2;
-	g3=3;
-	g4=4;
-	g5=5;
-	g6=6;
-	g7=7;
-	g8=8;
-	g9=9;
-	g10=10;
-	g11=11;
-	g12=12;
-	g13=13;
-	g14=14;
-	gWHITE=15;
-
+//Greyscale colors dont have names.
 //original xterm must have these stored somewhere as string data because parts of "unused holes" and "duplicate data" exist
 
 // I can guarantee you a shade of slateBlue etc.. but not the exact shade.
@@ -1166,550 +1151,221 @@ DarkCyan=37;
 LightSeaGreen=38;
 DeepSkyBlue1=39;
 DeepSkyBlue8=40;
-
-Green5,
-SpringGreen5,
-SpringGreen1,
-Cyan3,
-DarkTurquoise,
-Turquoise2,
-Green1,
-SpringGreen2,
-SpringGreen,
-MediumSpringGreen,
-Cyan2,
-Cyan1,
-
-DarkRed,
-DeepPink4,
-Purple4,
-Purple5,
-Purple3,
-
-BlueViolet,
-Orange4,
-Grey37,
-MediumPurple4,
-SlateBlue3,
-SlateBlue2,
-RoyalBlue1,
-
-UnUsedHole5,
-DarkSeaGreen5,
-
-PaleTurquoise4,
-SteelBlue,
-SteelBlue3,
-
-CornflowerBlue,
-UnUsedHole3,
-
-DarkSeaGreen4,
-CadetBlue,
-CadetBlue1,
-
-SkyBlue2,
-SteelBlue1,
-
-UnUsedHole4,
-PaleGreen3,
-SeaGreen3,
-
-Aquamarine3,
-MediumTurquoise,
-
-SteelBlue2,
-UnUsedHole1,
-
-SeaGreen2,
-SeaGreen,
-SeaGreen1,
-
-Aquamarine1,
-DarkSlateGray2,
-DarkRed2,
-DeepPink5,
-
-DarkMagenta,
-DarkMagenta1,
-
-DarkViolet,
-Purple1,
-Orange5,
-LightPink4,
-Plum4,
-MediumPurple3,
-MediumPurple5,
-SlateBlue1,
-Yellow4,
-
-Wheat4,
-Grey53,
-LightSlateGrey,
-MediumPurple,
-LightSlateBlue,
-Yellow5,
-
-DarkOliveGreen3,
-DarkSeaGreen,
-LightSkyBlue1,
-LightSkyBlue2,
-SkyBlue3,
-
-UnUsedHole2,
-
-DarkOliveGreen4,
-PaleGreen4,
-DarkSeaGreen3,
-DarkSlateGray3,
-
-SkyBlue1,
-UnUsedHole,
-
-LightGreen,
-LightGreen1,
-
-PaleGreen1,
-Aquamarine2,
-DarkSlateGray1,
-
-Red3,
-DeepPink6,
-MediumVioletRed,
-Magenta3,
-DarkViolet2, 
-Purple2,
-DarkOrange1,
-IndianRed,
-
-HotPink3,
-MediumOrchid3,
-MediumOrchid,
-MediumPurple2,
-DarkGoldenrod,
-
-LightSalmon3,
-RosyBrown,
-Grey63,
-MediumPurple6,
-MediumPurple1,
-Gold3,
-DarkKhaki,
-NavajoWhite3,
-Grey69,
-LightSteelBlue3,
-LightSteelBlue,
-
-Yellow3,
-DarkOliveGreen5,
-DarkSeaGreen6,
-DarkSeaGreen2,
-
-LightCyan3,
-LightSkyBlue3,
-GreenYellow,
-
-DarkOliveGreen2,
-PaleGreen2,
-DarkSeaGreen7,
-DarkSeaGreen1,
-
-PaleTurquoise1,
-Red4,
-DeepPink3,
-DeepPink7,
-Magenta5,
-Magenta6,
-Magenta2,
-DarkOrange2,
-IndianRed1,
-HotPink4,
-HotPink2,
-Orchid,
-MediumOrchid1,
-Orange1,
-LightSalmon2,
-LightPink1,
-Pink1,
-
-Plum2,
-Violet,
-Gold2,
-LightGoldenrod4,
-Tan,
-MistyRose3,
-Thistle3,
-
-Plum3,
-Yellow7,
-Khaki3,
-LightGoldenrod2,
-LightYellow3,
-Grey84,
-LightSteelBlue1,
-Yellow2,
-
-DarkOliveGreen,
-DarkOliveGreen1,
-DarkSeaGreen8,
-Honeydew2,
-LightCyan1,
-Red1,
-DeepPink2,
-DeepPink,
-DeepPink1,
-Magenta4,
-Magenta1,
-OrangeRed,
-IndianRed2,
-IndianRed3,
-HotPink,
-HotPink1,
-MediumOrchid2,
-DarkOrange,
-Salmon1,
-
-LightCoral,
-PaleVioletRed,
-
-Orchid2,
-Orchid1,
-Orange,
-SandyBrown,
-LightSalmon,
-LightPink,
-
-Pink,
-Plum,
-Gold,
-LightGoldenrod5,
-LightGoldenrod3,
-NavajoWhite1,
-MistyRose1,
-Thistle1,
-Yellow1,
-LightGoldenrod1,
-Khaki1,
-Wheat1,
-Cornsilk,
-
-Grey100,
-Grey3,
-Grey7,
-Grey11,
-Grey15,
-Grey19,
-Grey23,
-Grey27,
-Grey30,
-Grey35,
-
-Grey39,
-Grey42,
-Grey46,
-Grey50,
-Grey54,
-Grey58,
-Grey62,
-Grey66,
-Grey70,
-Grey74,
-
-Grey78,
-Grey82,
-Grey85,
-Grey89,
-Grey93
-
-
-//this one is HELL!
-TPalette256NamesGrey=(
-
-tfsGBlack,
-tfsG1,
-tfsG2,
-tfsG3,
-tfsG4,
-tfsG5,
-tfsG6,
-tfsG7,
-tfsG8,
-tfsG9,
-tfsG10,
-
-tfsG11,
-tfsG12,
-tfsG13,
-tfsG14,
-tfsG15,
-
-tfsG16,
-tfsG17,
-tfsG18,
-tfsG19,
-tfsG20,
-
-tfsG21,
-tfsG22,
-tfsG23,
-tfsG24,
-tfsG25,
-tfsG26,
-tfsG27,
-tfsG28,
-tfsG29,
-tfsG30,
-
-tfsG31,
-tfsG32,
-tfsG33,
-tfsG34,
-tfsG35,
-tfsG36,
-tfsG37,
-tfsG38,
-tfsG39,
-tfsG40,
-
-tfsG41,
-tfsG42,
-tfsG43,
-tfsG44,
-tfsG45,
-tfsG46,
-tfsG47,
-tfsG48,
-tfsG49,
-tfsG50,
-
-tfsG51,
-tfsG52,
-tfsG53,
-tfsG54,
-tfsG55,
-
-tfsG56,
-tfsG57,
-tfsG58,
-tfsG59,
-tfsG60,
-tfsG61,
-tfsG62,
-tfsG63,
-tfsG64,
-tfsG65,
-
-tfsG66,
-tfsG67,
-tfsG68,
-tfsG69,
-tfsG70,
-tfsG71,
-tfsG72,
-tfsG73,
-tfsG74,
-tfsG75, 
-
-tfsG76,
-tfsG77,
-tfsG78, 
-
-tfsG79,
-tfsG80,
-tfsG81,
-tfsG82,
-tfsG83,
-tfsG84,
-tfsG85,
-tfsG86,
-tfsG87,
-tfsG88, 
-
-tfsG89,
-tfsG90,
-tfsG91,
-tfsG92,
-tfsG93,
-tfsG94,
-tfsG95,
-tfsG96,
-tfsG97,
-tfsG98, 
-
-tfsG99,
-tfsG100,
-tfsG101,
-tfsG102,
-tfsG103,
-tfsG104,
-tfsG105,
-tfsG106,
-tfsG107,
-tfsG108, 
-
-tfsG109,
-tfsG110,
-tfsG111,
-tfsG112,
-tfsG113,
-tfsG114,
-tfsG115,
-tfsG116,
-tfsG117,
-tfsG118, 
-
-tfsG119,
-tfsG120,
-tfsG121,
-tfsG122,
-tfsG123,
-tfsG124,
-tfsG125,
-tfsG126,
-tfsG127,
-tfsG128, 
-
-tfsG129,
-tfsG130,
-tfsG131,
-tfsG132,
-tfsG133,
-tfsG134,
-tfsG135,
-tfsG136,
-tfsG137,
-tfsG138, 
-
-tfsG139,
-tfsG140,
-tfsG141,
-tfsG142,
-tfsG143,
-tfsG144,
-tfsG145,
-tfsG146,
-tfsG147,
-tfsG148, 
-
-tfsG149,
-tfsG150,
-tfsG151,
-tfsG152,
-tfsG153,
-tfsG154,
-tfsG155, 
-tfsG156,
-tfsG157,
-tfsG158, 
-
-tfsG159,
-tfsG160,
-tfsG161,
-tfsG162,
-tfsG163,
-tfsG164,
-tfsG165,
-tfsG166,
-tfsG167,
-tfsG168, 
-
-tfsG169,
-tfsG170,
-tfsG171,
-tfsG172,
-tfsG173,
-tfsG174,
-tfsG175,
-tfsG176,
-tfsG177,
-tfsG178, 
-
-tfsG179,
-tfsG180,
-tfsG181,
-tfsG182,
-tfsG183,
-tfsG184,
-tfsG185,
-tfsG186,
-tfsG187,
-tfsG188, 
-
-tfsG189,
-tfsG190,
-tfsG191,
-tfsG192,
-tfsG193,
-tfsG194,
-tfsG195,
-tfsG196,
-tfsG197,
-tfsG198, 
-
-tfsG199,
-tfsG200,
-tfsG201,
-tfsG202,
-tfsG203,
-tfsG204,
-tfsG205,
-tfsG206,
-tfsG207,
-tfsG208,
-
-tfsG209,
-tfsG210,
-tfsG211,
-tfsG212,
-tfsG213,
-tfsG214,
-tfsG215,
-tfsG216,
-tfsG217,
-tfsG218,
-
-tfsG219,
-tfsG220,
-tfsG221,
-tfsG222,
-tfsG223,
-tfsG224,
-tfsG225,
-tfsG226,
-tfsG227,
-tfsG228,
-tfsG229,
-
-tfsG230,
-tfsG231,
-tfsG232,
-tfsG233,
-tfsG234,
-tfsG235,
-tfsG236,
-tfsG237,
-tfsG238,
-tfsG239,
-tfsG240,
-
-tfsG241,
-tfsG242,
-tfsG243,
-tfsG244,
-tfsG245,
-tfsG246,
-tfsG247,
-tfsG248,
-tfsG249,
-tfsG250,
-
-tfsG251,
-tfsG252,
-tfsG253,
-tfsG254,
-tfsGWhite
-
-);
+Green5=41;
+SpringGreen5=42;
+SpringGreen1=43;
+Cyan3=44;
+DarkTurquoise=45;
+Turquoise2=46;
+Green1=47;
+SpringGreen2=48;
+SpringGreen=49;
+MediumSpringGreen=50;
+Cyan2=51;
+Cyan1=52;
+DarkRed=53;
+DeepPink4=54;
+Purple4=55;
+Purple5=56;
+Purple3=57;
+BlueViolet=58;
+Orange4=59;
+Grey37=60;
+MediumPurple4=61;
+SlateBlue3=62;
+SlateBlue2=63;
+RoyalBlue1=64;
+UnUsedHole5=65;
+DarkSeaGreen5=66;
+PaleTurquoise4=67;
+SteelBlue=68;
+SteelBlue3=69;
+CornflowerBlue=70;
+UnUsedHole3=71;
+DarkSeaGreen4=72;
+CadetBlue=73;
+CadetBlue1=74;
+SkyBlue2=75;
+SteelBlue1=76;
+UnUsedHole4=77;
+PaleGreen3=78;
+SeaGreen3=79;
+Aquamarine3=80;
+MediumTurquoise=81;
+SteelBlue2=82;
+UnUsedHole1=83;
+SeaGreen2=84;
+SeaGreen=85;
+SeaGreen1=86;
+Aquamarine1=87;
+DarkSlateGray2=88;
+DarkRed2=89;
+DeepPink5=90;
+DarkMagenta=91;
+DarkMagenta1=92;
+DarkViolet=93;
+Purple1=94;
+Orange5=95;
+LightPink4=96;
+Plum4=97;
+MediumPurple3=98;
+MediumPurple5=99;
+SlateBlue1=100;
+Yellow4=101;
+Wheat4=102;
+Grey53=103;
+LightSlateGrey=104;
+MediumPurple=105;
+LightSlateBlue=106;
+Yellow5=107;
+DarkOliveGreen3=108;
+DarkSeaGreen=109;
+LightSkyBlue1=110;
+LightSkyBlue2=111;
+SkyBlue3=112;
+UnUsedHole2=113;
+DarkOliveGreen4=114;
+PaleGreen4=115;
+DarkSeaGreen3=116;
+DarkSlateGray3=117;
+SkyBlue1=118;
+UnUsedHole=119;
+LightGreen=120;
+LightGreen1=121;
+PaleGreen1=122;
+Aquamarine2=123;
+DarkSlateGray1=124;
+Red3=125;
+DeepPink6=126;
+MediumVioletRed=127;
+Magenta3=128;
+DarkViolet2=129;
+Purple2=130;
+DarkOrange1=131;
+IndianRed=132;
+HotPink3=133;
+MediumOrchid3=134;
+MediumOrchid=135;
+MediumPurple2=136;
+DarkGoldenrod=137;
+LightSalmon3=138;
+RosyBrown=139;
+Grey63=140;
+MediumPurple6=141;
+MediumPurple1=142;
+Gold3=143;
+DarkKhaki=144;
+NavajoWhite3=145;
+Grey69=146;
+LightSteelBlue3=147;
+LightSteelBlue=148;
+Yellow3=149;
+DarkOliveGreen5=150;
+DarkSeaGreen6=151;
+DarkSeaGreen2=152;
+LightCyan3=153;
+LightSkyBlue3=154;
+GreenYellow=155;
+DarkOliveGreen2=156;
+PaleGreen2=157;
+DarkSeaGreen7=158;
+DarkSeaGreen1=159;
+PaleTurquoise1=160;
+Red4=161;
+DeepPink3=162;
+DeepPink7=163;
+Magenta5=164;
+Magenta6=165;
+Magenta2=166;
+DarkOrange2=167;
+IndianRed1=168;
+HotPink4=169;
+HotPink2=170;
+Orchid=171;
+MediumOrchid1=172;
+Orange1=173;
+LightSalmon2=174;
+LightPink1=175;
+Pink1=176;
+Plum2=177;
+Violet=178;
+Gold2=179;
+LightGoldenrod4=180;
+Tan=181;
+MistyRose3=182;
+Thistle3=183;
+Plum3=184;
+Yellow7=185;
+Khaki3=186;
+LightGoldenrod2=187;
+LightYellow3=188;
+Grey84=189;
+LightSteelBlue1=190;
+Yellow2=191;
+DarkOliveGreen=192;
+DarkOliveGreen1=193;
+DarkSeaGreen8=194;
+Honeydew2=195;
+LightCyan1=196;
+Red1=197;
+DeepPink2=198;
+DeepPink=199;
+DeepPink1=200;
+Magenta4=201;
+Magenta1=202;
+OrangeRed=203;
+IndianRed2=204;
+IndianRed3=205;
+HotPink=206;
+HotPink1=207;
+MediumOrchid2=208;
+DarkOrange=209;
+Salmon1=210;
+LightCoral=211;
+PaleVioletRed=212;
+Orchid2=213;
+Orchid1=214;
+Orange=215;
+SandyBrown=216;
+LightSalmon=217;
+LightPink=218;
+Pink=219;
+Plum=220;
+Gold=221;
+LightGoldenrod5=222;
+LightGoldenrod3=223;
+NavajoWhite1=224;
+MistyRose1=225;
+Thistle1=226;
+Yellow1=227;
+LightGoldenrod1=228;
+Khaki1=229;
+Wheat1=230;
+Cornsilk=231;
+Grey100=232;
+Grey3=233;
+Grey7=234;
+Grey11=235;
+Grey15=236;
+Grey19=237;
+Grey23=238;
+Grey27=239;
+Grey30=240;
+Grey35=241;
+Grey39=242;
+Grey42=243;
+Grey46=244;
+Grey50=245;
+Grey54=246;
+Grey58=247;
+Grey62=248;
+Grey66=249;
+Grey70=250;
+Grey74=251;
+Grey78=252;
+Grey82=253;
+Grey85=254;
+Grey93=255;
 
 {
 To get the red value of color 5:
@@ -1720,6 +1376,7 @@ TO get its DWord:
 Palette16[5].DWords;
 
 }
+
 TRec16=record
   
 	colors:PSDL_COLOR; 
@@ -4088,8 +3745,7 @@ end;
 //its either we hack this to hell- or reimplement MainSurface- the easier option.
 //MainSurface^.PixelFormat is unknown-but assignable.
 
-
-function TrueColorGetRGBfromHex(somedata:DWord):PSDL_Color;
+function GetRGBfromHex(somedata:DWord):PSDL_Color;
 
 var
 	pitch,format,i:integer;
@@ -4099,7 +3755,6 @@ var
 
 begin
 
-//always wise to lock-and unlock but w textures(I was trying to avoid a bug) theres more to it.
 lock;
 
 // Now you want to format the color to a correct format that SDL can use.
@@ -4110,10 +3765,9 @@ lock;
        somecolor^.g:=byte(^g);
        somecolor^.b:=byte(^b);
 
-// Also don't forget to unlock your texture once you're done.
 UnLock;
 
-   	   TrueColorGetRGBfromHex:=somecolor;
+   	   GetRGBfromHex:=somecolor;
 end;
 
 function GetRGBAFromHex(input:DWord):PSDL_Color;
@@ -4255,10 +3909,8 @@ end;
 
 function GetFgRGBA:PSDL_Color;
 
-
 begin
     GetFgRGBA:=__Fgcolor; 
-
 end;
 
 //give me the name(string) of the current fg or bg color (paletted modes only) from the screen
@@ -4448,16 +4100,13 @@ PenUp is UpMouseButton[x]
 
 //sets "pen color" given an indexed input
 procedure setFGColor(color:byte);
-var
-	colorToSet:PSDL_Color;
-    r,g,b:PUInt8;
 begin
 
    if MaxColors=256 then begin
-        colorToSet:=Tpalette256.colors[color];
+        colorToSet:=Tpalette256.DWords[color];
         __fgcolor:= colorToSet;
    end else if MaxColors=16 then begin
-		colorToSet:=Tpalette16.colors[color];
+		colorToSet:=Tpalette16.DWords[color];
         __fgcolor:= colorToSet;
    end;
 end;
@@ -4465,11 +4114,8 @@ end;
 
 //sets pen color to given dword.
 procedure setFGColor(someDword:dword); overload;
-var
-    r,g,b:PUInt8;
-    somecolor:PSDL_Color;
 begin
-        __fgcolor:= colorToSet;
+        __fgcolor:= someDword;
 end;
 
 {
@@ -4511,145 +4157,44 @@ end;
 
 //sets background color based on index
 //which surface?? The main one, or a sub-one?
-procedure setBGColor(index:byte; Surface:PSDL_Surface; clearWithFlush:boolean);
-var
-	colorToSet:PSDL_Color;
-    someRect:PSDL_Rect;
+procedure setBGColor(index:byte; Surface:PSDL_Surface);
+
 begin
-//current viewport will be updated in a different procedure/function, its a global variable.
-   somerect^.x:=viewport[currentViewport]^.x;
-   somerect^.y:=viewport[currentViewport]^.y;
-   somerect^.w:=viewport[currentViewport]^.w;
-   somerect^.h:=viewport[currentViewport]^.h;
 
     if MaxColors=256 then begin        
         _bgcolor:=Tpalette256[index].dwords; //set here- fetch later
 
-//theres some debate on this.
-   if ClearWithFlush=true then begin
-       _bgcolor:=Tpalette256[index].dwords; //set here- fetch later
-       if Surface=MainSurface then //nil means flush the entire screen
-           SDL_FillRect(Surface, Nil, __bgcolor);
-	   else
-           SDL_FillRect(Surface, someRect, __bgcolor);
-	    SDL_Flip;
-  
-   end else begin 
-       _bgcolor:=Tpalette256[index].dwords; //set here- fetch later
-	   exit;
-   end;
-
    if MaxColors=16 then begin 
         _bgcolor:=Tpalette256.dwords[index]; //set here- fetch later
-   if ClearWithFlush=true then begin
-       _bgcolor:=Tpalette256[index].dwords; //set here- fetch later
-       if Surface=MainSurface then
-           SDL_FillRect(Surface, Nil, __bgcolor);
-	   else
-           SDL_FillRect(Surface, someRect, __bgcolor);
-
-	    SDL_Flip;
-
-   end else begin 
-       _bgcolor:=Tpalette256[index].dwords; //set here- fetch later
-	   exit;
-   end;
 
 end;
 
-procedure setBGColor(someDword:DWord; Surface:PSDL_Surface; clearWithFlush:boolean); overload; 
-var
-	colorToSet:PSDL_Color;
-    someRect:PSDL_Rect;
+procedure setBGColor(someDword:DWord; Surface:PSDL_Surface); overload; 
 begin
-//current viewport will be updated in a different procedure/function, its a global variable.
-   somerect^.x:=viewport[currentViewport]^.x;
-   somerect^.y:=viewport[currentViewport]^.y;
-   somerect^.w:=viewport[currentViewport]^.w;
-   somerect^.h:=viewport[currentViewport]^.h;
-
-  if ClearWithFlush=true then begin
        _bgcolor:=SomeDword; //set here- fetch later
-       if Surface=MainSurface then
-           SDL_FillRect(Surface, Nil, __bgcolor);
-	   else
-           SDL_FillRect(Surface, someRect, __bgcolor);
-
-	    SDL_Flip;
-
-   end else begin 
-       _bgcolor:=someDword; //set here- fetch later
-	   exit;
-   end;
-
 end;
 
-procedure setBGColor(r,g,b:word;Surface:PSDL_Surface; clearWithFlush:boolean); overload;
+procedure setBGColor(r,g,b:byte;Surface:PSDL_Surface); overload;
 
 //bgcolor here and rgba *MAY* not match our palette..be advised.
 
-var
- color:PSDL_Color;
- someRect:PSDL_Rect;
-
 begin
-//current viewport will be updated in a different procedure/function, its a global variable.
-   somerect^.x:=viewport[currentViewport]^.x;
-   somerect^.y:=viewport[currentViewport]^.y;
-   somerect^.w:=viewport[currentViewport]^.w;
-   somerect^.h:=viewport[currentViewport]^.h;
-
-  if ClearWithFlush=true then begin
-       _bgcolor:=SDL_MapRGB(MainSurface^.format,color^.r,color^.g,color^.b);
-       if Surface=MainSurface then
-           SDL_FillRect(Surface, Nil, __bgcolor);
-	   else
-           SDL_FillRect(Surface, someRect, __bgcolor);
-
-	    SDL_Flip;
-
-   end else begin 
-       _bgcolor:=SDL_MapRGB(MainSurface^.format,color^.r,color^.g,color^.b);
-	   exit;
-   end;
+       _bgcolor:=SDL_MapRGB(MainSurface^.format,r,g,b);
 end;
 
-procedure setBGColor(r,g,b,a:word; Surface:PSDL_Surface; clearWithFlush:boolean); overload;
-
+procedure setBGColor(r,g,b,a:byte; Surface:PSDL_Surface); overload;
 
 //bgcolor here and rgba *MAY* not match our palette..be advised.
 
-var
- color:PSDL_Color;
- someRect:PSDL_Rect;
 
 begin
-//current viewport will be updated in a different procedure/function, its a global variable.
-   somerect^.x:=viewport[currentViewport]^.x;
-   somerect^.y:=viewport[currentViewport]^.y;
-   somerect^.w:=viewport[currentViewport]^.w;
-   somerect^.h:=viewport[currentViewport]^.h;
-
-  if ClearWithFlush=true then begin
-       _bgcolor:=SDL_MapRGBA(MainSurface^.format,color^.r,color^.g,color^.b,color^.a);
-       if Surface=MainSurface then
-           SDL_FillRect(Surface, Nil, __bgcolor);
-	   else
-           SDL_FillRect(Surface, someRect, __bgcolor);
-
-	    SDL_Flip;
-
-   end else begin 
-       _bgcolor:=SDL_MapRGBA(MainSurface^.format,color^.r,color^.g,color^.b,color^.a);
-	   exit;
-   end;
+       _bgcolor:=SDL_MapRGBA(MainSurface^.format,r,g,b,a);
 end;
 
 // ColorNameToNum(ColorName : string) : integer;
 //isnt needed anymore because enums carry a number for the defined "NAME".
 
-
-//remember: _fgcolor and _bgcolor are DWord(s).
+//remember: _fgcolor and _bgcolor are DWord(s). They are not, and nevermore will be -index numbers.
 
 function GetFgDWordRGBA:DWord;
 
@@ -4828,11 +4373,10 @@ The code is however-reasonable- but untested.
 
 }
 
-
 procedure IntHandler;
-//This is a dummy routine.
-
+//This is a dummy routine. Im only giving you the basics. SOMETHING HAS TO BE HERE.
 //I want you- Users/programmers to override this routine and DO THINGS RIGHT.
+// EXPORT the EVENT, then you can do that.
 
 begin
 
@@ -4844,6 +4388,13 @@ begin
  
                //keyboard events
         SDL_KEYDOWN: begin
+			case event^.key.keysym.sym of
+				//ESC always exits				
+				SDLK_ESCAPE:begin
+					quit:=true;                                
+                    break;
+				end;
+			end;	
         end;
 
 	    SDL_MOUSEBUTTONDOWN: begin
@@ -4855,11 +4406,24 @@ begin
                              SDL_WINDOWEVENT_MINIMIZED: minimized:=true; //pause
                              SDL_WINDOWEVENT_MAXIMIZED: minimized:=false; //resume
                              SDL_WINDOWEVENT_ENTER: begin
-                                    continue;
+                                   //hidemouse
                              end; 
                              SDL_WINDOWEVENT_LEAVE: begin
-                                   continue;
+                                   //showmouse
                              end;
+
+                             SDL_WINDOWEVENT_SHOWN: begin
+								//redraw window
+								SDL_RenderPresent(renderer);
+                             end;
+                             
+							//we got overlapped by something, redraw the window(PageFlip again).
+                             SDL_WINDOWEVENT_EXPOSED: begin
+								//redraw window
+								SDL_RenderPresent(renderer);
+								
+                             end;
+                             
                              SDL_WINDOWEVENT_CLOSE: begin
                                 quit:=true;                                
                                 break;
@@ -4870,7 +4434,7 @@ begin
       end;  //case
 
    end; //input loop
-   // LogLn('event handled: ',event^.type_);
+   // writeln('event handled: ',event^.type_);
   end; //mainloop
   closegraph;
 end;
@@ -5027,8 +4591,8 @@ begin
 //dont re-create the wheel, here
     SetBGColor(MainSurface,__fgcolor,true); 
     //since we didnt specify which color, use the current one.
-    //same with surface, use the Main one.
-    //assume we want to clear it.
+    //assume we want to obliterate the entire screen.
+//   SDL_FillRect(0,0,MaxX,MaxY);
 end;
 
 procedure clearscreen; 
@@ -5105,22 +4669,20 @@ begin
 end;
 
 
-//this is for dividing up the screen or dialogs (in game or in app)
-
 //spec says clear the last one assigned
 procedure clearviewport;
 
 //clears it, doesnt remove or add a "layered window".
 //usually the last viewport set..not necessary the whole "screen"
 
-//SetBGColor() reimplementation here
 
 begin
-{   viewport^.X:= texBounds[windownumber]^.x;
+   viewport^.X:= texBounds[windownumber]^.x;
    viewport^.Y:= texBounds[windownumber]^.y;
    viewport^.W:= texBounds[windownumber]^.w;
    viewport^.H:= texBounds[windownumber]^.h;
-}
+   //with BGColor...
+   SDL_FillRect(viewport^.X,viewport^.Y,viewport^.W,viewport^.H);
 end;
 
 
@@ -5893,58 +5455,52 @@ $F-
 end; //initgraph
 
 
-{ 
-
-//these two are completely untested and syntax unchecked.
-//they are not, by themselves "feature coplete dialogs", nor do they check input.
-//mimcs crt level windows in vga text modes
-
-//I said Id get to the line characters..here we go.
-procedure DrawSingleLinedWindowDialog(Rect:PSDL_Rect; colorToSet:DWord);
-
-var
-    UL,UR,LL,LR:Points; //see header file(polypts is ok here)
-    ShrunkenRect,NewRect:PSDL_Rect;
-
-begin
-    Tex:=NewTexture;
-    SDL_SetViewPort(Rect);
-
-    //corect me if Im off- this is guesstimate math here, not actual.
-    //the corner co ords
-    UL.x:=x+2;
-    UL.y:=y+2;
-    LL.x:=h-2;
-    LL.y:=x+2;
-    UR.x:=w-2;
-    UR.y:=y+2;
-    LR.x:=w-2;
-    LR.y:=h-2;
-    
-    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetPenColor(_fgcolor);
-    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
-
-//shink available space
-
-    //do this again- further in
-    UL.x:=x+6;
-    UL.y:=y+6;
-    LL.x:=h-6;
-    LL.y:=x+6;
-    UR.x:=w-6;
-    UR.y:=y+6;
-    LR.x:=w-6;
-    LR.y:=h-6;
-
-    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetViewPort(ShrunkenRect);
-
-end;
-
+//obviously RENDERER ops dont work here...
 procedure DrawDoubleLinedWindowDialog(Rect:PSDL_Rect);
 
 var
+    UL,UR,LL,LR:Points; //PolyPts
+    ShrunkenRect,ShurunkenRect2,NewRect:PSDL_Rect;
+
+begin
+//    Tex:=NewTexture;
+    SDL_SetViewPort(Rect);
+
+    //this is guesstimate math here, not actual.
+    //the corner co ords
+    
+    //come in by 2px, drawRect, come in by 2px, drawrect, come in by 2px- setViewport (I trapped you twice in a box..)
+    UL.x:=x+2;
+    UL.y:=y+2;
+    UR.x:=w-2;
+    LR.y:=h-2;    
+    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    //SDL_SetRenderDrawColor(_fgcolor);
+    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
+
+    //shink available space and...
+    //do this again- further in
+    UL.x:=x+4;
+    UL.y:=y+4;
+    UR.x:=w-4;
+    LR.y:=h-4;
+
+    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    //SDL_SetRenderDrawColor(_fgcolor);
+    SDL_RenderDrawRect(ShrunkenRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
+
+    UL.x:=x+6;
+    UL.y:=y+6;
+    UR.x:=w-6;
+    LR.y:=h-6;
+    ShrunkenRect2:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    SDL_SetViewPort(ShrunkenRect2);
+
+end;
+
+procedure DrawSingleLinedWindowDialog(Rect:PSDL_Rect);
+
+var
     UL,UR,LL,LR:Points; //see header file(polypts is ok here)
     ShrunkenRect,NewRect:PSDL_Rect;
 
@@ -5956,50 +5512,109 @@ begin
     //the corner co ords
     UL.x:=x+2;
     UL.y:=y+2;
-    LL.x:=h-2;
-    LL.y:=x+2;
     UR.x:=w-2;
-    UR.y:=y+2;
-    LR.x:=w-2;
     LR.y:=h-2;
     NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetPenColor(ColorToSet);
-    SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
+     //SDL_SetRenderDrawColor(_fgcolor);
+   SDL_RenderDrawRect(NewRect); //draw the box- inside the new "window" shrunk by 2 pixels (4-6 may be better)
     
     //do this again- further in
     UL.x:=x+4;
     UL.y:=y+4;
-    LL.x:=h-4;
-    LL.y:=x+4;
     UR.x:=w-4;
-    UR.y:=y+4;
-    LR.x:=w-4;
     LR.y:=h-4;
-    NewRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
-    SDL_SetPenColor(ColorToSet);
-    SDL_RenderDrawRect(NewRect); 
-
-//shink available space
-
-    //do this again- further in
-    UL.x:=x+6;
-    UL.y:=y+6;
-    LL.x:=h-6;
-    LL.y:=x+6;
-    UR.x:=w-6;
-    UR.y:=y+6;
-    LR.x:=w-6;
-    LR.y:=h-6;
-
-    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format
+    ShrunkenRect:=(UL.x,UL.y,UR.x,LR.y); //same in rect format 
     SDL_SetViewPort(ShrunkenRect);
 
+end;
+
+//I cant believe these primitives are missing!!! OH MAE GAWD.
+
+{
+
+So far Ive had to implement:
+
+	PutPixel/GetPixel (intentionally missing from SDL)
+	Line/HLine/VLine (ok, sort of FPC team, too)
+	Triangle
+	PixelTriangle (minimum TRI support needed)
+	Circle/Filled Circle and Ellipse/Filled Ellipse (bresnans or fpc team or similar)
+	Fat/ Nearest Neighbor Pixels(blocks)
+
+-On top of "getting these units SANE"....
+	
+Now I know why people keep this shit proprietary(and hide it in secret)...DAMN...theyre doing all the work for nothing.
+Everyone has everything else- it was given to them...they dont want to work for it.
+ 
+}
+
+procedure Rectangle(Rect:SDL_Rect); //if you want one, give me four points
+var
+	x,y,x1,y1,x2,y2,x3,y3:word;
+begin
+
+//join four lines points- to each other.
+		Line(x,y,x1,y1);
+		Line(x1,y1,y2,x2);
+		Line(x2,y2,x3,y3);
+		Line(x3,x3,x,y);		//The forth line returns to sender
+		SDL_Flip;
+end;
+
+//everything is made of these, yet still...no primitive in SDL?
+
+//Incomplete SDL2 code- the drawing sequence is correct. 
+
+{ 
+PixelTris are a smidge different. 
+PixelTris are caddy-corner Pixels(up or down diagonal depending on the direction of the tri.)
+Instead of Line, use PutPixel here.
+PixelTris are for "more precise rendering".
+
+Plop-drop em randomly for a neat effect...
+}
+ 
+procedure UDPixelTriangle(x,y:word; PointsUp:boolean); //if you want one, give me three points
+begin
+		PutPixel(x,y);
+		if PointsUp then begin
+			PutPixel(x-1,y+1);
+			PutPixel(x+1,y+1);
+		end else begin
+		    PutPixel(x-1,y-1);
+			PutPixel(x+1,y-1);
+		end;
+		//are we done?
+end;
+
+procedure LRPixelTriangle(x,y:word; PointsLeft:boolean); //if you want one, give me three points
+begin
+		PutPixel(x,y);
+		if PointsLeft then begin
+			PutPixel(x+1,y+1);
+			PutPixel(x+1,y-1);
+		end else begin
+		    PutPixel(x-1,y+1);
+			PutPixel(x-1,y-1);
+		end;
+		//are we done?
+end;
+
+
+procedure Triangle(Tri:TriPoints); //if you want one, give me three points
+begin
+
+//use the above, but "bend the lines together", return to sender with 3, not 4 points instead.
+
+		Line(x,y,x1,y1);
+		Line(x1,y1,y2,x2);
+		Line(x2,y2,x,y);
+		//are we done?
 end;
 
 
 var
     FontPointer:PTTF_Font;
-}
 
 
 procedure closegraph;
@@ -6149,6 +5764,8 @@ begin
 //are we coming up?
 //no? EXIT
 
+//Notice that DetectGraph should be working now.
+
 if (LIBGRAPHICS_INIT=false) then 
 
 begin
@@ -6158,10 +5775,14 @@ begin
 	    exit;
 end
 else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //initgraph called us
-    LogLn('MaxX: ',MaxX);
-    LogLn('MaxY: ',MaxY);
-    LogLn('bpp: ',bpp);
-//    LogLn('Full screen requested: ',wantfullscreen);
+    writeln('MaxX: ',MaxX);
+    writeln('MaxY: ',MaxY);
+    writeln('bpp: ',bpp);
+    if wantfullscreen = true then
+        wantsFS='True';
+    else
+		wantsFS:='False';
+    writeln('Full screen requested: ',wantsFS);
                    
     case bpp of
 		8: begin
@@ -6177,35 +5798,48 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 
         end;
 		24: format:=SDL_PIXELFORMAT_RGB888;
-		32: format:=SDL_PIXELFORMAT_RGBA8888;
 
     end;
+
     if mode=Detect then begin
        DetectGraph;
        exit;
     end;
 
-    if ForceSWSurface=false then begin
+    if ForceSWSurface=true then begin
 		if wantsFullsCreen=true then
 		    sdlflags:= (SDL_SWSURFACE or SDLHWPALETTE or SDL_DOUBLEBUF or SDL_FULLSCREEN);
 		else
-			sdlflasgs:= (SDL_SWSURFACE or SDLHWPALETTE or SDL_DOUBLEBUF);   
+			sdlflags:= (SDL_SWSURFACE or SDLHWPALETTE or SDL_DOUBLEBUF);   
     end;
-    if ForceSWSurface=true begin
+    if ForceSWSurface=false begin
 		if wantsFullsCreen=true then
 		    sdlflags:= (SDL_HWSURFACE or SDLHWPALETTE or SDL_DOUBLEBUF or SDL_FULLSCREEN);
 		else
-			sdlflasgs:= (SDL_HWSURFACE or SDLHWPALETTE or SDL_DOUBLEBUF);   
+			sdlflags:= (SDL_HWSURFACE or SDLHWPALETTE or SDL_DOUBLEBUF);   
     end;
 
 		test:=SDL_SetVideoMode(MaxX, MaxY, bpp, sdlflags);
+		if test=Nil then begin //we tried an appropriate combo, it didnt work.
+			if ForceSWSurface=false then begin
+				//The only chance we have left- we tried HW Surface and failed, SW should be available. If that doesnt work, leave.
+				Logln('You idiot. Hardware Surface not allowed. Forcing Software Surface Mode.');
+				if wantsFullsCreen=true then
+					sdlflags:= (SDL_SWSURFACE or SDLHWPALETTE or SDL_DOUBLEBUF or SDL_FULLSCREEN);
+				else
+					sdlflags:= (SDL_SWSURFACE or SDLHWPALETTE or SDL_DOUBLEBUF);   
+				test:=Nil;
+				test:=SDL_SetVideoMode(MaxX, MaxY, bpp, sdlflags); //if it comes back Nil- we are in trouble.
+			end;
+ 	    end;
+
         if test=Nil then begin //we tried an appropriate combo, it didnt work.
 			//error out
 			if IsConsoleInvoked then
-	             LogLn('Error: ', SDL_GetError);
+	             LogLn('InitGraph: Error setting mode: ', SDL_GetError);
 			else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SetGraph(SDL): Couldnt Set VideoMode','OK',NIL);	   
-			closegraph;
-	   end;
+			halt(1); //set this higher
+	    end;
 
     //Hide, mouse.
     SDL_ShowCursor(SDL_DISABLE);
@@ -6217,12 +5851,16 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
       InitPalette256; 
     //then set it back up
 
+{
+This should be done in the init source code, not here
+
     if (bpp<=8) then begin
       if MaxColors=16 then
             SDL_SetPalette(Mainsurface, SDL_LOGPAL, TMYPalette16, 0, 15);
 	  else if MaxColors=256 then
             SDL_SetPalette(Mainsurface, SDL_LOGPAL, TMYPalette256, 0, 255);
     end;
+} 
      LIBGRAPHICS_ACTIVE:=true;
      exit; //back to initgraph we go.
 
@@ -6231,8 +5869,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
                    
     case bpp of
 		8: begin
-			    if maxColors=256 then format:=SDL_PIXELFORMAT_INDEX8
-				else if maxColors=16 then format:=SDL_PIXELFORMAT_INDEX4MSB; 
+			    if maxColors<=256 then format:=SDL_PIXELFORMAT_INDEX8;
 		end;
 		15: format:=SDL_PIXELFORMAT_RGB555;
 
@@ -6243,9 +5880,20 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 
         end;
 		24: format:=SDL_PIXELFORMAT_RGB888;
-		32: format:=SDL_PIXELFORMAT_RGBA8888;
 
     end;
+
+		writeln('Resolution Re-Size requested.');
+        writeln('New MaxX: ',MaxX);
+		writeln('New MaxY: ',MaxY);
+		writeln('New bpp: ',bpp);
+		if wantfullscreen = true then
+			wantsFS='True';
+		else
+			wantsFS:='False';
+		writeln('Full screen requested: ',wantsFS);
+
+
     if mode=Detect then begin
        DetectGraph;
        exit;
@@ -6283,6 +5931,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
       InitPalette16;
     if bpp=8 then 
       InitPalette256; 
+{      
   //then set it back up
 
     if (bpp<=8) then begin
@@ -6291,10 +5940,11 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 	  else if MaxColors=256 then
             SDL_SetPalette(surface, SDL_LOGPAL, TMYPalette256, 0, 255);
     end;
+}
 
   end; 
-
 end; //setGraphMode
+
 
 function getgraphmode:string; 
 //determine what mode we are in based on bpp, MaxX and MaxY.
@@ -6712,7 +6362,68 @@ end;
 //linestyle is: (patten,thickness) "passed together" (QUE)
 //this uses thickness variable only
 
-procedure PlotPixelWithNeighbors(Thick:thickness; x,y:integer);
+//These need Blit code written. Im no expert, but "Roto and zoom code" has been written already.
+//Sprite blittering and rotation speeds things up even more.
+
+//procedure SpinningDiamonds(Thick:thickness; x,y:word; speed:integer);
+//procedure SpinningPixelTris(Thick:thickness; x,y:word; speed:integer);
+//procedure SpinningTris(Thick:thickness; x,y:word; speed:integer);
+//procedure SpinningRects(Thick:thickness; x,y:word; speed:integer);
+
+
+procedure Diamonds(Thick:thickness; x,y:word;);
+//everyone loves diamonds.... :-P
+// Trapeziods, in other words.
+
+begin                
+
+   New(Rect);
+   Rect^.x:=x;
+   Rect^.y:=y;
+   case (Thick) of
+       NormalWidth: begin
+             Rect^.w:=2;
+			 Rect^.h:=2;   
+       end;
+       ThickWidth: begin  
+             Rect^.w:=4;
+			 Rect^.h:=4;   
+       end;
+       SuperThickWidth: begin
+             Rect^.w:=6;
+			 Rect^.h:=6;   
+       end;
+       UltimateThickWidth: begin  
+             Rect^.w:=8;
+			 Rect^.h:=8;   
+       end;
+   end;
+   SDL_FillRect(MainSurface, rect,__fgcolor);
+
+   Dispose(Rect);
+   //now restore x and y
+   case Thick of
+		NormalWidth:begin
+			x:=x+2;
+			y:=y+2;   		
+		end;
+		ThickWidth:begin
+			x:=x+4;
+			y:=y+4;  
+		end;
+		SuperThickWidth: begin
+            x:=x+6;
+			y:=y+6;  
+       end;
+       UltimateThickWidth: begin  
+            x:=x+8;
+			y:=y+8;  
+       end;
+   end;
+end;
+
+
+procedure PlotPixelWithNeighbors(Thick:thickness; x,y:word;);
 //this makes the bigger Pixels
  
 // (in other words "blocky bullet holes"...)  

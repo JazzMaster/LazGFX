@@ -3,7 +3,60 @@
 I explicitly am targeting D2D, OpenGL(2D), and QDraw2D/Quartz2D, even through SDL.<br>
 
 Noob notes:
-DONT PRESUME ANYTHING.
+DONT PRESUME ANYTHING.EVER.
+
+
+Apparently I have to reCreate WinDos unit for Windows???<br>
+
+
+Dos:
+
+		A TRUE DOS MODE (Int21 based) FILE IO Routine Library
+		This includes ARGV and GetEnv and PutEnv processing.
+
+
+WinDos:
+
+		A fork of WinCrt(GUI terminal or xterm) that allows for FileIO.
+		Mimcks the DOS UNIT in post WinME era. 
+		Routines MAY NEED to be updated to WinAPI instead of INT21.
+		This includes ARGV and GetEnv and PutEnv processing.
+		
+THIS UNIT CAN NOT EVER USE BASEUNIX routines(ITS NOT UNIX BASED)!
+WHO GOT THE DUMBASS IDEA TO USE the BASEUNIX unit in the DOS,WINDOS units for FPC RTL?
+
+
+BaseUnix:
+
+		As X11 is an optional install, provides "core Unix/Linux/POSIX" functionality.
+
+xTerms were made to connect and mimck the old "VT100 hardware interfaces" used decades previously.<br>
+An xTerm is like a DOS CRT environment with "different OS hooks". <br>
+You are working with an actual "shell" -and the kernel itself, usually, underneath an xTerm. <br>
+
+A VTerm is like traveling to/fro DOS in WinME/98/95 without the added expense and overhead of THUNKING the CPU.<br>
+Its like staring at an ancient dinsaur.<br>
+You have a screen and keyboard (the node is elsewhere)...
+
+VTERM6 is usually running X11. On some Linux-es its on VTERM1.
+
+YOU CAN "BOMB OUT" to another terminal, kill X11, and go on with your day. (try that with windows!)
+
+
+Windows consoles were implemented differently, as they required a kernel and UI to be written.
+As DOS changed, so did the windows console. 
+
+You cant flip out "into a VTerm", there is no DOS underneath-
+
+		ITS ALL FAKE
+
+Then came PowerShell, a Unixy super version of the "Command Prompt".
+
+		AGAIN, ITS ALL FAKE
+
+You have the windows Task Manager when things go south- (if it co-operates) and fancy UI-ness.
+
+
 
 ## Which SDL to use?
 

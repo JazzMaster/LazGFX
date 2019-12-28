@@ -9811,75 +9811,6 @@ function SDL_DXGIGetOutputInfo(displayIndex :SInt32; adapterIndex, outputIndex :
 {$IFEND}
 
 
-(* Platform specific functions for WinRT *)
-{$IFDEF __WINRT__}
-
-  {**
-   *  \brief WinRT / Windows Phone path types
-   *}
-Type
-  TSDL_WinRT_Path = (
-
-    {** \brief The installed app's root directory.
-        Files here are likely to be read-only. *}
-    SDL_WINRT_PATH_INSTALLED_LOCATION = 0,
-
-    {** \brief The app's local data store.  Files may be written here *}
-    SDL_WINRT_PATH_LOCAL_FOLDER = 1,
-
-    {** \brief The app's roaming data store.  Unsupported on Windows Phone.
-        Files written here may be copied to other machines via a network
-        connection.
-    *}
-    SDL_WINRT_PATH_ROAMING_FOLDER = 2,
-
-    {** \brief The app's temporary data store.  Unsupported on Windows Phone.
-        Files written here may be deleted at any time. *}
-    SDL_WINRT_PATH_TEMP_FOLDER = 3
-
-  );
-
-
-  {**
-   *  \brief Retrieves a WinRT defined path on the local file system
-   *
-   *  \note Documentation on most app-specific path types on WinRT
-   *      can be found on MSDN, at the URL:
-   *      http://msdn.microsoft.com/en-us/library/windows/apps/hh464917.aspx
-   *
-   *  \param pathType The type of path to retrieve.
-   *  \ret A UCS-2 string (16-bit, wide-char) containing the path, or NULL
-   *      if the path is not available for any reason.  Not all paths are
-   *      available on all versions of Windows.  This is especially true on
-   *      Windows Phone.  Check the documentation for the given
-   *      SDL_WinRT_Path for more information on which path types are
-   *      supported where.
-   *}
-Function SDL_WinRTGetFSPathUNICODE(pathType :TSDL_WinRT_Path):PWideChar;
-   cdecl; external SDL_LibName;
-
-
-  {**
-   *  \brief Retrieves a WinRT defined path on the local file system
-   *
-   *  \note Documentation on most app-specific path types on WinRT
-   *      can be found on MSDN, at the URL:
-   *      http://msdn.microsoft.com/en-us/library/windows/apps/hh464917.aspx
-   *
-   *  \param pathType The type of path to retrieve.
-   *  \ret A UTF-8 string (8-bit, multi-byte) containing the path, or NULL
-   *      if the path is not available for any reason.  Not all paths are
-   *      available on all versions of Windows.  This is especially true on
-   *      Windows Phone.  Check the documentation for the given
-   *      SDL_WinRT_Path for more information on which path types are
-   *      supported where.
-   *}
-Function SDL_WinRTGetFSPathUTF8(pathType :TSDL_WinRT_Path):PChar;
-   cdecl; external SDL_LibName;
-
-{$ENDIF}
-
-
 const
 
   SDL_INIT_TIMER          = $00000001;
@@ -9955,8 +9886,9 @@ implementation
  end;
 
 {$IFDEF WINDOWS}
-function _putenv( const variable : Pchar ): Integer;
-cdecl; external 'MSVCRT.DLL';
+//WinDos or Dos units on older systems
+//dont use MSVcRT- we are trying to avoid it if needed...use WinDOS
+function _putenv( const variable : Pchar ): Integer; cdecl; external 'MSVCRT.DLL';
 {$ENDIF}
 
 
@@ -9967,11 +9899,7 @@ begin
   {$ENDIF}
 
   {$IFDEF UNIX}
-  {$IFDEF FPC}
   Result := _putenv(variable);
-  {$ELSE}
-  Result := libc.putenv(variable);
-  {$ENDIF}
   {$ENDIF}
 end;
 
@@ -9980,16 +9908,15 @@ function getenv( const name : Pchar ): PChar;
 cdecl; external 'MSVCRT.DLL';
 {$ENDIF}
 
-function SDL_getenv(const name: PChar): PChar;
+//shouldnt this return a phcar or ansistring?
+function SDL_getenv(const name: PChar): Integer;
 begin
   {$IFDEF WINDOWS}
   Result := getenv( name );
-  {$ELSE}
-
-  {$IFDEF UNIX}
-  Result := fpgetenv(name);
   {$ENDIF}
-
+  
+  {$IFDEF UNIX}
+  Result := _getenv(name);
   {$ENDIF}
 end;
 
