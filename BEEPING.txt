@@ -1,0 +1,79 @@
+BEEPing and BLOPing and Farting and BLOOPing and all that:
+
+
+EMERGERD...its so hard to BEEP these days...and when you can BEEP, its only when you have a speaker-<br>
+or an older machine....
+
+I have some solution, sort-of- that is passable.<br>
+
+AAAAAAAA:
+
+		play -q -n synth 2 sine 440 vol 0.5
+
+EEP:
+
+		play -q -n synth 0.20  sine 880 sine 440 vol 0.8
+
+
+Tone down the synth- or get blasted by it:
+
+Have some Guitar....<br>
+
+		play -q -n  synth 2 sine D3 gain -12
+
+also: tremolo 10 40
+
+(Tremolo makes the guitar go on and on and on "forever" like : G ~ ~ ~ ~ ~ ~)
+
+Single note:
+
+		play -qn synth <duration> pluck <note> fade l 0 <duration> 2 reverb
+
+(square instead of pluck sounds like chiptunes)
+
+duration=.10
+note= Piano or guitar note- as in E,G,A,etc.(with octave)
+
+Play many notes(from an array, not too loud):
+
+for note in C3 F4 A4 F4 C3 F4 A4 F4 C3 F4 F4 F4 E4 D4 C3; do
+    play -n synth 0.25 pluck $note gain -12
+done
+
+
+Fone synth:
+(careful! this can ass dial any cell phone if played loud enough)
+
+# 0
+play -n synth 0.5 sin 941 sin 1336
+# 1
+play -n synth 0.5 sin 697 sin 1209
+# 2
+play -n synth 0.5 sin 697 sin 1336
+# 3
+play -n synth 0.5 sin 697 sin 1477
+# 4
+play -n synth 0.5 sin 770 sin 1209
+# 5
+play -n synth 0.5 sin 770 sin 1336
+# 6
+play -n synth 0.5 sin 770 sin 1477
+# 7
+play -n synth 0.5 sin 852 sin 1209
+# 8
+play -n synth 0.5 sin 852 sin 1336
+# 9
+play -n synth 0.5 sin 852 sin 1477
+# *
+play -n synth 0.5 sin 941 sin 1209
+# #
+play -n synth 0.5 sin 941 sin 1477
+# A
+play -n synth 0.5 sin 697 sin 1633
+# B
+play -n synth 0.5 sin 770 sin 1633
+# C
+play -n synth 0.5 sin 852 sin 1633
+# D
+play -n synth 0.5 sin 941 sin 1633
+

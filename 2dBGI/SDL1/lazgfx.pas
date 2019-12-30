@@ -513,9 +513,11 @@ uses
 //FPC generic units(OS independent)
   SDL,strings,typinfo,logger,math
 
-//DUH! MATH....
+//Pulse and Sox can give us a beep(via commandline intervention)- but dont expect much in the way of a over-driven speaker.
+//Its a one-shot deal with enough delay to make you BEEP , yourself!
+//Its "good enough" for our needs.
 
-//uos
+//uos,FreeImage(instead of sdl_image)
 
 
 //stipple is what "dashed lines" are called. Like the "stipple on your face".

@@ -4,7 +4,10 @@ unit logger;
 interface
 
 uses
-    crt,sysutils;
+{$ifndef windows}
+    crt,
+{$endif}
+sysutils;
 
 
 const
@@ -15,7 +18,7 @@ const
 var
    outputfile: Textfile; 
    logging,donelogging:boolean;
-   MyTime: TDateTime;
+
    IsConsoleInvoked:boolean; external;
 
 function Long2String(l: longint): string;
@@ -83,11 +86,22 @@ Procedure LogLn(s: string);
 var
     v:string;
 Begin
+  {$ifdef lcl}
+          {$ifndef windows}
+           writeln( DateTimeToStr(Now),' : ',s); //to the debugging outputfile console first, then file.
+           {$endif}
+  {$else}
+         {$ifndef noconsole}
+                  writeln( DateTimeToStr(Now),' : ',s); //to the debugging outputfile console first, then file.
+         {$endif}
 
-  writeln( DateTimeToStr(MyTime),' : ',s); //to the debugging outputfile console first, then file.
-  v:=( (DateTimeToStr(MyTime))+' : '+s);
+  {$endif}
+
+  v:=( (DateTimeToStr(Now))+' : '+s);
   Writeln(outputfile,v);
 End;
+
+
 
 procedure StartLogging; 
 begin

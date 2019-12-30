@@ -39,6 +39,8 @@ begin
 end;
 
 
+{$R *.res}
+
 begin
 
 //specify- dont guess

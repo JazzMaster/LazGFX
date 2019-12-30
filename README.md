@@ -53,7 +53,20 @@ THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY-
 The code is "mostly sane", but do use caution.<br>
 This is WIP, but the most complete attempt that I have (built) found so far.
 
+Timer Callbacks are not fully implemented yet, use caution. Code will not be optimal, yet.
+
 ---
+
+Ports status:
+
+Win32 and Linux64(at least) are FULLY OPERATIONAL, as the code is written(console app).
+FPIDE seems to be missing from Win32 fpc port for some reason(bad idea).
+
+Lazarus)itself) seems to kill off SDL Renderer for some reason, possibly due to broken code in setGraphMode...
+(Using BGITest.pas as a "Program")
+
+GL seems to work either called thru the console, or as a Lazarus app.
+
 
 2D Graphics(BGI) Status:
 
@@ -78,7 +91,10 @@ SetFGColor(multiple declarations):  Working <br>
 Tris: somewhat implemented<br>
 Circle(Bresnans): Should work, untested<br>
 Ellipses, Polys,Fills: Unimplemented<br>
-Line: MISSING! (fpc team..)
+Line: MISSING! (fpc team..)<br>
+Logging: FULLY OPERATIONAL
+
+
 
 
 3D OpenGL Status(very basic):

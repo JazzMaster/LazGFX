@@ -47,17 +47,13 @@ unit sdl2;
   "sdl_video.h",
   "sdl_types.h"
 
-NONE OF WHICH WERE PROPERLY INCORPORATED HERE!
-
   I will not translate:
   "sdl_opengl.h",
   "sdl_opengles.h"
   "sdl_opengles2.h"
 
-  The OpenGL header defs at opengl.comare found here: 
+  The OpenGL header defs at opengl.com are found here: 
 		https://github.com/SaschaWillems/dglOpenGL
-
-(use: GL,GLU,freeGLUT)
 
   SDLv1.2 conversion was done by the JEDI-Team,  written by Domenique Louis and others.
 
@@ -186,6 +182,11 @@ interface
 {$IFDEF UNIX}
 	uses
 		x,xlib,ctypes;
+{$ENDIF}
+
+{$IFDEF WINDOWS}
+	uses
+		windows;
 {$ENDIF}
 	
 
@@ -505,7 +506,7 @@ type
                          SDL_THREAD_PRIORITY_HIGH);
 
   {* The function passed to SDL_CreateThread()
-     It is passed a void* user context parameter and returns an int.
+     It is passed a "user context parameter" Pointer and returns an int.
    *}
   PSDL_ThreadFunction = ^TSDL_ThreadFunction;
   TSDL_ThreadFunction = function(data: Pointer): Integer; cdecl;
@@ -567,7 +568,8 @@ function SDL_CreateThread(fn: TSDL_ThreadFunction; name: PAnsiChar; data: Pointe
   {**
    *  Create a thread.
    *}
-function SDL_CreateThread(fn: TSDL_ThreadFunction; name: PAnsiChar; data: Pointer): PSDL_Thread; overload;
+//function SDL_CreateThread(fn: TSDL_ThreadFunction; name: PAnsiChar; data: Pointer): PSDL_Thread; overload;
+function SDL_CreateThread(fn: TSDL_ThreadFunction; name: PAnsiChar; data: Pointer): PSDL_Thread; cdecl; overload; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_CreateThread' {$ENDIF} {$ENDIF};
 
 {$ELSE}
 
@@ -9904,12 +9906,11 @@ begin
 end;
 
 {$IFDEF WINDOWS}
-function getenv( const name : Pchar ): PChar;
-cdecl; external 'MSVCRT.DLL';
+function getenv( const name : Pchar ): PChar; cdecl; external 'MSVCRT.DLL';
 {$ENDIF}
 
 //shouldnt this return a phcar or ansistring?
-function SDL_getenv(const name: PChar): Integer;
+function SDL_getenv(const name: PChar): PChar;
 begin
   {$IFDEF WINDOWS}
   Result := getenv( name );

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Compiler Value="C:\lazarus\fpc\3.0.4\bin\i386-win32\fpc.exe" Date="1331393133"/>
+  <Params Value=" -Twin32 -Pi386 -CpPENTIUM4 -MObjFPC -Scghi -Crot -O1 -g -gl -l -vewibq -vn-h- -FiC:\Users\me\Desktop\lazgfx\2dBGI\SDL2\lib\i386-win32 -FuC:\Users\me\Desktop\lazgfx\2dBGI\SDL2\ -FUC:\Users\me\Desktop\lazgfx\2dBGI\SDL2\lib\i386-win32\ -FEC:\Users\me\Desktop\lazgfx\2dBGI\SDL2\ -oC:\Users\me\Desktop\lazgfx\2dBGI\SDL2\bgitest.exe bgitest.pas"/>
+</CONFIG>

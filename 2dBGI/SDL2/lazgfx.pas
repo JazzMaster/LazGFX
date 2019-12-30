@@ -133,9 +133,7 @@ If we could write these routines more low-level, this may not be a problem.
 2- without GUI/Lazarus as a Console Application
 (when running you may get crash help)
 
-Project-> Console App or
-Project-> Program
-
+Run->
 Set Run Parameters:
 "Use Launcher" -to enable runwait.sh and console output (otherwise you might not see it)
 
@@ -515,18 +513,22 @@ uses
 //cthreads has to be the first unit in this case-it so happens to support the C version.
 
 {$IFDEF UNIX} //if coming from dos- sysutils is the equivalent unit.
-      cthreads,cmem,sysUtils,baseunix,
+      cthreads,cmem,baseunix,
     
 {$ENDIF}
 
-    ctypes,classes,
+    ctypes,classes,sysutils,
+
+//very hackish: sysutils and Dos use baseunix and linux but work on windows???
+//HMMMMMMM
 
 //ctypes: cint,uint,PTRUint,PTR-USINT,sint...etc.
 
 // A hackish trick...test if LCL unit(s) are loaded or linked in, then adjust "console" logging...
 
 {$IFDEF MSWINDOWS} //as if theres a non-MS WINDOWS?
-    Windows,MMsystem, //audio subsystem
+    Windows,
+    //MMsystem, //audio subsystem-32bits only
 
 {$ENDIF}
 
@@ -584,6 +586,10 @@ uses
   SDL2,SDL2_ttf,strings,typinfo,logger,math
 
 //sdl2_net,uos,FreeImage
+
+//Pulse and Sox can give us a beep(via commandline intervention)- but dont expect much in the way of a over-driven speaker.
+//Its a one-shot deal with enough delay to make you BEEP , yourself!
+//Its "good enough" for our needs.
 
 //stipple is what dashes lines are called
 
@@ -875,15 +881,18 @@ const
 var
     _graphresult:integer;
     Xaspect,YAspect:byte;
+    //only mutex should be the VideoCallback....
     eventLock: PSDL_Mutex;
+    //??
     eventWait: PSDL_Cond;
+    
     video_timer_id: TSDL_TimerID;
 
     palette:PSDL_Palette;
     where:Twhere;
 	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop,NeedFrameBuffer:boolean;
     nogoautorefresh:boolean;
-    x,y:word;;
+    x,y:word;
     _grResult:grErrortype;
     
     //SDL2 broken game controller support nono-suid and root-only.
@@ -974,8 +983,8 @@ Atari modes, etc. were removed. (double the res and we will talk)
 //ideally we could mutex the renderer - but thats in a program, not this unit.
 
  
-  EventThread:Longint; //fpc uses Longint
-  EventThreadReturnValue:LongInt; //forked processes are supposed to return a error code
+  EventThread:PSDL_Thread; //FUCK-ME! fpc uses non-portable code
+  EventThreadReturnValue:LongInt; //forked processes are supposed to return a error code - can use Nil
 	
   Rect : PSDL_Rect;
 
@@ -1097,7 +1106,7 @@ procedure setgraphmode(graphmode:graphics_modes; wantfullscreen:boolean);
 
 
 //this is like Update_Rect() in SDL v1.
-procedure renderTexture( tex:PSDL_Texture;  ren:PSDL_Renderer;  x,y:word;;  clip:PSDL_Rect);
+procedure renderTexture( tex:PSDL_Texture;  ren:PSDL_Renderer;  x,y:word;  clip:PSDL_Rect);
 //(use SDL_RenderCopy otherwise)
 
 function getgraphmode:string; 
@@ -1106,7 +1115,7 @@ procedure restorecrtmode;
 function getmaxX:word;
 function getmaxY:word;
 
-function GetPixel(x,y:word;):DWord;
+function GetPixel(x,y:word):DWord;
 Procedure PutPixel(Renderer:PSDL_Renderer; x,y:Word);
 
 function getdrivername:string;
@@ -1128,7 +1137,7 @@ procedure LoadImage(filename:PChar; Rect:PSDL_Rect);
 procedure LoadImageStretched(filename:PChar);
 }
 
-procedure PlotPixelWithNeighbors(thick:thickness; x,y:word;);
+procedure PlotPixelWithNeighbors(thick:thickness; x,y:word);
 
 procedure SaveBMPImage(filename:string);
 
@@ -1660,7 +1669,7 @@ end;
 
 //Suraface uses CPU, Textures use GPU
 
-
+{
 function loadTexture(filename:PChar; renderer:PSDL_RENDERER):PSDL_Texture;
 
 var
@@ -1673,7 +1682,7 @@ begin
     texture := IMG_LoadTexture(renderer, filename);
 	result:= texture;
 end;
-
+}
 
 //rect size could be 1px for all we know- or the entire rendering surface...
 //note this function is "slow ASS"
@@ -4393,13 +4402,12 @@ end;
 procedure Texlock(Tex:PSDL_Texture);
 
 var
-  w,h:PInt;
-  pitch:integer;
-  pixels:^longword;
+  pitch:PInt;
+  pixels:pointer;
 
 begin
   pixels:=Nil;
-  pitch:=0;
+  pitch^:=0;
   if (LIBGRAPHICS_ACTIVE=false) then begin
     writeln('I cant lock a Texture if we are not active: Call initgraph first');
     exit;    
@@ -4423,8 +4431,9 @@ end;
 procedure TexlockwRect(Tex:PSDL_Texture; Rect:PSDL_Rect);
 
 var
-  w,h,pitch:integer;
-  pixels:^longword;
+
+  pitch:PInt;
+  pixels:pointer;
 
 begin
   if (LIBGRAPHICS_ACTIVE=false) then begin
@@ -4449,6 +4458,8 @@ function lockNewTexture:PSDL_Texture;
 
 var
   tex:PSDL_Texture;
+  pixels:pointer;
+  pitch:PInt;
 
 begin
   if (LIBGRAPHICS_ACTIVE=false) then begin
@@ -4468,9 +4479,11 @@ begin
   end;
 //  SDL_QueryTexture(tex, format, Nil, w, h);
   SDL_SetRenderTarget(renderer, tex);
+
 {$IFDEF mswindows}
   SDL_LockTexture(tex,Nil,pixels,pitch);
 {$ENDIF}
+
   lockNewTexture:=Tex; //kick it back
 end;
 
@@ -5167,10 +5180,12 @@ Although I may not know these low-level APIs, someone in the SDL community seems
 Lets use WHAT WE WANT, DAMNIT.
 }
 
-{$IFDEF mswindows}
+{
+
+IFDEF mswindows
 	_putenv('SDL_VIDEODRIVER=directx'); //Use DirectX, dont use GDI
 	_putenv('SDL_AUDIODRIVER=dsound'); //Fuck it, use direct sound, too.
-{$ENDIF}
+ENDIF}
 
 //OS9 support removed in SDL v1.3+
 
@@ -5213,11 +5228,10 @@ VTerm:
   if ( SDL_Init(_initflag) < 0 ) then begin
      //we cant speak- write something down.
 
-     if ISConsoleInvoked then begin
-        writeln('Critical ERROR: Cant Init SDL for some reason.');
-        writeln(SDL_GetError);
-     end;
-     //if we cant init- dont bother with dialogs.
+        logln('Critical ERROR: Cant Init SDL for some reason.');
+        logln(SDL_GetError);
+
+        //if we cant init- dont bother with dialogs.
 
      _grResult:=GenError; //gen error
      halt(0); //the other routines are now useless- since we didnt init- dont just exit the routine, DIE instead.
@@ -5233,8 +5247,8 @@ VTerm:
     //not critical, as we have bmp support but now are limping very very bad...
     if((imagesON and _imgflags) <> _imgflags) then begin
        if IsConsoleInvoked then begin
-		 writeln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
-		 writeln(IMG_GetError);
+		 logln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
+		 logln(IMG_GetError);
 	   end;
 	   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'IMG_Init: Failed to init required JPG, PNG, and TIFF support','OK',NIL);	
     end;
@@ -5253,7 +5267,7 @@ now- how do we check if sdl2 is supported- and fall back, given uses clauses can
   if (graphdriver = DETECT) then begin
 	//probe for it, dumbass...NEVER ASSUME.
 
-//temporarily not available
+//temporarily not available- SDL1 is working, v2 needs some help.
 	   SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Graphics detrection not available at this time.','Sorry',NIL);	
 
 //    Fetchgraphmode := DetectGraph; //need to kick back the higest supported mode...
@@ -5308,7 +5322,7 @@ $F-
 
   if(SDL_GetDisplayMode(0,0, mode) <> 0) then begin
     if IsConsoleInvoked then
-			writeln('Cant get current video mode info. Non-critical error.');
+			logln('Cant get current video mode info. Non-critical error.');
 //    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL cant get the data for the current mode.','OK',NIL);
   end;
 
@@ -5324,8 +5338,8 @@ $F-
   video_timer_id := SDL_AddTimer(flip_timer_ms, @videoCallback, nil);
   if video_timer_id=0 then begin
     if IsConsoleInvoked then begin
-		writeln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
-		writeln('you will have to manually update surfaces and the renderer.');
+		logln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
+		logln('you will have to manually update surfaces and the renderer.');
     end;
 //    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL cant set video callback timer.Manually update surface.','OK',NIL);
     NoGoAutoRefresh:=true; //Now we can call Initgraph and check, even if quietly(game) If we need to issue RenderPresent calls.
@@ -5342,7 +5356,7 @@ $F-
     //(slower systems use smaller chunks and degraded quality.)
     if AudioSystemCheck <> 0 then begin
         if IsConsoleInvoked then
-                writeln('There is no audio. Mixer did not init.')
+                logln('There is no audio. Mixer did not init.')
         else  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There is no audio. Mixer did not init.','OK',NIL);
     end;
 
@@ -5352,7 +5366,7 @@ $F-
   if TTF_Init = -1 then begin
     
     if IsConsoleInvoked then begin
-        writeln('I cant engage the font engine, sirs.');
+        logln('I cant engage the font engine, sirs.');
     end;
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: I cant engage the font engine, sirs. ','OK',NIL);
 		
@@ -5384,7 +5398,7 @@ $F-
  
     if( SDL_NumJoysticks < 1 ) then begin
         if IsConsoleInvoked then
-			writeln( 'Warning: No joysticks connected!' ); 
+			logln( 'Warning: No joysticks connected!' ); 
         
   		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: No joysticks connected!','OK',NIL);
         
@@ -5393,8 +5407,8 @@ $F-
     
         if( gGameController = NiL ) then begin  
 	        if IsConsoleInvoked then begin
-		    	writeln( 'Warning: Unable to open game controller! SDL Error: '+ SDL_GetError); 
-                writeln(SDL_GetError);
+		    	logln( 'Warning: Unable to open game controller! SDL Error: '+ SDL_GetError); 
+                logln(SDL_GetError);
             end;
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: Unable to open game controller!','OK',NIL);
             noJoy:=true;
@@ -5404,7 +5418,7 @@ $F-
   end; //Joypad 
 }
 
- //DEBUG: writeln(longword(@renderer));
+ //DEBUG: logln(longword(@renderer));
 
 
   InitGraph:=renderer;
@@ -5510,7 +5524,7 @@ end;
 //everything is made of these, yet still...no primitive in SDL?
 
 {
-Incomplete SDL2 code- the drawing sequence is correct. 
+Incomplete SDL2 code- the drawing sequence is correct. SDL_functionX isnt correct
 
  
 PixelTris are a smidge different. 
@@ -5592,7 +5606,7 @@ var
 begin
 
   LIBGRAPHICS_ACTIVE:=false;  //Unset the variable (and disable all of our other functions in the process)
-  
+  logln('CloseGraph: Shutting Down');
 
   //if wantsInet then
 //  SDLNet_Quit;
@@ -5626,11 +5640,11 @@ begin
   
   if (TextFore <> Nil) then begin
 	TextFore:=Nil;
-	free(TextFore);
+	dispose(TextFore);
   end;
   if (TextBack <> Nil) then begin
 	TextBack:=Nil;
-	free(TextBack);
+	Dispose(TextBack);
   end;
   TTF_CloseFont(FontPointer);
   TTF_Quit;
@@ -5639,28 +5653,30 @@ begin
   //   IMG_Quit;
 
 
-  die:=9; //signal number 9=kill
   //Kill child if it is alive. we know the pid since we assigned it(the OS really knows it better than us)
 
-  //were stuck in a loop
-  //we can however, trip the loop to exit...
+  //we can trip the loop to exit...
 
   exitloop:=true;
-  Killstatus:=FpKill(EventThread,Die); //send signal (DIE) to thread
+ 
+//you cant kill what you didnt make... 
+// SDL_WaitThread(EventThread,Nil);
 
-  EventThread:=0;
-
+  dispose(EventThread);
   dispose( Event );
   //free viewports memory buffers
 
-  x:=8;
+{
+Range ERROR:
+
+x:=8;
   repeat
 	if (Textures[x]<>Nil) then
 		SDL_DestroyTexture(Textures[x]);
 	Textures[x]:=Nil;
     dec(x);
   until x=0;
-  
+ } 
   //reset the viewport
   SDL_RenderSetViewport(Renderer,Nil);  
 
@@ -5693,7 +5709,8 @@ begin
   //"@ExitProc rerouting routines" (and checks) go here
 
   SDL_Quit; 
- 
+  logln('Done.');
+  StopLogging;
   halt(0); //nothing special, just bail gracefully.
 end;            	 
 
@@ -5726,7 +5743,7 @@ I didnt write this (from stackExchange in C) but it makes sense and SDL is at le
 
 }
 
-procedure renderTexture( tex:PSDL_Texture;  ren:PSDL_Renderer;  x,y:word;;  clip:PSDL_Rect);
+procedure renderTexture( tex:PSDL_Texture;  ren:PSDL_Renderer;  x,y:word;  clip:PSDL_Rect);
 
 var
   dst:PSDL_Rect;
@@ -5772,7 +5789,7 @@ begin
 if (LIBGRAPHICS_INIT=false) then 
 
 begin		
-		if IsConsoleInvoked then writeln('Call initgraph before calling setGraphMode.') 
+		if IsConsoleInvoked then logln('Call initgraph before calling setGraphMode.') 
 		else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'setGraphMode called too early. Call InitGraph first.','OK',NIL);
 	    exit;
 end
@@ -5799,14 +5816,15 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 
     end;
 
-    writeln('MaxX: ',MaxX);
-    writeln('MaxY: ',MaxY);
-    writeln('bpp: ',bpp);
+    logln('MaxX: '+Inttostr(MaxX));
+    logln('MaxY: '+Inttostr(MaxY));
+    logln('bpp: '+Inttostr(bpp));
+
     if wantfullscreen = true then
-        wantsFS='True';
+        wantsFS:='True'
     else
 		wantsFS:='False';
-    writeln('Full screen requested: ',wantsFS);
+    logln('Full screen requested: '+wantsFS);
 
    
          //posX,PosY,sizeX,sizeY,flags
@@ -5814,8 +5832,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
          window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
     	 if (window = Nil) then begin
  			if IsConsoleInvoked then begin
-	    	   	writeln('Something Fishy. No hardware render support and cant create a window.');
-	    	   	writeln('SDL reports: '+' '+ SDL_GetError);      
+	    	   	logln('Something Fishy. No hardware render support and cant create a window.');
+	    	   	logln('SDL reports: '+' '+ SDL_GetError);      
 	    	end;
          {$ENDIF}
 
@@ -5852,22 +5870,22 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 			_grResult:=GenError;
 	    	closegraph;
          end;
-        writeln('initgraph: Window is online.');
+        logln('initgraph: Window is online.');
 
   
     	renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
 		if (renderer = Nil ) then begin
  			if IsConsoleInvoked then begin
-	    	   	writeln('Something Fishy. No hardware render support and cant setup a software one.');
-	    	   	writeln('SDL reports: '+' '+ SDL_GetError);      
+	    	   	logln('Something Fishy. No hardware render support and cant setup a software one.');
+	    	   	logln('SDL reports: '+' '+ SDL_GetError);      
 	    	end;
 	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy.',' No hardware render support. BYE..',NIL);
 	    	_grResult:=GEnError;
 	    	closegraph;
 		end;
         // SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
-    writeln('initgraph: renderER online');
+    logln('initgraph: renderER online');
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
      SDL_RenderPresent(renderer); 
@@ -5893,8 +5911,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
        //thisMode:=getgraphmode;
   	   if ( IsThere < 0 ) then begin
     	      if IsConsoleInvoked then begin
-    	         writeln('Unable to set FS: ');
-    	         writeln('SDL reports: '+' '+ SDL_GetError);      
+    	         logln('Unable to set FS: ');
+    	         logln('SDL reports: '+' '+ SDL_GetError);      
      	      end;
 
               FSNotPossible:=true;      
@@ -5903,8 +5921,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
          SDL_SetWindowSize(window, MaxX, MaxY);
          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
          if IsconsoleInvoked then begin
-            writeln('ERROR: SDL cannot set FS.');
-            writeln(SDL_GetError);
+            logln('ERROR: SDL cannot set FS.');
+            logln(SDL_GetError);
          end;
        end;
 
@@ -5952,20 +5970,20 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
         if (success <> 0) then begin 
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set DisplayMode.','OK',NIL);
 	        if IsConsoleInvoked then begin
-                writeln('ERROR: SDL cannot set DisplayMode.');		
-                writeln(SDL_GetError);
+                logln('ERROR: SDL cannot set DisplayMode.');		
+                logln(SDL_GetError);
             end;
 			exit;
         end;
-		writeln('Resolution Re-Size requested.');
-        writeln('New MaxX: ',MaxX);
-		writeln('New MaxY: ',MaxY);
-		writeln('New bpp: ',bpp);
+		logln('Resolution Re-Size requested.');
+        logln('New MaxX: '+InttoStr(MaxX));
+		logln('New MaxY: '+Inttostr(MaxY));
+		logln('New bpp: '+Inttostr(bpp));
 		if wantfullscreen = true then
-			wantsFS='True';
+			wantsFS:='True'
 		else
 			wantsFS:='False';
-		writeln('Full screen requested: ',wantsFS);
+		logln('Full screen requested: '+wantsFS);
 
    if wantFullscreen then begin
        //I dont know about double buffers yet but this looks yuumy..
@@ -5989,8 +6007,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
   	 //  thisMode:=getgraphmode;
   	   if ( IsThere < 0 ) then begin
     	      if IsConsoleInvoked then begin
-    	         writeln('Unable to set FS: ');
-    	         writeln('SDL reports: '+' '+ SDL_GetError);      
+    	         logln('Unable to set FS: ');
+    	         logln('SDL reports: '+' '+ SDL_GetError);      
      	      end;
               FSNotPossible:=true;      
        
@@ -5998,8 +6016,8 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
           SDL_SetWindowSize(window, MaxX, MaxY);
           SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
           if IsConsoleInvoked then begin            
-            writeln('ERROR: SDL cannot set FS.');
-            writeln(SDL_GetError);
+            logln('ERROR: SDL cannot set FS.');
+            logln(SDL_GetError);
           end;
           exit;
        end;
@@ -6049,7 +6067,7 @@ begin
 			inc(x);
 		end;
         if IsConsoleInvoked then begin
-            writeln('Cant find current mode in modelist.');
+            logln('Cant find current mode in modelist.');
         end;
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: Cant find current mode in modelist.','OK',NIL);        
    end;   
@@ -6060,7 +6078,7 @@ begin
   if (not LIBGRAPHICS_ACTIVE) then begin //if not in use, then dont call me...
 
 	if IsConsoleInvoked then 
-        writeln('you didnt call initGraph yet...try again?') 
+        logln('you didnt call initGraph yet...try again?') 
     else
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Restore WHAT exactly?','Clarify the Stupid',NIL);
   end;
@@ -6152,7 +6170,7 @@ Polygons:
 
 }
 
-function GetPixel(x,y:word;):DWord;
+function GetPixel(x,y:word):DWord;
 
 // this function is "inconsistently fucked" from C...so lets standardize it...
 // this works, its hackish -but it works..SDL_GetPixel is for Surfaces/screens, not renderers.
@@ -6206,7 +6224,7 @@ begin
 			else begin
 				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Wrong bpp given to get a pixel. I dont how you did this.','OK',NIL);
 				 if IsConsoleInvoked then
-                writeln('Wrong bpp given to get a pixel. I dont how you did this.');
+                logln('Wrong bpp given to get a pixel. I dont how you did this.');
 			end;
 
 		end;
@@ -6334,7 +6352,7 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
       else
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get Pixel values...','OK',NIL);
          if IsConsoleInvoked then
-                writeln('Cant Put Pixel values...');
+                logln('Cant Put Pixel values...');
     end; //case
 
     SDL_FreeSurface(Tempsurface);
@@ -6352,7 +6370,7 @@ begin
   begin
     		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Put Pixel values...','OK',NIL);
             if IsConsoleInvoked then
-                writeln('Cant Put Pixel values...');
+                logln('Cant Put Pixel values...');
 			exit;
   end;
   SDL_RenderDrawPoint( Renderer, X, Y );
@@ -6446,8 +6464,8 @@ so- we get the current screen resolution and check if requested mode is smaller-
 	testbpp:=SDL_VideoModeOK(modelist.width[i], modelist.height[i], modelist.bpp[i], _initflag);		         
 	if (testbpp=0) then begin //did we run out of modes?
         if IsConsoleInvoked then
-            writeln('We ran out of modes to check.');
-            //writeln('We ran out of modes to check.');
+            logln('We ran out of modes to check.');
+            //logln('We ran out of modes to check.');
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There are no graphics modes available to set. Bailing..','OK',NIL);
 		CloseGraph; 
 	end;
@@ -6506,7 +6524,7 @@ I have to figure out what mode is what again...
 	    	lomode:= ord(mCGA); //no less than this.
 		end else begin
 			if IsConsoleInvoked then
-				writeln('Unknown graphdriver setting.');
+				logln('Unknown graphdriver setting.');
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Unknown graphdriver setting.','ok',NIL);
 		end;
 	end;
@@ -6545,7 +6563,7 @@ begin
    if windownumber=8 then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to create too many viewports.','OK',NIL);
       if IsConsoleInvoked then
-        writeln('Attempt to create too many viewports.');
+        logln('Attempt to create too many viewports.');
       exit;
    end;
    //get viewport size and put into LastRect
@@ -6567,8 +6585,8 @@ begin
 
   if (saveSurface = NiL) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt create SDL_Surface from renderer pixel data','OK',NIL);
-      writeln('Couldnt create SDL_Surface from renderer pixel data. ');
-      writeln(SDL_GetError);
+      logln('Couldnt create SDL_Surface from renderer pixel data. ');
+      logln(SDL_GetError);
       exit;
                     
   end;
@@ -6605,7 +6623,7 @@ begin
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to remove non-existant viewport.','UH oh.',NIL);
   
     if IsConsoleInvoked then
-        writeln('Attempt to remove non-existant viewport.');
+        logln('Attempt to remove non-existant viewport.');
     exit; 
    end;
    if windownumber > 1 then begin
@@ -6661,14 +6679,14 @@ end;
 procedure InstallUserDriver(Name: string; AutoDetectPtr: Pointer);
 begin
    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Function No longer supported: InstallUserDriver','OK',NIL);
-   writeln('Function No longer supported: InstallUserDriver');
+   logln('Function No longer supported: InstallUserDriver');
 end;
 
 procedure RegisterBGIDriver(driver: pointer);
 
 begin
    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Function No longer supported: RegisterBGIDriver','OK',NIL);
-   writeln('Function No longer supported: RegisterBGIDriver');
+   logln('Function No longer supported: RegisterBGIDriver');
 end;
 
 
@@ -6715,7 +6733,7 @@ end;
 //linestyle is: (patten,thickness) "passed together" (QUE)
 //this uses thickness variable only
 
-procedure PlotPixelWithNeighbors(Thick:thickness; x,y:word;);
+procedure PlotPixelWithNeighbors(Thick:thickness; x,y:word);
 //this makes the bigger Pixels
  
 // (in other words "blocky bullet holes"...)  
@@ -6792,8 +6810,8 @@ begin
   if (saveSurface = NiL) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt create SDL_Surface from renderer pixel data','OK',NIL);
       if IsConsoleInvoked then begin
-          writeln('Couldnt create SDL_Surface from renderer pixel data');      
-          writeln(SDL_GetError);
+          logln('Couldnt create SDL_Surface from renderer pixel data');      
+          logln(SDL_GetError);
       end;
       exit;
                     
@@ -6840,7 +6858,7 @@ var
 begin
    if ((Rect^.w=1) or (Rect^.h=1)) then begin    
      if IsConsoleInvoked then begin       
-        writeln('USE GetPixel. This routine FETCHES MORE THAN ONE');
+        logln('USE GetPixel. This routine FETCHES MORE THAN ONE');
      end;  
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'USE GetPixel. This routine FETCHES MORE THAN ONE','OK',NIL);
      exit;
@@ -6877,8 +6895,8 @@ begin
    if (AttemptRead<0) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to read pixel data failed.','OK',NIL);
       if IsConsoleInvoked then begin
-          writeln('Attempt to read pixel data failed.');
-          writeln(SDL_GetError);
+          logln('Attempt to read pixel data failed.');
+          logln(string(SDL_GetError));
       end;
      exit;
    end;
@@ -6890,7 +6908,7 @@ end;
 
 begin  //main()
 
-
+StartLogging;
 {$IFDEF unix}
 IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
 
@@ -6959,6 +6977,7 @@ IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
    grErrorStrings[5]:='General Graphics error';
    grErrorStrings[6]:='Graphics I/O error';
    grErrorStrings[7]:='Invalid font';
+
 
 end.
 

@@ -6,11 +6,27 @@ Math units were missing.<br>
 Get used to tangents, cosin, and sin usage--This IS COMPUTER SCIENCE afterall....<br>
 (Gimmie sum pi...)
 
+I will get to this in a moment.
 
-FreeImage needs to be added instead of SDL_image. It replaces it and adds better features.<br>
+GraphResult- 
+
+		Who gives a flying fuck anymore?
+
+We have logging, we can fetch the SDL/LCL error(and possibly trace it)...why do we care about
+ancient ShortInt C-ish responses?
+
+** LOG EVERYTHING **<br>
+output it to stdout (console) if we can, write it out regardless.
+
+StdError (Linux) has to be redirected to be of any use, we have FULL CRT(ncurses-ish) "color text mode" access.<br>
+(Slap it all together and lets have sum pi)
+
+
+FreeImage needs to replace SDL_image routines. SDL_Image CAN be used, I would prefer FreeImage.<br>
 This will require it to be installed prior to compile time, however.
 
-IMG_ is SDL_image unit, not FreeImage. I have (german) sources for this somewhere...(another dev)
+IMG_ is SDL_image, not FreeImage.<br>
+I have (german) sources for this somewhere...(another dev)
 
 (more depends hell)
 
