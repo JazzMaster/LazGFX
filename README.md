@@ -59,10 +59,10 @@ Timer Callbacks are not fully implemented yet, use caution. Code will not be opt
 
 Ports status:
 
-Win32 and Linux64(at least) are FULLY OPERATIONAL, as the code is written(console app).
+Win32 and Linux64(at least) are FULLY OPERATIONAL, as the code is written(console app).<br>
 FPIDE seems to be missing from Win32 fpc port for some reason(bad idea).
 
-Lazarus)itself) seems to kill off SDL Renderer for some reason, possibly due to broken code in setGraphMode...
+Lazarus)itself) seems to kill off SDL Renderer for some reason, possibly due to broken code in setGraphMode...<br>
 (Using BGITest.pas as a "Program")
 
 GL seems to work either called thru the console, or as a Lazarus app.
@@ -70,15 +70,15 @@ GL seems to work either called thru the console, or as a Lazarus app.
 
 2D Graphics(BGI) Status:
 
-**SDL1 is an early alpha break/fix mode- not guaranteed to compile yet**
+**SDL1 is an early alpha break/fix mode- not guaranteed to compile yet**<br>
 **SDL2 is working in break/fix mode as features are tweaked and added**
 
 InitGraph: Working<br>
 CloseGraph:  Working <br>
 GraphDetect: 
 
-		SDLv1:  Working
-		SDLv2:  In Progress 
+	SDLv1:  Working<br>
+	SDLv2:  In Progress<br> 
 
 (Draw)Line:  Working <br>
 (Draw)Rect:  Working <br>
@@ -93,7 +93,6 @@ Circle(Bresnans): Should work, untested<br>
 Ellipses, Polys,Fills: Unimplemented<br>
 Line: MISSING! (fpc team..)<br>
 Logging: FULLY OPERATIONAL
-
 
 
 
@@ -116,12 +115,12 @@ GL Shaders(GLSL): MOSTLY BROKEN, possible to use<br>
 
 RENDERING ISSUES, INEFFICENT on larger scale
 
-		requires wonky C-like shader code(vertex/fragment) and "programs" to be compiled
+	requires wonky C-like shader code(vertex/fragment) and "programs" to be compiled
 
-3D spirtes(OGRE/AssImp):  UNIMPLEMENTED
-SceneGraph(WorldGen,SpeedTree,etc): UNIMPLEMENTED
-Collision(Bullet) Physics: UNIMPLEMENTED
-Compressed and Advanced Texture Loading: UNIMPLEMENTED
+3D spirtes(OGRE/AssImp):  UNIMPLEMENTED<br>
+SceneGraph(WorldGen,SpeedTree,etc): UNIMPLEMENTED<br>
+Collision(Bullet) Physics: UNIMPLEMENTED<br>
+Compressed and Advanced Texture Loading: UNIMPLEMENTED<br>
 
 ---
 
