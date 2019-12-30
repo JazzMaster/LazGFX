@@ -77,8 +77,8 @@ InitGraph: Working<br>
 CloseGraph:  Working <br>
 GraphDetect: 
 
-	SDLv1:  Working<br>
-	SDLv2:  In Progress<br> 
+	SDLv1:  Working
+	SDLv2:  In Progress 
 
 (Draw)Line:  Working <br>
 (Draw)Rect:  Working <br>
@@ -129,20 +129,20 @@ Compressed and Advanced Texture Loading: UNIMPLEMENTED<br>
 These units have many many depends.<br>
 I have tried to source as many as possible for you, without requiring you to rebuild each and every one.
 
-**There is no way to avoid this unless you want to reprogram everything**  
-for 50+ years and have a team of programmers to do it.
+**There is no way to avoid this unless you want to reprogram everything  
+for 50+ years and have a team of programmers to do it.**
 
-JPEG support alone- in Pascal is an ancient mess, most will not know decades later how to implement it.
-
-You have to co-ordinate!
+JPEG support alone- in Pascal is an ancient mess, most will not know decades later how to implement it.<br>
+-You have to co-ordinate!
 
 OpenGL would not be possible to use in Lazarus if not for FContext and DelphiGL teams
 (YW for the double threat).
 
-Yes, Id rather static build but with a library that isnt possible these days.
 
-Anyone scared of this, wanting self-libraries only...run into the worgen woods now.<br>
-I cannot- and WILL NOT- help you. You can help me by coding for DX, X11, or Quartz2D, QuickDraw.
+Anyone scared of this- wanting static, self-made SINGLE DEPENDS libraries ...run into the worgen woods now.<br>
+I cannot- and WILL NOT- help you. <br>
+
+You can help me by coding for DX, X11, or Quartz2D, QuickDraw- as punishment.
 
 #### Just Draw
 
@@ -170,7 +170,7 @@ The latter is a "port thru Linux/Windows x64" hack -there is no native fpc compi
 
 Theres one possible glitch:
 
-		2d ops may be using "forced software surfaces" 
+		2d SDL ops may be using "forced software surfaces" 
 			-if not using fullscreen rendering/drawing
 			-if using SDL1 vs SDL2 on newer hardware
 
@@ -185,16 +185,8 @@ You need to support an API that allows for "accellerated drawing".<br>
 iOS devices have licencing issues that forbid developing for them in FPC/Lazarus.<br>
 Android (from FPC) needs some help- or we need to find another way to accomplish this task.
 
-**Coding for Other "Portables" may be possible.**
+The RasPi is showing Promise, for VTerm access(libsvga or directfb).
 
-GL ES (mostly) is what is holding us back. <br>
-SDL may port to these devices.<br> 
-
-## What happened?
-
-I took a look at some X11 code and decided that we are approaching the matter wrong.<br>
-CodeWarrior would like us to use QuickDraw(thats ok).<br>
-DirectDraw or D2D (DirectX) is faster than the (previously assumed) Windows GDI.
 
 ### The teardown
 
@@ -203,14 +195,14 @@ This "UNIT" should compose of two major elements:
         2d- BGI
         3d- OpenGL
 
-OpenGL is EXTREMELY ADVANCED 2D/3D engine- that leave most of the work, math, (and how-to) UP TO YOU.<br>
+OpenGL is EXTREMELY ADVANCED 2D/3D engine- that leaves most of the work, math, (and how-to) UP TO YOU.<br>
 IT DOES NOT ASSUME ANYTHING.
 
-If you need to mix 2D and 3D ops (at the same time) use OpenGL.<br>
+If you need to mix 2D and 3D ops (at the same time) -use OpenGL.<br>
 I will tell you why:
 
-        OpenGL doesnt care what view you use, if you draw in 3d onto the side of a cube, etc.
-        You can mix co ordinate systems 50x time a second- and it will keep up.
+	OpenGL doesnt care what view you use, if you draw in 3d onto the side of a cube, etc.
+	You can mix co ordinate systems 50x time a second- and it will keep up.
 
 GL co-ordinate system is what confuses people.<br>
 Further, you need at least a basic understanding of College level "intermediate algebra" to understand the 
@@ -307,12 +299,14 @@ There is no actual "Native Code" running- and these devs DO NOT CARE.<br>
 
 ## Build Targets
 
-		OS9/OSX AQUA Interface and MacShell(OS9) (Intel and PowerPC macintosh)
-		Win32/64 SDL via "Command Prompt" and OpenGL via Lazarus
-		Lin32/64 X11/VTerm (currently missing a Pascal-based "Graphics API" and "working OpenGL routines")
-		RasPi (FullScreen only) VTerm(mailroom based GPU accleration)
-		Android (needs a ton of testing- and time I dont have)
+	OS9/OSX AQUA Interface and MacShell(OS9) (Intel and PowerPC macintosh)
+	Win32/64 SDL via "Command Prompt" and OpenGL via Lazarus
+	Lin32/64 X11/VTerm (currently missing a Pascal-based "Graphics API" and "working OpenGL routines")
+	RasPi (FullScreen only) VTerm(mailroom based GPU accleration)
+	Android (needs a ton of testing- and time I dont have)
+
+-Enjoy,
+
 
 -Jazz
-
 
