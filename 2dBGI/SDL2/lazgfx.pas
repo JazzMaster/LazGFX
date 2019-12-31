@@ -992,7 +992,7 @@ Atari modes, etc. were removed. (double the res and we will talk)
   LIBGRAPHICS_INIT:boolean;
   RenderingDone:boolean; //did you want to pageflip now(or wait)?
 
-  IsConsoleInvoked,CantDoAudio:boolean; //will audio init? and the other is tripped NOT if in X11.
+  IsVTerm,CantDoAudio:boolean; //will audio init? and the other is tripped NOT if in X11.
   //can we modeset in a framebuffer graphics mode? YES. 
 
 
@@ -3549,7 +3549,7 @@ begin
 	      somecolor:=Tpalette256[index].colors; 
     GetRGBFromIndex:=somecolor;
   end else begin
-    if IsConsoleInvoked then
+    if IsVTerm then
 		writeln('Attempt to fetch RGB from non-Indexed color.Wrong routine called.');
    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to fetch RGB from non-Indexed color.Wrong routine called.','OK',NIL); 
    
@@ -3572,7 +3572,7 @@ begin
     
    GetDWordFromIndex:=somecolor;
   end else begin
-      if IsConsoleInvoked then
+      if IsVTerm then
 	    	writeln('Attempt to fetch indexed DWord from non-indexed color');
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to fetch indexed DWord from non-indexed color','OK',NIL); 
       exit;
@@ -3620,7 +3620,7 @@ begin
    end;
   end else if (bpp >8) then begin
   
-       if IsConsoleInvoked then begin
+       if IsVTerm then begin
              writeln('Wrong routine called. Try: TrueColorGetRGBfromHex');
              writeln('Wrong routine called. Try: TrueColorGetRGBfromHex');
        end;
@@ -3672,7 +3672,7 @@ var
 
 begin
    if (bpp <=8) then begin
-         if IsConsoleInvoked then
+         if IsVTerm then
 			writeln('Cant Get RGBA data from indexed colors.');
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get RGBA data from indexed colors.','OK',NIL);
       exit; 
@@ -3697,7 +3697,7 @@ var
 
 begin
   if (MaxColors >256) then begin
-       if IsConsoleInvoked then
+       if IsVTerm then
 			writeln('Cant Get color name from an RGB mode colors.');
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get color name from an RGB mode colors.','OK',NIL);
       exit; 
@@ -3811,7 +3811,7 @@ begin
        until i=255;
 
 	 end else begin
-		If IsConsoleInvoked then
+		If IsVTerm then
 			Writeln('Cant Get index from an RGB mode (or non-palette) colors.');
 	    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get index from an RGB mode (or non-palette) colors.','OK',NIL);
 		exit;
@@ -3855,7 +3855,7 @@ begin
        until i=255;
 
 	 end else begin
-		If IsConsoleInvoked then
+		If IsVTerm then
 			Writeln('Cant Get index from an RGB mode colors.');
 
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get index from an RGB mode colors.','OK',NIL);
@@ -4053,7 +4053,7 @@ function GetBgDWordRGB(r,g,b:byte):DWord;
 begin
 //really rare case
     if (MaxColors<=255) then exit; //use the other function for this
-       if IsConsoleInvoked then begin
+       if IsVTerm then begin
           writeln('Trying to fetch background color -when we have it- in Paletted mode.');
           writeln('We have the background color in paletted modes!');
           exit;
@@ -4413,7 +4413,7 @@ begin
     exit;    
   end;
   if (Tex = Nil) then begin
-     if IsConsoleInvoked then
+     if IsVTerm then
 		writeln('Cannot Lock unassigned Texture.');
         writeln('Cant Lock unassigned Texture');
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Lock an unassigned Texture.','OK',NIL);
@@ -4441,7 +4441,7 @@ begin
     exit;    
   end;
   if (Tex = Nil) then begin
-     if IsConsoleInvoked then
+     if IsVTerm then
 		writeln('Cannot Lock unassigned Texture.');
         writeln('Cant Lock unassigned Texture');
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Lock an unassigned Texture.','OK',NIL);
@@ -4471,7 +4471,7 @@ begin
   tex:=Nil; //if we dont clear it before calling, results are unpredictable.
   tex:= SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_TARGET, MaxX, MaxY);
   if (tex = Nil) then begin
-     if IsConsoleInvoked then
+     if IsVTerm then
 		writeln('Cannot Alloc Texture.');
         writeln('Cant Alloc Texture');
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cannot Alloc Texture.','OK',NIL);
@@ -4535,7 +4535,7 @@ var
     somecolor:PSDL_Color;
 begin
     if MaxColors>256 then begin
-        if IsConsoleInvoked then
+        if IsVTerm then
            writeln('ERROR: i cant do that. not indexed.');
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempting to clearscreen(index) with non-indexed data.','OK',NIL);   
         writeln('Attempting to clearscreen(index) with non-indexed data.');           
@@ -4686,7 +4686,7 @@ var
 begin
 
   if LIBGRAPHICS_ACTIVE then begin
-    if ISConsoleInvoked then begin
+    if IsVTerm then begin
         writeln('Graphics already active.');
     end;
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Initgraph: Graphics already active.','OK',NIL);	
@@ -5181,11 +5181,13 @@ Lets use WHAT WE WANT, DAMNIT.
 }
 
 {
+//bugged?
 
 IFDEF mswindows
 	_putenv('SDL_VIDEODRIVER=directx'); //Use DirectX, dont use GDI
 	_putenv('SDL_AUDIODRIVER=dsound'); //Fuck it, use direct sound, too.
-ENDIF}
+ENDIF
+}
 
 //OS9 support removed in SDL v1.3+
 
@@ -5194,11 +5196,12 @@ ENDIF}
 	_putenv('SDL_AUDIODRIVER=coreaudio'); //The new OSX Audio Subsystem
 {$ENDIF}
 
-{
+
 //The assumption is that we need svgalib, we dont.
 
 	//Tux must be a FEMALE Penguin....
 	//If "defined console" means xterm , too?
+
 
 X11:
 	   //Pretty deFacto Standard stuff
@@ -5208,8 +5211,10 @@ X11:
 VTerm:
        //Were in a TTY, NO x11...
 	   _putenv('SDL_VIDEODRIVER=svgalib'); //svgalib on FB (FPC has working-albeit tiny- Graphics unit for this.)
+		
+		//libao..
 	   _putenv('SDL_AUDIODRIVER=alsa'); //Guessing here- should be available.        
-}
+
 
 //Note this does not use OpenGL on purpose. You can still get 2D acceleration.
 
@@ -5246,7 +5251,7 @@ VTerm:
 
     //not critical, as we have bmp support but now are limping very very bad...
     if((imagesON and _imgflags) <> _imgflags) then begin
-       if IsConsoleInvoked then begin
+       if IsVTerm then begin
 		 logln('IMG_Init: Failed to init required JPG, PNG, and TIFF support!');
 		 logln(IMG_GetError);
 	   end;
@@ -5321,7 +5326,7 @@ $F-
   //The SDl equivalent error of: attempting to probe VideoModeInfo block when (VESA) isnt initd results in issues....
 
   if(SDL_GetDisplayMode(0,0, mode) <> 0) then begin
-    if IsConsoleInvoked then
+    if IsVTerm then
 			logln('Cant get current video mode info. Non-critical error.');
 //    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'SDL cant get the data for the current mode.','OK',NIL);
   end;
@@ -5337,7 +5342,7 @@ $F-
 
   video_timer_id := SDL_AddTimer(flip_timer_ms, @videoCallback, nil);
   if video_timer_id=0 then begin
-    if IsConsoleInvoked then begin
+    if IsVTerm then begin
 		logln('WARNING: cannot set drawing to video refresh rate. Non-critical error.');
 		logln('you will have to manually update surfaces and the renderer.');
     end;
@@ -5355,7 +5360,7 @@ $F-
     AudioSystemCheck:=Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2, 4096); //cd audio quality
     //(slower systems use smaller chunks and degraded quality.)
     if AudioSystemCheck <> 0 then begin
-        if IsConsoleInvoked then
+        if IsVTerm then
                 logln('There is no audio. Mixer did not init.')
         else  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There is no audio. Mixer did not init.','OK',NIL);
     end;
@@ -5365,7 +5370,7 @@ $F-
   //initialization of TrueType font engine
   if TTF_Init = -1 then begin
     
-    if IsConsoleInvoked then begin
+    if IsVTerm then begin
         logln('I cant engage the font engine, sirs.');
     end;
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: I cant engage the font engine, sirs. ','OK',NIL);
@@ -5397,7 +5402,7 @@ $F-
   if WantsJoyPad then begin
  
     if( SDL_NumJoysticks < 1 ) then begin
-        if IsConsoleInvoked then
+        if IsVTerm then
 			logln( 'Warning: No joysticks connected!' ); 
         
   		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Warning: No joysticks connected!','OK',NIL);
@@ -5406,7 +5411,7 @@ $F-
 	    gGameController := SDL_JoystickOpen( 0 ); 
     
         if( gGameController = NiL ) then begin  
-	        if IsConsoleInvoked then begin
+	        if IsVTerm then begin
 		    	logln( 'Warning: Unable to open game controller! SDL Error: '+ SDL_GetError); 
                 logln(SDL_GetError);
             end;
@@ -5698,7 +5703,7 @@ x:=8;
   	SDL_DestroyWindow ( Window );
   end;	
 
-  if IsConsoleInvoked then begin
+  if IsVTerm then begin
      
          textcolor(7); //..reset standards...
          clrscr; //text clearscreen
@@ -5789,7 +5794,7 @@ begin
 if (LIBGRAPHICS_INIT=false) then 
 
 begin		
-		if IsConsoleInvoked then logln('Call initgraph before calling setGraphMode.') 
+		if IsVTerm then logln('Call initgraph before calling setGraphMode.') 
 		else SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'setGraphMode called too early. Call InitGraph first.','OK',NIL);
 	    exit;
 end
@@ -5825,23 +5830,26 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
     else
 		wantsFS:='False';
     logln('Full screen requested: '+wantsFS);
-
    
-         //posX,PosY,sizeX,sizeY,flags
+//Not using Lazarus   
          {$IFNDEF LCL}
+         //posX,PosY,sizeX,sizeY,flags
          window:= SDL_CreateWindow(PChar('Lazarus Graphics Application'), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MaxX, MaxY, 0);
     	 if (window = Nil) then begin
- 			if IsConsoleInvoked then begin
+ 			if IsVTerm then begin
 	    	   	logln('Something Fishy. No hardware render support and cant create a window.');
 	    	   	logln('SDL reports: '+' '+ SDL_GetError);      
 	    	end;
+	    	closegraph;
+	     end;	
          {$ENDIF}
 
 //this code doesnt seem to be working- but to remove it would be wrong, lets fix it instead, somehow.
 
-//Handle -> Application.MainForm.Handle as per the forums
-
+//else: using Lazarus
          {$IFDEF LCL}
+			//Handle -> Application.MainForm.Handle as per the forums
+
             {$IFDEF mswindows}
                 window:=SDL_CreateWindowFrom(Pointer(Application.MainForm.Handle));
             {$ENDIF}
@@ -5850,38 +5858,35 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
                     window:=SDL_CreateWindowFrom(Pointer(GDK_WINDOW_XWINDOW(PGTKWidget(PtrUInt(Application.MainForm.Handle))^.window)));
                 {$ENDIF}
 
-//untested- similar to OSX
-            //    {$IFDEF LCLQt} //QT- never assume                
-            //        window:=SDL_CreateWindowFrom(Pointer(PQtWidget(PtrUInt(Application.MainForm.Handle))^.widget));
-            //    {$ENDIF}
+                {$IFDEF LCLQt} //QT- never assume                
+                    window:=SDL_CreateWindowFrom(Pointer(PQtWidget(PtrUInt(Application.MainForm.Handle))^.widget));
+                {$ENDIF}
 
-                //ELSE:  X11Core
-                GetXHandle(Application.MainForm.Handle);
+                {$ELSE} // X11Core
+					GetXHandle(Application.MainForm.Handle);
+				{$endif}
             {$ENDIF}
             //MacOSX
             {$IFDEF Darwin}
                     window:=SDL_CreateWindowFrom(Pointer(TCarbonWidget(PtrUInt(Application.MainForm.Handle))^.widget));  
             {$ENDIF}
-
          {$ENDIF}
-
-	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy','I cant make a window. BYE..',NIL);
-			
-			_grResult:=GenError;
+		 if (window = Nil) then begin
+ 			if IsVTerm then begin
+	    	   	logln('Something Fishy. I cant create a window.');
+	    	   	logln('SDL reports: '+' '+ SDL_GetError);
+	    	end;
 	    	closegraph;
-         end;
+		end;
         logln('initgraph: Window is online.');
-
   
     	renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
 		if (renderer = Nil ) then begin
- 			if IsConsoleInvoked then begin
+ 			if IsVTerm then begin
 	    	   	logln('Something Fishy. No hardware render support and cant setup a software one.');
 	    	   	logln('SDL reports: '+' '+ SDL_GetError);      
 	    	end;
 	    	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Something Fishy.',' No hardware render support. BYE..',NIL);
-	    	_grResult:=GEnError;
 	    	closegraph;
 		end;
         // SDL_RenderSetLogicalSize(renderer,MaxX,MaxY);
@@ -5910,7 +5915,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 
        //thisMode:=getgraphmode;
   	   if ( IsThere < 0 ) then begin
-    	      if IsConsoleInvoked then begin
+    	      if IsVTerm then begin
     	         logln('Unable to set FS: ');
     	         logln('SDL reports: '+' '+ SDL_GetError);      
      	      end;
@@ -5920,7 +5925,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
          //if we failed then just gimmie a yuge window..      
          SDL_SetWindowSize(window, MaxX, MaxY);
          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
-         if IsconsoleInvoked then begin
+         if IsVTerm then begin
             logln('ERROR: SDL cannot set FS.');
             logln(SDL_GetError);
          end;
@@ -5969,7 +5974,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 		success:=SDL_SetWindowDisplayMode(window,mode);
         if (success <> 0) then begin 
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set DisplayMode.','OK',NIL);
-	        if IsConsoleInvoked then begin
+	        if IsVTerm then begin
                 logln('ERROR: SDL cannot set DisplayMode.');		
                 logln(SDL_GetError);
             end;
@@ -6006,7 +6011,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
 
   	 //  thisMode:=getgraphmode;
   	   if ( IsThere < 0 ) then begin
-    	      if IsConsoleInvoked then begin
+    	      if IsVTerm then begin
     	         logln('Unable to set FS: ');
     	         logln('SDL reports: '+' '+ SDL_GetError);      
      	      end;
@@ -6015,7 +6020,7 @@ else if (LIBGRAPHICS_INIT=true) and (LIBGRAPHICS_ACTIVE=false) then begin //init
           //if we failed then just gimmie a yuge window..      
           SDL_SetWindowSize(window, MaxX, MaxY);
           SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: SDL cannot set FS.','OK',NIL);
-          if IsConsoleInvoked then begin            
+          if IsVTerm then begin            
             logln('ERROR: SDL cannot set FS.');
             logln(SDL_GetError);
           end;
@@ -6066,7 +6071,7 @@ begin
             bpp:=bpp * bpp; //bpp^2 - if x and y match, save time
 			inc(x);
 		end;
-        if IsConsoleInvoked then begin
+        if IsVTerm then begin
             logln('Cant find current mode in modelist.');
         end;
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'ERROR: Cant find current mode in modelist.','OK',NIL);        
@@ -6077,7 +6082,7 @@ procedure restorecrtmode; //wrapped closegraph function
 begin
   if (not LIBGRAPHICS_ACTIVE) then begin //if not in use, then dont call me...
 
-	if IsConsoleInvoked then 
+	if IsVTerm then 
         logln('you didnt call initGraph yet...try again?') 
     else
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Restore WHAT exactly?','Clarify the Stupid',NIL);
@@ -6223,7 +6228,7 @@ begin
 			32: TempSurface := SDL_CreateRGBSurfaceWithFormat(0, 1, 1, 32, format); 
 			else begin
 				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Wrong bpp given to get a pixel. I dont how you did this.','OK',NIL);
-				 if IsConsoleInvoked then
+				 if IsVTerm then
                 logln('Wrong bpp given to get a pixel. I dont how you did this.');
 			end;
 
@@ -6296,13 +6301,13 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
 			//play fetch            
 
              gotcolor^.r:=(byte(^r) );
-		     gotcolor^.g:=(byte(^g) );;
+		     gotcolor^.g:=(byte(^g) );
 	         gotcolor^.b:=(byte(^b) );
 
             //shift adjust me
 			gotcolor^.r:= (gotcolor^.r shr 3);
 			gotcolor^.g:= (gotcolor^.g shr 3);
-			gotcolor^.b:= (gotcolor^.b shr 3) ;
+			gotcolor^.b:= (gotcolor^.b shr 3);
 
             //repack
             someDWord:= SDL_MapRGB(TempSurface^.format,gotcolor^.r,gotcolor^.g,gotcolor^.b);
@@ -6317,7 +6322,7 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
 			//play fetch            
 
              gotcolor^.r:=(byte(^r) );
-		     gotcolor^.g:=(byte(^g) );;
+		     gotcolor^.g:=(byte(^g) );
 	         gotcolor^.b:=(byte(^b) );
 
             //shift adjust me
@@ -6351,7 +6356,7 @@ however endianness, although it should be checked for (ALWALYS) plays no role in
    
       else
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Get Pixel values...','OK',NIL);
-         if IsConsoleInvoked then
+         if IsVTerm then
                 logln('Cant Put Pixel values...');
     end; //case
 
@@ -6369,7 +6374,7 @@ begin
  
   begin
     		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Cant Put Pixel values...','OK',NIL);
-            if IsConsoleInvoked then
+            if IsVTerm then
                 logln('Cant Put Pixel values...');
 			exit;
   end;
@@ -6463,7 +6468,7 @@ so- we get the current screen resolution and check if requested mode is smaller-
     //there is still one mode remaining.
 	testbpp:=SDL_VideoModeOK(modelist.width[i], modelist.height[i], modelist.bpp[i], _initflag);		         
 	if (testbpp=0) then begin //did we run out of modes?
-        if IsConsoleInvoked then
+        if IsVTerm then
             logln('We ran out of modes to check.');
             //logln('We ran out of modes to check.');
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'There are no graphics modes available to set. Bailing..','OK',NIL);
@@ -6523,7 +6528,7 @@ I have to figure out what mode is what again...
 
 	    	lomode:= ord(mCGA); //no less than this.
 		end else begin
-			if IsConsoleInvoked then
+			if IsVTerm then
 				logln('Unknown graphdriver setting.');
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Unknown graphdriver setting.','ok',NIL);
 		end;
@@ -6562,7 +6567,7 @@ begin
 //freeze movement
    if windownumber=8 then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to create too many viewports.','OK',NIL);
-      if IsConsoleInvoked then
+      if IsVTerm then
         logln('Attempt to create too many viewports.');
       exit;
    end;
@@ -6622,7 +6627,7 @@ begin
    if windownumber=0 then begin
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to remove non-existant viewport.','UH oh.',NIL);
   
-    if IsConsoleInvoked then
+    if IsVTerm then
         logln('Attempt to remove non-existant viewport.');
     exit; 
    end;
@@ -6809,7 +6814,7 @@ begin
 
   if (saveSurface = NiL) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Couldnt create SDL_Surface from renderer pixel data','OK',NIL);
-      if IsConsoleInvoked then begin
+      if IsVTerm then begin
           logln('Couldnt create SDL_Surface from renderer pixel data');      
           logln(SDL_GetError);
       end;
@@ -6857,7 +6862,7 @@ var
 
 begin
    if ((Rect^.w=1) or (Rect^.h=1)) then begin    
-     if IsConsoleInvoked then begin       
+     if IsVTerm then begin       
         logln('USE GetPixel. This routine FETCHES MORE THAN ONE');
      end;  
      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'USE GetPixel. This routine FETCHES MORE THAN ONE','OK',NIL);
@@ -6894,7 +6899,7 @@ begin
    //pitch at this point could be 2,3,4,etc.. and must otherwise be taken into account.
    if (AttemptRead<0) then begin
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,'Attempt to read pixel data failed.','OK',NIL);
-      if IsConsoleInvoked then begin
+      if IsVTerm then begin
           logln('Attempt to read pixel data failed.');
           logln(string(SDL_GetError));
       end;
@@ -6906,14 +6911,22 @@ end;
 
 
 
-begin  //main()
+begin  //PascalMain()
 
 StartLogging;
+
+//On unices we dont care if LCL is used or not- were still a "console app", even if not in a VTerm.
+//UI apps just dont have a "console output window". LOG ANYWAY.
+
 {$IFDEF unix}
-IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
+  //GetEnv ..an egg by another name...
+  if (GetEnvironmentVariable('DISPLAY') = '') then begin //X11 is not active
+	NeedFrameBuffer:=true;
+    IsVTerm:=true; //This is the proper way to check, dont assume based on "flawed Unix logic".
+  end;
+{$ENDIF}
 
-  if (GetEnvironmentVariable('DISPLAY') = '') then NeedFrameBuffer:=true;
-
+  
 {
   libSVGA note:
 		NO- Im not rewriting THAT TOO!
@@ -6936,6 +6949,7 @@ IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
   (There has to be some reason you arent running X11....)
   
   if X11 EVER gets loaded- then libSVGA is out-of-the-question.
+  
   libSVGA is extremely unpractical on most modern day "workstations" and "common PCs".
   (This is why it has no future support in FreePascal)
   
@@ -6943,41 +6957,23 @@ IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
   -what then?
        
        You can load the driver module and associated LFB- but is it "accelerated" without X11? 
+			-DirectFB is.
   
   This is the case of "Nuking it" or "not thinking at all" when writing code- instead of planning for "as many
   as possible" scenarios.
   
-  A more NATIVE OPTION- would be to do Fullscreen "initgraph" within X11/Windows/OSX.
-  This unit DOES accomplish this.
 }
-{$ENDIF}
 
-//while I dont like the assumption that all linux apps are console apps- technically its true.
-
-//I dont see the need for the LCL with SDL/OGL but anyways...
 {$IFDEF LCL}
-        Log:=true;
-        {$IFDEF mswindows}
-			IsConsoleInvoked:=false; //ui app- NO CONSOLE AVAILABLE
-        {$ENDIF}
+        {$ifndef debug} //Lazarus default is to debug while running
+			{$IFDEF mswindows}
+				IsVTerm:=false; //ui app- NO CONSOLE AVAILABLE
+			{$ENDIF}        
+        {$endif}
 {$ENDIF}
-
-
-//with initgraph (as a function) it returns one of these codes
-//these are the strings of the error codes
 
    screenshots:=00000000;
-
    windownumber:=0;
-   grErrorStrings[0]:='No Error';
-   grErrorStrings[1]:='Not enough memory for graphics';
-   grErrorStrings[2]:='Not enough memory to load font';
-   grErrorStrings[3]:='Font file not found';
-   grErrorStrings[4]:='Invalid graphics mode';
-   grErrorStrings[5]:='General Graphics error';
-   grErrorStrings[6]:='Graphics I/O error';
-   grErrorStrings[7]:='Invalid font';
-
 
 end.
 

@@ -6540,15 +6540,22 @@ end;
 
 
 
+begin  //PascalMain()
 
-begin  //main()
+StartLogging;
 
+//On unices we dont care if LCL is used or not- were still a "console app", even if not in a VTerm.
+//UI apps just dont have a "console output window". LOG ANYWAY.
 
 {$IFDEF unix}
-IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
+  //GetEnv ..an egg by another name...
+  if (GetEnvironmentVariable('DISPLAY') = '') then begin //X11 is not active
+	NeedFrameBuffer:=true;
+    IsVTerm:=true; //This is the proper way to check, dont assume based on "flawed Unix logic".
+  end;
+{$ENDIF}
 
-  if (GetEnvironmentVariable('DISPLAY') = '') then NeedFrameBuffer:=true; //we have no X11 loaded.
-
+  
 {
   libSVGA note:
 		NO- Im not rewriting THAT TOO!
@@ -6571,6 +6578,7 @@ IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
   (There has to be some reason you arent running X11....)
   
   if X11 EVER gets loaded- then libSVGA is out-of-the-question.
+  
   libSVGA is extremely unpractical on most modern day "workstations" and "common PCs".
   (This is why it has no future support in FreePascal)
   
@@ -6578,31 +6586,23 @@ IsConsoleInvoked:=true; //All Linux apps are console apps-SMH.
   -what then?
        
        You can load the driver module and associated LFB- but is it "accelerated" without X11? 
+			-DirectFB is.
   
   This is the case of "Nuking it" or "not thinking at all" when writing code- instead of planning for "as many
   as possible" scenarios.
   
-  A more NATIVE OPTION- would be to do Fullscreen "initgraph" within X11/Windows/OSX.
-  This unit DOES accomplish this.
 }
+
+{$IFDEF LCL}
+        {$ifndef debug} //Lazarus default is to debug while running
+			{$IFDEF mswindows}
+				IsVTerm:=false; //ui app- NO CONSOLE AVAILABLE
+			{$ENDIF}        
+        {$endif}
 {$ENDIF}
 
-//while I dont like the assumption that all linux apps are console apps- technically its true.
-
-//with initgraph (as a function) it returns one of these codes
-//these are the strings of the error codes
-
    screenshots:=00000000;
-
    windownumber:=0;
-   grErrorStrings[0]:='No Error';
-   grErrorStrings[1]:='Not enough memory for graphics';
-   grErrorStrings[2]:='Not enough memory to load font';
-   grErrorStrings[3]:='Font file not found';
-   grErrorStrings[4]:='Invalid graphics mode';
-   grErrorStrings[5]:='General Graphics error';
-   grErrorStrings[6]:='Graphics I/O error';
-   grErrorStrings[7]:='Invalid font';
 
 end.
 
