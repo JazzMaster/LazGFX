@@ -5,7 +5,8 @@ program bgitest;
 
 {$mode objfpc}
 uses
-	lazgfx,sdl2;
+//In this order
+	grtext,lazgfx,sdl2;
 var
 	WantsAudioToo:boolean; export;
 	WantsJoypad:boolean; export;
@@ -35,6 +36,7 @@ begin
 
 		SetFGColor(  0, 255, 0, 255 );
 		SDL_RenderDrawLine( Renderer, 1, 480, 640, 1 );
+		OutText(30,30,'Hello World!');
         
 end;
 

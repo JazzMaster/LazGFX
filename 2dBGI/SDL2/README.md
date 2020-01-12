@@ -1,10 +1,11 @@
 SDL2 implementation of LazGfx Core(Borland replacement BGI)
 
 Leave the DLLs here.
+The includes are required- Im abstracting out the main unit again.
 
 When you build using fpc(lazarus cant hook SDL correctly)- 
-	SDL.pas header will require them if building on win32/64.
-	If building on unices, it will pull the installed SDL shared0object files from the OS location
+	SDL.pas header will require the DLLS if building on win32/64.
+	If building on unices, it will pull the installed SDL shared-object files from the OS location
 		/usr/lib/x86_64-linux-gnu , usually 
 		-You just need to install SDL12 and SDL2 dev packages.
 
@@ -16,37 +17,28 @@ The core routines are here-
 	I have to work on ellippses,polys, and fills- 
 		but SDL has the routines(as does GL), Im not starting from scratch here(fillDWord).
 
-The tricky parts are C-syncing and Line drawing.
+The tricky parts are C-syncing the code.
 (Bounds checks are everywhere as well.)
 
-These units are broken out- and not a single cohesive unit.<br>
-The reason behind this is not Laziness, I had to source these seperately or something was iffy or something else...<br>
-I forget. Anyways the headers are good now, and we can combine the sub-units. SDL include (depends) recursion 
-can also be avoided.
+
 
 Licence updated to Apache/Mozilla "for your programming pleasure".
 
 ### Why SDL and not...
 
 		BECAUSE ITS FUCKING BROKEN!
-	
-Do not depend on the units sitting here(made under x64bit unix- my flavor of the week) to work for you.
-**You will probably need to recompile these units.**
 
-type: 'fpc lazgfx.pas'
-It will exit cleanly -unless I broke something. 
+### Building	
 
--THEN go and write an application based on "this" code.
+type: 'fpc lazgfx.pas'<br>
+It will exit cleanly -unless I broke something. <br>
+DO NOT DEPEND ON THE BUILT UNITS to work for you, if in doubt- 
 
-The CRUX of the BITCH of the problem is that "Graphics contexts" are not passed between subroutines.
-Once you fix this- the application now has the handles--and subroutines--to do what you need the app to do.
-
-SDL: You cant render (or take input) on a different thread than the one you started with.
-BULLSHIT. I JUST DID IT.
+	RE-BUILD ALL SOURCE FILES.
 
 ---		
 
-state:  WIP 0.85(buggy, see the released files)
+state:  WIP 0.8(buggy, see the released files)
 
 ---
 You wont notice much difference in code(from SDL12) as its running or called-

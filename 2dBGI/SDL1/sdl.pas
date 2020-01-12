@@ -4078,6 +4078,10 @@ function SDL_putenv(const variable: PChar): integer;
 {$EXTERNALSYM SDL_putenv}
 
 {$IFDEF WINDOWS}
+function _getenv( const variable : Pchar ): integer; cdecl;
+{$ENDIF}
+
+{$IFDEF Unix}
 function getenv( const name : Pchar ): PChar; cdecl;  external 'libc.so' name 'getenv';
 {$ENDIF}
 
@@ -4366,7 +4370,7 @@ begin
   {$ELSE}
 
   {$IFDEF UNIX}
-  Result := _getenv(name);
+  Result := getenv(name);
   {$ENDIF}
 
   {$ENDIF}

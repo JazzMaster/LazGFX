@@ -4,11 +4,7 @@ unit logger;
 interface
 
 uses
-{$ifndef windows}
-    crt,
-{$endif}
 sysutils;
-
 
 const
   critical='CRITICAL ERROR: ';
@@ -54,7 +50,15 @@ end;
 
 //end FPC code - the rest has been modified "for an EXPLICIT PURPOSE"
 
+{
+We may need to turn this on 
 
+ I- // Suppress I/O errors: check the IOResult variable for the error code
+
+Ive had issue with try...except bailing the app (unit) on errors because a file isnt there.
+Yes, its a very oldschool method, I DONT CARE.
+
+}
 
 //usually you want to write a line.
 

@@ -1,8 +1,8 @@
-12/30/2019 2:58:06 : MaxX: 640
-12/30/2019 2:58:06 : MaxY: 480
-12/30/2019 2:58:06 : bpp: 15
-12/30/2019 2:58:06 : Full screen requested: False
-12/30/2019 2:58:06 : initgraph: Window is online.
-12/30/2019 2:58:06 : initgraph: renderER online
-12/30/2019 2:58:09 : Shutting Down
-12/30/2019 2:58:09 : Done.
+31-12-19 08:40:42 : MaxX: 640
+31-12-19 08:40:42 : MaxY: 480
+31-12-19 08:40:42 : bpp: 15
+31-12-19 08:40:42 : Full screen requested: False
+31-12-19 08:40:42 : initgraph: Window is online.
+31-12-19 08:40:42 : initgraph: renderER online
+31-12-19 08:40:46 : CloseGraph: Shutting Down
+31-12-19 08:40:46 : Done.

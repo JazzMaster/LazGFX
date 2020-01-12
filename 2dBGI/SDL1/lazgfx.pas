@@ -803,7 +803,7 @@ var
     where:Twhere;
 	quit,minimized,paused,wantsFullIMGSupport,nojoy,exitloop,NeedFrameBuffer:boolean;
     nogoautorefresh:boolean;
-    x,y:word;;
+    x,y:word;
     _grResult:grErrortype;
     
     gGameController:PSDL_Joystick;
@@ -852,7 +852,9 @@ Atari modes, etc. were removed. (double the res and pixelSize and we will talk)
 }
 
   ClipPixels: Boolean=true; //always clip, never an option "not to".
-
+  MaxColors:byte; //paletted code checks ONLY! 24bpp exceeds word boundary, CODE MUST BE 32bit compliant.
+  //(SDL 1.2 limitation-older 32bit hardware)
+  
   WantsJoyPad:boolean;
   screenshots:longint;
 
@@ -895,7 +897,7 @@ Atari modes, etc. were removed. (double the res and pixelSize and we will talk)
    
   himode,lomode:integer;
 
-  r,g,b,a:PUInt8; //^Byte
+  r,g,b:PUInt8; //^Byte
 
   //TextureFormat
   format:LongInt;
@@ -941,7 +943,7 @@ var
 }
 
 //procedure defines
-function FetchModeList:Tmodelist;
+//function FetchModeList:Tmodelist;
 
 procedure RoughSteinbergDither(filename,filename2:string);
 
@@ -988,7 +990,7 @@ function GetMaxColor: word;
 procedure LoadImage(filename:PChar; Rect:PSDL_Rect);
 procedure LoadImageStretched(filename:PChar);
 
-procedure PlotPixelWithNeighbors(thick:thickness; x,y:word;);
+procedure PlotPixelWithNeighbors(thick:thickness; x,y:word);
 
 procedure SaveBMPImage(filename:string);
 
@@ -1371,6 +1373,14 @@ Grey82=253;
 Grey85=254;
 Grey93=255;
 
+type
+//TODO:
+// for some reason CGA palette data is missing...and needs to be reimplemented.
+//fix the types here..then assign colors as with EGA/VGA data(palette code)..and we should be ok.
+//keep in mind that most of this CAN be altered, and we need to "abstract for -all of -that" as well.
+// -Jazz
+
+
 {
 To get the red value of color 5:
 Palette16[5].colors^.r;
@@ -1380,6 +1390,12 @@ TO get its DWord:
 Palette16[5].DWords;
 
 }
+
+
+TRec4=record
+   	colors:PSDL_COLOR; 
+	DWords:DWord;
+end;
 
 TRec16=record
   
@@ -1416,14 +1432,30 @@ TRec256=record
 
 end;
 
+//these get assigned bytes, each
 
 var
+  CgaListA:array [0..15] of byte;
+  CgaListB:array [0..15] of byte;
+  CgaListC:array [0..15] of byte;
+  CgaListD:array [0..15] of byte;
+
 //this one is unorthodox due to the totally destructive downsizing and image degredation needed
 //and its "best guess"
   GreyList16:array [0..48] of byte;
+  //GreyList256 is auto defined...
 
   valuelist16: array [0..48] of byte;
   valuelist256: array [0..767] of byte;
+  
+//this is the palette index (a record) 
+
+  //3 color modes, one hi-res B/W(Faked CGA)
+  Tpalette4a: array [0..3] of TRec4;
+  Tpalette4b:array [0..3] of TRec4;
+  Tpalette4c:array [0..3] of TRec4;
+  Tpalette4d:array [0..3] of TRec4;
+
 
   TPalette16: array [0..15] of TRec16;
   TPalette16Grey:array [0..15] of TRec16;
@@ -1435,11 +1467,9 @@ var
 function GetRGBfromIndex(index:byte):PSDL_Color; 
 function GetDWordfromIndex(index:byte):DWord; 
 function GetRGBFromHex(input:DWord):PSDL_Color;
-function GetRGBAFromHex(input:DWord):PSDL_Color;
 function GetIndexFromHex(input:DWord):byte;
 function GetColorNameFromHex(input:dword):string;
 function GetFgRGB:PSDL_Color;
-function GetFgRGBA:PSDL_Color;
 function GetFGName:string;
 function GetBGName:string;
 function GetBGColorIndex:byte;
@@ -1452,13 +1482,8 @@ procedure setBGColor(index:byte);
 procedure setBGColor(someDword:DWord); overload;
 procedure setBGColor(r,g,b:word); overload;
 procedure setBGColor(r,g,b,a:word); overload;
-function GetFgDWordRGBA:DWord;
 function GetBgDWordRGB(r,g,b:byte):DWord;
-function GetBgDWordRGBA(r,g,b,a:byte):DWord;
 procedure invertColors;
-function DWordToRGBA(someword:DWord):PSDL_Color;
-function RGBAToDWord(somecolor:PSDL_Color):DWord;
-
 
 implementation
 
@@ -1518,13 +1543,10 @@ and doesnt need to use bitdepth checks)
 function Word16_from_RGB(red,green, blue:byte):Word; //Word=GLShort
 //565 16bit color
 
-var
-    alpha:byte;
 begin
   red:= red shr 3;
   green:= green shr 2;
   blue:=  blue shr 3;
-  alpha:=$ff; //ignored
   Word16_from_RGB:= (red shl 11) or (green shl 5) or blue;
 end;
 
@@ -1532,14 +1554,10 @@ end;
 function Word15_from_RGB(red,green, blue:byte):Word; //Word=GLShort
 //555[1] 16bit color
 
-var
-    alpha:byte;
-
 begin
   red:= red shr 3;
   green:= green shr 3;
   blue:=  blue shr 3;
-  alpha:=$ff; //dropped and ignored
   Word15_from_RGB:= (red shl 10) or (green shl 4) or blue;
 end;
 

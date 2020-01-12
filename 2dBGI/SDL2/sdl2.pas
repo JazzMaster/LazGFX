@@ -9917,7 +9917,7 @@ begin
   {$ENDIF}
   
   {$IFDEF UNIX}
-  Result := _getenv(name);
+  Result := PChar(_getenv(name));
   {$ENDIF}
 end;
 

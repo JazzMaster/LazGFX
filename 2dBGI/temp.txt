@@ -1,0 +1,80 @@
+
+AssignFile(fid1,filename1);
+{$I-}
+Reset(fid1);
+{$I+}
+
+if not IOresult=0 then
+  MessageDlg('Origin file not found!',mtInformation, [mbOK],0)
+else
+  begin
+    AssignFile(fid2,filename2);
+{$I-}
+    ReWrite(fid2);
+{$I+}
+    if not IOresult=0 then
+      MessageDlg('Failed opening destination file!',mtInformation, [mbOK],0)
+      halt(0);
+    end;
+    
+    while not Eof(fid1) do
+        
+
+---
+
+
+procedure draw_line(surface:PSDL_Surface; cord1,cord2:Points; color:longword);
+var
+	dx,dy,x,y,e:integer;
+	x1,y1,s2,y2,inc:integer;
+	steep:boolean;
+begin
+
+        // bresenham line
+        x1 := cord1.x; 
+	y1 := cord1.y;
+        x2 := cord2.x; 
+	y2 := cord2.y;
+
+	//either its steep or its not
+        steep := abs(y2 - y1) > abs(x2 - x1);
+
+        inc := -1;
+
+        if (steep) then begin
+                swap(x1, y1);
+                swap(x2, y2);
+        end;
+
+        if (x1 > x2) then begin
+                swap(x1,x2);
+                swap(y1,y2);
+        end;
+
+        if (y1 < y2) then begin
+                inc := 1;
+        end;
+
+        dx := abs(x2 - x1);
+        dy := abs(y2 - y1);
+        y := y1;
+	x := x1,
+        e := 0;
+
+	//x:=0;
+        repeat
+                if (steep) then begin
+                        Putpixel(surface, y, x, color);
+                end else begin
+                        Putpixel(surface, x, y, color);
+                end;
+
+                if ((e + dy) shl 1 < dx) then begin
+                        e := e + dy;
+                end else begin
+                        y:=y + inc;
+                        e: = e + (dy - dx);
+                end;
+		inc(x);
+        until x=> x2;
+end;
